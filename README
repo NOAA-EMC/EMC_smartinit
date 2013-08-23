@@ -1,0 +1,264 @@
+
+smartinit conus development
+Jeff McQueen
+
+10-1-2012
+Working on wcoss (removed xlf filename dependencies)
+GETGRIB.f - Reduced getgb and varb assignment duplicate code
+by introducing rdhdrs and setvar subroutines
+
+10-5-2012
+Fixed read error for snow/rain files
+Combined getgrib and getgrib_off by introducing LHR flags
+
+10-11-2012
+Problem Creating 3 hour POPs in GETGRIB.f
+ - Problem reading in SREF POPS >.01,.10,.50"  ??
+ --> Fixed by resetting JGDS=-1 as could not find SREF data on special 255 grid
+
+10-12-2012
+GETGRIB.f : Error getting integer grib vars with setvar routine (eg: IRAIN)
+  -->  So, put getgb and direct initialization in GETGRIB w/o calling setvar
+
+10-15-2012
+MAKEPRECIP :  Modified input linked files to fort.XX for WCOSS conventions
+              Need to compile with /nwprod/lib/ updated w3libs for nmmb gds 205 grid type defined to work
+10-15-2012
+wcoss script,getgrib: Fixed F12h configuration, set up of i/o unit numbers(LUGB,...)
+             getgrib,main : input limited off-hr read option and anal read option in GETGRIB
+                            Therefore, GETGRIB-OFF,GETGRIB-LIMITED, GETGRIB-ANAL not needed
+                            corrected reads of prev hours temps (lugt, lugt1i...)
+             fhr=0 : Added checks to not process precip in wcoss script for fhr=0
+
+10-17-2012  OFF-CYCLE TESTS
+script,getgrib: fixed for condition where 3 hr precip is always available at +3,6...forecasts
+                so just need to create MAXMIN temperature files
+
+10-19-2012  addprecip6.f
+            compiled for wcoss, added rdhdrs and setvar routines
+
+10-19-2012  rdhdrs in addprecip6.f
+            Need to pass back JGDS to main routine for input to setvar
+     ACT::: Should be done in smartinit getgrib as well
+
+10-22-2012  smartprecip
+            combined addprecip6, addprecip12 and makeprecip for nam
+            must provide fhr3 and fhr4 regardless 
+            if fhr3 < 0, adding or subtracting two precip fields
+            if fhr4 > 0, adding 4 precip fields to compute 12 hour totals
+            if fhr1>fhr2, subtracting 2 precip fields
+
+11-15-2012  smartinit  MAIN.f, GETGRIB.f
+            Added allocatable arrays to MAIN,GETGRIB
+11-20-2012  smartinit  MAIN.f
+            Modularized SNOWFALL, SKYCVR and MKPOP calculations into subroutine
+            Simplified MIXHGT Calculation
+            Eliminated redundant codes for  MAX,MIN writes
+11-21-2012  smartinit  MAIN.f90, GETGRIB.f90, RDHDRS
+              Fixed definition of MAXLEV=KGDS(19)
+              GETGRIB: Allocated VEG array previously not defined 
+              MAIN: Added INTERFACE statements for GETGRIB,SKYCVR,SNOWFALL,MKPOP routines
+      ACT::   Commented out smartpm call in SKYCVR until proper lib is available on TIDE
+          
+11-25-2012  Debugged MAIN.f90 subroutines, added interface
+            MAKESTRING.f: converted to F90 w/dyn arrays
+                          created subs to reduce code
+            GRIBIT.f,   : coverted to F90 w/ dyn arrays 
+11-26-2012  Added Module grddef and type ginfo to MAIN,GETGRIB and GRIBIT.f90
+            now passing GDIN TYPE to subroutines
+11-27-2012  Modules: aset2d, aset3d, constants created and used in MAIN, GETGRIB
+11-29-2012  Modules: rdgrib, asetdown created and used in GETGRIB,  NDFDgrid 
+            READndfd.f90 : completed dynamic allocation, reads of topo/mask for O-CONUS nests
+            MAIN.f90 : Unified with HI O-CONUS to write out limited grib file for alaska 
+11-30-2012 MAIN.f90 : Added mkpop, NDFDgrid changes for AK.  Tested PR
+                      began adding VALIDPT bitmap checks for conusnest
+                      Added VALIDPT, lnest to grddef module
+ 12-01-2012 GETGRIB.f90: Modified logic for setting special precip unit numbers
+
+Now read precip depending on LHR3,LHR6,LHR12
+but LUGP3,LUGP6,LUGP12 set to full or special grib file depending on run type
+(eg: CYCON or OFF, NESTS)
+
+          3hr precip     6hr precip    12 hr precip  in Full GRIB file
+CYCON :   +3,+15,+27..   +6,+18,+30..  every 12 hrs
+CyCOFF:   every 3h       need(u15,17)   need(u19),  CHECK 6 HR!!!!
+NESTS :    " "           need(u15,17)   need(u17), 6h (u15,17)
+
+ 12-02-2012 :
+   GETGRIB  : Fixed igrdnum,numval set for various precip,maxmin input files
+   MAIN     : Fixed interface statement for wxstring
+              Moved GRIDWX out of downaset module for pass into makestring
+              Moved validpt out of griddef, fixed set in getgrib to come 
+              after Temperature read
+12-05-2012  : Testing conusnest region option
+     GETGRB : Put in LHR9 test...maybe only needed for on-cycle non-nests
+     unifprecip: completed conversion to f90 formatting
+     smartint.sh:  Adjusted mk3p,mk6p,mk12p for nests (mk3p always = 0)
+                   moved logic for hr3bkt needed for on-cycle parent 3-hr  
+                   or off-cyc/nests 6 hr precip special file read
+12-15-2012 NDFDgrid.f Fixed logic so conus nests check veg and roughness values
+           plotmet, plotdiff created gempak plotting routines
+
+12-21-2012 : CONUS REGION
+    NDFDgrid.f : Changed so all grids use q at level 1 rather than q-2m(too noisy).
+01-17-2013 : OFF-Cycle
+  GETGRB: Fixed 6 hour precip reads and set LHR12 correctly
+  ncoproc.sh : Fixed conversion to grib2, pgmout should be set
+  jobs : completed combining oper jobs and scr and config for various runtyps
+01-24-2013: reintroduced ex script
+  unified all jobs so RUNTYP is set in parent ecflow script
+
+01-27-2013: MAIN.f90
+   Checked when max,min,thold,dhold =0 at a valid point
+   Should = spval when temperature = 0.
+   not sure why at one point, this inconsistency creeps in
+   for example, conusnest at point 1011,26
+
+   NDFDgrid.f90 : Checked if dewnew.ne.spval before computing qnew
+   even if validpt
+
+01-28-2013: GETGRIB.f90
+   changes LHR9=FALSE for all off-cycle and nest runs
+   since they should have 3 hr precip in std nam file
+
+01-29-2013 
+GETGRIB.f90
+   Changed setvar to not stop if reading upper air fields
+   This is because nam input files after 60 hours has only 35 vertical levels, not 60
+nam_smartinit.sh:
+   Fixed error for off-hour 54 check in AHR array.
+
+01-30-2013
+ncoproc.sh
+	Added check to make sure the awp2 parm file is available before running tocgrib2
+
+02-21-2013:  MAIN.f90
+        Error writing SNOD.  Incorrect GRIB TABLE set.
+        Corrected by resetting ID(1:25)=0 
+2-22-2013: bjobc Cards
+added shared queue configuration (comment out bsub -X, add LAUNCH to ush scripts)
+
+Max Memory usage (MB) 
+           00-54/60	60-84    USED
+conus      1141         1690     1900
+ak         703/1036     1043     1200
+hi          302		 912     1100
+pr          259          912	 1100
+conus2p5    4508         XX      4700
+ak3         2790         XX      3000
+
+2-25-2013
+ncoproc.sh : line 53: corrected SEND_DBN error
+           : defined pcom directory in JOB for awips grib2 files
+           : Modified to use the correct awpparm file for conus2p5 and ak3 runs (namdngconus, namdngak)
+           : Modified to copy awips file to correct name for ak3 run. (smart3.ak )
+
+/nwprod/util/parm files
+          :  cpied awips conus2p5 and ak3 awips parm files from cirrus
+             grib2_awpnamdngconus...
+             grib2_awpnamdngak...
+
+03-07-2013 : MAIN.f90 
+             Output topo for CS and CS2P (all grids now)
+03-13-2013 : NDFDgrid.f90
+	     Corrected check for validpt that caused problems along Alaska boundaries
+03-15-2013 : nam_smartinit.sh 
+	     Added check to save in-between forecast hours for hawaii and priconest runs up
+             to 9 forecast hours as is done for alaska.
+DEV:
+03-19-2013 : nam_smartinit.sh
+             MAIN.f90, GETGRIB.f90, GRIBLIMITED.f90
+             Output VIS and WGUST every hour to 12 hours for ak,hi,pr, ak3, conus2p5
+             as part of the limited off-hour file writes for RTMA
+
+DEV/prod
+04-30-2013 : nam_smartinit.sh  Changed to output and run ncoprocessing for all grids at forecast hour 00.
+             (mksmart=1, alaskanest, hawaiinest,priconest)
+05-01-2013:  nam_smartinit.sh : Changed mksmart check for alaska
+             scripts/nam_smartinit.sh.ecf --> changed check to run all grids at fhr=00
+
+
+07-01-2013:  MAIN.f90 : fixed MIXHGT to ensure defined at all points if not determined during 
+             vertical check
+NCO IMPLEMENTED on 7/15/2013
+===============================================================================================
+
+FY14 IMPLEMENTATION *****
+07-01-2013:  Testing extended conus 187 grid creation:
+             nam_smartinit.sh : changed ogrd=187
+             fix: using 187 weight files : nam_wgt_187_conusnest
+             parm: modified conusnest2p5 master control file to set 187 as ogrd for prdgen
+             Now requires 5500 gb of memory.
+             
+             Configured guam nmm hrw to ndfd 2.5 km (grid 199) guam smartinit
+             fix: cp nam_smartmaskgm.grib, nam_smarttopogm.grb
+             parm: created gm master control file to set 199 as ogrd for prdgen
+                   (nam_mastergm.ctl)
+            prdgen output now mesogm.NDFD for guam interp
+
+07-02-2013: Modified ecf script to create 00 hr downscaling from NAM parent for 
+           conus, hi, pr
+           00hr  NAM PARENT  conus,ak,hi,pr,alaskanest,conusnest2p5,aknest3
+           03-09 NAM PARENT  ak-->ak_rtmages
+           03-60 NAM NEST    conusnest,alaskanest,hawaiinest,priconest,conusnest2p5,ak3nest
+           63-84 NAM PARENT  conus, alaskanest(ak), hi, pr
+NCO IMPLEMENTED on 7/23/2013
+
+07-03-2013: Created NAM_SMINIT.CTL config file to provide 
+            rg     = region name trigger for prdgen wgt, master file name format
+                       con, ak, hi, pr, ak3, gm
+            mdlgrd = input NAM grid domain name
+                       conusnest,hawaiinest,priconest,alaskanest,guamnmm
+            sgrb   = SREF input file grid no 
+                       212, 216, 243, gefs
+            natgrd = NAM Native input grid type 
+                      bgrd3d, .bsmart, wrfprs
+            ogrd   = output NDFD grid number 
+                      195, 196, 197, 198, 199, 91, 184, 187
+            grid   = grid definitions for copygb interp
+            outreg = Output file name region identifier
+                       conus, ak, hi, pr, conus2p5, ak3, gm
+
+07-04-2013: Modified nam_smartinit.sh to read/use cfg fields from CTL file
+07-08-2013: JNAM_SMINIT, smart_para_config
+            SET NET==nam or hiresw(for guam) input model directory (COM_IN) set
+NCO : ADD COM_IN option to JNAM_SMINIT job
+            nam_smartinit.sh : for guam use GEFS prob input
+
+07-15-2013
+nam_smartinit.sh 
+* using mdl varb (nam, hiresw) to define prdgen input files
+* Needed for Guam that uses hires window WRF-NMM.
+NOTE : SHOULD USE RUN OR NET ENVIR variable for mdl
+
+GUAM:
+Unified reads of guam land, orog file reads (in fix sub-directory)
+Created READGBpres.f90 to read in hires pressure grids
+Still error in reading.
+Error reading gefs prob files also.
+
+MAIN.f90, NDFDgrid.f90 : Added output of DOWNP (PNEW) instead of PSFC
+??? SHOULD OTHER PRODUCTS USE PNEW FOR COMPUTATION (eg:mixhgt)
+
+
+07-26-2013 GEM, RUN_GEM, ftpmet.job
+* Changed to plot nam nest vs downscaled smartinit fields thru 12 hours
+  by setting mdl="smart nam"
+             gribd2=/com/nam/prod
+             gribfile=nam.t12z.hiresfHH.tm00 
+* make-sfc, plotdiff.sh : Fixed title and plots with different vertical levels :
+Eg: NAM (2m temp) vs SMARTINIT( sfc temp) on same graph
+
+
+07-30-2013
+nam_smartinit.sh 
+*  Fixed cp of conus2p5 hourly files to 12 hours with vis/gust fields.
+   Also done for ak_rtmages, priconest, hawaiinest
+
+07-31-2013
+nam_smartinit.sh
+* Added option to use previous cycle 6 hour forecast for hour 0 downscaling if GUESS=GDAS (coldstart)
+* note default GUESS=NAM
+JNAM_SMINIT job
+* Invoke nam /nwges/prod/nam.yyyymmdd/nam.envir.sh to set GUESS variable needed by nam_smartinit
+
