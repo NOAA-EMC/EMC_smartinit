@@ -13,27 +13,28 @@
 #                   smartinit: getgrib.f: fixed bug with reading sref prob file
 # 2012-10-31  JTM : moved smartinit system to tide
 # 2012-12-03  JTM : Unified for nam parent and nested region runs
+# 2013-07-01  JTM : added extended conus (187) and guamnest hrw nest options (199)
+# 2013-07-03  JTM : Adding use of cfg file for grid settup
 #======================================================================
 #  Set Defaults fcst hours,cycle,model,region in config_nam_nwpara called in parent job
 
-# RUNTYP: OUTPUT REGION TO DOWNSCALE TO 
+# RUNTYP: OUTPUT REGION TO DOWNSCALE TO  (IN NAM-SMINIT.CTL FILE)
 #=================================================================
 # conus        : Downscale NAM 12 over CONUS  
 #              :  SREF-GRD=212  NAM-GRD=bgrd  NDFD-GRD=197
 # pr           :  SREF-GRD=212  NAM-GRD=bgrd  NDFD-GRD=195
 # hi           :  SREF-GRD=243  NAM-GRD=bgrd  NDFD-GRD=196
 # ak           :  SREF-GRD=216  NAM-GRD=bgrd  NDFD-GRD=198
-# ak_rtmages   :
+# ak_rtmages   :  " " forecast hours 0-12
 
 # conusnest    :  SREF-GRD=212   NAM-GRD=conusnest.bsmart      NDFD-GRD=197
-# conusnest2p5 :  SREF-GRD=212   NAM-GRID=conusnest.bsmart     NDFD-GRD=184
+# conusnest2p5 :  SREF-GRD=212   NAM-GRID=conusnest.bsmart     NDFD-GRD=184/187
 # priconest    :  SREF=GRD=212   NAM-GRD= prinest.bsmart       NDFD-GRD=195
 # hawaiinest   :  SREF-GRID=243  NAM-GRID=hawaiinest.bsmart    NDFD-GRD=196  
 # alaskanest   :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=198  
 # aknest3      :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=91
+# guamnest     :  GEFS-GRID???   HRW-GRID=guamnmm.t00z.wrfprs  NDFD-GRD=199
 #======================================================================
-
-set -x 
 
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
@@ -48,25 +49,62 @@ export rg=`echo $RUNTYP |cut -c1-2`
 # eg: nam_smartmasteraknest3.ctl     
 
 # prdgen wgt ctl file    : mdlgrd, ogrd
-# eg: nam_wgt_184_conusnest
+# eg: nam_wgt_187_conusnest
 
 # smartinit in/out file  : rg / outreg
 # eg: MESOAK.NDFD
 # eg: nam.t12z.smartconus2p5.f03
 #=====================================================================
 
-#INPUT MODEL GRID filename extension
-export mdlgrd=$RUNTYP  
-export mdl=nam
+# READ IN GRID INFO
+linemax=`cat NAM-SMINIT.CTL |wc -l`
+echo NAM-SMINIT  $linemax
+let iline=0
+while [ $iline -le $linemax ];do
+  head -n $iline NAM-SMINIT.CTL >tempfile
+  line=`tail -n1 tempfile`
+  let k=1
+  for word in $line; do
+    case $k in
+      1)  RCFG=$word;;
+      2)  export rg=$word;;
+      3)  export outreg=$word;;
+      4)  export mdlgrd=$word;;
+      5)  export sgrb=$word;;
+      6)  export natgrd=$word;;
+      7)  export ogrd=$word;;
+      8)  gtyp=$word;;
+      9)  gnx=$word;;
+     10)  gny=$word;;
+     11)  glat1=$word;;
+     12)  glon1=$word;;
+     13)  gdt=$word;;
+     14)  tlon=$word;;
+     15)  dx=$word;;
+     16)  dy=$word;;
+    esac
+    let k=k+1
+  done
+  if [ $RUNTYP = "$RCFG" ];then
+    if [ "$gtyp" = "$ogrd" ];then 
+      export grid=$ogrd
+    else
+      export grid="$gtyp $gnx $gny $glat1 $glon1 $gdt $tlon $dx $dy"
+    fi
+    break
+  else
+    let iline=iline+1
+    if [ $iline -gt $linemax ];then
+      echo;echo  $RUNTYP not found in SMINIT.CTL file
+      echo  EXITING NAM-SMARTINIT; exit
+    fi
+  fi
+done
 
-#SMARTINIT OUTPUT grid filename extension
-outreg=$rg
+prdgfl=meso${rg}.NDFD  # output prdgen grid name (eg: mesocon.NDFD,mesoak...)
 case $RUNTYP in
-  alaskanest) rg=ak; outreg=ak;;
-  hawaiinest) rg=hi; outreg=hi;;
-  conus|conusnest) rg=con; outreg=conus;;
-  conusnest2p5) rg=con; outreg=conus2p5; mdlgrd=conusnest;;
-  aknest3) rg=ak3; outreg=ak3; mdlgrd=alaskanest;;
+    conus ) prdgfl=meso.NDFD;;    #????????????????
+  aknest3 ) prdgfl=mesoak.NDFD;;  # CHANGE should be mesoak3.NDFD (meso{rg}
 esac
 
 cycon=0
@@ -95,16 +133,8 @@ typeset -Z2 srefcyc gefscyc pcphrl
 #       eg: nam.t12z.bgrd3d24.tm00
 #       eg: nam.t12z.conusnest.bsmart24.tm00
 
-prdgfl=meso${rg}.NDFD  # output prdgen grid name (eg: mesocon.NDFD,mesoak...)
-if [ $inest -eq 0 ];then 
-  natgrd="bgrd3d"
-  if [ $rg = con ];then prdgfl=meso.NDFD;fi
-else
-  natgrd=".bsmart"       # native model type grid extension (eg: bgrd3d, bsmart)
-  if [ $RUNTYP = aknest3 ];then prdgfl=mesoak.NDFD;fi
-fi
 #-------------------------------------------------------------------------
-#   For all grids, set the following:
+#   For all grids, set the following in NAM_SMINIT.CTL:
 #   sgrb : Input SREF grid grib number (eg: 212, 216, 243)
 #   grid : output grid to copygb sref precip and nam precip buckets to 
 #          one exception for non-nests where nam precip buckets are 
@@ -112,51 +142,26 @@ fi
 #   ogrd : output grib number for prdgen and smartinit codes 
 #          (eg: 197,196,195,198,184)
 #--------------------------------------------------------------------------
-grdext=" 0 64 25000 25000"
-case $RUNTYP in 
-  conus|conusnest)
-    maskpre=ruc2_vegtype_ndfd
-    topopre=ruc2_ndfdtopo
-    ext=dat
-    grid="255 3 1073 689 20192 238446 8 265000 5079 5079 $grdext"
-    sgrb=212       # SREF input GRIB File grid indicator
-    ogrd=197;;     # smartinit output grid number
-  *) 
-   maskpre=nam_smartmask${rg}
-   topopre=nam_smarttopo${rg}
-   ext=grb
-   case $RUNTYP in
-     ak|ak_rtmages) sgrb=216;ogrd=198
-      grid="255 5 825 553 40530  181429 8 210000 5953 5953  0 64 0 25000 25000";;
-     hi)            sgrb=243;ogrd=196
-      grid="255 1 321 225 18067 -161626 128 23082 -153969 20000 $grdext";;
-     pr)            sgrb=212;ogrd=195
-      grid="255 1 177 129 16829  -68196 128 19747  -63972 20000 $grdext";;
-
-#  NESTS-------------------------------------------------------------------
-           alaskanest)  sgrb=216;grid=198;ogrd=$grid;;
-           hawaiinest)  sgrb=243;grid=196;ogrd=$grid;;
-            priconest)  sgrb=212;grid=195;ogrd=$grid;;
-              aknest3)  sgrb=216;ogrd=91
-      grid="255 5 1649 1105 40530 181429 8 210000 2976 2976 0 64 0 25000 25000";;
-         conusnest2p5)  sgrb=212;ogrd=184 
-      grid="255 3 2145 1377 20192 238446 8 265000 2540 2540 $grdext"
-      topopre=ruc2_ndfd_elevtiles.ndfd2.5
-      maskpre=ruc2_ndfd_vegtiles.ndfd2.5;;
-#  NESTS--------------------------------------------------------------------
-   *)
-      echo RUNTYP  ${RUNTYP} configuration not available $mdlgrd $rg
-      exit;;
-   esac;;
+if [ $gtyp -ne $ogrd ];then
+case $RUNTYP in
+  ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
+                      *) grid="255 $grid  0 64 25000 25000";;
 esac
+fi
 
+set -x
+# Set NDFD output grid topo and land mask filenames
+maskpre=${mdl}_smartmask${outreg}
+topopre=${mdl}_smarttopo${outreg}
+ext=grb
+case $RUNTYP in conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
 
 echo
-echo "============================================================"
+echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
-echo RUNTYP:  $RUNTYP $mdlgrd  $rg
+echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
 echo INTERP GRID: $grid
 echo OUTPUT GRID: $ogrd $outreg
 echo "============================================================"
@@ -179,14 +184,12 @@ if [ $ffhr -gt 0 ]; then
 # get the sref precip fields that we need
   cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
 
-  if [ ! -s SREFPROB ]; then
+  if [ ! -s SREFPROB -o $RUNTYP = guamnest ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   fi
 
   $utilexec/grbindex SREFPROB SREFPROBI
-  # check for missing sref data
-  export err=$?; err_chk
-
+ 
   let IP=0
   if [ $ffhr -lt 6 ]; then pcphr6=;pcphr12=;fi
   if [ $ffhr -lt 12 ]; then pcphr12=;fi
@@ -253,28 +256,28 @@ for fhr in $hours; do
   let fhr9=fhr-9
   typeset -Z2 fhr1 fhr2 fhr3 fhr6 fhr9 fhr ffhr
 
-# Reduce the input model file size for prdgen on wcoss 32 bit limited machines
-  if [ $natgrd = "bgrd3d" ];then
-    cp $COMIN/nam.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
-    ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
-    grep -f ${PARMnam}/nam_smartinit.parmlist | \
-    ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
-    mv temp WRFPRS${fhr}.tm00
+# Check that NAM 00 hr analysis is from NDAS or GDAS
+#  lanl=`grep /nwprod/
+#  if [ $lanl = NDAS ];then
+#NCO 
+  if [ -s WRFPRS${fhr}.tm00 ];then
+    echo WRFPRS $fhr found
   else
-    cp $COMIN/nam.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
+    case $natgrd in 
+      bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
+#       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
+        ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
+        grep -f ${PARMnam}/${mdl}_smartinit.parmlist | \
+        ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
+        mv temp WRFPRS${fhr}.tm00;;
+      wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00;;
+           *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00;;
+    esac
   fi
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 
-  if [ $inest -eq 0 ];then
-    cp -p $PARMnam/nam_master${outreg}.ctl master${fhr}.ctl
-  else
-    case $rg in
-      ak|hi|pr) cp -p $PARMnam/nam_master${outreg}.ctl master${fhr}.ctl;;
-       con|ak3) cp -p $PARMnam/nam_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
-    esac
-  fi
-
   if [ $fhr -gt 0 ];then
+# nam_sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
 #   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
 #   ON-CYC :
@@ -350,61 +353,77 @@ for fhr in $hours; do
         pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
       esac
    
-      if [ $natgrd = "bgrd3d" ];then 
-        cp $COMIN/nam.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
-        ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMnam}/nam_smartinit.parmlist |${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
-        mv temp WRFPRS${FHRFRQ}.tm00
-      else
-        cp $COMIN/nam.t${cyc}z.${mdlgrd}${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
+    if [ -s WRFPRS${FHRFRQ}.tm00 ];then  #NCO RM
+      echo WRFPRS $FHRFRQ found
+    else     
+    case $natgrd in 
+      bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
+        ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMnam}/nam_smartinit.parmlist | \
+        ${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
+        mv temp WRFPRS${FHRFRQ}.tm00;;
+      wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00;;
+           *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00;;
+    esac
+    fi
+    $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+    $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+
+    export pgm=nam_smartprecip;#NCO . prep_step
+    ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
+    ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
+    ln -sf "WRFPRS${fhr}.tm00"     fort.15
+    ln -sf "WRFPRS${fhr}i.tm00"    fort.16
+    ln -sf "${freq}precip.${fhr}"  fort.50
+    ln -sf "${freq}cprecip.${fhr}" fort.51
+    ln -sf "${freq}snow.${fhr}"    fort.52
+
+    if [ $MKPCP -eq $mk12p ];then
+      if [ -s WRFPRS${fhr3}.tm00 ];then  #NCO RM
+        echo WRFPRS $fhr3 found
+      else 
+      case $natgrd in 
+        bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00
+          ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMnam}/nam_smartinit.parmlist | \
+          ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
+          mv temp WRFPRS${fhr3}.tm00;;
+        wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00;;
+             *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00;;
+      esac
       fi
-      $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
-      $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+      $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
-      export pgm=nam_smartprecip; . prep_step
-      ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
-      ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
-      ln -sf "WRFPRS${fhr}.tm00"     fort.15
-      ln -sf "WRFPRS${fhr}i.tm00"    fort.16
-      ln -sf "${freq}precip.${fhr}"  fort.50
-      ln -sf "${freq}cprecip.${fhr}" fort.51
-      ln -sf "${freq}snow.${fhr}"    fort.52
+#NCO RM
+      if [ -s WRFPRS${fhr6}.tm00 ];then
+        echo WRFPRS $fhr6 found
+      else
+      case $natgrd in 
+        bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00
+         ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMnam}/nam_smartinit.parmlist | \
+         ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
+         mv temp WRFPRS${fhr6}.tm00;;
+        wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00;;
+             *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00;;
+      esac
+      fi
+      $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
-      if [ $MKPCP -eq $mk12p ];then
-        if [ $natgrd = "bgrd3d" ];then 
-          cp $COMIN/nam.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00
-          ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMnam}/nam_smartinit.parmlist |${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
-          mv temp WRFPRS${fhr3}.tm00
-        else
-          cp $COMIN/nam.t${cyc}z.${mdlgrd}${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00
-        fi
-        $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
-
-        if [ $natgrd = "bgrd3d" ];then 
-          cp $COMIN/nam.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00
-          ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMnam}/nam_smartinit.parmlist |${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
-          mv temp WRFPRS${fhr6}.tm00
-         else
-          cp $COMIN/nam.t${cyc}z.${mdlgrd}${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00
-        fi
-        $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
-
-        ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
-        ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
-        ln -sf "WRFPRS${fhr3}.tm00"      fort.17
-        ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
-        ln -sf "WRFPRS${fhr}.tm00"       fort.19
-        ln -sf "WRFPRS${fhr}i.tm00"      fort.20
-      fi  # mk12p
+      ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
+      ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
+      ln -sf "WRFPRS${fhr3}.tm00"      fort.17
+      ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
+      ln -sf "WRFPRS${fhr}.tm00"       fort.19
+      ln -sf "WRFPRS${fhr}i.tm00"      fort.20
+    fi  # mk12p
 
 #===============================================================
 # nam_smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
-     echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-     $EXECnam/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
+    echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
+###     ${LAUNCH} $EXECnam/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
+    $EXECnam/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
-
-export err=$?; err_chk
+     export err=$?; #NCO err_chk
 
 #    Interp precip to smartinit GRID
      cpgbgrd=$grid
@@ -415,6 +434,7 @@ export err=$?; err_chk
      $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
      $utilexec/grbindex ${freq}snow ${freq}snowi
     fi #MKPCP>0
+#   nam_sminit_mkprcp.sh END ################################################
   done #MKPCP loop
 
 #=================================================================
@@ -423,38 +443,38 @@ export err=$?; err_chk
 
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 
+# FOR TESTING ONLY
+if [ -s meso${rg}.NDFDf${fhr} ];then
+  echo "PRDGEN FILE ALREADY CREATED: meso${rg}.NDFD${fhr}"
+else
+
   echo creating $prdgfl file for fhr $fhr
   cat >input${fhr}.prd <<EOF5
 WRFPRS${fhr}.tm00
 EOF5
 
-  export pgm=nam_prdgen;. prep_step
-  ln -sf $FIXnam/nam_wgt_${ogrd}     fort.21
-  if [ $inest -gt 0 ];then
+# cp/ln PRDGEN master ctl and weight files
+  if [ $inest -eq 0 ];then
+    cp -p $PARMnam/${mdl}_master${outreg}.ctl master${fhr}.ctl
+    ln -sf $FIXnam/${mdl}_wgt_${ogrd}     fort.21
+  else
+#   To interp nests to 5 km, just use same parent nam master files 
+#   To interp ak/cs nests to ak3/cs2p5, use special smartmaster ctl files
     case $rg in
-      ak3|con|pr) ln -sf $FIXnam/nam_wgt_${ogrd}_${mdlgrd} fort.21;;
-           ak|hi) ln -sf $FIXnam/nam_wgt_${mdlgrd}         fort.21;;
+      ak|hi|pr|gm) cp -p $PARMnam/${mdl}_master${rg}.ctl master${fhr}.ctl;;
+          con|ak3) cp -p $PARMnam/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
     esac
+    ln -sf $FIXnam/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
   fi
 
+  export pgm=nam_prdgen;#NCO . prep_step
   ln -sf master${fhr}.ctl            fort.10
-  # ln -sf $PARMnam/nam_kwbx.tbl       fort.41
-  # ln -sf $PARMnam/nam_time.tbl       fort.42
-  # ln -sf $PARMnam/nam_parm.tbl       fort.43
-  # ln -sf $PARMnam/nam_grid.tbl       fort.44
-  # ln -sf $PARMnam/nam_levl.tbl       fort.45
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
  
-  ${EXECnam}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
-  export err=$?; err_chk
+  /usrx/local/bin/getrusage -rss  ${EXECnam}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
+  export err=$?; #NCO err_chk
 
   cp ${COMROOT}/date/t${cyc}z DATE
-
-  # JY - the following three lines are for canned data test, can be deleted later
-  curDd=`date +%Y%m%d`
-  sed "s/$curDd/$PDY/" DATE > ./tmp-date
-  mv ./tmp-date DATE
-
   if [ -s $prdgfl ];then  
     mv ${prdgfl} meso${rg}.NDFDf${fhr}  
     echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
@@ -465,6 +485,8 @@ EOF5
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
+fi #TESTING ONLY
+
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 
 #=================================================================
@@ -472,8 +494,8 @@ EOF5
 #=================================================================
 
 # CHANGE : for non-conus look in FIXnam for topo,land files
-  cp $FIXruc2/${topofl} TOPONDFD
-  cp $FIXruc2/${maskfl} LANDNDFD
+  cp $FIXnam/${topofl} TOPONDFD
+  cp $FIXnam/${maskfl} LANDNDFD
   ln -sf TOPONDFD     fort.46
   ln -sf LANDNDFD     fort.48
   if [ $ext = grb ];then
@@ -515,9 +537,9 @@ EOF5
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/nam.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
-    cp $COMOUT/nam.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
-    cp $COMOUT/nam.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
     $utilexec/grbindex MAXMIN3 MAXMIN3i
     $utilexec/grbindex MAXMIN4 MAXMIN4i
     $utilexec/grbindex MAXMIN5 MAXMIN5i
@@ -582,8 +604,8 @@ EOF5
        fi  
 
      else   # fhr%3 -ne 0
-#    For all "in-between" forecast hours (13,14,16....)
-#    No special data needed
+#      For all "in-between" forecast hours (13,14,16....)
+#      No special data needed
        echo "*****************************************************"
        echo RUN SMARTINIT for in-between hour: $fhr
        ln -fs " " fort.13
@@ -591,6 +613,7 @@ EOF5
        ln -fs " " fort.15
        ln -fs " " fort.16
        mksmart=0
+#      Create downscaled 00 hour files 
        if [ $fhr -eq 00 ];then mksmart=1;fi
      fi;;
   esac
@@ -603,21 +626,20 @@ EOF5
       conusnest2p5) RGIN=CS2P;;
         ak_rtmages) RGIN=AKRT;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
-  esac
+   esac
 
-  export pgm=nam_smartinit;. prep_step
-  # JY ${EXECnam}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest >smartinit.out${fhr}
-  /nw${envir}/exec/nam_smartinit $cyc $fhr $ogrd $RGIN $inest >smartinit.out${fhr}
-  export err=$?; err_chk
+  export pgm=nam_smartinit;#NCO . prep_step
+  /usrx/local/bin/getrusage -rss ${EXECnam}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest >smartinit.out${fhr}
+  export err=$?; #NCO err_chk
 
-# Save smartinit output for RTMA 1st guess for AK, HI(nest), PR(nest) 03-13-13
-# But do not perform nco post-processing on in between hours for these downscaled nests except fhr=00
-  if [ $fhr -le 9 ];then
+# Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
+  if [ $fhr -le 12 ];then
     case $RUNTYP in
-     ak_rtmages) mksmart=0
-       mv MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00;;
-     hawaiinest|priconest)
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${rg}${fhr}.tm00;;
+     ak_rtmages) 
+       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
+       mksmart=0;;
+     hawaiinest|priconest|conusnest2p5|aknest3)
+       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00;;
    esac
   fi
 
@@ -629,7 +651,9 @@ EOF5
    export cyc  
    export fhr=$fhr
    export ogrd 
+
    ${USHnam}/ncoproc.sh
+
   fi
   echo
 done  #fhr loop
