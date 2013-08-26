@@ -1,0 +1,331 @@
+      subroutine NDFDgrid(veg_nam_ndfd,tnew,dewnew,unew,vnew, &
+      qnew,topo_ndfd)
+    use constants
+    use grddef
+    use aset2d
+    use aset3d
+       
+    REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:)
+    REAL, INTENT(INOUT) :: PNEW(:,:),SFCHTNEW(:,:),QNEW(:,)
+    REAL, INTENT(INOUT) :: VEG_NAM_NDFD(:,:),TOPO_NDFD(:,:)
+    TYPE (GINFO)        :: GDIN
+
+    REAL, ALLOCATABLE   :: EXN(:,:) 
+    REAL, ALLOCATABLE   :: ROUGH_MOD(:,:),VEG_NDFD(:,:)
+    REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:)
+
+      real exn0,exn1, wsp
+      integer nmod(2)
+
+      integer i,j, ierr,k,ib,jb, ivar,ix,iy
+      integer ibuf, ia,ja,iw,jw,id,n_rough_yes,n_rough_no
+      integer m_rough_yes,m_rough_no
+      real zs,qv,qq,t1,e,enl,dwpt,z6,t6,gam,gamd,gami,tsfc,td
+      real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
+      real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
+      real tmean,dz,theta1,theta6
+
+      print *, '***********************************'
+      print *, 'Into NDFDgrid'
+      print *, '***********************************'
+
+      IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
+
+      ALLOCATE (EXN(IM,JM),ROUGH_MOD(IM,JM),STAT=kret)
+      ALLOCATE (VEG_NDFD(IM,JM),STAT=kret)
+      ALLOCATE (TTMP(IM,JM),DTMP(IM,JM),STAT=kret)
+      ALLOCATE (UTMP(IM,JM),VTMP(IM,JM),STAT=kret)
+
+!  read in 5 km topography
+!  change name for consistency with non-conus region names
+!  CHANGE FOR GRIB FILES for non-conus regions ?????
+       open (46, file='TOPONDFD', form='unformatted')
+       read (46) topo_ndfd
+       close (46)
+
+!  read in 5 km vegetation
+c change to unit 48 for consistency with other domains
+       open (48, file='LANDNDFD', form='unformatted')
+       read (48) veg_ndfd
+       close (48)
+
+       print *, 'read in topo and veg files '
+       where(veg_nam_ndfd.eq.16.) veg_nam_ndfd(i,j) = -1.
+       where(veg_nam_ndfd.ne.16..and. veg_nam_ndfd.gt.0.) &
+             veg_nam_ndfd = 0.10
+       where(veg_nam_ndfd.eq.-1.) veg_nam_ndfd =  0.
+ 
+         zdif_max = -1000.
+         n_rough_yes=0
+         n_rough_no =0
+C ****************************************************************
+! -- Now let's start reducing to NDFD topo elevation.
+C ****************************************************************
+        where (zsfc .lt. 0.) zsfc=0.0
+        sfchtnew = topo_ndfd
+        exn = cpd_p*(psfc/P1000)**rovcp_p
+        maxarr=maxloc(topo_ndfd-zsfc)
+
+        do 120 j=1,jm
+        do 120 i=1,im
+
+! ---   z = surface elevation
+          zs = zsfc(i,j)
+
+! --- q = specific humidity at 2m from NAM model sfc
+! --- dew-point temperature at original sfc
+         td_orig=d2(i,j)
+
+c --- dewpoint depression
+          tddep = max(0.,t2(i,j) - td_orig )
+          qv= q(i,j,1)
+          QQ = QV/(1.+QV)
+
+          
+! --- Base Td on 2m q
+          qv = qq/(1.-qq)
+
+! ---   get values at level 6 for lapse rate calculations
+
+          QQ = Q(I,J,6)/(1.+Q(i,j,6))
+
+          exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
+          T6=T(I,J,6)
+          Z1=HGHT(I,J,1)
+          Z6=HGHT(I,J,6)
+          GAM = (T1-T6)/(Z6-Z1)
+
+!============================================
+          if (topo_ndfd(i,j).le.zs ) then
+!============================================
+          GAM = MIN(GAMD,MAX(GAM,GAMi))
+
+! --- temperature at NDFD topo
+! -- again, use 2m T at NAM regular terrain from similarity
+!      theory for derivation of 2m T at topomini elevation
+          tsfc = t2(i,j) + (zs-topo_ndfd(i,j))*gam
+
+!  Don't let reduced valley temps be
+!     any lower than NAM 2m temp minus 10K.
+          tsfc = max(t2(i,j)-10.,tsfc)
+!  Can't let valley temps go below NAM dewpoint temps.
+          tsfc = max (tsfc,td_orig)
+
+! --- pressure at NDFD topo
+          tmean = (tsfc+t2(i,j)) * 0.5
+          dz = zs-topo_ndfd(i,j)
+          pnew(i,j) = psfc(i,j) * exp(g0_p*dz/(rd_p*tmean))
+
+! --- temperature
+          tnew(i,j) = tsfc
+
+! Set dewpoint depression to that at original sfc
+
+! --- dew-pt at topomini
+          dewnew(i,j) = tsfc - tddep
+
+! --- surface winds
+! -- use 10 m wind values derived from similarity theory
+!   gsm  use u and v of level 1 or 10m???
+          unew(i,j) = u10(i,j)
+          vnew(i,j) = v10(i,j)
+
+!============================================
+          ELSE if (topo_ndfd(i,j).gt.zs) then
+!============================================
+! ----  Now only if topo_NDFD is above the NAM model elevation
+
+!        Here, when topo-NDFD > topo-NAM, we allow a small
+!        subisothermal lapse rate with slight warming with height.
+
+          GAM = MIN(GAMD,MAX(GAM,GAMsubj))
+
+          DO K=1,LM
+           if (hght(i,j,k) .gt. topo_ndfd(i,j)) exit
+          ENDDO 
+
+          if (k .eq. 1) then
+            zbot=zs
+            pbot=psfc(i,j)
+            tbot=t2(i,j)
+            qbot=q2(i,j)
+          else 
+            zbot=hght(i,j,k-1)
+            pbot=pmid(i,j,k-1)
+            tbot=t(i,j,k-1)
+            qbot=q(i,j,k-1)
+          endif
+          frac = (topo_ndfd(i,j)-zbot) / (hght(i,j,k)-zbot)
+          exn1 = (pbot/P1000)**rovcp_p
+          exn0 = (pmid(i,j,k)/P1000)**rovcp_p
+! --- pressure at NDFD topo
+          pnew(i,j) = P1000* ((exn1 +frac * (exn0 - exn1)) **cpovr_p)
+          thetak=((P1000/PMID(i,j,k))**CAPA)*T(i,j,k)
+          thetak1=((P1000/PSFC(i,j))**CAPA)*tbot  !USE PBOT ???
+          thetavc = thetak1+frac * (thetak-thetak1)
+          qvc = qbot+frac * (Q(i,j,k)-qbot))
+          qc = qvc/(1.+qvc)
+
+! --- temperature
+! GSM changed the tup computation, as it appears to give
+!   a better-looking product.  need to revisit at some point 
+          tup=t2(i,j)+frac*(t(i,j,k)-t2(i,j))
+            
+!  provisional 2m temp at NDFD topo
+          tnew(i,j) = t2(i,j) + (tup-t1)
+
+! --- Dont let extrapolated temp to be any larger than
+!     the value at the NAM terrain level.
+!     This will avoid the problem with NDFD temp values
+!     being set to be much warmer than NAM 2m temp.
+
+      tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam
+
+      if (tnew(i,j) .gt. t2(i,j))  tnew(i,j) = min(tnew(i,j),tsfc)
+
+! --- Just use q at NAM 1st level in this case.
+!     should use q2, but the values dont look good
+!     Obtain Td corresponding to NDFD pres otherwise.
+      qv=q2(i,j)
+      e=pnew(i,j)/100.*qv/(0.62197+qv)
+! --- dew-point temperature at original sfc
+      ENL = ALOG(E)
+      DWPT = (243.5*ENL-440.8)/(19.48-ENL)
+      td = dwpt + 273.15
+! --- dewpoint temperature
+      dewnew(i,j) = min(td,tnew(i,j))
+      if (k .eq. 1) then
+        uc = u10(i,j)+frac * (u(i,j,k)-u10(i,j))
+        vc = v10(i,j)+frac * (v(i,j,k)-v10(i,j))
+      else
+        uc = u(i,j,k-1)+frac * (u(i,j,k)-u(i,j,k-1))
+        vc = v(i,j,k-1)+frac * (v(i,j,k)-v(i,j,k-1))
+      endif
+
+! -- 0.7 factor is a wag at surface effects on wind speed
+!     when interpolating from the free atmosphere to
+!     the NDFD topo.
+          speedc = 0.7*sqrt(uc*uc+vc*vc)
+          speed = sqrt(u(i,j,1)**2 + v(i,j,1)**2)
+          ratio = max(1.,speedc/(max(0.001,speed)) )
+          unew(i,j) = ratio*(u(i,j,1))
+          vnew(i,j) = ratio*(v(i,j,1))
+
+!============================================
+        END IF
+!============================================
+
+120     continue
+
+!============================================
+! -- use land mask to get better temps/dewpoint/winds
+!      near coastlines.
+!    Use nearest neighbor adjustment where NAM
+!      land-water mask does not mask NDFD land-water mask 
+!============================================
+
+!  create temporary holder for u,v,t,td so that the "real"
+!   values don't get shifted around in the adjustment
+         ttmp=tnew
+         dtmp=dewnew
+         utmp=unew
+         vtmp=vnew
+         rough_mod = veg_nam_ndfd
+
+! ----------------------------------------------------
+! -- Adjust to rough_mod iteratively for land to water
+! ----------------------------------------------------
+       do k=1,15
+       nmod = 0
+       do j=1,jm
+        jm1 = max(1,j-1)
+        jp1 = min(jm,j+1)
+       do i=1,im
+        im1 = max(1,i-1)
+        ip1 = min(im,i+1)
+        if (veg_ndfd(i,j).eq.16. ) then
+         if(rough_mod(i,j).gt.0.05) then
+          if(any(rough_mod(im1:ip1,jm1:jp1).lt.0.05)) then
+             rough_mod(i,j) = 0.0
+             nmod(1) = nmod(1) + 1
+           end if
+          end if
+        else
+          if(rough_mod(i,j).lt.0.05) then
+           if(any(rough_mod(im1:ip1,jm1:jp1).gt.0.05)) then
+             rough_mod(i,j) = 0.1
+             nmod(2) = nmod(2) + 1
+           end if
+          end if
+         end if
+         end do
+         end do
+         write (6,*)k,' No. pts changed land-to-water',nmod(1)
+         write (6,*)k,' No. pts changed water-to-land',nmod(2)
+       end do
+
+       do j=1,jm
+       do i=1,im
+         if (veg_nam_ndfd(i,j).gt.0.05 then
+         if (rough_mod(i,j).lt.0.05) then
+! -----------------------------------------------------------------
+! -- i.e.  NDFD grid-point is over WATER (per rough_mod)
+!          NAM-interp grid-point is over LAND
+! -----------------------------------------------------------------
+               
+          do ibuf=1,10
+           ia = max(1,i-ibuf)
+           ib = min(im,i+ibuf)
+           ja = max(1,j-ibuf)
+           jb = min(jm,j+ibuf)
+               
+            do jw = ja,jb
+            do iw = ia,ib,id
+              if (veg_nam_ndfd(iw,jw).lt.0.05) then
+                unew(i,j) = utmp(iw,jw)
+                vnew(i,j) = vtmp(iw,jw)
+                tnew(i,j) = ttmp(iw,jw)
+                dewnew(i,j) = dtmp(iw,jw)
+                n_rough_yes = n_rough_yes+1
+                exit  ! check if leaves all three loops
+              end if
+            end do
+            end do
+               
+          end do
+               
+          end if 
+          end if 
+          if (veg_nam_ndfd(i,j).lt.0.05 .and. rough_mod(i,j).gt.0.05) then
+! -----------------------------------------------------------------
+! -- i.e.  NDFD grid-point is over LAND (per rough_mod)
+!          NAM-interp grid-point is over WATER
+! -----------------------------------------------------------------
+               
+          do ibuf=1,10
+          ia = max(1,i-ibuf)
+          ib = min(im,i+ibuf)
+          ja = max(1,j-ibuf)
+          jb = min(jm,j+ibuf)
+               
+            do jw = ja,jb
+            do iw = ia,ib
+              if (veg_nam_ndfd(iw,jw).gt.0.05) then
+                unew(i,j) = utmp(iw,jw)
+                vnew(i,j) = vtmp(iw,jw)
+                tnew(i,j) = ttmp(iw,jw)
+                dewnew(i,j) = dtmp(iw,jw)
+                m_rough_yes = m_rough_yes+1
+                exit    !check if leasve all 3 loops (not,i,)
+              end if
+            end do
+            end do
+          end do
+               
+          end if
+       end do
+       end do
+
+       qnew=PQ0/PSFC*EXP(A2*(dewnew-A3)/(dewnew-A4))
+       return
+       end

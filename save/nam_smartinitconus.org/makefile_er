@@ -1,0 +1,51 @@
+SHELL=/bin/sh
+#
+#
+SRCS=   GETGRIB.f MAIN.f NDFDgrid.f BOUND.f GRIBIT.f GET_BITS.f MAKESTRING.f GETGRIB_OFF.f GETGRIB_LIMITED.f GETGRIB_ANL.f
+OBJS=   GETGRIB.o MAIN.o NDFDgrid.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o GETGRIB_OFF.o GETGRIB_LIMITED.o GETGRIB_ANL.o
+
+# Tunable parameters
+#
+# FC		Name of the fortran compiling system to use
+# LDFLAGS	Flags to the loader
+# LIBS		List of libraries
+# CMD		Name of the executable
+# PROFLIB	Library needed for profiling
+#
+FC =		ifort -convert big_endian -g -traceback
+LDFLAGS =	    
+LIBS =          -L/u/Ratko.Vasic/lib_tmp \
+                -lip_4 -lw3-1.9_4 -lsp_noessl_4 -lbacio_4 \
+                -L/u/Eric.Rogers/nwprod/lib \
+                -lgem
+
+CMD =		nam_smartinitconus
+PROFLIB =
+
+# To perform the default compilation, use the first line
+# To compile with flowtracing turned on, use the second line
+# To compile giving profile additonal information, use the third line
+# WARNING:  SIMULTANEOUSLY PROFILING AND FLOWTRACING IS NOT RECOMMENDED 
+FFLAGS =         -O2
+
+# Lines from here on down should not need to be changed.  They are the
+# actual rules which make uses to build prdgen.
+#
+all:		$(CMD)
+
+$(CMD):		$(OBJS)
+	$(FC) $(LDFLAGS) -o $(@) $(OBJS) $(LIBS)
+
+# Make the profiled version of the command and call it prdgen.prof
+#
+$(CMD).prof:	$(OBJS)
+	$(FC) $(LDFLAGS) -o $(@) $(OBJS) $(PROFLIB) $(LIBS)
+
+clean:
+	-rm -f $(OBJS) $(CMD)
+
+clobber:	clean
+	-rm -f $(CMD) $(CMD).prof
+
+void:	clobber
+	-rm -f $(SRCS) makefile

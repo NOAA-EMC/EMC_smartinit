@@ -1,0 +1,1 @@
+/meso/save/Jeff.McQueen/smart-dev/ush/nam_smartinit.sh-cfg

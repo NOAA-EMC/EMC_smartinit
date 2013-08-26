@@ -1,0 +1,12 @@
+mpfort   -c -o NDFDgrid.o NDFDgrid.f
+NDFDgrid.f:39.48:
+
+      real zs,qv,qq,t1,e,enl,dwpt,z6,t6,gam,gamd,gami,tsfc,td           
+                                                1
+Error: PARAMETER at (1) is missing an initializer
+NDFDgrid.f:40.16:
+
+      real const,tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m             
+                1
+Error: PARAMETER at (1) is missing an initializer
+make: *** [NDFDgrid.o] Error 1

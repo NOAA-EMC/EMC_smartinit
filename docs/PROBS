@@ -1,0 +1,37 @@
+UGRD and VGRD are similar
+fixed 11/25 REFC = CWR
+fixed 11/25 BLRH is out of bounds -11100-->1800
+
+cp gribit, makestring...other ?? arrays to interface statement
+Create MODULE w/ 2 and 3-d arrays for getgrib,NDFD
+TEST gribit.f90, makestring.f90,getbits.f90
+new makestring.f90 logic w/ subroutines/function
+
+NDFDveg:
+test exit statements
+double check rough logic
+
+Use modules -Complete 11/29
+
+can all nests use smartmaster.ctl as is done for conusnest,aknest3
+eg for pr and hinest and aknest
+
+move all nests master files too bsmart
+nam_master: pr, hi, ak  (nest)
+nam_smartmaster : aknest3, conusnest,conusnest2p5
+
+nam_wgt_hawaiinest
+nam_wgt_alaskanest 
+
+nam_wgt_91_alaskanest  (aknest3)
+nam_wgt_184_conusnest  (conusnest,conustnest2p5)
+nam_wgt_195_priconest  (prinest)
+
+if inest = 1
+case rg in pr hi ak  nam_master${rg}
+           ak3  con   nam_smartmaster${REG}
+
+case rg in  hi ak         nam_wgt$_{REG}
+           ak3 con pr    nam_wgt_$ogrd_${REG}
+    
+            

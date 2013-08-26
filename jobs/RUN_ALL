@@ -1,0 +1,116 @@
+#!/bin/ksh
+###export stutil=/u/Samuel.Trahan/build/emc-utils/bin/
+export stutil=/hwrf/noscrub/soft/modulefiles
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+module use $stutil
+module load ruby emc-utils
+
+#=======================================================
+# Driving script to run a smartinit domain
+# Called by DRIVER
+# Submits JNAM_SMINIT.${RUNTYP}
+# RUNTYP : conus ak alaskanest hi pr conusnest2p5 aknest3
+#
+# Uses ${cfgdir}/smart_para_config --> directory config
+# Jeff McQueen   01/29/2013
+#=======================================================
+#set -x 
+typeset -Z2 cyc ffhr
+
+#====================User Sets=======================================
+# Location of smart config file to set up directories
+cfgdir=/meso/save/$USER/smart-dev
+gemdir=/meso/save/$USER/gempak/sfcplot/smart
+
+export jobd=${jobd:-`pwd`}
+
+# export RUNTYP=alaskanest # Set in DRIVER
+# export cyc=12            # Set in DRIVER
+#export fhrstr=00   # Starting forecast hour
+#export ENDHRS=12   # Ending forecast hour
+INCR=03            # Forecast hour increment
+
+#  Input sub-directory for model to downscale (/com/nam/prod, com/hiresw/prod)
+#  NCO should set NET and RUN before calling job
+
+export NET=nam  
+if [ $RUNTYP = guam ];then export NET=hiresw;fi
+
+#================END User Sets=======================================
+
+export ffhr=$fhrstr
+while [ $ffhr -le $ENDHRS ];do
+  export job="smartinit.${RUNTYP}${cyc}-${ffhr}"
+  rm -f /stmp/${USER}/smart-dev/list/o$job
+  if [ $fhrstr -le 03 ];then 
+   rm -rf /stmp/${USER}/smart-dev/$job
+   mkdir -p /stmp/${USER}/smart-dev/$job
+  fi
+  cd /stmp/${USER}/smart-dev/$job
+
+# Create and invoke config file needed by Job 
+  echo "export RUNTYP=$RUNTYP"   >$cfgdir/nam_para_config${RUNTYP}
+  echo "export cyc=$cyc"        >>$cfgdir/nam_para_config${RUNTYP}
+  echo "export ffhr=$ffhr"      >>$cfgdir/nam_para_config${RUNTYP}
+  echo "export RM_TMPDIR=NO"    >>$cfgdir/nam_para_config${RUNTYP}
+  echo "export NET=$NET"        >>$cfgdir/nam_para_config${RUNTYP}
+  echo "export RUN=$NET"        >>$cfgdir/nam_para_config${RUNTYP}
+  echo "export mdl=$mdl"        >>$cfgdir/nam_para_config${RUNTYP}
+  cat $cfgdir/parm/smart_para_config >>$cfgdir/nam_para_config${RUNTYP}
+  cp  ${cfgdir}/nam_para_config${RUNTYP} ../parm/nam_para_config   # FOR NCO run
+  . $cfgdir/nam_para_config${RUNTYP} 
+
+# Create JNAM_SMINIT job
+  echo "#BSUB -J ${job}"             >bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmp/Jeff.McQueen/smart-dev/list/o${job}" >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmp/Jeff.McQueen/smart-dev/list/o${job}" >>bjobcards-dev${RUNTYP}
+## echo "#BSUB -L /bin/ksh"           >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -W 03:00"              >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -n 1"                  >>bjobcards-dev${RUNTYP}
+###  echo "#BSUB -R span[ptile=1]"      >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "affinity[core]""   >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "rusage[mem=5500]"" >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -q dev"                >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -x"                    >>bjobcards-dev${RUNTYP}
+
+  cat bjobcards-dev${RUNTYP} $jobd/JNAM_SMINIT > $jobd/JNAM_SMINIT.${RUNTYP}
+  echo ==========================================================
+  echo `date`
+  echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
+  bsub <$jobd/JNAM_SMINIT.${RUNTYP}
+
+  jobid=`qac -u $USER -d |grep $job | awk '{ print $1 }'`
+  sleep 10     
+
+# Check if job is complete before submitting next forecast hour
+  qchkfl=qname.${RUNTYP}${cyc}
+  qname > $qchkfl
+  if [ -s $qchkfl ];then
+  status=`grep $jobid $qchkfl  | awk '{ print $2 }'`
+  while [ "${status}" != "C" ];do
+    if [ "${status}" = "RM" ]; then
+      err=601
+      echo ${err} > FCST_ERR-$job
+      exit
+    fi
+    sleep 60
+    qname > $qchkfl
+    status=`grep $jobid $qchkfl  | awk '{ print $2 }'`
+    if [ $SECONDS -gt 3000 ];then exit;fi
+  done
+  fi
+  echo SMINIT JOB COMPLETED: $err  $RUNTYPE CYCLE $cyc FFHR $ffhr
+  echo `date`
+  let ffhr=$ffhr+$INCR 
+done
+
+rm $qchkfl
+rm $jobd/JNAM_SMINIT.$RUNTYP
+rm bjobcards-dev$RUNTYP
+
+#echo SUBMIT plotmet.job for $RUNTYP $cyc from fhrs $ffhr to $ENDHRS
+export RUNTYP=$RUNTYP
+export cyc=$cyc
+export strhr=$fhrstr
+#bsub < $gemdir/plotmet.job

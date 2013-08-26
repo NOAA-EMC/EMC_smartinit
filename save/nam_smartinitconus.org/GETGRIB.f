@@ -1,0 +1,937 @@
+      SUBROUTINE GETGRIB(PSFC,ZSFC,PMID,HGHT,T,Q,UWND,VWND,CFR,
+     X    ISNOW,IZR,IIP,IRAIN,T2,Q2,D2,U10,V10,VEG,BLI,WETFRZ,
+     X    VIS,T950,T850,T700,T500,RH850,RH700,GUST,REFC,P03M,
+     X    P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,
+     X    S6REF10,S6REF50,S12REF01,S12REF10,S12REF50,
+     X    THOLD,DHOLD,DATE,IFHR,CYC)
+C$$$  SUBPROGRAM DOCUMENTATION BLOCK
+C                .      .    .
+C SUBPROGRAM:    GETGRIB    CREATES NDFD FILES 
+C   PRGRMMR: MANIKIN           ORG: W/NP22     DATE: 06-09-14
+C
+C ABSTRACT:
+C   READS GRIB FILE for smartinit downscaling
+
+C   Precip read are conditioned on whether on or off cycle run
+C   ON-CYCLE GRIB FILES have 6,12 hour precip buckets
+C   OFF-CYCLE GRIB FILES have 3 hr precip buckets
+
+C PROGRAM HISTORY LOG:
+C   06-09-14  G MANIKIN  - ADAPT CODE TO NAM 
+C   12-10-01  J.MCQUEEN  - Reduced code thru use of rdhdrs,setvar
+C   subrountines
+C   12-10-01             - Combined on and off-cycle reads into getgrib
+C
+C USAGE:    CALL SMARTINIT 
+C   INPUT ARGUMENT LIST:
+C
+C   OUTPUT ARGUMENT LIST:
+C     NONE
+C
+C   OUTPUT FILES:
+C     NONE
+
+      PARAMETER(ILIM=1073,JLIM=689,MAXLEV=60)
+      PARAMETER(ITOT=ILIM*JLIM)
+      DIMENSION GRID(ITOT),DIFF(5),IGRID(ITOT)
+      DIMENSION INCDAT(8),JNCDAT(8)
+      INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+      INTEGER LEVS(MAXLEV),IVAR(5),YEAR,MON,DAY,IHR,DATE,IFHR
+      LOGICAL*1 MASK(ITOT), MASK2(ITOT)
+C
+      PARAMETER(MBUF=2000000,JF=1000000)
+      CHARACTER CBUF(MBUF)
+      CHARACTER CBUF2(MBUF)
+      CHARACTER*7  ENVVAR
+      CHARACTER*80 FNAME
+      CHARACTER*4 DUM1
+      LOGICAL*1 LB(JF)
+      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED
+      REAL F(JF)
+      PARAMETER(MSK1=32000,MSK2=4000)
+      INTEGER JENS(200),KENS(200),CYC
+      INTEGER ISNOW(ILIM,JLIM),IRAIN(ILIM,JLIM),IIP(ILIM,JLIM),
+     x       IZR(ILIM,JLIM)
+      DIMENSION ZSFC(ILIM,JLIM),T(ILIM,JLIM,MAXLEV),PSFC(ILIM,JLIM),
+     x  Q(ILIM,JLIM,MAXLEV),PMID(ILIM,JLIM,MAXLEV),WETFRZ(ILIM,JLIM),
+     x  UWND(ILIM,JLIM,MAXLEV),VWND(ILIM,JLIM,MAXLEV),VIS(ILIM,JLIM),
+     x  T2(ILIM,JLIM),Q2(ILIM,JLIM),D2(ILIM,JLIM),REFC(ILIM,JLIM),
+     x  HGHT(ILIM,JLIM,MAXLEV),BLI(ILIM,JLIM),P12M(ILIM,JLIM),
+     x  T950(ILIM,JLIM),T850(ILIM,JLIM),T700(ILIM,JLIM),T500(ILIM,JLIM),
+     x  CFR(ILIM,JLIM,MAXLEV),RH850(ILIM,JLIM),RH700(ILIM,JLIM),
+     x  P03M(ILIM,JLIM),VEG(ILIM,JLIM),P06M(ILIM,JLIM),
+     x  THOLD(ILIM,JLIM,12),DHOLD(ILIM,JLIM,12),
+     x  U10(ILIM,JLIM),V10(ILIM,JLIM),
+     x  SN03(ILIM,JLIM),SN06(ILIM,JLIM),GUST(ILIM,JLIM)
+      DIMENSION S3REF01(ILIM,JLIM),S3REF10(ILIM,JLIM),
+     x  S3REF50(ILIM,JLIM),S6REF01(ILIM,JLIM),S6REF10(ILIM,JLIM),
+     x  S6REF50(ILIM,JLIM),S12REF01(ILIM,JLIM),
+     x  S12REF10(ILIM,JLIM),S12REF50(ILIM,JLIM)
+C
+C    09-2012 JTM : Modified I/O for WCOSS fort. file name nomenclature
+C                  ENVVAR not needed
+C                  Introduced RDHDRS and SETVAR routines to eliminate redundancies
+
+      NUMLEV=MAXLEV
+c  fill the max/min T/Td holders with 0's to
+c    1) account for this array at times other than f12,24,36...
+c    2) temporarily fill the 12th time slot, since we have only 11 here
+          THOLD=0.
+          DHOLD=0.
+
+      LUGB=11; LUGI=12; LUGB2=13; LUGI2=14; LUGP=15; LUGPI=16
+      IHROFF=0;LHR12=.FALSE.; LHR6=.FALSE.; LHR3=.FALSE.
+      LFULL=.FALSE.;LANL=.FALSE.;LLIMITED=.FALSE.
+
+      IF (IFHR.EQ.0) THEN
+        LANL=.TRUE.
+      ELSE
+        IF (MOD(IFHR,3).EQ.0) THEN
+          LFULL=.TRUE.
+        ELSE
+          LLIMITED=.TRUE.
+        ENDIF
+      ENDIF
+       
+      IF (CYC.EQ.12.OR.CYC.EQ.00) LCYCON=.TRUE.
+      if (.not.lanl) then
+      IF(LCYCON) THEN 
+        IF(MOD(IFHR,12).EQ.0) LHR12=.TRUE.
+        IF(MOD(IFHR,12).EQ.6 .OR. MOD(IFHR,12).EQ.9) LHR6=.TRUE.
+        IF(MOD(IFHR,12).EQ.3) LHR3=.TRUE.
+      ELSE
+        IHROFF=IFHR
+        IF (IFHR.GE.12) IHROFF=IFHR+6
+        IF (MOD(IHROFF,12).EQ.O) LHR12=.TRUE.
+        IF (MOD(IFHR,6).EQ.0) LHR6=.TRUE.
+        IF(MOD(IFHR,3).EQ.0) LHR3=.TRUE.
+      ENDIF
+      endif
+      print *, 'IFHR',IFHR,'LHR3',LHR3,'LHR6',LHR6,'LHR12',LHR12
+
+C     FOR 12-hr TIMES, WE NEED 3 AND 6-HR BUCKETS AND MAX/MIN TEMP
+C     DATA FOR THE PREVIOUS 11 HOURS
+      IF(LHR12) THEN
+       print *,'====================================================='
+       print *, 'Read 3,6 hr buckets and 11 hrs of MAX,MIN TEMP', IFHR
+       print *,'====================================================='
+
+       IF (LCYCON)  THEN 
+         LUGP2=17;LUGP2I=18
+         LUGS=19;LUGSI=20
+         LUGS2=21;LUGS2I=22
+         LUGT1=23
+       ELSE
+         LUGS=17;LUGSI=18     ! 6 hour snow files
+         LUGP2=19;LUGP2I=20   !12 hour precip files
+         LUGT1=21
+       ENDIF
+       LUGT2=LUGT1+1
+       LUGT3=LUGT1+2
+       LUGT4=LUGT1+3
+       LUGT5=LUGT1+4
+       LUGT1I=LUGT1+5
+       LUGT2I=LUGT1+6
+       LUGT3I=LUGT1+7
+       LUGT4I=LUGT1+8
+       LUGT5I=LUGT1+9
+
+c     FOR 6 and 9-HR TIMES, WE NEED 3-HR BUCKETS (already have the 6-hr
+c     buckets in the grib file) AND 2 HOURS OF MAX/MIN TEMP DATA
+
+C     However Off-Hour cycle runs do not have 6 hour buckets
+      ELSE IF(LHR6) THEN
+       print *,'======================================================='
+       print *, 'Read 6hr prcp from special file, MAX,MIN TEMP', IFHR
+       print *,'======================================================='
+        LUGS=17; LUGSI=18; LUGT1=19; LUGT2=20; LUGT1I=21; LUGT2I=22
+
+c     FOR F3,15,27.... WE ALREADY HAVE 3-HR BUCKETS AND NEED 2 HOURS
+c     OF MAX/MIN TEMP DATA
+      ELSE IF(LHR3) THEN
+       print *,'====================================================='
+       print *, 'Have 3 hr prcp,Read 2 hrs of MAX,MIN TEMP ', IFHR
+       print *,'====================================================='
+       LUGT1=15;LUGT2=16; LUGT1I=17; LUGT2I=18
+      ELSE
+
+C      IN-BETWEEN HOURS DON'T NEED ANYTHING FANCY
+       print *,'====================================================='
+       print *, 'IN-Between HOURS, small change ', IFHR
+       print *,'====================================================='
+      ENDIF
+       IF (.NOT.LCYCON)THEN
+         LUGS2=LUGS
+         LUGS2I=LUGSI
+       ENDIF
+
+      OPEN(49,file='DATE',form='formatted')
+      READ(49,200) DUM1,DATE
+      CLOSE(49)
+ 200  FORMAT(A4,2X,I10)
+      year=int(date/1000000)
+      mon=int(int(mod(date,1000000)/100)/100)
+      day=int(mod(date,10000)/100)
+      ihr=mod(date,100)
+      print *, 'date ', DATE,YEAR,MON,DAY,IHR 
+
+C==========================================================
+C     READ INDEX FILE TO GET GRID SPECS
+C==========================================================
+      CALL RDHDRS(LUGB,LUGI,IGDNUM,IMAX,JMAX,KMAX,NUMVAL)
+
+      if (lfull) then
+      print *, 'BEGIN READING SREF HDRS'
+      CALL RDHDRS(LUGB2,LUGI2,IGDNUM2,IMAX,JMAX,KMAX,NUMVAL2)
+
+C GSM  READ 3-HR PRECIP AND SNOW FILES WHICH ARE NEEDED
+C      IF NOT A 3-HR ACCUMULATION TIME (F15,F27,F39...) 
+C      OR AN "OFF-TIME" (F13,F14,F16....)
+
+CJTM  IF (MOD(IFHR-3,12).NE.0) THEN
+      IF (.NOT.LCYCON .AND. LHR6 .OR.            
+     +         LCYCON .AND. MOD(IFHR-3,12).NE.0) THEN
+        print *, 'READ HDR 3-hr precip from Unit ', LUGP
+        CALL RDHDRS(LUGP,LUGPI,IGDNUM3,IMAX,JMAX,KMAX,NUMVAL3)
+        CALL RDHDRS(LUGS,LUGSI,IGDNUMSN,IMAX,JMAX,KMAX,NUMVALSN)
+        IGDNUM5=IGDNUMSN
+      ENDIF
+
+C      READ 6-HR PRECIP/SNOW FILES AT F12,F24,F36.....
+C      OR 12-hr PRECIP FOR OFF-CYCLE RUNS
+CJTM  IF (MOD(IFHR,12).EQ.0) THEN
+      IF (LHR12) THEN
+        print *, 'READING 6 or 12 hr precip from Unit ', LUGP2
+        CALL RDHDRS(LUGP2,LUGP2I,IGDNUM4,IMAX,JMAX,KMAX,NUMVAL4)
+
+C       OPEN 6-HR SNOW FILE
+C       Not needed for off cycle files ???
+        print *, 'READING 6 or 12 hr SNOW from Unit ', LUGS2
+        CALL RDHDRS(LUGS2,LUGS2I,IGDNUM4,IMAX,JMAX,KMAX,NUMVAL4)
+      ENDIF
+
+C==================================================================
+C GSM  READ TEMPERATURE HDR FILES FOR 12-HR MIN/MAX
+C      READ INDEX FILE TO GET GRID SPECS
+C==================================================================
+C     GET GRID NUMBER FROM PDS AND PROCESS GRIB FILE
+C     NOTE: WE'LL ASSUME THE GRID NUMBER IS THE SAME FOR
+C     ALL OF THESE MIN/MAX FILES AND NOT DO THIS FOR EACH
+
+      CALL RDHDRS(LUGT1,LUGT1I,IGDNUMT,IMAX,JMAX,KMAX,NUMVALT)
+      print *, "Reading min/max Temp  UNIT:",LUGT1, LUGT1I, NUMVALT
+
+      CALL RDHDRS(LUGT2,LUGT2I,IGDNUMT,IMAX,JMAX,KMAX,NUMVALT)
+      print *, "Reading min/max Temp  UNIT:",LUGT2, LUGT2I, NUMVALT
+      IF (LHR12) THEN
+        LUGT=LUGT3    
+        LUGTI=LUGT3I   
+        DO  IT=3,5
+          CALL RDHDRS(LUGT,LUGTI,IGDNUMT,IMAX,JMAX,KMAX,NUMVALT)
+          print *, "Reading min/max Temp  UNIT:",LUGT, LUGTI, NUMVALT
+          LUGT=LUGT+1
+          LUGTI=LUGTI+1
+        ENDDO 
+      ENDIF
+      endif !LFULL
+
+c  get sfc height 
+      J=0;JPDS=-1;JGDS=-1;JPDS(3) = IGDNUM
+      JPDS(5) = 007
+      JPDS(6) = 001
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X           K,KPDS,KGDS,MASK,GRID,ZSFC,IRET,ISTAT)
+        WHERE (ZSFC < 0.0)
+           ZSFC=0.0
+        END WHERE
+
+c get surface pressure
+      JPDS(5) = 001
+      JPDS(6) = 001
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X           K,KPDS,KGDS,MASK,GRID,PSFC,IRET,ISTAT)
+
+c get 4 INTEGER precip types 
+      if (lfull) then
+      J=0;JPDS=-1;JPDS(3)=IGDNUM 
+      JPDS(5) = 143 
+      JPDS(6) = 001
+
+C     Get INTEGER GRIB Variable  
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        DO KK = 1, ITOT
+          IF(MOD(KK,ILIM).EQ.0) THEN
+            M=ILIM
+            N=INT(KK/ILIM)
+          ELSE
+            M=MOD(KK,ILIM)
+            N=INT(KK/ILIM) + 1
+          ENDIF
+          ISNOW(M,N) = GRID(KK)
+        ENDDO
+        WRITE(6,*) JPDS(5),JPDS(6),JPDS(7),J,KF,K
+      ELSE
+       WRITE(6,*)'COULD NOT UNPACK VARB',J,JPDS(3),JPDS(5),IRET
+       ISTAT = IRET
+      ENDIF
+
+      JPDS=-1;J=0
+      JPDS(5) = 142
+      JPDS(6) = 001
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        DO KK = 1, ITOT
+          IF(MOD(KK,ILIM).EQ.0) THEN
+            M=ILIM
+            N=INT(KK/ILIM)
+          ELSE
+            M=MOD(KK,ILIM)
+            N=INT(KK/ILIM) + 1
+          ENDIF
+          IIP(M,N) = GRID(KK)
+        ENDDO
+        WRITE(6,*) JPDS(5),JPDS(6),JPDS(7),J,KF,K
+      ELSE
+       WRITE(6,*)'COULD NOT UNPACK VARB',J,JPDS(3),JPDS(5),IRET
+       ISTAT = IRET
+      ENDIF
+
+c frz rain
+      JPDS=-1;J=0
+      JPDS(5) = 141
+      JPDS(6) = 001
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        DO KK = 1, ITOT
+          IF(MOD(KK,ILIM).EQ.0) THEN
+            M=ILIM
+            N=INT(KK/ILIM)
+          ELSE
+            M=MOD(KK,ILIM)
+            N=INT(KK/ILIM) + 1
+          ENDIF
+          IZR(M,N) = GRID(KK)
+        ENDDO
+        WRITE(6,*) JPDS(5),JPDS(6),JPDS(7),J,KF,K
+      ELSE
+       WRITE(6,*)'COULD NOT UNPACK VARB',J,JPDS(3),JPDS(5),IRET
+       ISTAT = IRET
+      ENDIF
+
+c rain
+      JPDS=-1;J=0
+      JPDS(5) = 140
+      JPDS(6) = 001
+C     Get INTEGER GRIB Variable  
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        DO KK = 1, ITOT
+          IF(MOD(KK,ILIM).EQ.0) THEN
+            M=ILIM
+            N=INT(KK/ILIM)
+          ELSE
+            M=MOD(KK,ILIM)
+            N=INT(KK/ILIM) + 1
+          ENDIF
+          IRAIN(M,N) = GRID(KK)
+        ENDDO
+        WRITE(6,*) JPDS(5),JPDS(6),JPDS(7),J,KF,K
+      ELSE
+       WRITE(6,*)'COULD NOT UNPACK VARB',J,JPDS(3),JPDS(5),IRET
+       ISTAT = IRET
+      ENDIF
+
+      endif !lfull
+    
+      if (lfull.or.lanl) then
+c lowest wet bulb zero level
+      JPDS=-1;J=0
+      JPDS(5) = 7 
+      JPDS(6) = 245 
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,WETFRZ,IRET,ISTAT)
+
+c visibility 
+      JPDS=-1;J=0
+      JPDS(5) = 020
+      JPDS(6) = 001
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,VIS,IRET,ISTAT)
+      endif
+
+c 2-m temp
+      JPDS=-1;J=0
+      JPDS(5) = 11 
+      JPDS(6) = 105 
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,T2,IRET,ISTAT)
+
+c 2-m spec hum
+      JPDS=-1;J=0
+      JPDS(5) = 51 
+      JPDS(6) = 105
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     x          K,KPDS,KGDS,MASK,GRID,Q2,IRET,ISTAT)
+
+c 2-m dew point 
+      JPDS=-1;J=0
+      JPDS(5) = 17 
+      JPDS(6) = 105
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,D2,IRET,ISTAT)
+
+c 10-m U
+      JPDS=-1;J=0;JPDS(3)=IGDNUM
+      JPDS(5) = 33
+      JPDS(6) = 105
+      JPDS(7) = 10
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,U10,IRET,ISTAT)
+
+c 10-m V
+      JPDS=-1;J=0;JPDS(3)=IGDNUM
+      JPDS(5) = 34
+      JPDS(6) = 105
+      JPDS(7) = 10
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,V10,IRET,ISTAT)
+
+c vegetation fraction
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 225
+      JPDS(6) = 001
+
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X           K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
+
+c Best Liftex Index 
+      if (lfull.or.lanl) then
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 132 
+      JPDS(6) = 116 
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,BLI,IRET,ISTAT)
+      endif
+
+C====================================================================
+C      READ PRECIP FROM SPECIAL GRIB FILE (unit LUGP)
+C====================================================================
+      if (lfull) then
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      IF (LCYCON .AND. .NOT.LHR3) THEN
+
+c 3-hr Precip from special file 
+       JPDS=-1;J=0
+       JPDS(3) = IGDNUM3
+       JPDS(5) = 61 
+       JPDS(6) = 001 
+       print *, IFHR,'READ 3 hr PRECIP from Special file unit',LUGP
+       CALL SETVAR(LUGP,LUGPI,NUMVAL3,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,P03M,IRET,ISTAT)
+
+c 3-hr Snow from special file
+       JPDS=-1;J=0
+       JPDS(3) = IGDNUMSN
+       JPDS(5) = 65
+       JPDS(6) = 001 
+       CALL SETVAR(LUGS,LUGSI,NUMVALSN,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,SN03,IRET,ISTAT)
+      ENDIF
+
+c 6-hr Precip from special file
+C     ON-CYC : 6 hr buckets at 12 Fhrs in special file
+C     OFF-CYC: All 6 hr buckets are in special file
+      IF (LHR12 .OR. LHR6.AND..NOT.LCYCON) THEN
+        JPDS=-1;J=0
+        JPDS(5) = 61
+        JPDS(6) = 001 
+        JPDS(3) = IGDNUM4;LUGPP=LUGP2;LUGPPI=LUGP2I;NUMVP=NUMVAL4
+        IF (.NOT.LCYCON)
+     X   JPDS(3)=IGDNUM3;LUGPP=LUGP;LUGPPI=LUGPI;NUMVP=NUMVAL3
+
+        print *, LCYCON,IFHR,'READ 6 hr PRECIP from Spec file',LUGPP
+        CALL SETVAR(LUGPP,LUGPPI,NUMVP,J,JPDS,JGDS,KF,
+     X         K,KPDS,KGDS,MASK,GRID,P06M,IRET,ISTAT)
+
+c     6-hr snow from special file
+       JPDS=-1;J=0
+       JPDS(3) = IGDNUMSN
+       JPDS(5) = 65
+       JPDS(6) = 001 
+       NUMVS=NUMVAL4
+       IF (.NOT.LCYCON) NUMVS=NUMVALSN
+       CALL SETVAR(LUGS2,LUGS2I,NUMVS,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,SN06,IRET,ISTAT)
+      ELSE
+       IF (.NOT.LCYCON) THEN
+        P06M=0.0
+        SN06=-99
+       ENDIF
+      ENDIF
+
+C=================================================================
+C      STANDARD FULL GRIB FILE PRECIP READS 
+c      For on-Cycles it will have either a 3-hr, 6-hr, 9-hr, or 12-hr accumulation
+c      For off-Cycles, only 3-hr accumulations are in full grib file
+C=================================================================
+      JPDS=-1; J=0;JPDS(3) = IGDNUM
+
+c 12-hr Precip
+      IF (LHR12) THEN
+        JPDS(5) = 61
+        JPDS(6) = 001
+        IF(LCYCON) THEN
+          JPDS(3) = IGDNUM
+          print *, LCYCON,IFHR,'READ 12 hr PRECIP from full file ',LUGB
+          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X           K,KPDS,KGDS,MASK,GRID,P12M,IRET,ISTAT)
+        ELSE
+          print *, LCYCON,IFHR,'READ 12 hr PRECIP from Spec file ',LUGP2
+          JPDS(3) = IGDNUM4
+          CALL SETVAR(LUGP2,LUGP2I,NUMVAL4,J,JPDS,JGDS,KF,
+     X           K,KPDS,KGDS,MASK,GRID,P12M,IRET,ISTAT)
+        ENDIF
+
+c 6-hr Precip and Snow for on-Cycle run in std grib file
+      ELSE IF (LCYCON.AND.LHR6) THEN
+        J=0;JPDS=-1;JPDS(3) = IGDNUM
+        JPDS(5) = 61
+        JPDS(6) = 001
+        print *, LCYCON,IFHR,'READ 06 hr PRECIP from full file ',LUGB
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,P06M,IRET,ISTAT)
+        P12M=0.0
+
+        J=0;JPDS=-1;JPDS(3) = IGDNUM
+        JPDS(5) = 65
+        JPDS(6) = 001
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X         K,KPDS,KGDS,MASK,GRID,SN06,IRET,ISTAT)
+
+      ELSE IF (LCYCON.AND.MOD(IFHR,12).EQ.9) THEN
+
+c  don't need 9-hr accumulation and don't have 6 or 12
+         print *, 'ON-CYCLE: No 6 or 12 hr buckets',IFHR
+         P06M=0.0
+         P12M=0.0
+      ENDIF
+
+c 3-hr Precip from std file
+      IF (LCYCON.AND.LHR3 .OR. .NOT.LCYCON) THEN
+        J=0;JPDS=-1;JPDS(3) = IGDNUM
+        JPDS(5) = 61
+        JPDS(6) = 001
+        print *, 'IFHR',IFHR,'READ 03 hr QPF from full file ',LUGB
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,P03M,IRET,ISTAT)
+        IF (LCYCON) THEN
+         P06M=0.0
+         P12M=0.0
+        ENDIF
+
+        J=0;JPDS=-1;JPDS(3) = IGDNUM
+        JPDS(5) = 65
+        JPDS(6) = 001
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,SN03,IRET,ISTAT)
+        IF (LCYCON) SN06=0.0
+      ENDIF
+
+C  READ min/max temperature values for previous 2 hours
+      print *, 'Reading max/min for previous 2 hours',LUGT1,LUGT2
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 11
+      JPDS(6) = 001
+      CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
+
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 17
+      JPDS(6) = 001
+      CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
+
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 11
+      JPDS(6) = 001
+      CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
+
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 17
+      JPDS(6) = 001
+      CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
+
+c Get min/max temperature values for full 12-hr period for F12,24...
+      IF (LHR12) THEN
+       IFHR4=IFHR-3
+       IFHR12=IFHR-11
+       KT=4
+       LUGTA=LUGT3
+       LUGTB=LUGT3I
+       DO IIH=IFHR4,IFHR12,-1
+         IF (IIH.LE.IFHR-6) THEN
+           LUGTA=LUGT4
+           LUGTB=LUGT4I
+         ENDIF
+         IF (IIH.LE.IFHR-9) THEN
+           LUGTA=LUGT5
+           LUGTB=LUGT5I
+         ENDIF
+ 
+         JPDS = -1;J=0
+         JPDS(3) = IGDNUM
+         JPDS(5) = 11 
+         JPDS(6) = 001
+         JPDS(14) = IIH   
+         print *, 'READING TEMP for hr', IIH, LUGTA,LUGTB,KT
+         CALL SETVAR(LUGTA,LUGTB,NUMVALT,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,THOLD(:,:,KT),IRET,ISTAT)
+         JPDS = -1;J=0
+         JPDS(3) = IGDNUM
+         JPDS(5) = 17 
+         JPDS(6) = 001
+         JPDS(14) = IIH   
+         CALL SETVAR(LUGTA,LUGTB,NUMVALT,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,KT),IRET,ISTAT)
+         KT=KT+1
+       ENDDO
+      ENDIF
+      endif !lfull
+
+c   get the vertical profile of pressure 
+      print *,'READ upper level fields from unit ', LUGB
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=001; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+
+c   get the vertical profile of height 
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=007; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,HGHT(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+
+c   get the vertical profile of temperature
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=011; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,T(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+
+c   get the vertical profile of q
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=051; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,Q(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+
+c   get the vertical profile of u 
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=033; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,UWND(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+
+c   get the vertical profile of v
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=034; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,VWND(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+      if (llimited) return
+
+c   get the vertical profile of cloud fraction 
+      J=0
+      DO LL=1,MAXLEV
+       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=071; JPDS(6)=109
+       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,CFR(:,:,LL),IRET,ISTAT)
+       J=K
+      ENDDO
+
+c   950 mb temperature
+      J=0
+      JPDS(3) = IGDNUM
+      JPDS(5) = 011
+      JPDS(6) = 100
+      JPDS(7) = 950
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,T950,IRET,ISTAT)
+
+c   850 mb temperature
+      JPDS(7) = 850
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,T850,IRET,ISTAT)
+
+c   700 mb temperature
+      JPDS(7) = 700
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,T700,IRET,ISTAT)
+
+c   500 mb temperature
+      JPDS(7) = 500
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,T500,IRET,ISTAT)
+
+c   850 mb RH
+      JPDS(5) = 052
+      JPDS(6) = 100
+      JPDS(7) = 850
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,RH850,IRET,ISTAT)
+
+c   700 mb RH
+      JPDS(7) = 700
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,RH700,IRET,ISTAT)
+
+c sfc wind gust 
+      J=0
+      JPDS=-1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 180 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
+
+c composite reflectivity
+      JPDS(5) = 212
+      JPDS(6) = 200
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
+
+      if (lanl) return
+C  READ SREF precip
+      print*; print *,'READ SREF Precip Probs', LUGB2
+
+c 3-hr probability of .01"
+      J=0     !J= number of records to skip in SREFPCP file
+      JPDS=-1;JGDS=-1
+      JPDS(3) = IGDNUM2
+      JPDS(5) = 191 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S3REF01,IRET,ISTAT)
+
+c probability of .1"
+      J = 2
+      JPDS=-1;JGDS=-1
+      JPDS(3) = IGDNUM2
+      JPDS(5) = 191 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S3REF10,IRET,ISTAT)
+      IF(IRET .NE. 0 )RETURN
+
+c probability of 0.5"
+      J = 4
+      JPDS=-1;JGDS=-1
+      JPDS(3) = IGDNUM2
+      JPDS(5) = 191 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S3REF50,IRET,ISTAT)
+
+      IF (IFHR .EQ. 3) THEN
+        IF (.NOT.LCYCON) THEN
+          print *, 'FHR=3 so zero 6 and 12-hr sref probabilities'
+          S6REF01(M,N) = 0.0
+          S6REF10(M,N) = 0.0
+          S6REF50(M,N) = 0.0
+          S12REF01(M,N) = 0.0
+          S12REF10(M,N) = 0.0
+          S12REF50(M,N) = 0.0
+        ENDIF
+       print *, 'bailing out of sref pcp early IFHR=',IFHR
+       RETURN
+      ENDIF
+
+c 6-hr probability of 0.01"
+      J = 5
+      JPDS=-1;JGDS=-1
+      JPDS(3) = IGDNUM2
+      JPDS(5) = 191 
+      JPDS(6) = 001
+Cjtm  IF (.NOT.LCYCON) J=J+1
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S6REF01,IRET,ISTAT)
+
+c 6-hr probability of 0.1"
+      J = J+2
+      JPDS=-1;JGDS=-1
+      JPDS(3) = IGDNUM2
+      JPDS(5) = 191 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S6REF10,IRET,ISTAT)
+
+c 6-hr probability of 0.5"
+      J = J+2
+      JPDS=-1;JGDS=-1
+      JPDS(3) = IGDNUM2
+      JPDS(5) = 191 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S6REF50,IRET,ISTAT)
+
+c 12-hr probability of 0.01"
+      J = 10
+Cjtm  IF (.NOT.LCYCON) THEN 
+Cjtm    J=J+1
+        IF (IFHR .EQ. 6 .OR. IFHR .EQ. 9) THEN
+        print *, 'FHR=6 or 9 so 12-hr sref probabilities not available'
+          S12REF01 = 0.0
+          S12REF10 = 0.0
+          S12REF50 = 0.0
+          RETURN
+        ENDIF
+Cjtm  ENDIF
+
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S12REF01,IRET,ISTAT)
+
+c 12-hr probability of 0.1"
+      J = J+2 
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S12REF10,IRET,ISTAT)
+
+c 12-hr probability of 0.5"
+      J = J+2
+      CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF,
+     X          K,KPDS,KGDS,MASK,GRID,S12REF50,IRET,ISTAT)
+
+      RETURN 
+      END
+
+      SUBROUTINE SETVAR(LUB,LUI,NUMV,J,JPDS,JGDS,KF,
+     X           K,KPDS,KGDS,MASK,GRID,VARB,IRET,ISTAT)
+C============================================================================
+C     This Routine reads in a grib field and initializes a 2-D variable
+C     Requested from w3lib GETGRB routine
+C     10-2012   Jeff McQueen
+C     NOTE: ONLY WORKS for REAL Type Variables
+C============================================================================
+C
+      PARAMETER(ILIM=1073,JLIM=689,MAXLEV=60)
+      PARAMETER(ITOT=ILIM*JLIM)
+      DIMENSION GRID(*),VARB(ILIM,JLIM)
+      INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+      LOGICAL*1 MASK(ITOT)
+
+C     Get GRIB Variable    
+      CALL GETGB(LUB,LUI,NUMV,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        DO KK = 1, ITOT
+          IF(MOD(KK,ILIM).EQ.0) THEN
+            M=ILIM
+            N=INT(KK/ILIM)
+          ELSE
+            M=MOD(KK,ILIM)
+            N=INT(KK/ILIM) + 1
+          ENDIF
+          VARB(M,N) = GRID(KK)
+        ENDDO
+        
+       WRITE(6,100) JPDS(5),JPDS(6),JPDS(7),J,MINVAL(VARB),MAXVAL(VARB)
+ 100   FORMAT('VARB UNPACKED ', 4I7,2G12.4)
+      ELSE
+      WRITE(6,*)'====================================================='
+      WRITE(6,*)'COULD NOT UNPACK VARB',K,JPDS(3),JPDS(5),JPDS(6),IRET
+      WRITE(6,*)'UNIT', LUB,LUI,NUMV,KF
+      WRITE(6,*)'====================================================='
+      print *,'JPDS',jpds
+      print *,'JGDS',jgds
+        ISTAT = IRET
+CTEST        STOP 99
+      ENDIF
+
+      RETURN
+      END
+
+      SUBROUTINE RDHDRS(LUB,LUI,IGDN,IMAX,JMAX,KMAX,NUMV)
+C=============================================================
+C     This Routine Reads GRIB index file and returns its contents
+C     (GETGI)
+C     Also reads GRIB index and grib file headers to
+C     find a GRIB message and unpack pds/gds parameters (GETGB1S)
+C
+C     10-2012  Jeff McQueen
+C=============================================================
+      PARAMETER(ILIM=1073,JLIM=689,MAXLEV=60)
+      PARAMETER(ITOT=ILIM*JLIM)
+      INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+C
+      PARAMETER(MBUF=2000000)
+      CHARACTER CBUF(MBUF)
+      CHARACTER*80 FNAME
+      INTEGER JENS(200),KENS(200)
+
+Cjtm  Input Filename prefix on WCOSS
+      FNAME='fort.  '
+
+      IRGI = 1
+      IRGS = 1
+      KMAX = 0
+      JR=0
+      KSKIP = 0
+
+      WRITE(FNAME(6:7),FMT='(I2)')LUB
+      CALL BAOPEN(LUB,FNAME,IRETGB)
+      WRITE(FNAME(6:7),FMT='(I2)')LUI
+      CALL BAOPEN(LUI,FNAME,IRETGI)
+      CALL GETGI(LUI,KSKIP,MBUF,CBUF,NLEN,NNUM,IRGI)
+
+      write(6,*)' IRET FROM GETGI ',IRGI,LUB,LUI,NLEN
+      IF(IRGI .NE. 0) THEN
+        WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE SO ABORT'
+        ISTAT = IRGI
+        STOP 9
+      ENDIF
+c      REWIND LUGI
+
+
+      DO K = 1, NNUM
+        JR = K - 1
+        JPDS = -1
+        JGDS = -1
+        CALL GETGB1S(CBUF,NLEN,NNUM,JR,JPDS,JGDS,JENS,
+     &               KR,KPDS,KGDS,KENS,LSKIP,LGRIB,IRGS)
+CJTM    write(6,*)' IRET FROM GETGB1S ',IRGS,JR
+        IF(IRGI .NE. 0) THEN
+          WRITE(6,*)' PROBLEMS ON 1ST READ OF GRIB FILE SO ABORT'
+          WRITE(6,280) IGDN,JPDS(4),JPDS(5),IMAX,JMAX,KMAX
+          ISTAT = IRGS
+          STOP 10
+        ENDIF
+        IGDN = KPDS(3)
+        IMAX = KGDS(2)
+        JMAX = KGDS(3)
+        NUMV = IMAX*JMAX
+        KMAX = MAXLEV
+  280 FORMAT(' IGDN, IMAX,JMAX,KMAX ',4I5)
+C
+      ENDDO
+      RETURN
+      END

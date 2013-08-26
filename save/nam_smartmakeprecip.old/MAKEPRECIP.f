@@ -1,0 +1,352 @@
+       PROGRAM MAKEPRECIP
+C                .      .    .                                       .
+C SUBPROGRAM:    MAKEPRECIP 
+C   PRGMMR: MANIKIN        ORG: W/NP22     DATE:  01-10-00
+C
+C ABSTRACT: PRODUCES 3-HOUR TOTAL AND CONVECTIVE PRECIPITATION BUCKETS
+C              ON THE ETA NATIVE GRID FOR SMARTINIT 
+C
+C PROGRAM HISTORY LOG:
+C   01-10-00  GEOFF MANIKIN 
+C
+C REMARKS:
+
+C ATTRIBUTES:
+C   LANGUAGE: FORTRAN-90
+C   MACHINE:  CRAY C-90
+C$$$
+      INCLUDE "parmnam"
+      PARAMETER(ITOT=ILIM*JLIM)
+      DIMENSION GRID(ITOT),DIFF(5)
+      DIMENSION INCDAT(8),JNCDAT(8)
+      INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+      INTEGER LEVS(MAXLEV),IVAR(5)
+      INTEGER FHR1, FHR2, FHR12
+      LOGICAL*1 MASK(ITOT), MASK2(ITOT)
+C
+      PARAMETER(MBUF=2000000,JF=1000000)
+      CHARACTER CBUF(MBUF)
+      CHARACTER CBUF2(MBUF)
+      CHARACTER*11 ENVVAR
+      CHARACTER*80 FNAME
+      LOGICAL*1 LB(JF)
+      REAL F(JF)
+      PARAMETER(MSK1=32000,MSK2=4000)
+      INTEGER JENS(200),KENS(200)
+      DIMENSION APCP(ITOT), APCP2(ITOT),APCP3HR(ITOT),
+     &     CAPCP(ITOT),CAPCP2(ITOT),CAPCP3HR(ITOT),
+     &     SNOW(ITOT),SNOW2(ITOT),SNOW3HR(ITOT)
+
+Cjtm  Input Filename prefix on WCOSS
+      FNAME='fort.  '
+
+      READ (5,*) FHR2, FHR1
+      print *, 'makeprecip hours are ', FHR1, FHR2
+      NUMLEV=MAXLEV
+      IF (MOD(FHR2,12).EQ. 0.) THEN
+        FHR3=FHR2-12
+      ELSE
+        FHR3=FHR2-MOD(FHR2,12)
+      ENDIF
+C
+      LUGB=13
+      LUGI=14
+      LUGB2=15
+      LUGI2=16
+      LUGB3=50
+      LUGB4=51
+      LUGB5=52
+C
+      JJ1 = 1
+      JJINC = 1
+C
+      ISTAT = 0
+C
+C  READ INDEX FILE TO GET GRID SPECS 
+C
+      IRGI = 1
+      IRGS = 1
+      KMAX = 0
+      JR=0
+      KSKIP = 0
+      WRITE(FNAME(6:7),FMT='(I2)')LUGB
+      CALL BAOPEN(LUGB,FNAME,IRETGB)
+      WRITE(FNAME(6:7),FMT='(I2)')LUGI
+      CALL BAOPEN(LUGI,FNAME,IRETGI)
+      CALL GETGI(LUGI,KSKIP,MBUF,CBUF,NLEN,NNUM,IRGI)
+      write(6,*)' IRET FROM GETGI ',IRGI
+      IF(IRGI .NE. 0) THEN
+        WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE SO ABORT'
+        ISTAT = IRGI
+        STOP  
+      ENDIF 
+c      REWIND LUGI
+
+C
+      DO K = 1, NNUM
+        JR = K - 1
+        JPDS = -1
+        JGDS = -1
+        CALL GETGB1S(CBUF,NLEN,NNUM,JR,JPDS,JGDS,JENS,
+     &               KR,KPDS,KGDS,KENS,LSKIP,LGRIB,IRGS)
+        IF(IRGI .NE. 0) THEN
+          WRITE(6,*)' PROBLEMS ON 1ST READ OF GRIB FILE SO ABORT'
+          ISTAT = IRGS
+          STOP   
+        ENDIF 
+C
+      ENDDO
+      write(6,*)' IRET FROM GETGB1S ',IRGS,' UNIT ',LUGB
+
+C    GET GRID NUMBER FROM PDS
+C
+      IGDNUM = KPDS(3)
+C
+C   PROCESS THE GRIB FILE
+C
+      IMAX = KGDS(2)
+      JMAX = KGDS(3)
+      NUMVAL = IMAX*JMAX
+      KMAX = MAXLEV
+      WRITE(6,280) IMAX,JMAX,NUMLEV,KMAX
+  280 FORMAT(' IMAX,JMAX,NUMLEV,KMAX ',5I4)
+  285 FORMAT(' IV, IVAR, L, IRET:  ',4I5)
+
+C -== GET SURFACE FIELDS ==-
+      L = 0
+      IV= 0
+
+C   PRECIP 
+
+c   to start each new file with its index, set J=-1 for sfc pressure
+C
+      J = 0 
+      JPDS = -1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 061
+      JPDS(6) = 001
+      JPDS(13) = 1
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        II = 1
+        JJ = JJ1
+        DO KK = 1, ITOT
+          APCP(KK) = GRID(KK) 
+        ENDDO
+      ELSE
+        WRITE(6,285)IV,JPDS(5),L,IRET
+        WRITE(6,*)' COULD NOT UNPACK TOT PCP FROM FILE 1' 
+         ISTAT = IRET
+        STOP   
+      ENDIF
+
+C   PRECIP
+
+C  CONVECTIVE PRECIP
+      J = 0
+      JPDS = -1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 063
+      JPDS(6) = 001
+      JPDS(13) = 1
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+
+      IF(IRET.EQ.0) THEN
+        II = 1
+        JJ = JJ1
+        DO KK = 1, ITOT
+          CAPCP(KK) = GRID(KK)
+        ENDDO
+      ELSE
+        WRITE(6,285)IV,JPDS(5),L,IRET
+        WRITE(6,*)' COULD NOT UNPACK CNVCT PCP FROM FILE 1'
+         ISTAT = IRET
+        STOP   
+      ENDIF
+
+C  SNOWFALL 
+      J = 0
+      JPDS = -1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 065
+      JPDS(6) = 001
+      JPDS(14) = FHR3
+      JPDS(15) = FHR1
+
+      CALL GETGB(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        II = 1
+        JJ = JJ1
+        DO KK = 1, ITOT
+          SNOW(KK) = GRID(KK)
+        ENDDO
+      ELSE
+        WRITE(6,285)IV,JPDS(5),L,IRET
+        WRITE(6,*)' COULD NOT UNPACK SNOW FROM FILE 1'
+         ISTAT = IRET
+        STOP  
+      ENDIF
+
+
+C BEGIN WORK ON 2ND FILE
+      JJ1 = 1
+      JJINC = 1
+
+C  READ INDEX FILE TO GET GRID SPECS
+C
+      IRGI = 1
+      IRGS = 1
+      KMAX = 0
+      JR=0
+      KSKIP = 0
+      WRITE(FNAME(6:7),FMT='(I2)')LUGB2
+      CALL BAOPEN(LUGB2,FNAME,IRETGB2)
+      WRITE(FNAME(6:7),FMT='(I2)')LUGI2
+      CALL BAOPEN(LUGI2,FNAME,IRETGI2)
+      CALL GETGI(LUGI2,KSKIP,MBUF,CBUF2,NLEN,NNUM,IRGI)
+      IF(IRGI .NE. 0) THEN
+        WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE SO ABORT'
+        ISTAT = IRGI
+        STOP   
+      ENDIF
+c      REWIND LUGI2
+
+      DO K = 1, NNUM
+        JR = K - 1
+        JPDS = -1 
+        JGDS = -1
+        CALL GETGB1S(CBUF2,NLEN,NNUM,JR,JPDS,JGDS,JENS,
+     &               KR,KPDS,KGDS,KENS,LSKIP,LGRIB,IRGS)
+        IF(IRGI .NE. 0) THEN
+          WRITE(6,*)' PROBLEMS ON 1ST READ OF GRIB FILE SO ABORT'
+          ISTAT = IRGS
+          STOP  
+        ENDIF
+C
+      ENDDO
+      write(6,*)' IRET FROM GETGB1S ',IRGS,' UNIT ',LUGB2
+
+C    GET GRID NUMBER FROM PDS
+C
+      IGDNUM = KPDS(3)
+C
+C   PROCESS THE GRIB FILE
+C
+      IMAX = KGDS(2)
+      JMAX = KGDS(3)
+      NUMVAL = IMAX*JMAX
+      KMAX = MAXLEV
+      WRITE(6,280) IMAX,JMAX,NUMLEV,KMAX
+
+C -== GET SURFACE FIELDS ==-
+      L = 0
+      IV= 0
+C   ACCUMULATED PRECIP 
+
+c   to start each new file with its index, set J=-1 for sfc pressure
+C
+C
+      J = -1
+      JPDS = -1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 061
+      JPDS(6) = 001
+      JPDS(13) = 1
+      CALL GETGB(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK2,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        II = 1
+        JJ = JJ1
+        DO KK = 1, ITOT
+          APCP2(KK) = GRID(KK)
+        ENDDO
+      ELSE
+        WRITE(6,285)IV,JPDS(5),L,IRET
+        WRITE(6,*)' COULD NOT UNPACK PCP 2ND GRID FILE '
+         ISTAT = IRET
+        STOP  
+      ENDIF
+
+C   ACCUMULATED CONVECTIVE PRECIP
+      J = -1
+      JPDS = -1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 063
+      JPDS(6) = 001
+      JPDS(13) = 1
+      CALL GETGB(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK2,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        II = 1
+        JJ = JJ1
+        DO KK = 1, ITOT
+          CAPCP2(KK) = GRID(KK)
+        ENDDO
+      ELSE
+        WRITE(6,285)IV,JPDS(5),L,IRET
+        WRITE(6,*)' COULD NOT UNPACK CPCP 2ND GRID FILE '
+         ISTAT = IRET
+        STOP   
+      ENDIF
+
+C   SNOWFALL
+      J = -1
+      JPDS = -1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 065
+      JPDS(6) = 001
+      JPDS(14) = FHR3
+      JPDS(15) = FHR2
+      CALL GETGB(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,K,
+     X           KPDS,KGDS,MASK2,GRID,IRET)
+      IF(IRET.EQ.0) THEN
+        II = 1
+        JJ = JJ1
+        DO KK = 1, ITOT
+          SNOW2(KK) = GRID(KK)
+        ENDDO
+      ELSE
+        WRITE(6,285)IV,JPDS(5),L,IRET
+        WRITE(6,*)' COULD NOT UNPACK SNOW 2ND GRID FILE '
+         ISTAT = IRET
+        STOP   
+      ENDIF
+
+       DO K = 1, ITOT
+          APCP3HR(K)=APCP2(K)-APCP(K)
+          CAPCP3HR(K)=CAPCP2(K)-CAPCP(K)
+          SNOW3HR(K)=SNOW2(K)-SNOW(K)
+       ENDDO
+
+      KPDS(5)=61
+      KPDS(14)=FHR1
+      KPDS(15)=FHR2
+      WRITE(FNAME(6:7),FMT='(I2)')LUGB3
+      CALL BAOPEN(LUGB3,FNAME,IRET)
+      print *, 'BAOPEN  ',LUGB3,ITOT,' IRET ',IRET
+      CALL PUTGB(LUGB3,ITOT,KPDS,KGDS,MASK2,APCP3HR,IRET)
+      print *, 'PUTGB  ',LUGB3,KPDS(3),KPDS(5),' IRET ',IRET
+      CALL BACLOSE(LUGB3,IRET)
+
+      KPDS(5)=63
+      KPDS(14)=FHR1
+      KPDS(15)=FHR2
+      WRITE(FNAME(6:7),FMT='(I2)')LUGB4
+      CALL BAOPEN(LUGB4,FNAME,IRET)
+      CALL PUTGB(LUGB4,ITOT,KPDS,KGDS,MASK2,CAPCP3HR,IRET)
+      print *, 'PUTGB  ',LUGB4,KPDS(3),KPDS(5),' IRET ',IRET
+      CALL BACLOSE(LUGB4,IRET)
+
+      KPDS(5)=65
+      KPDS(14)=FHR1
+      KPDS(15)=FHR2
+      WRITE(FNAME(6:7),FMT='(I2)')LUGB5
+      CALL BAOPEN(LUGB5,FNAME,IRET)
+      CALL PUTGB(LUGB5,ITOT,KPDS,KGDS,MASK2,SNOW3HR,IRET)
+      print *, 'PUTGB  ',LUGB5,KPDS(3),KPDS(5),' IRET ',IRET
+      CALL BACLOSE(LUGB5,IRET)
+      STOP
+      END

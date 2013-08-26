@@ -1,0 +1,33 @@
+#!/bin/ksh
+################################################################################
+####  UNIX Script Documentation Block
+#                      .                                             .
+# Script name:        exnam_smartinit_akrtmages.sh.sms 
+# Script description:  Runs NAM smartinit codes over Alaska to generate
+#         a first guess for the Alaskan RTMA;  the smartinit files generated
+#         by the nest won't work due to their bitmap
+#
+# Author:        Geoff Manikin       Org: NP11         Date: 2011-07-21
+#
+# Script history log:
+# 2011-07-21  Geoff Manikin   -  new script 
+#
+
+set -xa
+msg="JOB $job HAS BEGUN"
+postmsg "$jlogfile" "$msg"
+
+cd $DATA
+  if [ cyc -eq 00 -o cyc -eq 12 ] ; then
+      $USHnam/nam_smartinitak_rtmages_on.sh
+    else
+      $USHnam/nam_smartinitak_rtmages_off.sh
+  fi
+#export err=$?; err_chk
+
+set -x
+#####################################################################
+
+echo EXITING $0
+exit
+#
