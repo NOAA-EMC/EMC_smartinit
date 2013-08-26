@@ -262,3 +262,8 @@ nam_smartinit.sh
 JNAM_SMINIT job
 * Invoke nam /nwges/prod/nam.yyyymmdd/nam.envir.sh to set GUESS variable needed by nam_smartinit
 
+08-23-2013
+nam_smartinit.sh
+* added hourly output of aknest3 downscaling thru +12 hours.
+* began putting in vertical structure
+   * JNAM_SMINIT : /meso/noscrub/Jeff.McQueen/smartinit.${model_ver}/parm/
