@@ -9,20 +9,21 @@ set -xa
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Job name:         nam_smartinitconus.job
+# Job name:         JNAM_SMINIT.job
 # Job description:  Run nam smartinit jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
-# Abstract: This script runs the Nam  Smart Init jobs
+# Abstract: This script runs the NAM smartinit DNG jobs
 #
 # Script history log:
-# 2007-08-23  Bradley Mabe  - Created script (copied actually) to call nam_smartinit on & off
+# 2007-08-23  Bradley Mabe  - Created script to call nam_smartinit on & off
 #                          initially of Alaskan precip & snowfall
 # 2007-09-17  Geoff Manikin - This version for CONUS runs
 # 2011-07-06  Geoff Manikin - Adapted to use nested output
 # 2011-07-22  Geoff Manikin - Can't use nest output for F00
 # 2012-12-03  Jeff McQueen  - Adapted for unified smartinit
+# 2013-08-23  Jeff McQueen  - Put into vertical structure
 
 #  NOTE: cyc, ffhr, RUNTYP must be set from controlling ECFlow script
 #   export cyc = 00,06,12,18
@@ -67,7 +68,7 @@ if [ "$USER" = Jeff.McQueen ];then
 
   group_name=${group_name:-meso}
   package_name=${package_name:-nam}
-  . /${group_name}/noscrub/${LOGNAME}/nwprod/parm/${package_name}_para_config
+  . /${group_name}/noscrub/${LOGNAME}/smartinit/parm/${package_name}_para_config
   export userid=${userid:-$LOGNAME}
   export DATA_IN=${DATA_IN:-/stmp/$userid}
 
