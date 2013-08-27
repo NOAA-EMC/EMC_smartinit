@@ -44,10 +44,10 @@ else
   exit 1
 fi
 
-echo CYC is ${cyc.?}
-echo envir is ${envir.?}
-echo model_ver is ${model_ver.?}
-echo code_ver is ${code_ver.?}
+echo CYC is ${cyc:?}
+echo envir is ${envir:?}
+echo model_ver is ${model_ver:?}
+echo code_ver is ${code_ver:?}
 
 cd $DATA
 
@@ -82,13 +82,11 @@ export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS
 #####################################################################################
 ### For Developers, "group_name" is passed from the ECF script
 if [ "$USER" = Jeff.McQueen ];then
-  export model_ver="v3.2.0"
-  export code_ver="v3.2.0"
+### . /${group_name}/save/${LOGNAME}/smartinit.${model_ver}/parm/${package_name}_para_config
   group_name=${group_name:-meso}
   package_name=${package_name:-smart}
-###  . /${group_name}/save/${LOGNAME}/smartinit.${model_ver}/parm/${package_name}_para_config
   export userid=${userid:-$LOGNAME}
-  export DATA_IN=${DATA_IN:-/stmp/$USER/smart-dev}
+  export DATA_IN=${DATA_IN:-/stmp/$USER/smartinit}
   export pcom=${pcom:-/ptmp/$USER/smart$RUNTYP}
 fi
 
@@ -148,8 +146,8 @@ export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
 export HOMEdng=${HOMEdng:-${ROOTdng}/${modeld}.$model_ver}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
- export FIXnam=${FIXdng:-${HOMEdng}/fix}
-export PARMnam=${PARMdng:-${HOMEdng}/parm}
+ export FIXdng=${FIXdng:-${HOMEdng}/fix}
+export PARMdng=${PARMdng:-${HOMEdng}/parm}
  export USHdng=${USHdng:-${HOMEdng}/ush}
 export FIXruc2=${FIXruc2:-${HOMEdng}/fix}
 

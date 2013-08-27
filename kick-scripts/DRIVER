@@ -35,7 +35,7 @@ fi
  export cyc=12 #TEST
 
 export fhrstr=00
-export ENDHRS=03
+export ENDHRS=00
 echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 
 #07/13: change to run ak and alaskanest separately for good output listing

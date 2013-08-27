@@ -52,7 +52,7 @@ while [ $ffhr -le $ENDHRS ];do
 # Create and invoke config file needed by Job 
   echo "export RUNTYP=$RUNTYP"   >$cfgdir/dng_para_config${RUNTYP}
   echo "export cyc=$cyc"        >>$cfgdir/dng_para_config${RUNTYP}
-  echo "export ffhr=$ffhr"      >>$cfgdir/dengpara_config${RUNTYP}
+  echo "export ffhr=$ffhr"      >>$cfgdir/dng_para_config${RUNTYP}
   echo "export RM_TMPDIR=NO"    >>$cfgdir/dng_para_config${RUNTYP}
   echo "export NET=$NET"        >>$cfgdir/dng_para_config${RUNTYP}
   echo "export RUN=$NET"        >>$cfgdir/dng_para_config${RUNTYP}
@@ -109,7 +109,7 @@ while [ $ffhr -le $ENDHRS ];do
 done
 
 rm $qchkfl
-rm $rootd/working/JNAM_SMINIT.$RUNTYP
+#TEST rm $rootd/working/JNAM_SMINIT.$RUNTYP
 rm $rootd/working/bjobcards-dev$RUNTYP
 
 #echo SUBMIT plotmet.job for $RUNTYP $cyc from fhrs $ffhr to $ENDHRS
