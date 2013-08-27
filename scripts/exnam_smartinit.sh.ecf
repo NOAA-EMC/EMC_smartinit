@@ -20,13 +20,14 @@
 # 2013-07-01  Jeff McQueen  - Enabled hrw guamnest smartinit ndfd grid 199 generation 
 # 2013-07-02  Jeff McQueen  - Modified to create all 00 hour downscaling from NAM parent
 #                             While 03 --> 54/60 created from NAM Nests
+# 2013-08-27  JTM           - Put in vertical structure
 #
 # NCO SUBMISSION  HRS       RUNTYP
-#                 00-12    ak_rtmages
+#                 00-12     ak_rtmages
 #                 00-84     conus,ak,hi,pr
 #                 00-60     aknest3,conusnest2p5
 
-# NOTE: NCO should not run  jobs for RUNTYP=ak from 12 - 54/60 hours
+# NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #
 
 set -xa
@@ -61,7 +62,7 @@ cd $DATA
       esac
   fi
 
-  ${NAM_SMINIT_SSH:-$USHnam/nam_smartinit.sh}
+  ${NAM_SMINIT_SSH:-$USHdng/nam_smartinit.sh}
 
 set -x
 #####################################################################
