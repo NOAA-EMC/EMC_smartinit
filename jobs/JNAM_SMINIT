@@ -192,7 +192,7 @@ export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
-cp ${PARMdng}/DNG-SMINIT.CTL $DATA
+cp ${PARMdng}/NAM-SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
 if [ $srefcyc -lt 0 ] ; then
@@ -233,7 +233,7 @@ mkdir -p $pcom
 
 ########################################################
 # Execute the script.
-${DNG_SMINIT_CONUSSH:-$HOMEdng/scripts/exdng_${modeld}.sh.ecf}
+${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
 ########################################################
 cat $pgmout
 
