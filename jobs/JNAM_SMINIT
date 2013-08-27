@@ -21,6 +21,7 @@
 # 2011-07-06  Geoff Manikin - Adapted to use nested output
 # 2011-07-22  Geoff Manikin - Can't use nest output for F00
 # 2012-12-03  Jeff McQueen  - Adapted for unified smartinit
+# 2013-08-27  Jeff McQueen  - Put in vertical structure     
 
 #  NOTE: cyc, ffhr, RUNTYP must be set from controlling ECFlow script
 #   export cyc = 00,06,12,18
@@ -29,7 +30,14 @@
 
 # FOR TESTING BY DEVELOPER----------------------------------------
 msg="JOB $job HAS BEGUN"
-#NCO postmsg "$jlogfile" "$msg"
+case $envir in 
+  prod|para|test|dev )
+    postmsg "$jlogfile" "$msg";;
+esac
+echo CYC is ${cyc.?}
+echo envir is ${envir.?}
+echo model_ver is ${model_ver.?}
+echo code_ver is ${code_ver.?}
 
 cd $DATA
 
@@ -50,6 +58,16 @@ export SENDECF=${SENDECF:-YES}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export modeld=${modeld:-smartinit}
+if [ -s "${modeld}.card" ];then
+  . ${modeld}.card
+else
+  echo "============================================="
+  echo "### ERROR !!: COULD NOT FIND VERSION CARD"
+  echo "============================================="
+  exit 1
+fi
+
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -64,9 +82,11 @@ export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS
 #####################################################################################
 ### For Developers, "group_name" is passed from the ECF script
 if [ "$USER" = Jeff.McQueen ];then
+  export model_ver="v3.2.0"
+  export code_ver="v3.2.0"
   group_name=${group_name:-meso}
-  package_name=${package_name:-nam}
-###  . /${group_name}/noscrub/${LOGNAME}/nwprod/parm/${package_name}_para_config
+  package_name=${package_name:-smart}
+###  . /${group_name}/save/${LOGNAME}/smartinit.${model_ver}/parm/${package_name}_para_config
   export userid=${userid:-$LOGNAME}
   export DATA_IN=${DATA_IN:-/stmp/$USER/smart-dev}
   export pcom=${pcom:-/ptmp/$USER/smart$RUNTYP}
@@ -80,7 +100,7 @@ if [ "$RUN_ENVIR" = prod -a "$envir" != prod ]; then
   export SENDDBN=${SENDDBN:-NO}
   export SENDDBN_GB2=${SENDDBN_GB2:-NO}
 
-  export pcom=${pcom:-/pcom/${envir}/nam}
+  export pcom=${pcom:-/pcom/${envir}/${NET}}
   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
 fi
 
@@ -122,14 +142,16 @@ export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 
 ####################################
 # Specify Execution Areas
+# dng = downscaled gridding
 ####################################
-export HOMEnam=${HOMEnam:-/nw${envir}}
-export EXECnam=${EXECnam:-${HOMEnam}/exec}
-export USHnam=${USHnam:-${HOMEnam}/ush}
+export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
+export HOMEdng=${HOMEdng:-${ROOTdng}/${modeld}.$model_ver}
 
-export FIXnam=${FIXnam:-${HOMEnam}/fix}
-export PARMnam=${PARMnam:-${HOMEnam}/parm}
-export FIXruc2=${FIXruc2:-${HOMEnam}/fix}
+export EXECdng=${EXECdng:-${HOMEdng}/exec}
+ export FIXnam=${FIXdng:-${HOMEdng}/fix}
+export PARMnam=${PARMdng:-${HOMEdng}/parm}
+ export USHdng=${USHdng:-${HOMEdng}/ush}
+export FIXruc2=${FIXruc2:-${HOMEdng}/fix}
 
 ###################################
 # Set up the UTILITIES
@@ -149,9 +171,9 @@ sh $utilscript/setup.sh
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
 
-# Set GUESS, CYCLE parameters from nam run 
+# Set GUESS, CYCLE parameters from NAM run 
 sh /nwges/${envir}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
-export GUESS=GDAS   #TEST
+#   For testing cold startexport GUESS=GDAS   #TEST
 
 # RETRO DEVELOPER SET
 #if [ $RUN_ENVIR != prod ];then 
@@ -170,7 +192,7 @@ export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
-cp ${PARMnam}/NAM-SMINIT.CTL $DATA
+cp ${PARMdng}/DNG-SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
 if [ $srefcyc -lt 0 ] ; then
@@ -204,14 +226,14 @@ export COM_SREF=${COM_SREF:-/com/sref/prod}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
-export pcom=${pcom:-/pcom/nam}
+export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
 #TEST-NCO env
 
 ########################################################
 # Execute the script.
-${NAM_SMINIT_CONUSSH:-$HOMEnam/scripts/exnam_smartinit.sh.ecf}
+${DNG_SMINIT_CONUSSH:-$HOMEdng/scripts/exdng_${modeld}.sh.ecf}
 ########################################################
 cat $pgmout
 

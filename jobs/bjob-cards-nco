@@ -1,11 +1,13 @@
 #BSUB -J nam_smartinit
 #BSUB -o /tmpnwprd/nam_smartinit.%J
 #BSUB -e /tmpnwprd/nam_smartinit.%J
-#BSUB -q hpc_ibm
+#BSUB -q dev
 #BSUB -n 1
 ###BSUB -R "affinity[core]"
 #BSUB -R "rusage[mem=5096]"
 #BSUB -W 01:00
 #BSUB -x
 #BSUB -a poe
+export cycle=12
+export RUNTYP=conus
 
