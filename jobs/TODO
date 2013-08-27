@@ -1,9 +1,0 @@
-
-fix conusnest2p5 setup with nam-sminit.ctl -->prdgen error
-test conus,ak,ak3,hi,pr, with new ctl file
-fix wrfprs copy for guam and test
-test ext conus 187  -->prdgen error
-
-change master ctls ndfd output file names to reduce rg checks
-unify weight names
-
