@@ -36,7 +36,7 @@ export UTILparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm fi
 #retros export COMROOT=/meso/noscrub/$USER/com_canned
 export COMROOT=/com
 
-export COM_IN=${COMROOT}/${mdlin}/prod
+export COM_IN=${COMROOT}/${mdl}/prod
 export COM_SREF=${COMROOT}/sref/prod
 export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
 export jlogfile=${COM_OUT}/jlogfile

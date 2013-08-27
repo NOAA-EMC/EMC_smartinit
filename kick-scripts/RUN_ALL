@@ -21,6 +21,7 @@ typeset -Z2 cyc ffhr
 #====================User Sets=======================================
 # Location of smart config file to set up directories
 cfgdir=${rootd}/parm
+wkdir=${rootd}/working
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
 
 export jobd=${jobd:-`pwd`}
@@ -44,42 +45,42 @@ while [ $ffhr -le $ENDHRS ];do
   export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
   rm -f /stmp/${USER}/${modeld}/list/o$job
   if [ $fhrstr -le 03 ];then 
-   rm -rf /stmp/${USER}/${modeld}/$job
-   mkdir -p /stmp/${USER}/${modeld}/$job
+    rm -rf /stmp/${USER}/${modeld}/$job
+    mkdir -p /stmp/${USER}/${modeld}/$job
   fi
   cd /stmp/${USER}/${modeld}/${job}
 
 # Create and invoke config file needed by Job 
-  echo "export RUNTYP=$RUNTYP"   >$cfgdir/dng_para_config${RUNTYP}
-  echo "export cyc=$cyc"        >>$cfgdir/dng_para_config${RUNTYP}
-  echo "export ffhr=$ffhr"      >>$cfgdir/dng_para_config${RUNTYP}
-  echo "export RM_TMPDIR=NO"    >>$cfgdir/dng_para_config${RUNTYP}
-  echo "export NET=$NET"        >>$cfgdir/dng_para_config${RUNTYP}
-  echo "export RUN=$NET"        >>$cfgdir/dng_para_config${RUNTYP}
-  echo "export mdl=$mdl"        >>$cfgdir/dng_para_config${RUNTYP}
-  cat $cfgdir/smart_para_config >>$cfgdir/dng_para_config${RUNTYP}
-  . ${cfgdir}/dng_para_config${RUNTYP} 
+  echo "export RUNTYP=$RUNTYP"   >$wkdir/dng_para_config${RUNTYP}
+  echo "export cyc=$cyc"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export ffhr=$ffhr"      >>$wkdir/dng_para_config${RUNTYP}
+  echo "export RM_TMPDIR=NO"    >>$wkdir/dng_para_config${RUNTYP}
+  echo "export NET=$NET"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export RUN=$NET"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export mdl=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
+  cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
+  . ${wkdir}/dng_para_config${RUNTYP} 
 
 # Create JNAM_SMINIT job
-  echo "#BSUB -J ${job}"             >${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -oo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -eo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${rootd}/working/bjobcards-dev${RUNTYP}
-##echo "#BSUB -L /bin/ksh"          >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -W 03:00"              >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -n 1"                  >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -R "affinity[core]""   >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -R "rusage[mem=5500]"" >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -q dev"                >>${rootd}/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -x"                    >>${rootd}/working/bjobcards-dev${RUNTYP}
+  echo "#BSUB -J ${job}"             >${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+##echo "#BSUB -L /bin/ksh"          >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -W 03:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -n 1"                 >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "affinity[core]""  >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "rusage[mem=5500]"" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -q dev"                >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -x"                    >>${wkdir}/bjobcards-dev${RUNTYP}
 
-  cd ${rootd}/working
-  cat ${rootd}/working/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${rootd}/working/JNAM_SMINIT.${RUNTYP}
-  cp -p ${jobd}/${modeld}.card ${rootd}/working
+  cd ${wkdir}
+  cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
+  cp -p ${jobd}/${modeld}.card ${wkdir}
   echo ==========================================================
   echo `date`
   echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
 
-  bsub <${rootd}/working/JNAM_SMINIT.${RUNTYP}
+  bsub <${wkdir}/JNAM_SMINIT.${RUNTYP}
 
   jobid=`qac -u $USER -d |grep $job | awk '{ print $1 }'`
   sleep 10     
@@ -109,8 +110,8 @@ while [ $ffhr -le $ENDHRS ];do
 done
 
 rm $qchkfl
-#TEST rm $rootd/working/JNAM_SMINIT.$RUNTYP
-rm $rootd/working/bjobcards-dev$RUNTYP
+#TEST rm $wkdir/JNAM_SMINIT.$RUNTYP
+#TEST rm $wkdir/bjobcards-dev$RUNTYP
 
 #echo SUBMIT plotmet.job for $RUNTYP $cyc from fhrs $ffhr to $ENDHRS
 export RUNTYP=$RUNTYP

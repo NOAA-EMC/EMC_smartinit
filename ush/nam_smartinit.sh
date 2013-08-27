@@ -419,7 +419,7 @@ for fhr in $hours; do
 # nam_smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
     echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-###     ${LAUNCH} $EXECnam/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
+###     ${LAUNCH} $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
     $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
@@ -471,7 +471,7 @@ EOF5
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
  
-  /usrx/local/bin/getrusage -rss  ${EXECnam}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
+  /usrx/local/bin/getrusage -rss  ${EXECdng}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
   export err=$?; #NCO err_chk
 
   cp ${COMROOT}/date/t${cyc}z DATE

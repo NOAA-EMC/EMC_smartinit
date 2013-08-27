@@ -1,4 +1,4 @@
-#TEST set -xa
+set -xa
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -35,17 +35,10 @@ case $envir in
 esac
 
 export modeld=${modeld:-smartinit}
-if [ -s "${modeld}.card" ];then
-  . ${modeld}.card
-else
-  echo "============================================="
-  echo "### ERROR !!: COULD NOT FIND VERSION CARD"
-  echo "============================================="
-  exit 1
-fi
 
 echo CYC is ${cyc:?}
 echo envir is ${envir:?}
+echo modeld is ${modeld:?}
 echo model_ver is ${model_ver:?}
 echo code_ver is ${code_ver:?}
 
@@ -82,10 +75,10 @@ export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS
 #####################################################################################
 ### For Developers, "group_name" is passed from the ECF script
 if [ "$USER" = Jeff.McQueen ];then
-### . /${group_name}/save/${LOGNAME}/smartinit.${model_ver}/parm/${package_name}_para_config
+### . /${group_name}/save/${LOGNAME}/${modeld}.${model_ver}/working/dng_para_config.${RUNTYP}
   group_name=${group_name:-meso}
-  package_name=${package_name:-smart}
   export userid=${userid:-$LOGNAME}
+  package_name=${package_name:-smart}
   export DATA_IN=${DATA_IN:-/stmp/$USER/smartinit}
   export pcom=${pcom:-/ptmp/$USER/smart$RUNTYP}
 fi
@@ -97,7 +90,6 @@ fi
 if [ "$RUN_ENVIR" = prod -a "$envir" != prod ]; then
   export SENDDBN=${SENDDBN:-NO}
   export SENDDBN_GB2=${SENDDBN_GB2:-NO}
-
   export pcom=${pcom:-/pcom/${envir}/${NET}}
   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
 fi
@@ -170,7 +162,7 @@ sh $utilscript/setpdy.sh
 . ${DATA}/PDY    # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
-sh /nwges/${envir}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+sh /nwges/prod/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold startexport GUESS=GDAS   #TEST
 
 # RETRO DEVELOPER SET
@@ -181,6 +173,7 @@ sh /nwges/${envir}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
 
 ##############################################
 # Define COM directories
+# USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
 export COM_IN=${COM_IN:-/com/${NET}/${envir}}
