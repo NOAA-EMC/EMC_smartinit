@@ -15,13 +15,14 @@ module load ruby emc-utils
 # set job directory needed if running from cron
 export modeld=smartinit
 export model_ver=v3.2.0
-export rootd=/meso/save/$USER/${modeld}.${model_ver}
+export code_ver=v3.2.0
+export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 
 export jobd=${rootd}/jobs
-#CTL ln -fs ${rootd}/ush/nam_smartinit.sh-ctl ${rootd}/ush/nam_smartinit.sh
-ln -fs ${rootd}/ush/nam_smartinit.sh-cfg ${rootd}/ush/nam_smartinit.sh
+export kickd=${rootd}/kick-scripts
+#TEST ln -fs ${rootd}/ush/nam_smartinit.sh-cfg ${rootd}/ush/nam_smartinit.sh
 
-cd $jobd
+cd $kickd
 
 # Determine cycle
 let HH=`date +%H`
@@ -34,15 +35,15 @@ fi
  export cyc=12 #TEST
 
 export fhrstr=00
-export ENDHRS=12
+export ENDHRS=03
 echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 
 #07/13: change to run ak and alaskanest separately for good output listing
 #07/13: added guam=guamnmm  configuration
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
-for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3 guam;do
-# for RUNTYP in aknest3 ;do
+#TEST for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3 guam;do
+for RUNTYP in conus ;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   export NET=$mdl
@@ -62,6 +63,6 @@ for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3 guam;do
 # Create and submit JNAM_SMINIT job
 
   echo SUBMIT RUN_ALL $RUNTYP  CYC $cyc
-  $jobd/RUN_ALL >/stmp/$USER/smart-dev/smout-${RUNTYP} 2>&1 &
+  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}/smout-${RUNTYP} 2>&1 &
   sleep 10
 done

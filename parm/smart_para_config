@@ -31,8 +31,8 @@ export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
 
-export HOMEnam=/meso/save/$USER/smart-dev    # location of exec,scripts,ush dirs
-export UTILparm=/meso/noscrub/$USER/nwprod/util/parm #grib2 parm files
+export HOMEdng=/meso/save/$USER/smartinit.${model_ver}            # location of exec,scripts,ush dirs
+export UTILparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm files
 #retros export COMROOT=/meso/noscrub/$USER/com_canned
 export COMROOT=/com
 

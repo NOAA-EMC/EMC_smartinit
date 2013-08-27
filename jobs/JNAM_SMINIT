@@ -28,12 +28,22 @@
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
-# FOR TESTING BY DEVELOPER----------------------------------------
 msg="JOB $job HAS BEGUN"
 case $envir in 
   prod|para|test|dev )
     postmsg "$jlogfile" "$msg";;
 esac
+
+export modeld=${modeld:-smartinit}
+if [ -s "${modeld}.card" ];then
+  . ${modeld}.card
+else
+  echo "============================================="
+  echo "### ERROR !!: COULD NOT FIND VERSION CARD"
+  echo "============================================="
+  exit 1
+fi
+
 echo CYC is ${cyc.?}
 echo envir is ${envir.?}
 echo model_ver is ${model_ver.?}
@@ -58,16 +68,6 @@ export SENDECF=${SENDECF:-YES}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export modeld=${modeld:-smartinit}
-if [ -s "${modeld}.card" ];then
-  . ${modeld}.card
-else
-  echo "============================================="
-  echo "### ERROR !!: COULD NOT FIND VERSION CARD"
-  echo "============================================="
-  exit 1
-fi
-
 
 #####################################################################################
 # This block is for Developer's test run:

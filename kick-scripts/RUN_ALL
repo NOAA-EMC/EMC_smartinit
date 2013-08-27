@@ -57,13 +57,13 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export NET=$NET"        >>$cfgdir/dng_para_config${RUNTYP}
   echo "export RUN=$NET"        >>$cfgdir/dng_para_config${RUNTYP}
   echo "export mdl=$mdl"        >>$cfgdir/dng_para_config${RUNTYP}
-  cat $cfgdir/parm/smart_para_config >>$cfgdir/dng_para_config${RUNTYP}
+  cat $cfgdir/smart_para_config >>$cfgdir/dng_para_config${RUNTYP}
   . ${cfgdir}/dng_para_config${RUNTYP} 
 
 # Create JNAM_SMINIT job
-  echo "#BSUB -J ${job}"             >${rootd/working/bjobcards-dev${RUNTYP}
-  echo "#BSUB -oo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>bjobcards-dev${RUNTYP}
-  echo "#BSUB -eo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>bjobcards-dev${RUNTYP}
+  echo "#BSUB -J ${job}"             >${rootd}/working/bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${rootd}/working/bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${rootd}/working/bjobcards-dev${RUNTYP}
 ##echo "#BSUB -L /bin/ksh"          >>${rootd}/working/bjobcards-dev${RUNTYP}
   echo "#BSUB -W 03:00"              >>${rootd}/working/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                  >>${rootd}/working/bjobcards-dev${RUNTYP}
@@ -73,10 +73,12 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -x"                    >>${rootd}/working/bjobcards-dev${RUNTYP}
 
   cd ${rootd}/working
-  cat ${rootd}/working/bjobcards-dev${RUNTYP} $jobd/JNAM_SMINIT > $rootd/working/JNAM_SMINIT.${RUNTYP}
+  cat ${rootd}/working/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${rootd}/working/JNAM_SMINIT.${RUNTYP}
+  cp -p ${jobd}/${modeld}.card ${rootd}/working
   echo ==========================================================
   echo `date`
   echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
+
   bsub <${rootd}/working/JNAM_SMINIT.${RUNTYP}
 
   jobid=`qac -u $USER -d |grep $job | awk '{ print $1 }'`
