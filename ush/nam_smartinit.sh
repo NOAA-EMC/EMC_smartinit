@@ -456,7 +456,7 @@ EOF5
 # cp/ln PRDGEN master ctl and weight files
   if [ $inest -eq 0 ];then
     cp -p $PARMdng/${mdl}_master${outreg}.ctl master${fhr}.ctl
-    ln -sf $FIXdng/${mdl}_wgt_${ogrd}     fort.21
+    ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}     fort.21
   else
 #   To interp nests to 5 km, just use same parent nam master files 
 #   To interp ak/cs nests to ak3/cs2p5, use special smartmaster ctl files
@@ -464,7 +464,7 @@ EOF5
       ak|hi|pr|gm) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
           con|ak3) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
     esac
-    ln -sf $FIXdng/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
+    ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
   fi
 
   export pgm=nam_prdgen;#NCO . prep_step
@@ -494,8 +494,8 @@ fi #TESTING ONLY
 #=================================================================
 
 # CHANGE : for non-conus look in FIXdng for topo,land files
-  cp $FIXdng/${topofl} TOPONDFD
-  cp $FIXdng/${maskfl} LANDNDFD
+  cp $FIXdng/topo/${topofl} TOPONDFD
+  cp $FIXdng/mask/${maskfl} LANDNDFD
   ln -sf TOPONDFD     fort.46
   ln -sf LANDNDFD     fort.48
   if [ $ext = grb ];then
