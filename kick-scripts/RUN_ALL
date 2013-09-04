@@ -75,7 +75,7 @@ while [ $ffhr -le $ENDHRS ];do
 
   cd ${wkdir}
   cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
-  cp -p ${jobd}/${modeld}.card ${wkdir}
+  cp -p ${jobd}/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`
   echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
