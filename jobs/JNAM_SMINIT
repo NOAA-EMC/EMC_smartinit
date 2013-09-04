@@ -138,6 +138,7 @@ export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
 export HOMEdng=${HOMEdng:-${ROOTdng}/${modeld}.$model_ver}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
+export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
  export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
  export USHdng=${USHdng:-${HOMEdng}/ush}

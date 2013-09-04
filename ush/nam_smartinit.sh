@@ -423,11 +423,6 @@ EOF
 
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 
-# FOR TESTING ONLY
-if [ -s meso${rg}.NDFDf${fhr} ];then
-  echo "PRDGEN FILE ALREADY CREATED: meso${rg}.NDFD${fhr}"
-else
-
   echo creating $prdgfl file for fhr $fhr
   cat >input${fhr}.prd <<EOF5
 WRFPRS${fhr}.tm00
@@ -451,7 +446,10 @@ EOF5
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
  
-  ${EXECdng}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
+#  ${EXECdng}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
+
+# POINT TO NAM Network prdgen (/nwprod/exec)
+  ${EXECnam}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}  
   export err=$?;  err_chk
 
   cp ${COMROOT}/date/t${cyc}z DATE
@@ -465,7 +463,6 @@ EOF5
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
-fi #TESTING ONLY
 
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 

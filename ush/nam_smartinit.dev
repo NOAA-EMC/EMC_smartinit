@@ -443,7 +443,7 @@ EOF
 
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 
-# FOR TESTING ONLY
+# FOR TESTING ONLY   NCO RM
 if [ -s meso${rg}.NDFDf${fhr} ];then
   echo "PRDGEN FILE ALREADY CREATED: meso${rg}.NDFD${fhr}"
 else
