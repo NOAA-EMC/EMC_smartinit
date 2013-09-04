@@ -1,4 +1,0 @@
-#!/bin/bash   
-  export reg="conusnest"
-  var=$(echo $reg|awk '{ index($1,"nest") }' )
-  echo $var
