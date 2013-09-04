@@ -24,7 +24,7 @@ $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg
 
 # Processing grids for AWIPS
  pgm=tocgrib2
- export pgm; #NCO . prep_step
+ export pgm;  . prep_step
  startmsg
 export FORTREPORTS=unit_vars=yes
 export FORT11=${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 
