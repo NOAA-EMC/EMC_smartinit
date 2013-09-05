@@ -63,8 +63,8 @@ while [ $ffhr -le $ENDHRS ];do
 
 # Create JNAM_SMINIT job
   echo "#BSUB -J ${job}"             >${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -oo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -eo /stmp/Jeff.McQueen/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmp/${USER}/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmp/${USER}/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
 ##echo "#BSUB -L /bin/ksh"          >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -W 03:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                 >>${wkdir}/bjobcards-dev${RUNTYP}
