@@ -87,11 +87,13 @@ fi
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
-if [ "$RUN_ENVIR" = prod -a "$envir" != prod ]; then
-  export SENDDBN=${SENDDBN:-NO}
-  export SENDDBN_GB2=${SENDDBN_GB2:-NO}
-  export pcom=${pcom:-/pcom/${envir}/${NET}}
-  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+if [ "$RUN_ENVIR" = prod ];then
+   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile.${job}.$$}
+   if [ "$envir" != prod ]; then
+   export SENDDBN=${SENDDBN:-NO}
+   export SENDDBN_GB2=${SENDDBN_GB2:-NO}
+   export pcom=${pcom:-/pcom/${envir}/${NET}}
+  fi
 fi
 
 export PS4='$SECONDS + '
@@ -102,8 +104,7 @@ date
 ####################################
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
-# TEST export DATA=$DATA_IN/${job}.${pid}
-export DATA=$DATA_IN/${job}
+export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
