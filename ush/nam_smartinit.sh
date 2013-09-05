@@ -257,12 +257,6 @@ for fhr in $hours; do
   typeset -Z2 fhr1 fhr2 fhr3 fhr6 fhr9 fhr ffhr
 
 # Check that NAM 00 hr analysis is from NDAS or GDAS
-#  lanl=`grep /nwprod/
-#  if [ $lanl = NDAS ];then
-#NCO 
-  if [ -s WRFPRS${fhr}.tm00 ];then
-    echo WRFPRS $fhr found
-  else
     case $natgrd in 
       bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
@@ -273,7 +267,6 @@ for fhr in $hours; do
       wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00;;
            *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00;;
     esac
-  fi
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 
   if [ $fhr -gt 0 ];then
@@ -353,9 +346,6 @@ for fhr in $hours; do
         pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
       esac
    
-    if [ -s WRFPRS${FHRFRQ}.tm00 ];then  #NCO RM
-      echo WRFPRS $FHRFRQ found
-    else     
     case $natgrd in 
       bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
         ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
@@ -364,11 +354,10 @@ for fhr in $hours; do
       wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00;;
            *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00;;
     esac
-    fi
     $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
     $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
-    export pgm=nam_smartprecip;#NCO . prep_step
+    export pgm=nam_smartprecip; . prep_step
     ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
     ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
     ln -sf "WRFPRS${fhr}.tm00"     fort.15
@@ -378,9 +367,6 @@ for fhr in $hours; do
     ln -sf "${freq}snow.${fhr}"    fort.52
 
     if [ $MKPCP -eq $mk12p ];then
-      if [ -s WRFPRS${fhr3}.tm00 ];then  #NCO RM
-        echo WRFPRS $fhr3 found
-      else 
       case $natgrd in 
         bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00
           ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
@@ -389,13 +375,8 @@ for fhr in $hours; do
         wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00;;
              *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00;;
       esac
-      fi
       $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
-#NCO RM
-      if [ -s WRFPRS${fhr6}.tm00 ];then
-        echo WRFPRS $fhr6 found
-      else
       case $natgrd in 
         bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00
          ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
@@ -404,7 +385,6 @@ for fhr in $hours; do
         wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00;;
              *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00;;
       esac
-      fi
       $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
       ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
@@ -423,7 +403,7 @@ for fhr in $hours; do
     $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
-     export err=$?; #NCO err_chk
+     export err=$?;  err_chk
 
 #    Interp precip to smartinit GRID
      cpgbgrd=$grid
@@ -442,11 +422,6 @@ EOF
 #=================================================================
 
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
-
-# FOR TESTING ONLY
-if [ -s meso${rg}.NDFDf${fhr} ];then
-  echo "PRDGEN FILE ALREADY CREATED: meso${rg}.NDFD${fhr}"
-else
 
   echo creating $prdgfl file for fhr $fhr
   cat >input${fhr}.prd <<EOF5
@@ -467,12 +442,13 @@ EOF5
     ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
   fi
 
-  export pgm=nam_prdgen;#NCO . prep_step
+  export pgm=nam_prdgen; . prep_step
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
- 
-  /usrx/local/bin/getrusage -rss  ${EXECdng}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
-  export err=$?; #NCO err_chk
+
+# POINT TO NAM Network prdgen (/nwprod/exec) 
+  ${EXECnam}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
+  export err=$?;  err_chk
 
   cp ${COMROOT}/date/t${cyc}z DATE
   if [ -s $prdgfl ];then  
@@ -485,7 +461,6 @@ EOF5
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
-fi #TESTING ONLY
 
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 
@@ -628,9 +603,9 @@ fi #TESTING ONLY
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 
-  export pgm=nam_smartinit;#NCO . prep_step
-  /usrx/local/bin/getrusage -rss ${EXECdng}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest >smartinit.out${fhr}
-  export err=$?; #NCO err_chk
+  export pgm=nam_smartinit; . prep_step
+  ${EXECdng}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest >smartinit.out${fhr}
+  export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
   if [ $fhr -le 12 ];then
