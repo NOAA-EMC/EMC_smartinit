@@ -2,7 +2,39 @@
 smartinit V3.2.0 Q1FY14      
 Jeff McQueen
 
-===============================================================================================
+For this version NCO ECF submission will be exactly the same as previous upgrades
+JNAM_SMINIT will continue to be triggered  every 3 hrs from 00-84 forecast hours
+by existence of NAM BGRD or BSMART post files as done for previous upgrades
+
+# NCO SUBMISSION  ffhrs     RUNTYP
+#                 00-12     ak_rtmages
+#                 00-84     conus,ak,hi,pr
+#                 00-60     aknest3,conusnest2p5
+
+
+SUMMARY:
+* Added hourly output for all downscaled nests thru 01-12 forecast hours
+* Added gust and visibility to all downscaled output files.
+* Replaced surface pressure with downscaled surface pressure in all output files.
+* Added option to downscale NAM nest  to extended conus nest 2.5 km grid 184
+* Added option to downscale HRW guam run.
+* Switched to use NAM_SMINIT.CTL file to configure downscaled domains
+* put in vertical structure and on svn
+* added smartinit.ver to configure model and code versions.
+Switched to Standard Grid 184 for conus2p5 run
+Turned off Guam option for this implementation
+
+BUILD INSTRUCTIONS:
+checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
+
+1.  check out to /nwprod/smartinit.v3.2.0
+2.  build sorc codes nam_smartinit.fd, nam_smartprecip.fd
+3.  Use smartinit.ver if desired to set model_ver and modeld parms
+4.  See bjobcards-dev for recommended memory limits
+    to use in JNAM_SMINIT jobs.
+5.  Set RUNTYP,cyc, ffhr from ecflow script as currently done.
+
+========DETAILED UPDATES SINCE LAST RELEASE====================================================
 
 FY14 IMPLEMENTATION *****
 07-01-2013:  Testing extended conus 187 grid creation:
@@ -99,7 +131,7 @@ put in https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 
 1.  check out to /nwprod/smartinit.v3.2.0
 2.  build sorc codes nam_smartinit.fd, nam_smartprecip.fd
-3.  Use smartinit.ver if desired
+3.  Use smartinit.ver if desired to set model_ver and modeld parms
 4.  See bjobcards-dev for recommended memory limits
     to use in JNAM_SMINIT job.
 5.  Set RUNTYP,cyc, ffhr from ecflow script as currently done.
