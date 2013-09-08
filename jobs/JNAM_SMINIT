@@ -1,4 +1,4 @@
-set -xa
+set -xa   #NCO ecflow environment set
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -46,7 +46,7 @@ cd $DATA
 
 ######################################################
 # The following two variable could be defined in the
-# loadleveler submission script (the sms script), if
+# loadleveler submission script (the ECF script), if
 # not they will take the default values which is set
 # for the NCO running enviroment
 #######################################################
@@ -87,11 +87,13 @@ fi
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
-if [ "$RUN_ENVIR" = prod -a "$envir" != prod ]; then
-  export SENDDBN=${SENDDBN:-NO}
-  export SENDDBN_GB2=${SENDDBN_GB2:-NO}
-  export pcom=${pcom:-/pcom/${envir}/${NET}}
-  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+if [ "$RUN_ENVIR" = prod ];then
+   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile.${job}.$$}
+   if [ "$envir" != prod ]; then
+   export SENDDBN=${SENDDBN:-NO}
+   export SENDDBN_GB2=${SENDDBN_GB2:-NO}
+   export pcom=${pcom:-/pcom/${envir}/${NET}}
+  fi
 fi
 
 export PS4='$SECONDS + '
@@ -102,8 +104,7 @@ date
 ####################################
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
-# TEST export DATA=$DATA_IN/${job}.${pid}
-export DATA=$DATA_IN/${job}
+export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -221,7 +222,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-#TEST-NCO env
+./env   #NCO ecflow environment set
 
 ########################################################
 # Execute the script.
@@ -240,4 +241,3 @@ if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi
 
 date
 
-if [ $SENDECF = YES ]; then $SMSBIN/smscomplete; fi

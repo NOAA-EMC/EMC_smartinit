@@ -1,4 +1,5 @@
 #!/bin/ksh
+export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
 module load ibmpe lsf ics
@@ -75,7 +76,7 @@ while [ $ffhr -le $ENDHRS ];do
 
   cd ${wkdir}
   cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
-  cp -p ${jobd}/${modeld}.ver ${wkdir}
+  cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`
   echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
