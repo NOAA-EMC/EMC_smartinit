@@ -42,14 +42,12 @@ if [ $RUNTYP = guam ];then export NET=hiresw;fi
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
+mkdir -p /stmp/${USER}/${modeld}
+mkdir -p /stmp/${USER}/${modeld}/list
 while [ $ffhr -le $ENDHRS ];do
   export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
+ 
   rm -f /stmp/${USER}/${modeld}/list/o$job
-  if [ $fhrstr -le 03 ];then 
-    rm -rf /stmp/${USER}/${modeld}/$job
-    mkdir -p /stmp/${USER}/${modeld}/$job
-  fi
-  cd /stmp/${USER}/${modeld}/${job}
 
 # Create and invoke config file needed by Job 
   echo "export RUNTYP=$RUNTYP"   >$wkdir/dng_para_config${RUNTYP}

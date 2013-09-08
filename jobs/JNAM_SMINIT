@@ -31,7 +31,7 @@ set -xa   #NCO ecflow environment set
 msg="JOB $job HAS BEGUN"
 case $envir in 
   prod|para|test|dev )
-    postmsg "$jlogfile" "$msg";;
+    ./postmsg "$jlogfile" "$msg";;
 esac
 
 export modeld=${modeld:-smartinit}
@@ -231,7 +231,7 @@ ${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
 cat $pgmout
 
 msg="ENDED NORMALLY."
-postmsg "$jlogfile" "$msg"
+./postmsg "$jlogfile" "$msg"
 
 ##############################
 # Remove the Temporary working directory
