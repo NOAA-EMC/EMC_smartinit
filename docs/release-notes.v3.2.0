@@ -1,40 +1,52 @@
-
 smartinit V3.2.0 Q1FY14      
 Jeff McQueen
 September 9, 2013
 
-For this version NCO ECF submission will be exactly the same as previous upgrades
-JNAM_SMINIT will continue to be triggered  every 3 hrs from 00-84 forecast hours
-by existence of NAM BGRD or BSMART post files as done for previous upgrades
+This upgrade is primarily needed for the implementation of RTMA v2.2.0 scheduled for 
+Q1FY14.
+For this version, NCO ECF submission will be exactly the same as previous upgrade.
+JNAM_SMINIT will continue to be triggered every 3 hrs from 00-84 forecast hours
+by existence of NAM BGRD or BSMART post files as done for previous upgrades.
 
+The following RUNTYP submissions will continue as before(RUNTYP set in ecf scripts?).
 # NCO SUBMISSION  ffhrs     RUNTYP
 #                 00-12     ak_rtmages
 #                 00-84     conus,ak,hi,pr
 #                 00-60     aknest3,conusnest2p5
 
-
 SUMMARY:
-* Added hourly output for all downscaled nests thru 01-12 forecast hours
+* Added hourly output for all downscaled nests thru 01-12 forecast hours.
 * Added gust and visibility to all downscaled output files.
 * Replaced surface pressure with downscaled surface pressure in all output files.
-* Added option to downscale NAM nest  to extended conus nest 2.5 km grid 184
-* Added option to downscale HRW guam run.
-* Switched to use NAM_SMINIT.CTL file to configure downscaled domains
-* put in vertical structure and on svn
-* added smartinit.ver to configure model and code versions.
-Switched to Standard Grid 184 for conus2p5 run
-Turned off Guam option for this implementation
-* Cleaned up JNAM_SMINIT job to be consistent with ECF and NCO poliicies
+* Added option to downscale NAM nest to extended conus nest 2.5 km grid 187.
+   (To be used with next NAM implementation)
+* Added option to downscale HRW guam runs.
+   (To be used along with next HRW upgrade)
+* Switched to use parm/NAM_SMINIT.CTL file to configure 
+  downscaled domains rather than setting configuration in ush scripts.
+* Put in vertical structure and on svn.
+* Added smartinit.ver file to configure model and code versions.
+* Cleaned up JNAM_SMINIT template job to be consistent with ECF and NCO poliicies
 
 
 BUILD INSTRUCTIONS:
 checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 
-1.  check out to /nwprod/smartinit.v3.2.0
-2.  build sorc codes nam_smartinit.fd, nam_smartprecip.fd
-3.  Use docs/smartinit.ver if desired to set model_ver and modeld parms
-4.  See bjobcards-dev for recommended limits
-    to use in JNAM_SMINIT jobs.
+1.  Check out and copy to /nwprod/smartinit.v3.2.0
+    cd /nwprod/smartinit.v3.2.0
+
+2.  Build sorc codes nam_smartinit.fd, nam_smartprecip.fd
+        cd smartinit.${model_ver}/sorc/nam_smartinit.fd
+        make
+        cp nam_smartinit ../../smartinit.${model_ver}/exec
+        cd ...smartinit.${model_ver}/sorc/nam_smartprecip.fd
+        make
+        cp nam_smartprecip ...smartinit.${model_ver}/exec
+  
+3.  Use ...docs/smartinit.ver file if desired to set 
+      model_ver=v3.2.0 parameter
+
+4.  See ...docs/bjobcards-dev for recommended limits to use in JNAM_SMINIT jobs.
     eg: 
 #BSUB -W 03:00
 #BSUB -n 1
@@ -42,9 +54,14 @@ checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 #BSUB -R rusage[mem=5500]
 #BSUB -q dev
 
-5.  Set RUNTYP,cyc, ffhr from ecflow script or in specific JNAM_SMINIT jobs with all parameters set.
+5.  Set RUNTYP,cyc, ffhr from ecflow scripts or in specific JNAM_SMINIT jobs.
+    NOTE: Example Fully configured jobs 
+          for each RUNTYP domain are found in 
+          ...smartinit.${model_ver}/working
 
-========DETAILED UPDATES SINCE LAST RELEASE====================================================
+
+
+========DETAILED UPDATES SINCE LAST RELEASE==========================================
 
 FY14 IMPLEMENTATION *****
 07-01-2013:  Testing extended conus 187 grid creation:
@@ -101,7 +118,6 @@ Still error in reading.
 Error reading gefs prob files also.
 
 MAIN.f90, NDFDgrid.f90 : Added output of DOWNP (PNEW) instead of PSFC
-??? SHOULD OTHER PRODUCTS USE PNEW FOR COMPUTATION (eg:mixhgt)
 
 07-30-2013
 nam_smartinit.sh 
@@ -123,28 +139,6 @@ NCO IMPLEMENTED on August 28, 2013
 * using envir=emc.  NCO reserves dev now.
 
 09/04/2013  jobs, nam_smartinit.sh
-Uncommented NCO specific utility calls (eg: err_chk, pgm...)
-
-SUMMARY:
-* Added hourly output for all downscaled nests thru 01-12 forecast hours
-* Added gust and visibility to all downscaled output files.
-* Replaced surface pressure with downscaled surface pressure in all output files.
-* Added option to downscale NAM nest  to extended conus nest 2.5 km grid 184
-* Added option to downscale HRW guam run.
-* Switched to use NAM_SMINIT.CTL file to configure downscaled domains
-* put in vertical structure and on svn
-* added smartinit.ver to configure model and code versions.
-Switched to Standard Grid 184 for conus2p5 run
-Turned off Guam option for this implementation
-
-put in https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
-
-1.  check out to /nwprod/smartinit.v3.2.0
-2.  build sorc codes nam_smartinit.fd, nam_smartprecip.fd
-3.  Use smartinit.ver if desired to set model_ver and modeld parms
-4.  See bjob-card-nco for recommended memory limits
-    to use in JNAM_SMINIT job.
-5.  Set RUNTYP,cyc, ffhr from ecflow script as currently done.
-    
+* Uncommented NCO specific utility calls (eg: err_chk, pgm...)
 
 
