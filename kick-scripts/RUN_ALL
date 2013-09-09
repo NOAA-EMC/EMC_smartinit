@@ -23,6 +23,7 @@ typeset -Z2 cyc ffhr
 # Location of smart config file to set up directories
 cfgdir=${rootd}/parm
 wkdir=${rootd}/working
+mkdir -p $wkdir
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
 
 export jobd=${jobd:-`pwd`}
@@ -110,6 +111,7 @@ done
 
 rm $qchkfl
 #TEST rm $wkdir/JNAM_SMINIT.$RUNTYP
+rm $wkdir/dng_para_config${RUNTYP}
 rm $wkdir/bjobcards-dev$RUNTYP
 
 #echo SUBMIT plotmet.job for $RUNTYP $cyc from fhrs $ffhr to $ENDHRS
