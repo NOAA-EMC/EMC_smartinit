@@ -1,4 +1,4 @@
-smartinit V3.2.0 Q1FY14      
+smartinit V3.2.01 Q1FY14      
 Jeff McQueen
 September 9, 2013
 
@@ -30,10 +30,10 @@ SUMMARY:
 
 
 BUILD INSTRUCTIONS:
-checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
+checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.01
 
-1.  Check out and copy to /nwprod/smartinit.v3.2.0
-    cd /nwprod/smartinit.v3.2.0
+1.  Check out and copy to /nwprod/smartinit.v3.2.01
+    cd /nwprod/smartinit.v3.2.01
 
 2.  Build sorc codes nam_smartinit.fd, nam_smartprecip.fd
         cd smartinit.${model_ver}/sorc/nam_smartinit.fd
@@ -44,7 +44,7 @@ checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
         cp nam_smartprecip ...smartinit.${model_ver}/exec
   
 3.  Use ...docs/smartinit.ver file if desired to set 
-      model_ver=v3.2.0 parameter
+      model_ver=v3.2.01 parameter
 
 4.  See ...docs/bjobcards-dev for recommended limits to use in JNAM_SMINIT jobs.
     eg: 
