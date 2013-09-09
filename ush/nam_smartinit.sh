@@ -627,7 +627,7 @@ EOF5
    export fhr=$fhr
    export ogrd 
 
-   ${USHdng}/ncoproc.sh
+   ${USHdng}/dng_awp.sh
 
   fi
   echo

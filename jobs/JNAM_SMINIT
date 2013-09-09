@@ -53,6 +53,7 @@ export SENDECF=${SENDECF:-YES}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export mdl=${NET}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -77,7 +78,6 @@ export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
-   export SENDDBN_GB2=${SENDDBN_GB2:-NO}
    export pcom=${pcom:-/pcom/${envir}/${NET}}
  fi
 fi
@@ -139,7 +139,8 @@ export PARMdng=${PARMdng:-${HOMEdng}/parm}
 ###################################
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
-export UTILparm=${UTILparm:-/nwprod/util/parm}
+export utilparm=${utilparm:-/nwprod/util/parm}
+export gespath=${gespath:-/nwprod/prod}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
@@ -153,7 +154,7 @@ sh $utilscript/setpdy.sh
 . ${DATA}/PDY    # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
-sh /nwges/prod/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold start export GUESS=GDAS   #TEST
 
 ##############################################

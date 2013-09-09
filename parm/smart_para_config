@@ -32,7 +32,7 @@ export SENDDBN=NO
 export SENDDBN_GB2=NO
 
 export HOMEdng=/meso/save/$USER/smartinit.${model_ver}            # home dir
-export UTILparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm files
+export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm files
 export EXECnam=/nwprod/exec   #Location of nam_prdgen
 export COMROOT=/com
 
