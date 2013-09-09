@@ -258,7 +258,19 @@ for fhr in $hours; do
 
 # Check that NAM 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
-      bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
+      bgrd3d) 
+# Check that NAM 00 hr analysis is from NDAS or GDAS (08/2013)
+        if [ $fhr -eq 00 -a $GUESS = GDAS ];then
+          echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
+          echo USING PREVIOUS $pcdate $ ${cyc}Z CYCLE $mdl $pcfhr FORECAST;echo
+          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}${pcfhr}.tm00
+          ln -fs ${mdlin} fort.11
+          ln -fs WRFPRS${fhr}.tm00 fort.51
+          echo ${PDY}${cyc} | ${utilexec}/overdate.grib
+        else
+          echo;echo $mdl GUESS= $GUESS
+          cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
+        fi
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
