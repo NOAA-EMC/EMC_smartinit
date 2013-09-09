@@ -1,0 +1,3509 @@
+<?xml version="1.0"?>
+<log>
+<logentry
+   revision="31115">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T21:57:01.983365Z</date>
+<paths>
+<path
+   kind="dir"
+   copyfrom-path="/smartinit/trunk"
+   copyfrom-rev="31114"
+   action="A">/smartinit/branches/EXP_Q1FY14-vert2</path>
+</paths>
+<msg>updated vertical structure branch</msg>
+</logentry>
+<logentry
+   revision="31111">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T20:56:48.101959Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff42.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf39.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf60.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff36.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf78.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff33.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff75.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf15.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf48.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff72.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf54.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf18.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf57.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff18.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff69.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff00.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff57.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf09.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf03.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff51.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf48.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff06.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff03.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff45.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff42.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff39.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff84.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf24.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf57.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff81.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf63.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf69.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf27.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff39.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf66.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff78.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff27.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf18.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf12.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff60.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff15.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf57.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff12.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff54.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff51.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff48.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf33.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf39.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf72.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff09.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf78.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf36.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff48.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf75.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff36.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf39.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff03.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf27.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf21.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff24.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf66.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff69.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff21.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff63.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf03.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf09.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff57.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf09.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff60.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf42.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf48.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf81.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf06.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff18.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf45.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff06.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff57.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf84.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff45.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf09.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf48.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff12.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf36.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf30.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff39.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf75.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff33.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff78.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff30.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff72.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf12.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf18.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf18.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf51.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf57.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf15.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff27.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf54.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff15.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff66.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff54.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf18.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf57.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf06.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff09.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff21.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf45.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff03.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff48.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff00.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf84.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff42.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff09.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff81.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf21.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf27.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf27.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf60.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf66.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf24.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff36.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf63.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff75.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff24.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf27.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf15.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff18.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff30.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf54.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff12.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff57.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff51.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff18.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf30.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf36.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf36.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff06.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf75.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf33.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff45.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf72.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff33.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff84.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf36.184</path>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/parm/smart_para_config</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf24.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff27.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf63.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff21.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff66.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff60.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf00.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff27.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf06.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf45.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf45.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf03.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff15.196</path>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/kick-scripts/DRIVER</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf84.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf42.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff54.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff03.184</path>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/jobs/JNAM_SMINIT</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf81.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff69.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff42.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf06.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf45.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf33.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf00.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff36.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf72.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff30.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff75.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff36.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf15.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf54.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf54.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf12.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff24.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf51.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff39.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff63.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff12.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff78.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff51.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf15.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf54.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf03.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff06.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff00.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf42.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff45.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf81.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff84.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff45.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf24.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf63.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf21.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff09.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff33.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf60.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff48.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff72.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff21.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff60.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf24.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf69.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf12.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff15.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff00.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf51.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff54.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf06.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf33.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff54.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf72.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff03.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf30.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff18.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff42.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff57.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff81.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff30.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf39.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf33.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf78.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf21.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff24.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf60.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff63.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf03.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf15.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf42.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf00.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf81.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff12.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff27.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff51.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff00.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff69.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf09.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff66.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf48.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf03.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf42.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf30.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff33.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff72.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf12.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff06.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf24.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf51.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff21.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff39.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff36.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff60.196</path>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/kick-scripts/RUN_ALL</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff78.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf18.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff75.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf12.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf57.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf51.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf00.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff03.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff42.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff81.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff15.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf21.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf33.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf60.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff09.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff06.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff30.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff48.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff45.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf27.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff84.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf21.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf66.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf60.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf69.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff12.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff51.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf30.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff24.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf42.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff00.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff18.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff15.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff57.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff54.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf36.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf30.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf75.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf39.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf78.196</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/util</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff39.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff21.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff60.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf00.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff33.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf51.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff27.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf69.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff24.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff66.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf39.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf06.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff63.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf00.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf45.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf84.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf09.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf48.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff09.184</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/util/parm</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff48.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff30.195</path>
+</paths>
+<msg>add util, fix vert structure</msg>
+</logentry>
+<logentry
+   revision="31104">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T20:03:38.243569Z</date>
+<paths>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.sh-cfg</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/NAM-SMINIT.CTL</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/trunk/ush/nam_smartinit.sh-cfg"
+   copyfrom-rev="31067"
+   action="R">/smartinit/trunk/ush/nam_smartinit.sh</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.sh-ctl</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.sh-getrusage</path>
+</paths>
+<msg>ush script vertical structure
+</msg>
+</logentry>
+<logentry
+   revision="31093">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T17:58:28.593807Z</date>
+<paths>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.nco-org</path>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/ush/save</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.sh-launch-old</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.nco</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/ush/nam_smartinit.test</path>
+</paths>
+<msg>ush dir cleanup</msg>
+</logentry>
+<logentry
+   revision="31092">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T17:55:07.670118Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/jobs/JNAM_SMINIT</path>
+</paths>
+<msg>jobs JNAM_SMINIT_CONUSSH varb</msg>
+</logentry>
+<logentry
+   revision="31091">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T17:53:14.187107Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/scripts/exnam_smartinit.sh.ecf</path>
+</paths>
+<msg>scripts vertical structure</msg>
+</logentry>
+<logentry
+   revision="31089">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T17:49:55.302112Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/scripts/save</path>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/jobs/JNAM_SMINIT</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/kick-scripts</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/scripts/exnam_smartinit.sh.org</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/trunk/jobs/CHK_NCO"
+   copyfrom-rev="31067"
+   action="A">/smartinit/trunk/kick-scripts/CHK_NCO</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/trunk/jobs/TODO"
+   copyfrom-rev="31067"
+   action="A">/smartinit/trunk/docs/TODO</path>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/jobs/bjob-cards-nco</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/trunk/jobs/DRIVER"
+   copyfrom-rev="31067"
+   action="A">/smartinit/trunk/kick-scripts/DRIVER</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/trunk/jobs/RUN_ALL"
+   copyfrom-rev="31067"
+   action="A">/smartinit/trunk/kick-scripts/RUN_ALL</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/trunk/jobs/RUN_GEM"
+   copyfrom-rev="31067"
+   action="A">/smartinit/trunk/kick-scripts/RUN_GEM</path>
+</paths>
+<msg>jobs and kick-scripts vertical structure</msg>
+</logentry>
+<logentry
+   revision="31074">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T15:27:29.668674Z</date>
+<paths>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/DRIVER</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/RUN_ALL</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/RUN_GEM</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/DRIV-test</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/CHK_NCO</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/TODO</path>
+</paths>
+<msg>make kick-scripts dir</msg>
+</logentry>
+<logentry
+   revision="31073">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T15:23:40.608938Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/jobs/out</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/dfp</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/diff-bgrd3d</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/dr.out</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/list</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/dffull</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/list2</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/bjobcards-devaknest3</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/jobs/qname.aknest318</path>
+</paths>
+<msg>cleanup jobs directory</msg>
+</logentry>
+<logentry
+   revision="31067">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-27T12:58:50.302399Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/save</path>
+</paths>
+<msg>d</msg>
+</logentry>
+<logentry
+   revision="31061">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T23:25:27.255271Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopopr.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_alaskanest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/RUN_ALL</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/rdgrib.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoconus2p5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/PRDGEN.f_orig</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset2d.mod</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/jobs/out</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/GRIB_OUT.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/map</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskhi.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/DRIV-test</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/bjob-cards-nco</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smarttopoguam.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/INTERP_SC.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/asetdown.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/nam_smartinitconus.ccs</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/CTL_RDR.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/makefile.ccs</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_mask.guam.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/pr06</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smarttopogm.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/chknst</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GET_BITS.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/nam_smartprecip</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/NDFDgrid.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_vegtype_ndfd.dat</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/nam_smartinit</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/SET_WMO.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/PRDGEN.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterconus.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_vegtiles.ndfd2.5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/INTERP_PPT.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/GET_PDS.f</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/exec</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/BOUND.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/MAIN.f90</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/save/scripts</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/pr12</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/exnam_smartinit.sh.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smartmaskguam.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh-ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/conus12</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/parm</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/aset3d.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinit_pr.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskconus.dat</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIBold.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/list</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/diff-bgrd3d</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIB.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/PUT_GB.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exgfs_smartinit_guam.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinit_hi.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterhi.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/constants.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/NAM-SMINIT.CTL</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIB_OFFold.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/TODO</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/nam_smartaddprecip6</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopohi.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskconus2p5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_orog.guam.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/DEFGRIBINT.INC</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh-cfg</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/list</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/nam_smartmakeprecip</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/ADDPRECIP6.f</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/fix</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/DRIVER</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/grddef.mod</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/ush/save</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopopr.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_mastergm.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/makefile_er</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/rdgrib.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/ncoproc.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/exec/nam_prdgen-nco</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/save</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/map</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/aset2d.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/TILE_OUT.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/namtest_siconus_on.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnawips_nam_smartinit.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/nam_prdgen</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/diffs-GDASGUESS</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GETGBtst.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GETGRIB.f90</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/scripts/save</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/scripts</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/NDFDgrid.new</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/RUN_GEM</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/makefile-dev</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/NDFDgrid.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinit_akrtmages.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset3d.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/MAKESTRING.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/ak06</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskak.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/dffull</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/SET_O14.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/parmnam</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinit_ak.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exgfs_smartinit_guam.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GRIBIT.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/SET_O56.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/save/MAIN.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/MAKESTRING.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinitconus.sh.sms-org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/GETGRIB.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/MAKEPRECIP.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/ak12</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GRIBIT.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/save/nam_smartinit.nco-org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoak.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/MAINold.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinit_conus.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/SMARTPRECIP.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/hi06</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/SET_O23.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/NDFDgrid.new</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopohi.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/smart_para_config</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/nam_smartinitconus</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/NDFDgrid.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/asetdown.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/save/NDFDgrid.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoconus.dat</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_198_alaskanest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/FILTER_UV.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_orog.guam.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/w3fi71.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/exec/nam_prdgen</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/makefile12</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/gempak.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/FNDBIT.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/JNAM_SMINIT</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/namprod_smartinitconus_on.sh</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/hi12</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/save/NDFDgrid.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/constants.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/docs/PROBS</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/nam_smartaddprecip</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/DATE</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/READ_SORT_CTL.f</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/save/nam_smartinit.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoak3.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnawips_nam_smartinit.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/ak3</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterak.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/EXTEND.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/parmnam</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/grddef.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskconus2p5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoak.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinit_akrtmages.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/ADDPRECIP12.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/asetdown.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/rdgrib.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinit_ak.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/MAKEPRECIP.lst</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.test</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset2d.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_197_conusnest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/ak306</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/list2</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_wgt_199_guamarw</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/save/nam_smartinit.sh-launch-old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh-launch-old</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh-getrusage</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/CHK_NCO</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/dffull-GDASGUESS</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/ADD_WMO.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest2p5.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_195_priconest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/dr.out</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/smart_config_NCO</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/qname.aknest318</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/hiresw_mastergm.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/compile.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/READ_SORT_GRIB.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/aset3d.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/xmovex.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GETGBpres.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/GRIBIT.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/w3fi63.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/hiresw_nmm_master.guamnmm.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/GRIB_IN.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/FILTER_SC.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/dfp</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.nco-org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/BOUND.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/constants.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/save/MAIN.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/dfp</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/smartinit-short.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIB_LIMITEDold.f</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/dffull</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/makefile6</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/docs</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/DEFGRIBINT.INC</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_hawaiinest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinit_ak3.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinitconus2p5.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_para_config</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_vegtiles.ndfd2.5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskpr.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/MAIN.01-27-13</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_elevtiles.ndfd2.5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.nco</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_elevtiles.ndfd2.5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_196_hawaiinest</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/jobs</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartinit.parmlist</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/ush</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/MAIN.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/grddef.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/cs12</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/ADDPRECIP12.lst</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest2p5.ctl-184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest2p5.ctl-187</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/docs/README</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/nam_smartinit</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/rdgrib.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/NAM-SMINIT.CTL</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskpr.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/aset2d.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/namwcoss_siconus_on.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_91_alaskanest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/MAKEPRECIP.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/dump</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/INTERP_UV.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIB.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/nam_smartinitconustst</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/NDFDgrid.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/MAKESTRING.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskak.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_187_conusnest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset3d.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GET_BITS.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskhi.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/SET_TBL.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_mastergm.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_wgt_199_guamnmm</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/exnam_smartinit.sh.ecf</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/ADDPRECIP.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinit_ak3.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinitconus2p5.sh.sms</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/save</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/ADDPRECIP6.lst</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIB.test</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smartmaskgm.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/MAIN.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/save/exnam_smartinitconus.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartmakeprecip.old/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus_off.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoconus2p5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/MAK_WMO.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/exec/nam_smartinit</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/makefile-old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/bjobcards-devaknest3</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskak3.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/BOUND.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/constants.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/save/makefile</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/save</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/asetdown.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/NDFDgrid.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinitconus.org/GETGRIB_ANLold.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinit_pr.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfdtopo.dat</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasteraknest3.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_prdgen.fd/SET_O11.f</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterpr.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/exec/nam_smartprecip</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/kill-job.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/out/cs2p</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/grddef.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/nam_smartinit.old/GET_BITS.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_184_conusnest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/save/scripts/exnam_smartinit_hi.sh.sms</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_mask.guam.grb</path>
+</paths>
+<msg>Q1FY14 BASE</msg>
+</logentry>
+<logentry
+   revision="31060">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:53:53.547711Z</date>
+<paths>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/README</path>
+<path
+   kind="file"
+   action="D">/smartinit/trunk/smart_para_config</path>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/ush</path>
+<path
+   kind="dir"
+   action="M">/smartinit/trunk</path>
+</paths>
+<msg>delete trunk nam_smartinit.sh</msg>
+</logentry>
+<logentry
+   revision="31059">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:43:53.163747Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/scripts</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31058">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:43:38.857369Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/parm</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31057">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:43:30.700467Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/jobs</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31056">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:42:59.564490Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/fix</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31055">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:42:49.713827Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/exec</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31054">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:42:42.139001Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/util</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31053">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T22:42:33.698424Z</date>
+<paths>
+<path
+   kind="dir"
+   action="D">/smartinit/trunk/sorc</path>
+</paths>
+<msg>delete trunk</msg>
+</logentry>
+<logentry
+   revision="31032">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-26T16:03:14.251257Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/smartinit/trunk/jobs/JNAM_SMINIT</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/branches/EXP_Q1FY14/README"
+   copyfrom-rev="31031"
+   action="A">/smartinit/trunk/README</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/branches/EXP_Q1FY14/ush/nam_smartinit.sh"
+   copyfrom-rev="31031"
+   action="R">/smartinit/trunk/ush/nam_smartinit.sh</path>
+<path
+   kind="file"
+   copyfrom-path="/smartinit/branches/EXP_Q1FY14/smart_para_config"
+   copyfrom-rev="31031"
+   action="A">/smartinit/trunk/smart_para_config</path>
+<path
+   kind="dir"
+   action="M">/smartinit/trunk</path>
+</paths>
+<msg>Merged EXP_Q1Fy14 31007:31031 into trunk</msg>
+</logentry>
+<logentry
+   revision="31003">
+<author>jeff.mcqueen@noaa.gov</author>
+<date>2013-08-23T18:36:28.353491Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopopr.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff42.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_alaskanest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf39.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/rdgrib.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf60.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoconus2p5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff36.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf78.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff33.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff75.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf48.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf15.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff72.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset2d.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf54.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf18.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf57.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff69.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff18.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff00.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskhi.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff57.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smarttopoguam.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/asetdown.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf09.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf03.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff51.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf48.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff06.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_mask.guam.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff03.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff45.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smarttopogm.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff42.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff39.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff84.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf57.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf24.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GET_BITS.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff81.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf63.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf69.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/nam_smartprecip</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_vegtype_ndfd.dat</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf27.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff39.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/nam_smartinit</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf66.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff78.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff27.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterconus.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_vegtiles.ndfd2.5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/makefile</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/exec</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/MAIN.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf18.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf12.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff60.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff15.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf57.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff12.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smartmaskguam.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff54.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff48.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff51.198</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/parm</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf33.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf39.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskconus.dat</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf72.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf78.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff09.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf36.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff48.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf75.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff36.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf39.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff03.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf27.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterhi.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf21.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff24.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf66.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff69.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff21.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff63.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/NAM-SMINIT.CTL</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf03.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf09.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf09.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff57.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff60.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf42.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf48.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf81.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf06.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopohi.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskconus2p5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff18.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_orog.guam.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf45.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff06.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff57.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf84.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff45.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf09.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf48.184</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff12.91</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/fix</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf36.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf30.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff39.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff33.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf75.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff78.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff30.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff72.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopopr.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf12.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf18.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf18.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_mastergm.org</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf51.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf57.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf15.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff27.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf54.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff66.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff15.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff54.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf18.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf57.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf06.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GETGRIB.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff09.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff21.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf45.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff03.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff48.195</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/scripts</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff00.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf84.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff42.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh.old</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff09.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff81.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf21.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf27.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf27.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf60.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf66.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf24.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset3d.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/MAKESTRING.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff36.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf63.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff24.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff75.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskak.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf27.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/GRIBIT.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf15.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff18.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff30.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf54.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff12.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff57.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff51.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff18.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf30.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf36.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf36.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf75.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff06.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf33.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff45.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf72.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff84.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff33.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoak.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/SMARTPRECIP.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf36.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopohi.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/smart_para_config</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/NDFDgrid.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf24.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff27.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf63.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff21.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff66.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoconus.dat</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff60.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_198_alaskanest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf00.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf06.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff27.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_orog.guam.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf45.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf45.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf03.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf84.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff15.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf42.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff54.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff03.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/JNAM_SMINIT</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf81.196</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/sorc</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff69.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff42.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf06.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/constants.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf45.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoak3.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterak.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf33.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh.save0703</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff36.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf00.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf72.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff30.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff75.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf15.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskconus2p5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/grddef.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff36.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf54.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf54.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoak.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf12.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff24.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf51.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff63.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff39.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff12.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/asetdown.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff78.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff51.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf15.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/rdgrib.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf54.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf03.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff06.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset2d.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_197_conusnest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff00.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf42.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff45.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf81.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff84.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff45.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf24.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_wgt_199_guamarw</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf63.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf21.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff09.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff33.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf60.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff21.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff48.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff72.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest2p5.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_195_priconest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff60.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf24.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf69.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/smart_config_NCO</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/hiresw_mastergm.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf12.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff15.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff00.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf51.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff54.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf06.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff54.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf33.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff03.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf72.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartprecip.fd/makefile</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf30.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff42.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff18.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/hiresw_nmm_master.guamnmm.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff81.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff57.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff30.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf39.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/BOUND.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf33.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf78.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf21.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff24.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf60.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff63.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/DEFGRIBINT.INC</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf03.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf15.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf42.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf00.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff12.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_hawaiinest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf81.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff51.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff27.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff00.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff69.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf09.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff66.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf03.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf48.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_vegtiles.ndfd2.5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskpr.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf42.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_elevtiles.ndfd2.5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf30.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff33.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff72.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff06.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf12.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfd_elevtiles.ndfd2.5.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf24.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf51.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/JNAM_SMINIT.canned</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/jobs</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_196_hawaiinest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff21.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartinit.parmlist</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/ush</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff39.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff60.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff36.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff78.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf18.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff75.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf12.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf57.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf51.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf00.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff03.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest2p5.ctl-184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff42.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasterconusnest2p5.ctl-187</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff81.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf21.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff15.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf33.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf60.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff09.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff30.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskpr.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff06.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff48.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff45.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_91_alaskanest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf27.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff84.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf21.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf66.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf60.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf69.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/ush/nam_smartinit.sh</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff12.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff51.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskak.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_187_conusnest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/aset3d.f90</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskhi.grbi</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf30.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff24.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf42.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_wgt_199_guamnmm</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthiofff00.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff18.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/scripts/exnam_smartinit.sh.ecf</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff15.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff57.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff54.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf36.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/hiresw_smartmaskgm.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf75.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf30.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf39.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf78.196</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/util</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff39.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff21.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smarttopoconus2p5.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff60.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusonf00.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakofff33.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/exec/nam_smartinit</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/jobs/JNAM_SMINIT_GEMPAK</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf51.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_smartmaskak3.grb</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartpronf69.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff27.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/constants.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff24.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartconusofff66.197</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf06.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngakonf39.91</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakofff63.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf45.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusonf00.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/ruc2_ndfdtopo.dat</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf09.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartakonf84.198</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_smartmasteraknest3.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/parm/nam_masterpr.ctl</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmarthionf48.196</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff09.184</path>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk/util/parm</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/sorc/nam_smartinit.fd/grddef.mod</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamdngconusofff48.184</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/util/parm/grib2_awpnamsmartprofff30.195</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/nam_wgt_184_conusnest</path>
+<path
+   kind="file"
+   action="A">/smartinit/trunk/fix/gfs_mask.guam.grb</path>
+</paths>
+<msg>first nam smartinit commit</msg>
+</logentry>
+<logentry
+   revision="30908">
+<author>root</author>
+<date>2013-08-19T13:34:05.340509Z</date>
+<paths>
+<path
+   kind="dir"
+   action="A">/smartinit/trunk</path>
+</paths>
+<msg>Creating new project: smartinit Trunk</msg>
+</logentry>
+</log>
