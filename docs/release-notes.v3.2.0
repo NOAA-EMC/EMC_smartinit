@@ -55,9 +55,6 @@ checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 #BSUB -q dev
 
 5.  Set RUNTYP,cyc, ffhr from ecflow scripts or in specific JNAM_SMINIT jobs.
-    NOTE: Example Fully configured jobs 
-          for each RUNTYP domain are found in 
-          ...smartinit.${model_ver}/working
 
 
 
