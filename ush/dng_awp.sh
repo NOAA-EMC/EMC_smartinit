@@ -33,11 +33,11 @@ export FORT51=grib2.t${cyc}z.smart${outreg}f${fhr}
 
 # Define grib2 awips parm file 
 if [ $outreg = conus2p5 ];then
-  awpparm=$UTILparm/grib2_awpnamdngconus${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awpnamdngconus${cyctp}f${fhr}.${ogrd}
 elif [ $outreg = ak3 ];then
-  awpparm=$UTILparm/grib2_awpnamdngak${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awpnamdngak${cyctp}f${fhr}.${ogrd}
 else
-  awpparm=$UTILparm/grib2_awpnamsmart${outreg}${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awpnamsmart${outreg}${cyctp}f${fhr}.${ogrd}
 fi
 
 if [ -s "$awpparm" ];then
@@ -67,7 +67,6 @@ if [ -s "$awpparm" ];then
   fi
 fi
 
-if [ $SENDDBN_GB2 = YES ]
- then
+if [ $SENDDBN = YES ];then
   $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2 $job $COMOUT/nam.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi
