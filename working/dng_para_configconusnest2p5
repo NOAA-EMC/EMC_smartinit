@@ -1,0 +1,53 @@
+export RUNTYP=conusnest2p5
+export cyc=06
+export ffhr=12
+export RM_TMPDIR=NO
+export NET=nam
+export RUN=nam
+export mdl=nam
+# nam_smartinit configuration
+# Jeff McQueen 01/2013 
+
+ export ymd=20130313   
+
+# ffhr,cyc,RUNTYP set in RUN_ALL
+#TEST export ffhr=06        # end of 3 hr forecast processing block
+#TEST export cyc=06
+
+# OUTPUT REGION TO DOWNSCALE TO
+# valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3
+#TEST export RUNTYP=ak    
+
+export RUN_ENVIR=emc
+export envir=emc
+
+#####################################################################################
+# This block is for Developer's test run:
+# Run config file to get input parameters
+# This config file should define the following variables
+# DATA_IN: Location of working directory, default to /tmpnwprd
+# SENDECF: If the job is to be running using SMS, default to YES
+# SENDDBN: Set to NO for developers, default to YES
+# COM_IN:  Directory for input files, default to /com/$NET/${envir}
+# COM_OUT: Directory for output file, default to /com/$NET/${envir}
+# gespath: Directory for the guess or restart files, default to /nwges/${envir}
+
+#  USED BY RUN_ALL JOB to set up Development input and output file directies
+#####################################################################################
+export SENDECF=NO
+export SENDDBN=NO
+export SENDDBN_GB2=NO
+
+export HOMEdng=/meso/save/$USER/smartinit.${model_ver}            # home dir
+export UTILparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm files
+export EXECnam=/nwprod/exec   #Location of nam_prdgen
+export COMROOT=/com
+
+export DATA_IN=/stmp/$USER/smartinit
+export COM_IN=${COMROOT}/${mdl}/prod
+export COM_SREF=${COMROOT}/sref/prod
+
+export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
+export pcom=${pcom:-${COM_OUT}}
+export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
+

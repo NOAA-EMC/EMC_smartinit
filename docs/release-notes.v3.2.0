@@ -26,6 +26,7 @@ Switched to Standard Grid 184 for conus2p5 run
 Turned off Guam option for this implementation
 * Cleaned up JNAM_SMINIT job to be consistent with ECF and NCO poliicies
 
+
 BUILD INSTRUCTIONS:
 checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 
@@ -34,7 +35,14 @@ checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 3.  Use docs/smartinit.ver if desired to set model_ver and modeld parms
 4.  See bjobcards-dev for recommended limits
     to use in JNAM_SMINIT jobs.
-5.  Set RUNTYP,cyc, ffhr from ecflow script as currently done.
+    eg: 
+#BSUB -W 03:00
+#BSUB -n 1
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=5500]
+#BSUB -q dev
+
+5.  Set RUNTYP,cyc, ffhr from ecflow script or in specific JNAM_SMINIT jobs with all parameters set.
 
 ========DETAILED UPDATES SINCE LAST RELEASE====================================================
 

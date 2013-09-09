@@ -110,7 +110,7 @@ done
 
 rm $qchkfl
 #TEST rm $wkdir/JNAM_SMINIT.$RUNTYP
-#TEST rm $wkdir/bjobcards-dev$RUNTYP
+rm $wkdir/bjobcards-dev$RUNTYP
 
 #echo SUBMIT plotmet.job for $RUNTYP $cyc from fhrs $ffhr to $ENDHRS
 export RUNTYP=$RUNTYP
