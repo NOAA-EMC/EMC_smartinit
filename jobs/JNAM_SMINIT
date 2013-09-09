@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa   #NCO ecflow environment set
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
