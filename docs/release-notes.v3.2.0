@@ -1,6 +1,7 @@
 
 smartinit V3.2.0 Q1FY14      
 Jeff McQueen
+September 9, 2013
 
 For this version NCO ECF submission will be exactly the same as previous upgrades
 JNAM_SMINIT will continue to be triggered  every 3 hrs from 00-84 forecast hours
@@ -23,14 +24,15 @@ SUMMARY:
 * added smartinit.ver to configure model and code versions.
 Switched to Standard Grid 184 for conus2p5 run
 Turned off Guam option for this implementation
+* Cleaned up JNAM_SMINIT job to be consistent with ECF and NCO poliicies
 
 BUILD INSTRUCTIONS:
 checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 
 1.  check out to /nwprod/smartinit.v3.2.0
 2.  build sorc codes nam_smartinit.fd, nam_smartprecip.fd
-3.  Use smartinit.ver if desired to set model_ver and modeld parms
-4.  See bjobcards-dev for recommended memory limits
+3.  Use docs/smartinit.ver if desired to set model_ver and modeld parms
+4.  See bjobcards-dev for recommended limits
     to use in JNAM_SMINIT jobs.
 5.  Set RUNTYP,cyc, ffhr from ecflow script as currently done.
 
@@ -132,7 +134,7 @@ put in https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.0
 1.  check out to /nwprod/smartinit.v3.2.0
 2.  build sorc codes nam_smartinit.fd, nam_smartprecip.fd
 3.  Use smartinit.ver if desired to set model_ver and modeld parms
-4.  See bjobcards-dev for recommended memory limits
+4.  See bjob-card-nco for recommended memory limits
     to use in JNAM_SMINIT job.
 5.  Set RUNTYP,cyc, ffhr from ecflow script as currently done.
     
