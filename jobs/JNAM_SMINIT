@@ -1,3 +1,4 @@
+#!/bin/ksh
 set -xa   #NCO ecflow environment set
 
 ########################################
@@ -28,21 +29,12 @@ set -xa   #NCO ecflow environment set
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
-msg="JOB $job HAS BEGUN"
-case $envir in 
-  prod|para|test|dev )
-    ./postmsg "$jlogfile" "$msg";;
-esac
-
 export modeld=${modeld:-smartinit}
 
-echo CYC is ${cyc:?}
+echo cyc is ${cyc:?}
 echo envir is ${envir:?}
 echo modeld is ${modeld:?}
 echo model_ver is ${model_ver:?}
-echo code_ver is ${code_ver:?}
-
-cd $DATA
 
 ######################################################
 # The following two variable could be defined in the
@@ -67,33 +59,27 @@ export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS
 # Run config file to get input parameters
 # This config file should define the following variables
 # DATA_IN: Location of working directory, default to /tmpnwprd
-# SENDECF: If the job is to be running using SMS, default to YES
+# SENDECF: If the job is to be running using ECF, default to YES
 # SENDDBN: Set to NO for developers, default to YES
 # COM_IN:  Directory for input files, default to /com/$NET/${envir}
 # COM_OUT: Directory for output file, default to /com/$NET/${envir}
 # gespath: Directory for the guess or restart files, default to /nwges/${envir}
+
+#  NOW SET IN : parm/smart_para_config
+#               which is called from kick_scripts/DRIVER and RUN_ALL
 #####################################################################################
-### For Developers, "group_name" is passed from the ECF script
-if [ "$USER" = Jeff.McQueen ];then
-### . /${group_name}/save/${LOGNAME}/${modeld}.${model_ver}/working/dng_para_config.${RUNTYP}
-  group_name=${group_name:-meso}
-  export userid=${userid:-$LOGNAME}
-  package_name=${package_name:-smart}
-  export DATA_IN=${DATA_IN:-/stmp/$USER/smartinit}
-  export pcom=${pcom:-/ptmp/$USER/smart$RUNTYP}
-fi
+
 
 ###############################################################
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
 if [ "$RUN_ENVIR" = prod ];then
-   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile.${job}.$$}
-   if [ "$envir" != prod ]; then
+ if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
    export SENDDBN_GB2=${SENDDBN_GB2:-NO}
    export pcom=${pcom:-/pcom/${envir}/${NET}}
-  fi
+ fi
 fi
 
 export PS4='$SECONDS + '
@@ -120,7 +106,11 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-/com/logs/jlogfile}
+if [ "$envir" = 'prod' ] ; then
+  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
+else
+  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+fi
 
 ####################################
 # SENDECF  - Flag Events on ECF
@@ -143,7 +133,6 @@ export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is i
  export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
  export USHdng=${USHdng:-${HOMEdng}/ush}
-export FIXruc2=${FIXruc2:-${HOMEdng}/fix}
 
 ###################################
 # Set up the UTILITIES
@@ -165,13 +154,7 @@ sh $utilscript/setpdy.sh
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh /nwges/prod/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
-#   For testing cold startexport GUESS=GDAS   #TEST
-
-# RETRO DEVELOPER SET
-#if [ $RUN_ENVIR != prod ];then 
-#   export PDY=$ymd  #ymd set in cfg parm file
-#   let PDYm1=$ymd-1;export PDYM1
-#fi
+#   For testing cold start export GUESS=GDAS   #TEST
 
 ##############################################
 # Define COM directories
@@ -222,7 +205,10 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-./env   #NCO ecflow environment set
+env  
+
+msg="JOB $job HAS BEGUN"
+./postmsg "$jlogfile" "$msg"
 
 ########################################################
 # Execute the script.

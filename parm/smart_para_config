@@ -36,8 +36,11 @@ export UTILparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm fi
 export EXECnam=/nwprod/exec   #Location of nam_prdgen
 export COMROOT=/com
 
+export DATA_IN=/stmp/$USER/smartinit
 export COM_IN=${COMROOT}/${mdl}/prod
 export COM_SREF=${COMROOT}/sref/prod
+
 export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
-export jlogfile=${COM_OUT}/jlogfile
-export pcom=$COM_OUT
+export pcom=${pcom:-${COM_OUT}}
+export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
+
