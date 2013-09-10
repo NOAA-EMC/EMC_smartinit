@@ -15,7 +15,8 @@ The following RUNTYP submissions will continue as before(RUNTYP set in ecf scrip
 #                 00-60     aknest3,conusnest2p5
 
 SUMMARY:
-* Added hourly output for all downscaled nests thru 01-12 forecast hours.
+* Added hourly output for all downscaled NAM nests thru 01-12 forecast hours.
+
 * Added gust and visibility to all downscaled output files.
 * Replaced surface pressure with downscaled surface pressure in all output files.
 * Added option to downscale NAM nest to extended conus nest 2.5 km grid 187.
@@ -28,6 +29,15 @@ SUMMARY:
 * Added smartinit.ver file to configure model and code versions.
 * Cleaned up JNAM_SMINIT template job to be consistent with ECF and NCO poliicies
 
+FILE SIZE INCREASE:
+  Outfiles  Size Increase/cycle   
+  conus     0
+  hi        1.4 mb
+  pr        0.4 mb
+ak_rtmages   10 mb
+  conus2p5  300 mb
+  ak3       150 mb
+      TOTAL     ~462 MB/cycle increase
 
 BUILD INSTRUCTIONS:
 checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.01
@@ -55,7 +65,7 @@ checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v3.2.01
 #BSUB -q dev
 
 5.  Set RUNTYP,cyc, ffhr from ecflow scripts or in specific JNAM_SMINIT jobs.
-
+NOTE: The working sub-directory provides example JNAM_SMINIT job scripts for each RUNTYP domain
 
 
 ========DETAILED UPDATES SINCE LAST RELEASE==========================================
