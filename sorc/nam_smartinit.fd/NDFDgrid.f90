@@ -117,6 +117,7 @@
         sfchtnew = topo_ndfd
         tnew=spval;qnew=spval
         dewnew=spval;unew=spval;vnew=spval
+        pnew=spval  
 
         do 120 j=1,jm
         do 120 i=1,im
