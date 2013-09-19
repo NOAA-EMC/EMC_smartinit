@@ -1,7 +1,7 @@
 # nam_smartinit configuration
 # Jeff McQueen 01/2013 
 
- export ymd=20130313   
+# export ymd=20130313   
 
 # ffhr,cyc,RUNTYP set in RUN_ALL
 #TEST export ffhr=06        # end of 3 hr forecast processing block
@@ -24,7 +24,7 @@ export envir=emc
 # COM_IN:  Directory for input files, default to /com/$NET/${envir}
 # COM_OUT: Directory for output file, default to /com/$NET/${envir}
 # gespath: Directory for the guess or restart files, default to /nwges/${envir}
-
+#
 #  USED BY RUN_ALL JOB to set up Development input and output file directies
 #####################################################################################
 export SENDECF=NO
@@ -39,7 +39,8 @@ export DATA_IN=/stmp/$USER/smartinit
 export COM_IN=${COMROOT}/${mdl}/prod
 export COM_SREF=${COMROOT}/sref/prod
 
-export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
-export pcom=${pcom:-${COM_OUT}}
+####export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
+export COM_OUT=/ptmp/$USER
+export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
 

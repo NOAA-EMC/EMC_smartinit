@@ -1,0 +1,19 @@
+#!/bin/sh
+set +x
+echo $pgm > pgmname
+[ -z "$pgmout" ] && echo "Variable pgmout not set"
+if [ ! -f break ]
+then
+   cat /dev/null > break
+fi
+paste pgmname break >> $pgmout
+rm pgmname 
+[ -f errfile ] && rm errfile
+export FORT01=0
+unset `env | grep "^FORT[0-9]\{1,\}=" | awk -F= '{print $1}'`
+if [ ! -f tracer ]
+then
+   cat /dev/null > tracer
+fi
+cat tracer > errfile
+set -x

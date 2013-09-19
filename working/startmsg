@@ -1,0 +1,4 @@
+#!/bin/sh
+[ -z "$utilscript" ] && utilscript="/nwprod/util/ush"
+stmsg="$pgm started"
+sh ${utilscript}/postmsg.sh "$jlogfile" "$stmsg"
