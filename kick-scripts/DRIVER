@@ -32,10 +32,10 @@ elif [ $HH -le 18 ];then export cyc=12;
 else 
   export cyc=18
 fi 
- export cyc=06 #TEST
+ export cyc=12 #TEST
 
-export fhrstr=00
-export ENDHRS=12
+export fhrstr=48
+export ENDHRS=63
 echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 
 #07/13: change to run ak and alaskanest separately for good output listing
@@ -43,7 +43,8 @@ echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
 ## for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3 guam;do
-for RUNTYP in ak hi pr ak_rtmages aknest3 ;do
+for RUNTYP in  pr ;do
+  mkdir -p /ptmp/${USER}/${RUNTYP}/nam.${wdayd}
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   export NET=$mdl
@@ -58,7 +59,7 @@ for RUNTYP in ak hi pr ak_rtmages aknest3 ;do
   M=$(echo $PDY | cut  -c 5-6 )
   D=$(echo $PDY | cut  -c 7-8 )
   wdayd=$Y$M$D
-  rm -rf /ptmp/${USER}/${RUNTYP}/nam.${wdayd}
+#TEST  rm -rf /ptmp/${USER}/${RUNTYP}/nam.${wdayd}
 
 # Create and submit JNAM_SMINIT job
 

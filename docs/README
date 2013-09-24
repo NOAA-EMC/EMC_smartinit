@@ -270,3 +270,8 @@ JNAM_SMINIT job
 
 09/11/2013 -- sorc/smartinit.fd/NDFDgrid.f90
 * Fixed downscaled PNEW initialization to spval
+
+09/26/2013 --> sorc/GETGRIB.f90
+* Fixed visibility reads for non-nest downscaling (>54 or 60 hrs)
+  Only read hourly visibility for nest downscaling (<=54 or 60 hrs)
+
