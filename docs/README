@@ -268,3 +268,5 @@ JNAM_SMINIT job
 * Cleaned up unnecessary scripts, fix, parm files
 * using envir=emc.  NCO reserves dev now.
 
+09/11/2013 -- sorc/smartinit.fd/NDFDgrid.f90
+* Fixed downscaled PNEW initialization to spval
