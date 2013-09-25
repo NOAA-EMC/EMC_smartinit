@@ -233,8 +233,13 @@
     LUGB=11;LUGI=12
     CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
-    GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
-    if (lnest) GDIN%KMAX=40
+    if (lnest) then   
+      GDIN%KMAX=40
+    else
+      GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
+      if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
+    endif
+
     if (GDIN%REGION.EQ.'GM') GDIN%KMAX=10   ! Pressure level files
     KMAX=GDIN%KMAX
 

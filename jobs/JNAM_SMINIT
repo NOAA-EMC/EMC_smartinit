@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa   #NCO preferred setting
+#TEST set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   

@@ -730,7 +730,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S3REF01,IRET,ISTAT)
 
 ! probability of .1"
-      J = 2
+      J = 1
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -739,7 +739,7 @@
       IF(IRET .NE. 0 )RETURN
 
 ! probability of 0.5"
-      J = 4
+      J = 3
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -761,7 +761,7 @@
       ENDIF
 
 ! 6-hr probability of 0.01"
-      J = 5
+       J = 5     
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -769,7 +769,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S6REF01,IRET,ISTAT)
 
 ! 6-hr probability of 0.1"
-      J = J+2
+      J = 6
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -777,7 +777,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S6REF10,IRET,ISTAT)
 
 ! 6-hr probability of 0.5"
-      J = J+2
+      J = 8
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -785,7 +785,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S6REF50,IRET,ISTAT)
 
 ! 12-hr probability of 0.01"
-      J = 10
+      J = 10  
         IF (IFHR .EQ. 6 .OR. IFHR .EQ. 9) THEN
         print *, 'FHR=6 or 9 so 12-hr sref probabilities not available'
           S12REF01 = 0.0
@@ -796,11 +796,11 @@
 
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S12REF01,IRET,ISTAT) 
 ! 12-hr probability of 0.1"
-      J = J+2 
+       J = 11
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S12REF10,IRET,ISTAT)
 
 ! 12-hr probability of 0.5"
-      J = J+2
+      J = 13
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S12REF50,IRET,ISTAT)
 
 

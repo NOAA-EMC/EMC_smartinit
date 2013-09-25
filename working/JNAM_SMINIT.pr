@@ -6,9 +6,10 @@
 #BSUB -R affinity[core]
 #BSUB -R rusage[mem=5500]
 #BSUB -q dev
+#BSUB -P RTMA
 #BSUB -x
 #!/bin/ksh
-set -xa   #NCO preferred setting
+#TEST set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
