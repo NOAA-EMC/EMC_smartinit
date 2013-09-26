@@ -1,6 +1,6 @@
-#BSUB -J smartinit.conus18-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.conus18-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.conus18-12
+#BSUB -J smartinit.conus12-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.conus12-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.conus12-12
 #BSUB -W 03:00
 #BSUB -n 1
 #BSUB -R affinity[core]
