@@ -145,7 +145,7 @@ typeset -Z2 srefcyc gefscyc pcphrl
 if [ $gtyp -ne $ogrd ];then
 case $RUNTYP in
   ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
-                      *) grid="255 $grid  0 64 25000 25000";;
+                      *) grid="255 $grid  0 64 2500 2500";;
 esac
 fi
 
