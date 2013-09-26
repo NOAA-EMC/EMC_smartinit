@@ -34,7 +34,7 @@ else
 fi 
  export cyc=12 #TEST
 
-export fhrstr=48
+export fhrstr=60
 export ENDHRS=63
 echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 
