@@ -268,3 +268,18 @@ JNAM_SMINIT job
 * Cleaned up unnecessary scripts, fix, parm files
 * using envir=emc.  NCO reserves dev now.
 
+09/11/2013 -- sorc/smartinit.fd/NDFDgrid.f90
+* Fixed downscaled PNEW initialization to spval
+
+09/26/2013 --> sorc/GETGRIB.f90
+* Fixed visibility reads for non-nest downscaling (>54 or 60 hrs)
+  Only read hourly visibility for nest downscaling (<=54 or 60 hrs)
+* Fixed upper level varb reads for non-nest downscaling by setting KMAX levels =35
+  for in between forecast hours (eg: 61,62, 64...)
+* Changed POP read indexing (line skipping, J)
+  from J =0  2  4   5  7  9  10  12 14
+    to J =0  1  3   5  6  8  10  11 13
+        .01 .1 .5 .01 .1 .5 .01  .1 .5
+         3 hr---    6 hr---  12 hr---- SREF POP
+* nam_smartinit.sh
+    Fixed copygb gridext varb to correct dx 2500 2500
