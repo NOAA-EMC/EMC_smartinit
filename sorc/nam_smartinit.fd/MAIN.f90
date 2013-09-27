@@ -233,8 +233,13 @@
     LUGB=11;LUGI=12
     CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
-    GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
-    if (lnest) GDIN%KMAX=40
+    if (lnest) then   
+      GDIN%KMAX=40
+    else
+      GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
+      if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
+    endif
+
     if (GDIN%REGION.EQ.'GM') GDIN%KMAX=10   ! Pressure level files
     KMAX=GDIN%KMAX
 
@@ -1114,7 +1119,7 @@
         END WHERE
 
         WHERE (validpt .and. PCP10 .GT. PXCP10)
-          TMPPCP=(PCP01+PXCP01)/2.
+          TMPPCP=(PCP10+PXCP10)/2.      ! ERROR FOUND 09/26/13
           PCP10  = TMPPCP
           PXCP10 = TMPPCP
         END WHERE
@@ -1161,6 +1166,7 @@
         else 
         
          IF (IAHR.EQ.3) THEN
+          if (I.eq.90.and.J.eq.65) print *, 'POPTMP',POPTMP
           IF (BL .GT. 0.) THEN
             POP(I,J)=(POPTMP+PCP01(I,J))/2.
           ELSE
@@ -1180,7 +1186,7 @@
         endif  !validpt check
        ENDDO
       ENDDO
-
+      print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(90,65), QPF(90,65),PCP01(90,65),PCP10(90,65),BLI(90,65)
       RETURN 
       END SUBROUTINE mkpop
 
