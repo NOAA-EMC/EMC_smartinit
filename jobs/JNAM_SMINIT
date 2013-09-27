@@ -140,7 +140,7 @@ export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
-export gespath=${gespath:-/nwprod/prod}
+export gespath=${gespath:-/nwges/prod}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
