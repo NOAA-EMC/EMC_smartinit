@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -x 
+###set -x 
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
@@ -44,8 +44,9 @@ if [ $RUNTYP = guam ];then export NET=hiresw;fi
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-mkdir -p /stmp/${USER}/${modeld}
-mkdir -p /stmp/${USER}/${modeld}/list
+export DATA_IN=/stmp/${USER}/${modeld}
+mkdir -p $DATA_IN
+mkdir -p $DATA_IN/list
 while [ $ffhr -le $ENDHRS ];do
   export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
  
@@ -59,6 +60,7 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export NET=$NET"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export RUN=$NET"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export mdl=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export DATA=/${DATA_IN/${job}"        >>$wkdir/dng_para_config${RUNTYP}
   cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 
@@ -67,7 +69,7 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -oo /stmp/${USER}/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -eo /stmp/${USER}/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
 ##echo "#BSUB -L /bin/ksh"          >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -W 03:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -W 01:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                 >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#####BSUB -R "affinity[core]""  >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -R "rusage[mem=5500]"" >>${wkdir}/bjobcards-dev${RUNTYP}

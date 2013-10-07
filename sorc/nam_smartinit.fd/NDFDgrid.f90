@@ -67,8 +67,8 @@
         veglim=0.5
         scale=100.
         ivgid=81 ! all grids including CS2P grid 187 Extended CONUS
-        if (gdin%region .eq. 'CS2P') ivgid=225 ! CS2P grid 184
-!        if (gdin%region .eq. 'GM')  ivgid=81
+        if (gdin%region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type
+!        if (gdin%region .eq. 'GM')  ivgid=81  ! Land fraction
 
         print *, 'READ IN  GRIB  TOPO file'
         JGDS=-1

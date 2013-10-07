@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa   #NCO preferred setting
+##set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -90,7 +90,7 @@ date
 ####################################
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
-export DATA=$DATA_IN/${job}.${pid}
+export DATA=${DATA:-$DATA_IN/${job}.${pid}}
 mkdir -p $DATA
 cd $DATA
 
@@ -152,6 +152,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
+#TEST export PDY=20130926
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 

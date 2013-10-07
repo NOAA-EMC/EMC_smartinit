@@ -1,14 +1,14 @@
-#BSUB -J smartinit.ak06-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.ak06-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.ak06-12
-#BSUB -W 03:00
+#BSUB -J smartinit.ak12-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.ak12-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.ak12-12
+#BSUB -W 01:00
 #BSUB -n 1
-#BSUB -R affinity[core]
+#####BSUB -R affinity[core]
 #BSUB -R rusage[mem=5500]
 #BSUB -q dev
-#BSUB -x
+#BSUB -P RTMA
 #!/bin/ksh
-set -xa   #NCO preferred setting
+##set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -149,7 +149,7 @@ export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
-export gespath=${gespath:-/nwprod/prod}
+export gespath=${gespath:-/nwges/prod}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
@@ -161,6 +161,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
+#TEST export PDY=20130926
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
