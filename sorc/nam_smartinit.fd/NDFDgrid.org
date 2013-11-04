@@ -56,7 +56,6 @@
         print *, 'read in Binary topo and veg files '
         open (46, file='TOPONDFD', form='unformatted')
         read (46) topo_ndfd
-        DX=5000.;DY=5000.
         close (46)
      
 !  read in 5 km vegetation for CONUS domain
@@ -78,9 +77,6 @@
         ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
         CALL SETVAR(46,47,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,topo_ndfd,IRET,ISTAT)
-
-        DX=JGDS(9)
-        DY=JGDS(10)
 
      print *, 'READ IN GRIB LAND COVER file'
         CALL RDHDRS(48,49,IGDNUM,GDIN,NUMVAL)
@@ -278,21 +274,17 @@
 ! -- 0.7 factor is a wag at surface effects on wind speed
 !     when interpolating from the free atmosphere to
 !     the NDFD topo.
-
-!          speedc = 0.7*sqrt(uc*uc+vc*vc)
-!          speed = sqrt(uc)**2 + vc)**2)
-!          ratio = max(1.,speedc/(max(0.001,speed)) )
-          unew(i,j) = uc
-          vnew(i,j) = vc
+          speedc = 0.7*sqrt(uc*uc+vc*vc)
+          speed = sqrt(uwnd(i,j,1)**2 + vwnd(i,j,1)**2)
+          ratio = max(1.,speedc/(max(0.001,speed)) )
+          unew(i,j) = ratio*(uwnd(i,j,1))
+          vnew(i,j) = ratio*(vwnd(i,j,1))
 
 !============================================
         END IF
 !============================================
 
 120     continue
-
-!       Adjust winds to topography
-        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
@@ -426,7 +418,3 @@
        endwhere
        return
        end
-
-
-
-       

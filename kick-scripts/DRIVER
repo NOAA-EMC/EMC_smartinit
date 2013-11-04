@@ -13,9 +13,9 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
+export model_ver=v3.2.1
+export code_ver=v3.2.1
 export modeld=smartinit
-export model_ver=v3.2.0
-export code_ver=v3.2.0
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 export RUN_ENVIR=emc
 export envir=emc
@@ -34,7 +34,7 @@ elif [ $HH -le 18 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#TEST export cyc=06 
+export cyc=06  #TEST
 
 export fhrstr=00
 export ENDHRS=12
@@ -45,7 +45,8 @@ echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
 ##for RUNTYP in conus conusnest2p5;do #   ak hi pr ak_rtmages aknest3 ;do
-for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3;do
+#TEST for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3;do
+for RUNTYP in conus conusnest2p5;do #TEST ak hi pr ak_rtmages conusnest2p5 aknest3;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   export NET=$mdl
@@ -65,6 +66,7 @@ for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3;do
 # Create and submit JNAM_SMINIT job
 
   echo SUBMIT RUN_ALL $RUNTYP  CYC $cyc
-  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}/smout-${RUNTYP} 2>&1 &
+  mkdir -p /stmp/${USER}/${modeld}.${model_ver} 
+  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}.${model_ver}/smout-${RUNTYP} 2>&1 &
   sleep 10
 done

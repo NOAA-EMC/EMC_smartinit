@@ -786,7 +786,7 @@
                 TEMP1=THOLD(:,:,2)
                 TEMP2=THOLD(:,:,3)
 ! JTM 01-27-2013
-! Added check for single points when temperate=0 at validpt 
+! Added check for single points when temperature=0 at validpt 
 ! This should not happen but has been found on some nests
 !                where (temp1.le.10) TEMP1=SPVAL
 !                where (temp2.le.10) TEMP2=SPVAL
