@@ -45,8 +45,7 @@ echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
 ##for RUNTYP in conus conusnest2p5;do #   ak hi pr ak_rtmages aknest3 ;do
-#TEST for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3;do
-for RUNTYP in conus conusnest2p5;do #TEST ak hi pr ak_rtmages conusnest2p5 aknest3;do
+for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   export NET=$mdl

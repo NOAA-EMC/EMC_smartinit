@@ -1,6 +1,6 @@
-#BSUB -J smartinit.conusnest2p506-00
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.conusnest2p506-00
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.conusnest2p506-00
+#BSUB -J smartinit.conusnest2p506-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.conusnest2p506-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.conusnest2p506-12
 #BSUB -W 01:00
 #BSUB -n 1
 #####BSUB -R affinity[core]

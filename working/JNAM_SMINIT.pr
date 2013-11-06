@@ -1,6 +1,6 @@
-#BSUB -J smartinit.pr12-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.pr12-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.pr12-12
+#BSUB -J smartinit.pr06-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.pr06-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.pr06-12
 #BSUB -W 01:00
 #BSUB -n 1
 #####BSUB -R affinity[core]
