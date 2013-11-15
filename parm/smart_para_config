@@ -35,7 +35,7 @@ export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm fi
 export EXECnam=/nwprod/exec   #Location of nam_prdgen
 export COMROOT=/com
 
-export DATA_IN=/stmp/$USER/smartinit
+export DATA_IN=/stmp/$USER/smartinit.${model_ver}
 export COM_IN=${COMROOT}/${mdl}/prod
 export COM_SREF=${COMROOT}/sref/prod
 

@@ -1,12 +1,12 @@
-#BSUB -J smartinit.ak06-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.ak06-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.ak06-12
-#BSUB -W 01:00
+#BSUB -J smartinit.ak12-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.ak12-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.ak12-12
 #BSUB -n 1
-#####BSUB -R affinity[core]
-#BSUB -R rusage[mem=5500]
-#BSUB -q dev
+#BSUB -W 0:30
 #BSUB -P RTMA
+#BSUB -q dev
+#BSUB -R span[ptile=1]
+#BSUB -R rusage[mem=4500]
 #!/bin/ksh
 ##set -xa   #NCO preferred setting
 
