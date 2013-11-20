@@ -608,9 +608,10 @@ EOF5
 #========================================================
 # Run Smartinit
 #========================================================
+  hrlyfhr=12  # forecast hour to output hourly files to
   case $RUNTYP in
    conus|conusnest) RGIN=CS;;
-      conusnest2p5) RGIN=CS2P;;
+      conusnest2p5) RGIN=CS2P;hrlyfhr=36;;
         ak_rtmages) RGIN=AKRT;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
@@ -620,7 +621,7 @@ EOF5
   export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
-  if [ $fhr -le 12 ];then
+  if [ $fhr -le $hrlyfhr ];then
     case $RUNTYP in
      ak_rtmages) 
        cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00

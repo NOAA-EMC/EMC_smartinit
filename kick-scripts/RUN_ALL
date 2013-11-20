@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -x 
+###set -x 
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
@@ -44,12 +44,13 @@ if [ $RUNTYP = guam ];then export NET=hiresw;fi
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-mkdir -p /stmp/${USER}/${modeld}
-mkdir -p /stmp/${USER}/${modeld}/list
+export DATA_IN=/stmp/${USER}/${modeld}.${model_ver}
+mkdir -p $DATA_IN
+mkdir -p $DATA_IN/list
 while [ $ffhr -le $ENDHRS ];do
   export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
  
-  rm -f /stmp/${USER}/${modeld}/list/o${job}
+  rm -f /stmp/${USER}/${modeld}.${model_ver}/list/o${job}
 
 # Create and invoke config file needed by Job 
   echo "export RUNTYP=$RUNTYP"   >$wkdir/dng_para_config${RUNTYP}
@@ -59,20 +60,20 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export NET=$NET"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export RUN=$NET"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export mdl=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export DATA=/${DATA_IN}/${job}"        >>$wkdir/dng_para_config${RUNTYP}
   cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 
 # Create JNAM_SMINIT job
   echo "#BSUB -J ${job}"             >${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -oo /stmp/${USER}/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -eo /stmp/${USER}/${modeld}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
-##echo "#BSUB -L /bin/ksh"          >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -W 03:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -n 1"                 >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#####BSUB -R "affinity[core]""  >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -R "rusage[mem=5500]"" >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -q dev"                >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -P RTMA"                >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmp/${USER}/${modeld}.${model_ver}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmp/${USER}/${modeld}.${model_ver}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -n 1"                >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -W 1:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -P RTMA"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -q dev"              >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "span[ptile=1]""    >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "rusage[mem=4800]"" >>${wkdir}/bjobcards-dev${RUNTYP}
 
   cd ${wkdir}
   cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
@@ -102,7 +103,7 @@ while [ $ffhr -le $ENDHRS ];do
     sleep 60
     qname > $qchkfl
     status=`grep $jobid $qchkfl  | awk '{ print $2 }'`
-    if [ $SECONDS -gt 3000 ];then exit;fi
+    if [ $SECONDS -gt 4500 ];then exit;fi
   done
   fi
   echo SMINIT JOB COMPLETED: $err  $RUNTYPE CYCLE $cyc FFHR $ffhr
