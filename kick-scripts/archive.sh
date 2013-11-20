@@ -2,7 +2,7 @@
 # Archive para smartinit files
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
-export yyyymmdd=20131117
+# export yyyymmdd=20131117
 export wdir=/stmp/${USER}/archive
 indir=/ptmp/${USER}/nam.$yyyymmdd
 

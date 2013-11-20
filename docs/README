@@ -286,7 +286,8 @@ VERSION 3.2.2===================================================
 * nam_smartinit.sh
     Fixed copygb gridext varb to correct dx 2500 2500
 
-VERSION 3.2.3
+============================VERSION 3.2.3==============================================
+FY14Q2
 
 11/01/2013 NDFDgrid.f90
 * Added VADJUST.f90 subroutine to adjust 10 m winds based on terrain gradient (CALMET techniqe)
