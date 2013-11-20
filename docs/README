@@ -285,3 +285,16 @@ VERSION 3.2.2===================================================
          3 hr---    6 hr---  12 hr---- SREF POP
 * nam_smartinit.sh
     Fixed copygb gridext varb to correct dx 2500 2500
+
+VERSION 3.2.3
+
+11/01/2013 NDFDgrid.f90
+* Added VADJUST.f90 subroutine to adjust 10 m winds based on terrain gradient (CALMET techniqe)
+
+11/05/2013 MAIN.f90
+* Added Routine HINDEX to compute HAINES Index from downscaled Pressure or reference height as compared
+to downscaled topography.  This reference hght determines the method for computing HI (what T, RH level and coefficiants.
+11/20/2013 -->sorc/MAIN.f90 & ush/nam_smartinit.sh
+*   The length of hourly file writes set by fhrhrly in MAIN.f90 and in nam_sminit.sh
+*   11/2013: Conus 2.5 km hrly output extended to 36 hours for wave model input
+

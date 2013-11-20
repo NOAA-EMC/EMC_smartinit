@@ -773,12 +773,16 @@
       CALL GRIBIT(ID,RITEHD,DOWNDEW,GDIN,71,DEC)
     ENDIF
 
-!   For HI Nest Write limited data to grib file for hrs 1,2,4,5,7,8,10,11
-!   since this files serve as 1st guess for Alaskan RTMA
+!   For Nests Write limited data to grib file for hrs 1,2,4,5,7,8,10,11
+!   since these files serve as 1st guess for RTMA
+!   The length of hourly file writes set by fhrhrly here and in nam_sminit.sh
+!   11/2013: Conus 2.5 km hrly output extended to 36 hours for wave model input
+      fhrhrly=12  
+      IF (TRIM(REGION).EQ.'CS2P') fhrhrly=36
       IF (TRIM(REGION).EQ.'HI' .or. TRIM(REGION).EQ.'PR'  & 
       .or. TRIM(REGION).EQ.'AK' .or. TRIM(REGION).EQ.'AK3' & 
       .or. TRIM(REGION).EQ.'AKRT' .or. TRIM(REGION).EQ.'CS2P') THEN
-        IF(.not.LHR3 .AND. FHR.LT.12) CALL GRIBLIMITED(70,GDIN)
+        IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(70,GDIN)
       ENDIF
 
 !  write older T/Td data for max/min to grib file

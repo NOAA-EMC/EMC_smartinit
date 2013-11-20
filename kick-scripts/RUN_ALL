@@ -69,11 +69,11 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -oo /stmp/${USER}/${modeld}.${model_ver}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -eo /stmp/${USER}/${modeld}.${model_ver}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -W 0:30"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -W 1:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -P RTMA"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -q dev"              >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -R "span[ptile=1]""    >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -R "rusage[mem=4500]"" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -R "rusage[mem=4800]"" >>${wkdir}/bjobcards-dev${RUNTYP}
 
   cd ${wkdir}
   cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}

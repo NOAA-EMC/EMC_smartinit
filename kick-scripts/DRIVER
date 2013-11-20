@@ -47,6 +47,7 @@ echo DRIVER $modeld run from fhr $fhrstr to $ENDHRS
 for RUNTYP in conus ak hi pr ak_rtmages conusnest2p5 aknest3;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
+  if [ $RUNTYPE = conusnest2p5 ];then ENDHR=36;fi
   export NET=$mdl
   export RUN=$NET
   export RUNTYP=$RUNTYP
