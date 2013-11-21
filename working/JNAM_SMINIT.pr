@@ -1,6 +1,6 @@
-#BSUB -J smartinit.pr12-63
-#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.pr12-63
-#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.pr12-63
+#BSUB -J smartinit.pr00-00
+#BSUB -oo /stmp/Jeff.McQueen/smartinit/list/osmartinit.pr00-00
+#BSUB -eo /stmp/Jeff.McQueen/smartinit/list/osmartinit.pr00-00
 #BSUB -W 03:00
 #BSUB -n 1
 #####BSUB -R affinity[core]
@@ -9,7 +9,7 @@
 #BSUB -P RTMA
 #BSUB -x
 #!/bin/ksh
-#TEST set -xa   #NCO preferred setting
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
