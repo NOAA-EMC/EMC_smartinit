@@ -67,6 +67,6 @@ if [ -s "$awpparm" ];then
   fi
 fi
 
-if [ $SENDDBN = YES ];then
-  $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2 $job $COMOUT/nam.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+if [ $SENDDBN_GB2 = YES ];then
+  $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2_PARA $job $COMOUT/nam.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi

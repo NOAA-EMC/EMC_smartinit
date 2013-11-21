@@ -1,5 +1,5 @@
 #!/bin/ksh
-##set -xa   #NCO preferred setting
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -29,7 +29,8 @@
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
-export modeld=${modeld:-smartinit}
+#Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
+export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
 
 echo cyc is ${cyc:?}
 echo envir is ${envir:?}
@@ -78,6 +79,7 @@ export mdl=${NET}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
+   export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preferrences 
    export pcom=${pcom:-/pcom/${envir}/${NET}}
  fi
 fi
@@ -91,6 +93,7 @@ date
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
 export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+#NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -125,8 +128,8 @@ export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
-export HOMEdng=${HOMEdng:-${ROOTdng}/${modeld}.$model_ver}
+export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
+export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
@@ -163,7 +166,7 @@ sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}
+export COM_IN=${COM_IN:-/com/${NET}/prod}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
