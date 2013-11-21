@@ -779,9 +779,11 @@
 !   11/2013: Conus 2.5 km hrly output extended to 36 hours for wave model input
       fhrhrly=12  
       IF (TRIM(REGION).EQ.'CS2P') fhrhrly=36
+      print *, 'REGION ',TRIM(REGION),fhrhrly
       IF (TRIM(REGION).EQ.'HI' .or. TRIM(REGION).EQ.'PR'  & 
       .or. TRIM(REGION).EQ.'AK' .or. TRIM(REGION).EQ.'AK3' & 
       .or. TRIM(REGION).EQ.'AKRT' .or. TRIM(REGION).EQ.'CS2P') THEN
+        print *, 'GET GRIBLIMITIED ',TRIM(REGION),fhrhrly
         IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(70,GDIN)
       ENDIF
 
@@ -1220,7 +1222,7 @@
       use aset2d
       use asetdown
 !---------------------------------------------------------
-!  write limited data to grib file for hrs 1,2,4,5,7,8
+!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11
 !  since this file serve as 1st guess for Alaskan RTMA
 !---------------------------------------------------------
        INTEGER ID(25)
