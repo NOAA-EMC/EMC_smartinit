@@ -390,7 +390,7 @@
 ! Moved to hourly reads for hourly writes for RTMA (03-19-2013) from 00-12 hours
 ! visibility from NAM parent only available every 3 hours (09-24-2013)
        print *, 'visibility read', lnest, LHR3
-      if (lnest .or. LHR3) then
+      if (lnest .or. LHR3 .or. REGION.EQ.'AKRT') then
         JPDS=-1;J=0
         JPDS(5) = 020
         JPDS(6) = 001
