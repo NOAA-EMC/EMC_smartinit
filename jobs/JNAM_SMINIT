@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa   #NCO preferred setting
+####NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -54,7 +54,7 @@ export SENDECF=${SENDECF:-YES}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export mdl=${NET}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -79,9 +79,11 @@ export mdl=${NET}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
-   export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preferrences 
+   export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
    export pcom=${pcom:-/pcom/${envir}/${NET}}
  fi
+else
+ dng_para_config${RUNTYP}   #EMC User set
 fi
 
 export PS4='$SECONDS + '
@@ -155,7 +157,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-#TEST export PDY=20130926
+export PDY=20131125   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
@@ -210,7 +212,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-env  
+####NCO SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"

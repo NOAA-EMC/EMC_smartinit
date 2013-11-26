@@ -16,6 +16,7 @@
 # 2013-07-01  JTM : added extended conus (187) and guamnest hrw nest options (199)
 # 2013-07-03  JTM : Adding use of cfg file for grid settup
 # 2013-08-27  JTM : Put in Vertical Structure
+# 2013-11-20  JTM : Added option to downscale DGEX 3 hrly files beyond 84 hrs w/ 6 hr precip
 #======================================================================
 #  Set Defaults fcst hours,cycle,model,region in config_nam_nwpara called in parent job
 
@@ -34,10 +35,13 @@
 # alaskanest   :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=198  
 # aknest3      :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=91
 # guamnest     :  GEFS-GRID???   HRW-GRID=guamnmm.t00z.wrfprs  NDFD-GRD=199
+# dgex         :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart    NDFD-GRD=184
+# dgexak       :  SREF-GRID=212  DGEXGRID=dgex_ak.tCCz.bsmart       NDFD-GRD=91
 #======================================================================
 
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
+if [ $RUNTYP = dgex ];then inest=1;fi  #set to read in 6hr precip for dgex files
 export rg=`echo $RUNTYP |cut -c1-2` 
 
 #=====================================================================
@@ -184,7 +188,7 @@ if [ $ffhr -gt 0 ]; then
 # get the sref precip fields that we need
   cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
 
-  if [ ! -s SREFPROB -o $RUNTYP = guamnest ]; then
+  if [ ! -s SREFPROB -o $RUNTYP = guamnest -o $ffhr -gt 84 ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   fi
 
@@ -240,6 +244,7 @@ let ffhr1=ffhr-1
 let ffhr2=ffhr-2
 hours="${ffhr}"
 if [ $ffhr -ge 3 ];then hours="${ffhr2} ${ffhr1} ${ffhr}";fi
+if [ $RUNTYP = dgex ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
@@ -259,29 +264,46 @@ for fhr in $hours; do
 # Check that NAM 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
       bgrd3d) 
-# Check that NAM 00 hr analysis is from NDAS or GDAS (08/2013)
+#     Check that NAM 00 hr analysis is from NDAS or GDAS (08/2013)
         if [ $fhr -eq 00 -a $GUESS = GDAS ];then
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate $ ${cyc}Z CYCLE $mdl $pcfhr FORECAST;echo
-          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}${pcfhr}.tm00
-          ln -fs ${mdlin} fort.11
+          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+          ln -fs ${mdlin}${pcfhr}.tm00 fort.11
           ln -fs WRFPRS${fhr}.tm00 fort.51
           echo ${PDY}${cyc} | ${utilexec}/overdate.grib
         else
           echo;echo $mdl GUESS= $GUESS
-          cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00
+          mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
+          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         fi
-#       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
+#     Reduce the input model file size for prdgen on wcoss 32 bit limited machines
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
         mv temp WRFPRS${fhr}.tm00;;
-      wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00;;
-           *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 WRFPRS${fhr}.tm00;;
+      wrfprs)  
+        mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
+        cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00;;
+           *) 
+        if [ $RUNTYP = dgex ];then 
+          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z${natgrd}
+          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+        else
+          mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
+          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+        fi;;
     esac
+
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+  inhrfrq=1
 
   if [ $fhr -gt 0 ];then
+
+#   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
+    inhrfrq=3
+    if [ -s ${mdlin}${ffhr1}.tm00 -a $check -ne 0 ];then inhrfrq=1;fi
+
 # nam_sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
 #   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
@@ -358,13 +380,12 @@ for fhr in $hours; do
         pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
       esac
    
+    cp ${mdlin}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
     case $natgrd in 
-      bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
+      bgrd3d) 
         ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
         mv temp WRFPRS${FHRFRQ}.tm00;;
-      wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00;;
-           *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00;;
     esac
     $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
     $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
@@ -379,23 +400,21 @@ for fhr in $hours; do
     ln -sf "${freq}snow.${fhr}"    fort.52
 
     if [ $MKPCP -eq $mk12p ];then
+      cp ${mdlin}${fhr3}.tm00 WRFPRS${fhr3}.tm00
       case $natgrd in 
-        bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00
+        bgrd3d) 
           ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
           ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
           mv temp WRFPRS${fhr3}.tm00;;
-        wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00;;
-             *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr3}.tm00 WRFPRS${fhr3}.tm00;;
       esac
       $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
+      cp ${mdlin}${fhr6}.tm00 WRFPRS${fhr6}.tm00
       case $natgrd in 
-        bgrd3d) cp $COMIN/${mdl}.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00
+        bgrd3d) 
          ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
          ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
          mv temp WRFPRS${fhr6}.tm00;;
-        wrfprs) cp $COMIN/${mdlgrd}.t${cyc}z.${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00;;
-             *) cp $COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr6}.tm00 WRFPRS${fhr6}.tm00;;
       esac
       $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
@@ -448,8 +467,8 @@ EOF5
 #   To interp nests to 5 km, just use same parent nam master files 
 #   To interp ak/cs nests to ak3/cs2p5, use special smartmaster ctl files
     case $rg in
-      ak|hi|pr|gm) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
-          con|ak3) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
+      ak|hi|pr|gm|dg) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
+             con|ak3) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
     esac
     ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
   fi
@@ -462,7 +481,7 @@ EOF5
   ${EXECnam}/nam_prdgen < input${fhr}.prd > prdgen.out${fhr}
   export err=$?;  err_chk
 
-  cp ${COMROOT}/date/t${cyc}z DATE
+  cp /com/date/t${cyc}z DATE
   if [ -s $prdgfl ];then  
     mv ${prdgfl} meso${rg}.NDFDf${fhr}  
     echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
@@ -496,8 +515,14 @@ EOF5
   if [ $check -eq 0 -a $fhr -ne 00 ];then 
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
     cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
-    cp MAXMIN${fhr2}.tm00 MAXMIN2
-    cp MAXMIN${fhr1}.tm00 MAXMIN1
+    if [ -s MAXMIN2 ];then
+      cp MAXMIN${fhr2}.tm00 MAXMIN2
+      cp MAXMIN${fhr1}.tm00 MAXMIN1
+    else
+#     For 3 hourly input files, hourly maxmins not created
+      cp meso${rg}.NDFDf${fhr} MAXMIN2
+      cp meso${rg}.NDFDf${fhr} MAXMIN1
+    fi
     $utilexec/grbindex MAXMIN1 MAXMIN1i
     $utilexec/grbindex MAXMIN2 MAXMIN2i
   fi
@@ -617,7 +642,7 @@ EOF5
    esac
 
   export pgm=nam_smartinit; . prep_step
-  ${EXECdng}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest >smartinit.out${fhr}
+  ${EXECdng}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest $inhrfrq >smartinit.out${fhr}
   export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields

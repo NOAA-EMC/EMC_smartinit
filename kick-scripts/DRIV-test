@@ -34,19 +34,20 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-###export cyc=06  #TEST
+export cyc=06  #TEST
 
-export fhrstr=00
+export fhrstr=87
 echo DRIVER $modeld run CYC $cyc fhr $fhrstr 
 
 #07/13: change to run ak and alaskanest separately for good output listing
 #07/13: added guam=guamnmm  configuration
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
-for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
-  export ENDHRS=12
+for RUNTYP in dgex;do # ak hi pr ak_rtmages conusnest2p5 aknest3;do
+  export ENDHRS=87
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
+  if [ $RUNTYP = dgex ];then export mdl=dgex;fi
   if [ $RUNTYP = conusnest2p5 ];then ENDHRS=36;fi
   export NET=$mdl
   export RUN=$NET

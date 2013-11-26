@@ -57,11 +57,12 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export cyc=$cyc"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export ffhr=$ffhr"      >>$wkdir/dng_para_config${RUNTYP}
   echo "export RM_TMPDIR=NO"    >>$wkdir/dng_para_config${RUNTYP}
-  echo "export NET=$NET"        >>$wkdir/dng_para_config${RUNTYP}
-  echo "export RUN=$NET"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export mdl=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export NET=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export RUN=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export DATA=/${DATA_IN}/${job}"        >>$wkdir/dng_para_config${RUNTYP}
   cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
+  chmod 755 ${wkdir}/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 
 # Create JNAM_SMINIT job
@@ -69,7 +70,7 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -oo /stmp/${USER}/${modeld}.${model_ver}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -eo /stmp/${USER}/${modeld}.${model_ver}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -W 1:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -W 2:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -P RTMA"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -q dev"              >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -R "span[ptile=1]""    >>${wkdir}/bjobcards-dev${RUNTYP}
@@ -103,7 +104,7 @@ while [ $ffhr -le $ENDHRS ];do
     sleep 60
     qname > $qchkfl
     status=`grep $jobid $qchkfl  | awk '{ print $2 }'`
-    if [ $SECONDS -gt 4500 ];then exit;fi
+    if [ $SECONDS -gt 7200 ];then exit;fi  #SECONDS is the total runtime since first submission
   done
   fi
   echo SMINIT JOB COMPLETED: $err  $RUNTYPE CYCLE $cyc FFHR $ffhr

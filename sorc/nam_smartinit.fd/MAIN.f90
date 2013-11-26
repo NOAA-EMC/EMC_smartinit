@@ -202,6 +202,8 @@
       call getarg(5,ctmp)
       READ (ctmp,*) INEST
       if(inest.gt.0)GDIN%LNEST=.TRUE.
+      call getarg(6,ctmp)
+      READ (ctmp,*) GDIN%INHRFRQ   !hrly freq of input files (eg 1 or 3 hrly)
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
       CYC=GDIN%CYC;LNEST=GDIN%LNEST
@@ -954,7 +956,7 @@
       ID(2)=2
       ID(8)=209;ID(9)=1
       DEC=1.0
-      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
+!jtm not needed      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
 
        print *, 'completed main'
       STOP

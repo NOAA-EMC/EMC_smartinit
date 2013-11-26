@@ -13,5 +13,8 @@ guam         gm   guam     guamnmm    243       wrfprs   199     199
 guamnest     gm   guam     guamnmm    243       wrfprs   199     199
 aknest3      ak3  ak3      alaskanest 216      .bsmart    91     5  1649 1105 40530 181429 8 210000 2976 2976
 conusnest2p5 con  conus2p5 conusnest  212      .bsmart   184     3  2145 1377 20192 238446 8 265000 2540 2540
-###conusnest187 con  conus187 conusnest  212      .bsmart   187    3  2145 1597 20192 238446 8 265000 2540 2540
+dgex        dgx   conus     conus      212     .bsmart   184     3  2145 1377 20192 238446 8 265000 2540 2540
+dgex_conus  dgx   conus     conus      212     .bsmart   184     3  2145 1377 20192 238446 8 265000 2540 2540
+dgex_alaska dgx   ak3       alaska     216     .bsmart    91     5  1649 1105 40530 181429 8 210000 2976 2976
+###conusnest187 con  conus187 conusnest  212     .bsmart   187    3  2145 1597 20192 238446 8 265000 2540 2540
 

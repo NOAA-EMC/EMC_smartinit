@@ -286,6 +286,12 @@ VERSION 3.2.2===================================================
 * nam_smartinit.sh
     Fixed copygb gridext varb to correct dx 2500 2500
 
+11/20/2013
+V3.2.21 : fixed visibility read in GETGRIB.f90 for AK_RTMAGES in-between hours
+          Added NCO ecflow and gempak scripts.
+          Made JNAM_SMINIT job compatible with NCO version
+NOTE: Visibility not read in from non-nests (should fix this ?)
+
 ============================VERSION 3.2.3==============================================
 FY14Q2
 
