@@ -1,0 +1,177 @@
+#!/bin/ksh      
+########################################
+# Preliminary data setup step for exsref_wrf_gfsprep.sh.ecf
+# change log:
+# 08/14/2007, Jun Du: Initial Implementation
+# 05/20/2008, Jun Du: run it separately by disconnecting to $model and $member
+#                     for generality
+# 9/20/2009, Julia Zhu   Scripts are modified to be sharable
+#                        between EMC and NCO
+#         Please note that variable "RUN_ENVIR" is set and used
+#         in the development enviroment only.
+# 9/27/2011, Jun Du: To speed it up, this step is now submitted sinutaneously 
+#                    for all members (ctl, c00, p01, p02, p03, p04, p05, p06) 
+#                    separately for each cycle (cyc)
+# 12/10/2013, Jeff McQueen: Extended forecast hour range to 192 hours
+#             for DGEX downscaling
+#
+########################################
+set -xa
+export OMP_NUM_THREADS=1
+export MP_EUIDEVICE=sn_all
+export MP_EUILIB=us
+export MP_MPILIB=mpich2
+
+#
+# Specify whether the run is production or development
+#
+export RUN_ENVIR=${RUN_ENVIR:-para}  #jtm
+export SENDECF=${SENDECF:-YES}
+
+#####################################################################################
+# Run config file to get input parameters
+# This config file should define the following variables
+# DATA_IN: Location of working directory, default to /tmpnwprd
+# DEV_SMS: If the job is to be running using ecFflow, default to YES
+# SENDDBN: Set to NO for developers, default to YES
+# COM_IN:  Directory for input files, default to /com/$NET/${envir}
+# COM_OUT: Directory for output file, default to /com/$NET/${envir}
+# gespath: Directory for the guess or restart files, default to /nwges/${envir}
+#####################################################################################
+if [ "$RUN_ENVIR" != prod ]      ### For Developers, "group_name" is passed from the ecFflow script
+then
+#jtm  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/sref/nwprod/parm/sref_para_config}
+ CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.v3.2.3/parm/sref_para_config}
+  . $CONFIG_FILE
+  export userid=$LOGNAME
+  export DATA_IN=${DATA_IN:-/stmp/$userid/tmpnwprd}
+  export RM_TMPDIR=NO
+fi
+
+###############################################################
+# This block can be modified for different test environment
+###############################################################
+if [ $RUN_ENVIR = prod -a $envir != prod ]; then
+  export DBNROOT=/nwprod/spa_util/fakedbn
+  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+fi
+
+echo `date` $0 `date -u` begin
+export PS4='$SECONDS + '
+
+########################################################### 
+# obtain unique process id (pid) and make temp directories
+# Note: ctl member needs to be run only once and can be used 
+# for both NMM and ARW cores!
+###########################################################
+export pid=$$
+export DATA_IN=${DATA_IN:-/tmpnwprd1}
+
+export DATA=$DATA_IN/${job}.${pid}
+# Remove old directory if it exists
+####jtm  rm -rf $DATA
+mkdir -p $DATA
+cd $DATA 
+
+####################################
+# File To Log Msgs
+####################################
+export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.${pid}}
+
+####################################
+# Determine Job Output Name on System
+####################################
+export outid="LL$job"
+export jobid="${outid}.o${pid}"
+export pgmout="OUTPUT.${pid}"
+export pgmerr=errfile
+
+export cycle=t${cyc}z 
+
+###############################
+# Specify NET and RUN name
+##############################
+export NET=sref
+export RUN=sref
+
+##################################################
+# SAVEGES  - Copy Files From TMPDIR to $GESdir
+# SENDECF  - Flag Events on ecFflow
+# SENDCOM  - Copy Files From TMPDIR to $COMOUT
+# SENDDBN  - Issue DBNet Client Calls
+# RERUN    - Rerun fcst from beginning (default no)
+##################################################
+export SENDCOM=${SENDCOM:-YES}
+export SENDECF=${SENDECF:-YES}
+export SENDDBN=${SENDDBN:-NO}
+#jtm export VERBOSE=${VERBOSE:-YES}
+
+export HOMEsref=${HOMEsref:-/nw${envir}/${NET}.${model_ver}}
+export EXECsref=${EXECsref:-$HOMEsref/exec}
+export FIXsref=${FIXsref:-$HOMEsref/fix}
+export PARMsref=${PARMsref:-$HOMEsref/parm}
+export USHsref=${USHsref:-$HOMEsref/ush}
+
+# used for those global scripts
+export HOMEglobal=${HOMEglobal:-/nwprod}
+export EXECglobal=${EXECglobal:-$HOMEglobal/exec}
+export FIXglobal=${FIXglobal:-$HOMEglobal/fix}
+export PARMglobal=${PARMglobal:-$HOMEglobal/parm}
+export USHglobal=${USHglobal:-$HOMEglobal/ush}
+
+##XXW for global_postgp
+###jtm export POSTGPSH=$HOMEsref/ush/global_postgp.sh
+###jtm export POSTGPEXEC=$HOMEsref/exec/global_postgs
+ export POSTGPSH=/nwprod/sref.v6.1.1/ush/global_postgp.sh
+ export POSTGPEXEC=/nwprod/sref.v6.1.1/exec/global_postgs
+###################################
+# Set up the UTILITIES
+###################################
+export utilscript=/nwprod/util/ush
+export utilexec=/nwprod/util/exec
+
+# Run setup to initialize working directory and utility scripts
+sh $utilscript/setup.sh
+
+# Run setpdy and initialize PDY variables
+sh $utilscript/setpdy.sh
+. ./PDY
+
+#############################################
+# COMIN and COMOUT
+#############################################
+export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
+
+export COMOUT=$COM_OUT/${RUN}.${PDY}
+export GFSOUT=$COMOUT/global_pgrb
+
+export COMGFS=${COMGFS:-/com/gfs/prod}
+export COMENS=${COMENS:-/com/gens/prod}
+
+mkdir -p -m 775 $COMOUT $GFSOUT
+ 
+env
+
+export cyc MEMBER
+export CYC=${cyc}
+export LENGTH=03     #jtm
+export INCR=3
+export DATE=$PDY
+export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
+
+########################################################
+# Execute the script.
+$HOMEsref/scripts/exsref_wrf_gfsprep.sh.ecf
+########################################################
+cat $pgmout
+
+msg="JOB COMPLETED NORMALLY"
+./postmsg "$jlogfile" "$msg"
+
+################################
+# Remove the Working Directory
+################################
+cd $DATA_IN
+if [ ${RM_TMPDIR:-YES} = YES ]; then rm -rf $DATA; fi
+
+date

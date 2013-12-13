@@ -1,0 +1,414 @@
+#!/bin/ksh
+#
+#####################################################
+# This program uses ensemble product generator to produce
+# ensemble products (mean, spread and probability etc.) of 
+# selected variables and write them out in grib format
+# particularly for GEFS. 
+#
+# programmer: Jun Du
+# 05/28/2012: initial program
+# 12/02/2013: Generalized for varying ENDHOUR (J. McQuee)
+#
+#####################################################
+set -x
+
+freq=$1
+#freq=3hrly
+#freq=1hrly
+
+######################################
+# Part I: Fetching SREF data from /com 
+######################################
+# clean directory before job starts
+rm -f r_gribawips.ctl*
+rm -f r_gribawips.p01*
+rm -f r_gribawips.p02*
+rm -f r_gribawips.p03*
+rm -f r_gribawips.p04*
+rm -f r_gribawips.p05*
+rm -f r_gribawips.p06*
+rm -f r_gribawips.p07*
+rm -f r_gribawips.p08*
+rm -f r_gribawips.p09*
+rm -f r_gribawips.p10*
+rm -f r_gribawips.n01*
+rm -f r_gribawips.n02*
+rm -f r_gribawips.n03*
+rm -f r_gribawips.n04*
+rm -f r_gribawips.n05*
+rm -f r_gribawips.n06*
+rm -f r_gribawips.n07*
+rm -f r_gribawips.n08*
+rm -f r_gribawips.n09*
+rm -f r_gribawips.n10*
+rm -f *
+
+export XLFRTEOPTS="namelist=old"
+
+sh $utilscript/setup.sh
+
+grid=$2
+#grid=212
+TOTMBR=21
+KM=39             #vertical pressure levels in input grib files (not really matters?)
+yy=`echo $PDY | cut -c 1-4`
+mm=`echo $PDY | cut -c 5-6`
+dd=`echo $PDY | cut -c 7-8`
+gefscyc=`expr $cyc - 3`
+echo "sref cyc = ",$cyc
+echo "gefs cyc = ",$gefscyc
+
+system=$3
+
+#jtm if [ $freq = "3hrly" ]; then
+#jtm ENDHOUR=90
+#jtm INCHOUR=3
+#jtm fi
+
+typeset -Z3 ihr
+if [ $freq = "3hrly" ]; then
+#jtm fhrs="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90"
+  ihr=00
+  interval=3
+  timestep=${TOTAL_COUNT}  #this should correspond to the number of poe job submissions (eg: 90/3+1=31)
+  fhrs=;
+  while [ $ihr -le $ENDHOUR ];do
+    fhrs="$fhrs $ihr"
+    ((ihr=ihr+interval))
+  done
+fi
+
+# calculation based on the following order
+# nmb_ctl: p01 
+# nmb_n1:  n01
+# nmb_p1:  p02
+# nmb_n2:  n02
+# nmb_p2:  p03
+# nmb_n3:  n03  
+# nmb_p3:  p04
+
+# nmm_ctl: n04
+# nmm_n1:  p05
+# nmm_p1:  n05
+# nmm_n2:  p06
+# nmm_p2:  n06
+# nmm_n3:  p07
+# nmm_p3:  n07
+
+# em_ctl:  p08
+# em_n1:   n08
+# em_p1:   p09
+# em_n2:   n09
+# em_p2:   p10
+# em_n3:   n10
+# em_p3:   ctl
+
+MODEL[0]=
+MODEL_PAIR[0]=
+PAIR[0]=
+
+MODEL[1]=sref_nmb
+MODEL_PAIR[1]=ctl
+PAIR[1]=p01
+MODEL[2]=sref_nmb
+MODEL_PAIR[2]=n1
+PAIR[2]=n01
+
+MODEL[3]=sref_nmb
+MODEL_PAIR[3]=p1
+PAIR[3]=p02
+MODEL[4]=sref_nmb
+MODEL_PAIR[4]=n2
+PAIR[4]=n02
+
+MODEL[5]=sref_nmb
+MODEL_PAIR[5]=p2
+PAIR[5]=p03
+MODEL[6]=sref_nmb
+MODEL_PAIR[6]=n3
+PAIR[6]=n03
+
+MODEL[7]=sref_nmb
+MODEL_PAIR[7]=p3
+PAIR[7]=p04
+MODEL[8]=sref_nmm
+MODEL_PAIR[8]=ctl
+PAIR[8]=n04
+
+MODEL[9]=sref_nmm
+MODEL_PAIR[9]=n1
+PAIR[9]=p05
+MODEL[10]=sref_nmm
+MODEL_PAIR[10]=p1
+PAIR[10]=n05
+
+MODEL[11]=sref_nmm
+MODEL_PAIR[11]=n2
+PAIR[11]=p06
+#nmm members
+MODEL[12]=sref_nmm
+MODEL_PAIR[12]=p2
+PAIR[12]=n06
+
+MODEL[13]=sref_nmm
+MODEL_PAIR[13]=n3
+PAIR[13]=p07
+MODEL[14]=sref_nmm
+MODEL_PAIR[14]=p3
+PAIR[14]=n07
+
+MODEL[15]=sref_em
+MODEL_PAIR[15]=ctl
+PAIR[15]=p08
+MODEL[16]=sref_em
+MODEL_PAIR[16]=n1
+PAIR[16]=n08
+
+MODEL[17]=sref_em
+MODEL_PAIR[17]=p1
+PAIR[17]=p09
+MODEL[18]=sref_em
+MODEL_PAIR[18]=n2
+PAIR[18]=n09
+
+MODEL[19]=sref_em
+MODEL_PAIR[19]=p2
+PAIR[19]=p10
+MODEL[20]=sref_em
+MODEL_PAIR[20]=n3
+PAIR[20]=n10
+
+MODEL[21]=sref_em
+MODEL_PAIR[21]=p3
+PAIR[21]=ctl
+
+MODEL[22]=
+MODEL_PAIR[22]=
+PAIR[22]=
+#--------------------
+
+typeset -Z3 HR
+HR=00
+
+NENS=0                               #total number of available members counted
+nf=1
+while [ $nf -le $TOTMBR ]            #loop for all members
+do
+
+   HR=00
+   hasfile="yes"
+   while [ $HR -le $ENDHOUR ]
+   do
+    waittime=0
+    cklast="no"
+    while [ $cklast = "no" ] && [ $hasfile = "yes" ]  #if a fcst file at any single fcst time is missing, this member won't be counted
+    do
+     str=`ls -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR`  #get file size in block (around 380 bytes)
+     set -A fsize $str
+     if [ -s ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR ] && [ ${fsize[0]} -gt 100 ] ; then # fcst file is finished?
+#      echo  ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR " exist"
+       cklast="yes"
+     else
+       sync
+       if [ $waittime -gt 10 ] ; then                                       
+         echo ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR " is temporarily missing and will check one more time later!"
+       fi                                                                   
+       echo "waiting " ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR .....
+       sleep 60
+       waittime=`expr $waittime + 1`
+     fi
+    done
+    HR=`expr $HR + $INCHOUR`
+   done
+ 
+    HR=00
+    while [ $HR -le $ENDHOUR ] && [ $hasfile = "yes" ]   #further check each fcst time files
+    do
+     ckall="no"
+     icnt=1
+     while [ $icnt -lt 1000 ]
+     do
+      str=`ls -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR`  #get file size in block (1024 bytes)
+      set -A fsize $str
+      if [ -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR ] && [ ${fsize[0]} -gt 100 ] ; then
+       dump=0
+       break
+      else
+       sync
+       icnt=$((icnt + 1))
+       sleep 5
+      fi
+      if [ $icnt -ge 120 ]
+       then
+       echo $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR "not exist"
+       hasfile="no"
+       msg="ABORTING after 10 minutes of waiting for $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR"
+       err_exit $msg
+      fi
+     done
+
+     HR=`expr $HR + $INCHOUR`
+    done
+    echo ${MODEL[$nf]} ${MODEL_PAIR[$nf]} " done"  
+
+    HR=00 
+    if [ $hasfile = "yes" ] ; then
+      while [ $HR -le $ENDHOUR ]
+      do
+        ln -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR r_gribawips.${PAIR[$nf]}.f$HR
+        HR=`expr $HR + $INCHOUR`
+      done
+      member[$nf]=1
+      NENS=`expr $NENS + 1`
+    else
+      member[$nf]=0
+    fi
+
+  nf=`expr $nf + 1`
+
+done
+
+echo $NENS $grid $KM $timestep $interval -1 > filename
+echo $fhrs >> filename
+
+nf=1
+while [ $nf -le $TOTMBR ]
+do
+ if [ ${member[$nf]} -eq 1 ] ; then
+   echo r_gribawips.${PAIR[$nf]} "  "  ${MODEL[$nf]}  "   -> " ${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]} >> filename
+ fi
+ nf=`expr $nf + 1`
+done
+
+cat <<paramEOF >input
+ &namin
+  iyr=${yy},imon=${mm},idy=${dd},ihr=${gefscyc},ihh1=1,ihh2=${timestep},sys=$system
+ &end
+paramEOF
+
+###############################################
+# Part III: decode, calculate and write to grib
+###############################################
+export pgm=sref_com_grib_gefs.$grid
+#. prep_step
+
+#startmsg
+rm -f variable.tbl
+cp $PARMsref/sref_product_variable.tbl_gefs variable.tbl
+$EXECsref/sref_ens_gen < input >> $pgmout 2>errfile
+export err=$?;./err_chk
+
+HR=00
+while [ $HR -le $ENDHOUR ]
+do
+  mv mean.sref.f$HR   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.f$HR
+  mv spread.sref.f$HR $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.f$HR
+  mv prob.sref.f$HR   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.f$HR
+  mv max.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.f$HR
+  mv min.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.f$HR
+  mv mod.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.f$HR
+  mv p10.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.f$HR
+  mv p25.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.f$HR
+  mv p50.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.f$HR
+  mv p75.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.f$HR
+  mv p90.sref.f$HR    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.f$HR
+
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.f$HR   >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.f$HR >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.f$HR   >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq
+  cat $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.f$HR    >> $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq
+
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.f$HR
+  rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.f$HR
+HR=`expr $HR + $INCHOUR`
+done
+
+############################
+# Convert to grib2 format
+############################
+CNVGRIB=${CNVGRIB:-/nwprod/util/exec/cnvgrib}
+WGRIB2=${WGRIB2:-/nwprod/util/exec/wgrib2}
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.grib2
+$CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq    $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.grib2
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.grib2 -s >       $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.grib2 -s >     $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.grib2 -s >       $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.grib2.idx
+$WGRIB2 $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.grib2 -s >        $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.grib2.idx
+
+echo "This product will not be sent outside of the CCS"
+# Send alerts
+#if test "$SENDDBN" = "YES"
+#then
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq
+#fi
+#
+#if [ $SENDDBN_GB2 = YES ]
+#then
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.grib2
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2 $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.grib2
+#
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prod_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.max_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.min_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mod_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p10_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p25_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.grib2.idx
+# $DBNROOT/bin/dbn_alert MODEL SREF_GEFS_PGB_GB2_WIDX  $job $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.grib2.idx
+#fi
+

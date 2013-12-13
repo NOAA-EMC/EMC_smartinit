@@ -1,6 +1,6 @@
-#BSUB -J smartinit.ak12-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.ak12-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.ak12-12
+#BSUB -J smartinit.ak18-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.ak18-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.ak18-12
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -166,7 +166,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-#TEST export PDY=20130926
+### export PDY=20131125   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
@@ -221,7 +221,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-env  
+####NCO SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"

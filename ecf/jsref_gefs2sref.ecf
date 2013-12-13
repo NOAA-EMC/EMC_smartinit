@@ -1,0 +1,88 @@
+#BSUB -J jsref_gefs2sref
+#BSUB -o /ptmp/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -e /ptmp/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -L /bin/ksh   #moved from sh to ksh
+#BSUB -q debug
+#BSUB -cwd /stmp/Jeff.McQueen/tmpnwprd
+#BSUB -R "span[ptile=2]"   #jtm or 16 if using all tasks on node
+#BSUB -R "affinity[core]"  #jtm
+#BSUB -n 02                #jtm Depends on the number of forecast hours
+#BSUB -W 00:30
+#BSUB -P meso
+#BSUB -a poe
+#BSUB -x    # not_shared
+# %include "/ecf/ecfnets/scripts/head.h"
+set -x
+
+# jtm lib loads
+export stutil=/hwrf/noscrub/soft/modulefiles
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+module use $stutil
+module load ruby emc-utils
+
+
+export envir=para
+export cyc=03
+
+#  PURPOSE:      To execute the SREF Post Procestep must line up to the number job  submissions
+#  Set NODES: (e.g.: 90/3 +1=31)
+export ENDHOUR=03
+export INCHOUR=3
+export INCR=${INCHOUR}
+export CYC=${cyc}
+export LENGTH=${ENDHOUR}
+export DATE=$PDY
+export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
+
+# versions file for SREF model $model_ver
+VERSION_FILE=/nw${envir}/versions/sref.ver
+if [ -f $VERSION_FILE ]; then
+  . $VERSION_FILE
+else
+  exit
+fi
+
+#1. jtm  Create SREF look-alike files from GEFS run
+#jtm typeset -Z2 ipert
+ipert=01
+for MEMBER in c00 ctl;do
+  export MEMBER
+  export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
+  /meso/save/${USER}/smartinit.v3.2.3/jobs/JSREF_WRF_GFSPREP
+done
+
+while [ipert -le 20 ];do
+  export MEMBER="p${ipert}"
+  export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
+  /meso/save/${USER}/smartinit.v3.2.3/jobs/JSREF_WRF_GFSPREP
+  ((ipert=ipert+1))
+done
+
+#2. Create SREF look-alike products from GEFS run
+#jtm /nw${envir}/sref.${model_ver}/jobs/JSREF_GEFS2SREF
+export job=sref_gefs2sref
+/meso/save/${USER}/smartinit.v3.2.3/jobs/JSREF_GEFS2SREF
+
+# if [ $? -ne 0 ]; then
+#  ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
+#  ecflow_client --abort
+#  exit
+# fi
+
+
+# %include "/ecf/ecfnets/scripts/tail.h"
+# %manual
+######################################################################
+#
+#
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+# %end

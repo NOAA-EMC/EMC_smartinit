@@ -301,8 +301,7 @@ for fhr in $hours; do
   if [ $fhr -gt 0 ];then
 
 #   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
-    inhrfrq=3
-    if [ -s ${mdlin}${ffhr1}.tm00 -a $check -ne 0 ];then inhrfrq=1;fi
+    if [ ${RUNTYP} = dgex ];then inhrfrq=3;fi
 
 # nam_sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
@@ -515,13 +514,13 @@ EOF5
   if [ $check -eq 0 -a $fhr -ne 00 ];then 
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
     cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
-    if [ -s MAXMIN2 ];then
+    if [ -s MAXMIN${fhr1}.tm00 ];then
       cp MAXMIN${fhr2}.tm00 MAXMIN2
       cp MAXMIN${fhr1}.tm00 MAXMIN1
     else
 #     For 3 hourly input files, hourly maxmins not created
-      cp meso${rg}.NDFDf${fhr} MAXMIN2
-      cp meso${rg}.NDFDf${fhr} MAXMIN1
+      ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
+      ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi
     $utilexec/grbindex MAXMIN1 MAXMIN1i
     $utilexec/grbindex MAXMIN2 MAXMIN2i

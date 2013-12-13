@@ -211,7 +211,7 @@
       print *, 'RUN CYCLE ', CYC
       print *, 'REGION ',TRIM(REGION)
       print *, 'OUTPUT GRID # ',OGRD
-      print *, 'LNEST ',LNEST
+      print *, 'LNEST ',LNEST, ' INPUT FILE FREQ ',INHRFRQ,' HRS'
 
       FHR3=FHR-3
       FHR6=FHR-6

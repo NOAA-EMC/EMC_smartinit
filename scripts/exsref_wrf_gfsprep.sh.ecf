@@ -1,0 +1,131 @@
+#!/bin/ksh
+################################################################################
+# UNIX Script Documentation Block                              
+#                                                              
+# Script name:         exsref_wrf_gfsprep.sh.sms              
+# Script description:  Run global post to convert global sigma file to pgrib data 
+#                      to initiate SREF WRF members                              
+#                                                                              
+# Author:        Jun Du       Org: NP22         Date: 2007-08-14            
+#                                                        
+# Script history log:                                          
+# 2007-08-14  Jun Du   - Initial Implementation
+# 2008-05-20  Jun Du   - (1) modified to include all GEFS members and change the
+#                        name convention for the new configuration of WRF members;
+#                        (2) to run it separately by disconnecting to models and 
+#                        membership information for generality
+# 2011-07-18  Jun Du   - Output GEFS in 0.5Deg due to the increased resolution 
+#                        of GEFS to T254
+# 2011-09-26  Jun Du   - moved the membership control option to the sms/J-JOB step
+#                        to significantly speed up this step by processing all members 
+#                        simutaneously
+#
+################################################################################
+
+set -x
+
+yy=`echo $PDY | cut -c1-4`
+mm=`echo $PDY | cut -c5-6`
+dd=`echo $PDY | cut -c7-8`
+
+msg="JOB $job FOR WRF HAS BEGUN"
+
+# ------------------------------------------------------------------------------
+# convert global sigma data to pgrb data FOR GENERATING INITIAL AND BOUNDARY CONDITIONS
+# -----------------------------------------------------------------------------
+## for ctl run (using hires 0.5 degree gfs data)
+#if [ $MODE = "control" ]
+if [ $MEMBER = "ctl" ];then
+# MEMBER=ctl 
+  if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
+     whr=00
+     last=$LENGTH
+     gfscyc=$cyc
+  fi
+  if [ $cyc -eq 03 -o $cyc -eq 09 -o $cyc -eq 15 -o $cyc -eq 21 ]; then
+     whr=00
+#     let "last=LENGTH+3"  #jtm
+     let last=$LENGTH  #jtm
+     let "gfscyc=cyc-3"
+     if [ $gfscyc -lt 10 ]; then
+        gfscyc=0$gfscyc
+     fi
+  fi
+# if using global_post to convert from sig, flux files:
+  fhr=$whr
+  >$DATA/cmdfile_gfs
+  while [ $fhr -le $last ]; do
+    mkdir -p $DATA/${MEMBER}_$fhr
+    echo "$USHsref/sref_prep_sig2pgb.sh $DATE $gfscyc $MEMBER $MEMBER $fhr 5 GFS >$DATA/postgb_${fhr}.out" >>$DATA/cmdfile_gfs  #jtm
+    fhr=`expr $fhr + $INCR`
+    if [ $fhr -lt 10 ];then fhr=0$fhr;fi
+  done  
+
+#  chmod 775 cmdfile
+  chmod 775 $DATA/cmdfile_gfs   #jtm
+  pwd
+
+  export MP_PGMMODEL=mpmd
+  export MP_CMDFILE=$DATA/cmdfile_gfs
+  export MP_STDOUTMODE=ordered
+  export MP_LABELIO=yes
+  export MP_INFOLEVEL=3
+
+  mpirun.lsf -cmdfile $DATA/cmdfile_gfs -pgmmodel mpmd
+
+  rm -f gfs.t${gfscyc}z.master.grbif*
+  rm -f flxfile sigfile
+
+else
+## for perturb runs (using gefs 1.0 degree data)
+  MODEL=gens
+  if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
+     whr=00
+     last=$LENGTH
+     mrfcyc=$cyc
+  fi
+  if [ $cyc -eq 03 -o $cyc -eq 09 -o $cyc -eq 15 -o $cyc -eq 21 ]; then
+     whr=00
+#jtm     let "last=LENGTH+3"
+     let last=$LENGTH
+     let "mrfcyc=cyc-3"
+     if [ $mrfcyc -lt 10 ]; then
+        mrfcyc=0$mrfcyc
+     fi
+  fi
+
+# 03, 06, 09, 12 .... 81, 84, 87, 90hr of gefs forecasts
+# Run the global post on ens sigma files starting at f03
+#
+  fhr=$whr
+  >$DATA/cmdfile_gefs
+  while [ $fhr -le $last ]; do
+    mkdir -p $DATA/${MEMBER}_$fhr
+    echo "$USHsref/sref_prep_sig2pgb.sh $DATE $mrfcyc $MEMBER $MEMBER $fhr 5 ${MODEL} >$DATA/postgb_${fhr}.out" >>$DATA/cmdfile_gefs
+    fhr=`expr $fhr + $INCR`
+    if [ $fhr -lt 10 ];then fhr=0$fhr;fi
+  done
+
+  chmod 775 $DATA/cmdfile_gefs  #jtm
+  export MP_PGMMODEL=mpmd
+  export MP_CMDFILE=$DATA/cmdfile_gefs
+  export MP_STDOUTMODE=ordered
+  export MP_LABELIO=yes
+  export MP_INFOLEVEL=3
+
+  mpirun.lsf -cmdfile $DATA/cmdfile_gefs -pgmmodel mpmd
+
+  rm -f ${MODEL}_${MEMBER}.t${mrfcyc}z.pgrbif*
+  rm -f flxfile sigfile
+
+fi  
+
+####################################################
+msg="HAS COMPLETED NORMALLY!"
+echo $msg
+./postmsg "$jlogfile" "$msg"
+
+############## END OF SCRIPT #######################
+
+exit
+
