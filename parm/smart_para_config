@@ -36,10 +36,14 @@ export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm fi
 export EXECnam=/nwprod/exec   #Location of nam_prdgen
 export COMROOT=/com
 export COM_IN=${COMROOT}/${mdl}/prod
+
+# Testing dgex thru 192 forecast hours
+# use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod
 
 #TEST until dgex bsmart files are available from production run
 if [ $RUNTYP = dgex ];then 
+  export COM_SREF=/ptmp/Jeff.McQueen/sref/para
   export COMROOT="/meso/noscrub/Eric.Rogers/com"
   export COM_IN=${COMROOT}/${mdl}/para   #Test with ER para files
 fi

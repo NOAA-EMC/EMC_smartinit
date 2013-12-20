@@ -11,7 +11,7 @@
 # 12/02/2013: Generalized for varying ENDHOUR (J. McQuee)
 #
 #####################################################
-set -x
+#NCO set -x
 
 freq=$1
 #freq=3hrly

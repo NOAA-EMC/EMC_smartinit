@@ -21,6 +21,7 @@
 # 2013-07-02  Jeff McQueen  - Modified to create all 00 hour downscaling from NAM parent
 #                             While 03 --> 54/60 created from NAM Nests
 # 2013-08-27  JTM           - Put in vertical structure
+# 2013-11-25h JTM           - added option to downscale dgex to 192 forecast hours
 #
 # NCO SUBMISSION  HRS       RUNTYP
 #                 00-12     ak_rtmages
@@ -65,7 +66,7 @@ cd $DATA
 
   ${NAM_SMINIT_SSH:-$USHdng/nam_smartinit.sh}
 
-set -x
+#NCO set -x
 #####################################################################
 
 echo EXITING $0

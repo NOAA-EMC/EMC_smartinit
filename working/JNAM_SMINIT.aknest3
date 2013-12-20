@@ -1,6 +1,6 @@
-#BSUB -J smartinit.aknest318-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.aknest318-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.aknest318-12
+#BSUB -J smartinit.aknest312-12
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.aknest312-12
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.aknest312-12
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA

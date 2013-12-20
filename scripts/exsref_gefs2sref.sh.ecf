@@ -8,7 +8,7 @@
 # 12/11/2013: Jeff McQueen, set for extended forecast hour conversion (beyond 90 hours)
 #
 ############################################################
-set -x
+#NCO set -x
 
 XLFRTEOPTS="namelist=old"
 export XLFRTEOPTS
@@ -77,8 +77,7 @@ cat   slp 500_z 850_t 250_u 850_u 250_v 850_v 850_rh t2m q2m rh2m u10m v10m ppt 
 rm -f slp 500_z 850_t 250_u 850_u 250_v 850_v 850_rh t2m q2m rh2m u10m v10m ppt
 
 domain="212 243 216"
-for grid in $domain
-do
+for grid in $domain;do
  $utilexec/copygb -x -g $grid gens_old gens_new
  if [ $mem = c00 ]; then mv gens_new $COMIN/sref_nmb.t${gefscyc}z.pgrb$grid.ctl.f$HR;fi
  if [ $mem = p01 ]; then mv gens_new $COMIN/sref_nmb.t${gefscyc}z.pgrb$grid.n1.f$HR;fi
