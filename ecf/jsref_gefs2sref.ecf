@@ -5,8 +5,8 @@
 #BSUB -q dev
 #BSUB -cwd /stmp/Jeff.McQueen/tmpnwprd
 #BSUB -R "span[ptile=8]"  #jtm or 16 if using all tasks on node
-#BSUB -n 31               #jtm Depends on the number of forecast hours, 31 nodes for 90 fhrs
-#BSUB -W 1:00 
+#BSUB -n 65               #jtm Depends on the number of forecast hours, 31 nodes for 90 fhrs
+#BSUB -W 3:00 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared
@@ -40,7 +40,7 @@ SIVER="v3.2.3"
 nwdir=${nwdir:-/meso/save/${USER}/smartinit.$SIVER}  # or nwprod
 export utilscript=${utilscript:-/nwprod/util/ush}
 $utilscript/setup.sh
-export DATE=PDY
+export DATE=$PDY
 outd=${outd:-/ptmp/Jeff.McQueen/com/sref/prod/sref.$DATE}
 
 # Determine cycle (NCO WILL SET)
@@ -51,11 +51,11 @@ elif [ $HH -le 18 ];then export cyc=12;
 else
   export cyc=18
 fi
-export cyc=06   #TEST
+#TEST export cyc=06   #TEST
 
 #  PURPOSE:      To execute the SREF Post Procestep must line up to the number job  submissions
 #  Set NODES: (e.g.: 90/3 +1=31)
-export ENDHOUR=90
+export ENDHOUR=192
 export INCHOUR=3
 export INCR=${INCHOUR}
 export CYC=${cyc}
@@ -76,14 +76,14 @@ fi
 for MEMBER in c00 ctl;do
   export MEMBER
   export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
-#TEST  ${nwdir}/jobs/JSREF_WRF_GFSPREP
+  ${nwdir}/jobs/JSREF_WRF_GFSPREP
 done
 
 ipert=01
 while [ $ipert -le 20 ];do
   export MEMBER="p${ipert}"
   export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
-#TEST  ${nwdir}/jobs/JSREF_WRF_GFSPREP
+  ${nwdir}/jobs/JSREF_WRF_GFSPREP
   ipert=`expr $ipert + 1`
   if [ $ipert -lt 10 ];then ipert=0${ipert};fi
 done
@@ -96,6 +96,11 @@ fi
 #=======================================================
 #2. Create SREF look-alike products from GEFS run
 #=======================================================
+#set sref cycle
+srefcyc=`expr $cyc + 3`
+if [ $srefcyc -lt 10 ];then srefcyc="0"${srefcyc};fi 
+export cyc=$srefcyc
+
 export job=sref_gefs2sref
 ${nwdir}/jobs/JSREF_GEFS2SREF
 

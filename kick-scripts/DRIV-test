@@ -34,32 +34,31 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=06  #TEST
+export cyc=12  #TEST
 
-export fhrstr=87
+export fhrstr=00
 echo DRIVER $modeld run CYC $cyc fhr $fhrstr 
 
 #07/13: change to run ak and alaskanest separately for good output listing
 #07/13: added guam=guamnmm  configuration
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
-for RUNTYP in dgex;do # ak hi pr ak_rtmages conusnest2p5 aknest3;do
-  export ENDHRS=87
+for RUNTYP in conusnest2p5;do #  ak hi pr ak_rtmages aknest3 conusnest2p5;do
+  export ENDHRS=12
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
-  if [ $RUNTYP = dgex ];then export mdl=dgex;fi
   if [ $RUNTYP = conusnest2p5 ];then ENDHRS=36;fi
   export NET=$mdl
   export RUN=$NET
   export RUNTYP=$RUNTYP
 
 # Remove older directories
-#  /nwprod/util/ush/setpdy.sh
+  /nwprod/util/ush/setpdy.sh
+  export  PDY=20131231
   dayrm=$( echo `/nwprod/util/exec/ndate -120` |cut -c 1-8 )
-
-  Y=$(echo $PDY | cut  -c 1-4 )
-  M=$(echo $PDY | cut  -c 5-6 )
-  D=$(echo $PDY | cut  -c 7-8 )
+  Y=$(echo $dayrm | cut  -c 1-4 )
+  M=$(echo $dayrm | cut  -c 5-6 )
+  D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
   rm -rf /ptmp/${USER}/nam.${wdayd}
 

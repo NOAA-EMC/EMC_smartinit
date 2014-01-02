@@ -66,7 +66,7 @@ system=$3
 #jtm INCHOUR=3
 #jtm fi
 
-typeset -Z3 ihr
+#TEST typeset -Z3 ihr
 if [ $freq = "3hrly" ]; then
 #jtm fhrs="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90"
   ihr=00
@@ -76,6 +76,7 @@ if [ $freq = "3hrly" ]; then
   while [ $ihr -le $ENDHOUR ];do
     fhrs="$fhrs $ihr"
     ((ihr=ihr+interval))
+    if [ $ihr -lt 10 ];then ihr="0"$ihr;fi
   done
 fi
 
@@ -188,7 +189,7 @@ MODEL_PAIR[22]=
 PAIR[22]=
 #--------------------
 
-typeset -Z3 HR
+#TEST typeset -Z3 HR
 HR=00
 
 NENS=0                               #total number of available members counted
@@ -213,13 +214,15 @@ do
        sync
        if [ $waittime -gt 10 ] ; then                                       
          echo ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR " is temporarily missing and will check one more time later!"
-       fi                                                                   
-       echo "waiting " ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR .....
-       sleep 60
+       else  #jtm
+         echo "waiting " ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR .....
+         sleep 60
+       fi
        waittime=`expr $waittime + 1`
      fi
     done
     HR=`expr $HR + $INCHOUR`
+    if [ $HR -lt 10 ];then HR="0"$HR;fi
    done
  
     HR=00
@@ -249,6 +252,7 @@ do
      done
 
      HR=`expr $HR + $INCHOUR`
+     if [ $HR -lt 10 ];then HR="0"$HR;fi
     done
     echo ${MODEL[$nf]} ${MODEL_PAIR[$nf]} " done"  
 
@@ -258,6 +262,7 @@ do
       do
         ln -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR r_gribawips.${PAIR[$nf]}.f$HR
         HR=`expr $HR + $INCHOUR`
+        if [ $HR -lt 10 ];then HR="0"$HR;fi
       done
       member[$nf]=1
       NENS=`expr $NENS + 1`
@@ -337,7 +342,8 @@ do
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p50_$freq.f$HR
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.f$HR
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.f$HR
-HR=`expr $HR + $INCHOUR`
+  HR=`expr $HR + $INCHOUR`
+  if [ $HR -lt 10 ];then HR="0"$HR;fi
 done
 
 ############################

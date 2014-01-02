@@ -34,7 +34,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-###export cyc=06  #TEST
+#TEST export cyc=06  #TEST
 
 export fhrstr=00
 echo DRIVER $modeld run CYC $cyc fhr $fhrstr 
@@ -53,12 +53,12 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
   export RUNTYP=$RUNTYP
 
 # Remove older directories
-#  /nwprod/util/ush/setpdy.sh
+  /nwprod/util/ush/setpdy.sh
   dayrm=$( echo `/nwprod/util/exec/ndate -120` |cut -c 1-8 )
 
-  Y=$(echo $PDY | cut  -c 1-4 )
-  M=$(echo $PDY | cut  -c 5-6 )
-  D=$(echo $PDY | cut  -c 7-8 )
+  Y=$(echo $dayrm | cut  -c 1-4 )
+  M=$(echo $dayrm | cut  -c 5-6 )
+  D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
   rm -rf /ptmp/${USER}/nam.${wdayd}
 

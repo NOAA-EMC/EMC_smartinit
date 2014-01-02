@@ -1,5 +1,10 @@
 #!/bin/ksh
+#========================================
 # Archive para smartinit files
+#========================================
+
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe ics lsf
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
 # export yyyymmdd=20131117

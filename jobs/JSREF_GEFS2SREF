@@ -8,7 +8,7 @@ export RUN_ENVIR=para
 # 12/02/2013, Jeff McQueen: Incorporated into DNG smartinit processing
 #
 ############################################
-#NCO set -xa
+set -xa
 
 export OMP_NUM_THREADS=1
 export MP_EUIDEVICE=sn_all
@@ -128,6 +128,9 @@ elif [ $cyc -eq 15 ];then
  export gefscyc=12
 elif [ $cyc -eq 21 ];then
  export gefscyc=18
+else 
+ echo "INVALID SREF CYCLE : $cyc "
+ exit
 fi
 
 if [ "$RUN_ENVIR" != prod ]     ### For Developers
@@ -167,14 +170,15 @@ mkdir -m 775 $DATA/gefs2sref
 cd $DATA/gefs2sref
 rm -rf $DATA/gefs2sref/poescript
 
-typeset -Z3 HR
+#TEST typeset -Z3 HR
 HR=00
 
-#2. Convert gefs to sref
+#1. Convert gefs to sref
 while [ $HR -le $ENDHOUR ];do
   mkdir -m 775 $DATA/gefs2sref/$HR
   echo "$HOMEsref/scripts/exsref_gefs2sref.sh.ecf $HR > $DATA/gefs2sref/${HR}.out" >>$DATA/gefs2sref/poescript
   HR=`expr $HR + $INCHOUR`
+  if [ $HR -lt 10 ];then HR="0"${HR};fi 
 done
 
 chmod 775 $DATA/gefs2sref/poescript
@@ -182,10 +186,7 @@ export MP_PGMMODEL=mpmd
 export MP_CMDFILE=$DATA/gefs2sref/poescript
 mpirun.lsf -cmdfile $DATA/gefs2sref/poescript -pgmmodel mpmd -ilevel 3 -labelio yes -stdoutmode ordered
 
-exit   #TEST 
-
-
-#3. Create GEFS SREF look-alike  ensemble products for CONUS, Alaska and Hawaii
+#2. Create GEFS SREF look-alike  ensemble products for CONUS, Alaska and Hawaii
 mkdir -p $DATA/212_3hrly
 cd $DATA/212_3hrly
 $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 212 222 > $DATA/212_3hrly.out 
