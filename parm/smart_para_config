@@ -43,8 +43,12 @@ export COM_SREF=${COMROOT}/sref/prod
 
 #TEST until dgex bsmart files are available from production run
 if [ $RUNTYP = dgex ];then 
-  export COM_SREF=/ptmp/Jeff.McQueen/sref/para
+  export COM_SREF=/ptmp/Jeff.McQueen/com/sref/para
   export COMROOT="/meso/noscrub/Eric.Rogers/com"
+  export COM_IN=${COMROOT}/${mdl}/para   #Test with ER para files
+elif [ $RUNTYP = guam ];then
+  export COM_SREF=/ptmp/Jeff.McQueen/com/sref/para
+  export COMROOT="/meso/noscrub/Matt.Pyles/com"
   export COM_IN=${COMROOT}/${mdl}/para   #Test with ER para files
 fi
 

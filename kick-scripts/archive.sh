@@ -8,8 +8,8 @@ module load ibmpe ics lsf
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
 # export yyyymmdd=20131117
-export wdir=/stmp/${USER}/archive
 export pldir=/stmp/${USER}
+export wdir=${pldir}/archive
 indir=/ptmp/${USER}/nam.$yyyymmdd
 
 mkdir -p $wdir
@@ -23,11 +23,11 @@ mkdir -p $wdir
 # Archive Plot files
   for cyc in 00 06 12 18;do
     cd $pldir/d2${REG}${cyc}
-    if [ -s ../smartplts${REG}.${yyyymmdd}.tar ];then
-      tar --append --file=../smartplts${REG}.${yyyymmdd}.tar  *gif
+    if [ -s ${wdir}/smartplts${REG}.${yyyymmdd}.tar ];then
+      tar --append --file=${wdir}/smartplts${REG}.${yyyymmdd}.tar  *gif
     else
-      tar -cvf ../smartplts${REG}.${yyyymmdd}.tar  *gif
+      tar -cvf ${wdir}/smartplts${REG}.${yyyymmdd}.tar  *gif
     fi
   done
-  hsi put ../smartplts${REG}.${yyyymmdd}.tar /NCEPDEV/hpssuser/g01/wx22mc/smartplts/smartplts${REG}.${yyyymmdd}.tar
+  hsi put ${wdir}/smartplts${REG}.${yyyymmdd}.tar /NCEPDEV/hpssuser/g01/wx22mc/smartplts/smartplts${REG}.${yyyymmdd}.tar
  done

@@ -36,7 +36,7 @@ else
 fi 
 #TEST export cyc=06  #TEST
 
-export fhrstr=00
+export fhrstr=0
 echo DRIVER $modeld run CYC $cyc fhr $fhrstr 
 
 #07/13: change to run ak and alaskanest separately for good output listing
@@ -47,7 +47,8 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
   export ENDHRS=12
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
-  if [ $RUNTYP = conusnest2p5 ];then ENDHRS=36;fi
+  if [ $RUNTYP = conusnest2p5 ];then export ENDHRS=36;fi
+  if [ $RUNTYP = dgex ];then export fhrstr=87; export ENDHRS=126;fi
   export NET=$mdl
   export RUN=$NET
   export RUNTYP=$RUNTYP

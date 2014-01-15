@@ -19,7 +19,7 @@
 !   12-11-30  J McQueen  - Converted to f90, unified for different domains
 !========================================================================
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
-      INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD
+      INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC
 
       LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST
       CHARACTER*4 CTMP,REGION
@@ -68,7 +68,7 @@
 
     TYPE (GINFO) :: GDIN
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN
+    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR
     PARAMETER(MBUF=2000000)
     CHARACTER CBUF(MBUF)
     CHARACTER*80 FNAME
@@ -192,6 +192,7 @@
 !-----------------------------------------------------------------------------------------
       LNEST=.FALSE.
       LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+      nargc=iargc()
       call getarg(1,CTMP)
       READ (ctmp,*) GDIN%CYC
       call getarg(2,CTMP)
@@ -204,10 +205,13 @@
       if(inest.gt.0)GDIN%LNEST=.TRUE.
       call getarg(6,ctmp)
       READ (ctmp,*) GDIN%INHRFRQ   !hrly freq of input files (eg 1 or 3 hrly)
+      IFHRSTR=0
+      if (nargc.gt.6) call getarg(7,ctmp)
+      READ (ctmp,*) GDIN%IFHRSTR   !starting hour (0 or 87 for dgex)
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
-      CYC=GDIN%CYC;LNEST=GDIN%LNEST
-      print *, 'Running Smartinit for FHR', FHR
+      CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR
+      print *,  nargc,' Running Smartinit for FHR', FHR,' IFHRSTR ',IFHRSTR
       print *, 'RUN CYCLE ', CYC
       print *, 'REGION ',TRIM(REGION)
       print *, 'OUTPUT GRID # ',OGRD

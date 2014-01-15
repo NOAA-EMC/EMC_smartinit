@@ -32,7 +32,6 @@ dd=`echo $PDY | cut -c7-8`
 
 msg="JOB $job FOR WRF HAS BEGUN"
 
-#jtm typeset -Z2 fhr
 typeset -Z2 gfscyc 
 
 # ------------------------------------------------------------------------------
@@ -62,9 +61,11 @@ fhr=$whr
 >$DATA/cmdfile_$gmdl
 while [ $fhr -le $last ]; do
   mkdir -p $DATA/${MEMBER}_$fhr
+  echo "SUBMIT sref_prep_sig2pgb for"  MEMBER $MEMBER  FHR $fhr  MODEL $MODEL
   echo "$USHsref/sref_prep_sig2pgb.sh $DATE $gfscyc $MEMBER $MEMBER $fhr 5 $MODEL >$DATA/postgb_${fhr}.out" >>$DATA/cmdfile_$gmdl
 
   fhr=`expr $fhr + $INCR`
+  if [ $fhr -ge 126 ];then INCR=06;fi   #jtm (GEFS file increment change)
   if [ $fhr -lt 10 ];then fhr=0$fhr;fi
 done  
 chmod 775 $DATA/cmdfile_$gmdl   #jtm

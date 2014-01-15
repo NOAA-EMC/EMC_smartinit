@@ -294,6 +294,11 @@ NOTE: Visibility not read in from non-nests (should fix this ?)
 
 ============================VERSION 3.2.3==============================================
 FY14Q2
+***  terrain based wind adjustment
+***  DGEX downscaling to 192 hours
+     --> Include JSREF_SREFTOGEFS for POP output beyond 90 hours
+***  Haines index product
+***  Hourly CONUS 2.5 km downscaling to 36 hours
 
 11/01/2013 NDFDgrid.f90
 * Added VADJUST.f90 subroutine to adjust 10 m winds based on terrain gradient (CALMET techniqe)
@@ -304,7 +309,7 @@ to downscaled topography.  This reference hght determines the method for computi
 
 11/20/2013 -->sorc/MAIN.f90 & ush/nam_smartinit.sh
 *   The length of hourly file writes set by fhrhrly in MAIN.f90 and in nam_sminit.sh
-*   11/2013: Conus 2.5 km hrly output extended to 36 hours for wave model input
+*    Conus 2.5 km hrly output extended to 36 hours for wave model input
 
 11/25/2013:  DGEX extension forecast hours 87->192
 * modified parm/JNAM_SMINIT.CTL for dgex setting
@@ -321,3 +326,13 @@ to downscaled topography.  This reference hght determines the method for computi
 * Created driver ecflow script for JSREF_SREFTOGEFS job
     must bsub for poe to work
     and use bjob card:  #BSUB -R "affinity[core]" in ecf script
+
+01/09/2014  JNAM_SMINIT, grddef.f90
+* defined fhrstr variable for DGEX = 87 otherwise 00.
+* JSREF_WRFGFSPREP and scripts modified to create global pgrb files thru 126 hours
+gens files are 6 hourly after 126 hours.
+* modified gfsprep and enspost scripts to run thru 126 hours (3 digits):
+       After 126 hours, interval changes to 06.
+NOTE:  JGEFS2SREF system won't work past 126 hours so POPs not available from sref look-alike files 
+        after 126 hours.
+

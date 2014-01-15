@@ -476,7 +476,7 @@ c  Second loop: for ensmeble members:----------------------------------------
         end if
 
         write(cyc,'(i2.2)') ihr       !ihr is cycle 
-        write(fhr,'(i2.2)') itime     !ihr is cycle 
+        write(fhr,'(i3.3)') itime     !fhr is forecast hour :  Changed to I3 for hrs >100 jtm
         write(*,*) 'cyc,fhr=', cyc,fhr
 
         fname=trim(fhead(irun)) // '.f' // trim(hr)
@@ -1015,7 +1015,7 @@ c%%%%%%%  14. Asymptotic fog formulation is implemented here
             write(*,*) 'prev temp irun=', irun      
             head=fhead(irun)
             jtime=fnn(i00-1)
-            write(fhr_1,'(i2.2)') jtime
+            write(fhr_1,'(i3.3)') jtime    !i3.3 for hrs > 100 jtm
  
              ID_RHFG=index_table_var(vname,k5,k6,52,100,'RHFG',numvar)  !if compute new fog algo, RHTF must be declared in deirect var
              write(*,*)'ID_RHFG=',ID_RHFG

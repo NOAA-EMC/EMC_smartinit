@@ -1,6 +1,6 @@
-#BSUB -J smartinit.dgex06-87
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.dgex06-87
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.dgex06-87
+#BSUB -J smartinit.dgex06-90
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.dgex06-90
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.dgex06-90
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -166,7 +166,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-export PDY=20131125   #TEST
+export PDY=20140106   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 

@@ -38,6 +38,7 @@ cd $DATA
 
 # 00/12 UTC CYCLE smartinit CONFIGURE
   export ENDHR=60
+  export fhrstr=00
 
 # For Off-Cycles must stop nest at 54 hours, so that 12-hr totals at
 # f66 aren't split between nest and parent
@@ -53,7 +54,7 @@ cd $DATA
 #   Downscale from NAM parent for forecast hrs=0 and > ENDHR (54/60)
  
   case $RUNTYP in gm|guam) export RUNTYP=guamnest;; esac
-  if [ $ffhr -gt 0 -a $ffhr -le $ENDHR ];then
+  if [ $ffhr -gt $fhrstr -a $ffhr -le $ENDHR ];then
     case $RUNTYP in
       conus) export RUNTYP=${RUNTYP}nest;;
          hi) export RUNTYP=hawaiinest;;

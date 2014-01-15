@@ -105,6 +105,8 @@ while [ $iline -le $linemax ];do
   fi
 done
 
+set -x
+
 prdgfl=meso${rg}.NDFD  # output prdgen grid name (eg: mesocon.NDFD,mesoak...)
 case $RUNTYP in
     conus ) prdgfl=meso.NDFD;;    
@@ -153,7 +155,6 @@ case $RUNTYP in
 esac
 fi
 
-set -x
 # Set NDFD output grid topo and land mask filenames
 maskpre=${mdl}_smartmask${outreg}
 topopre=${mdl}_smarttopo${outreg}
@@ -183,7 +184,7 @@ let pcphr3=pcphr-3
 #======================================================================
 
 # fhr should be gt 0 since precip is not available at initial time
-if [ $ffhr -gt 0 ]; then
+if [ $ffhr -gt ${fhrstr} ]; then
 
 # get the sref precip fields that we need
   cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
@@ -298,7 +299,7 @@ for fhr in $hours; do
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
   inhrfrq=1
 
-  if [ $fhr -gt 0 ];then
+  if [ $fhr -gt ${fhrstr} ];then
 
 #   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
     if [ ${RUNTYP} = dgex ];then inhrfrq=3;fi
@@ -466,8 +467,9 @@ EOF5
 #   To interp nests to 5 km, just use same parent nam master files 
 #   To interp ak/cs nests to ak3/cs2p5, use special smartmaster ctl files
     case $rg in
-      ak|hi|pr|gm|dg) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
-             con|ak3) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
+      ak|hi|pr|gm) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
+          con|ak3) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
+              dgx) cp -p $PARMdng/${mdl}_master${outreg}.ctl master${fhr}.ctl
     esac
     ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
   fi
@@ -582,7 +584,7 @@ EOF5
     ln -sf "MAXMIN5i"  fort.$((fmx+9));;
 
     *)   # Not 00/12 UTC valid times
-     if [ $check -eq 0 -a $fhr -ne 0 ];then
+     if [ $check -eq 0 -a $fhr -ne $fhrstr ];then
 #      READ PRECIP FROM SPECIAL FILES CREATED BY SMARTPRECIP
 #      ON-CYC: All forecast hours divisible by 3 except for (3,15,27....), 
 #      read  3-hr buckets max/min temp data for the previous 2 hours
@@ -641,7 +643,7 @@ EOF5
    esac
 
   export pgm=nam_smartinit; . prep_step
-  ${EXECdng}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest $inhrfrq >smartinit.out${fhr}
+  ${EXECdng}/nam_smartinit $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr >smartinit.out${fhr}
   export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields

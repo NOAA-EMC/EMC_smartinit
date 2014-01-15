@@ -18,7 +18,7 @@ module load ruby emc-utils
 # Vertical structure 08/27/2013
 #=======================================================
 #set -x 
-typeset -Z2 cyc ffhr
+typeset -Z2 cyc 
 
 #====================User Sets=======================================
 # Location of smart config file to set up directories
@@ -48,6 +48,7 @@ export DATA_IN=/stmp/${USER}/${modeld}.${model_ver}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 while [ $ffhr -le $ENDHRS ];do
+  if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
   export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
  
   rm -f /stmp/${USER}/${modeld}.${model_ver}/list/o${job}
