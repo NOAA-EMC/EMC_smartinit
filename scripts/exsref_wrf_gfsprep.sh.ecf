@@ -25,7 +25,7 @@
 ################################################################################
 
 #NCO set -x
-
+echo WRF_GFSPREP `pwd`
 yy=`echo $PDY | cut -c1-4`
 mm=`echo $PDY | cut -c5-6`
 dd=`echo $PDY | cut -c7-8`

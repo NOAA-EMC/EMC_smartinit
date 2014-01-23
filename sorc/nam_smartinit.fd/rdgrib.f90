@@ -48,7 +48,11 @@ contains
        print *,'JPDS',jpds(1:25)
        ISTAT = IRET
 ! 01-29-13 JTM : past hour 60 nam output onli to level 35
-       if (JPDS(6).ne.109) STOP 'ABORT: GRIB VARB READ ERROR'
+       if (JPDS(6).eq.109 .or. JPDS(6).eq.245) then 
+         print *, 'GRIB VARB READ ERROR: program continuing'
+       else
+         STOP 'ABORT: GRIB VARB READ ERROR'
+       endif
       ENDIF
 
       RETURN

@@ -13,7 +13,7 @@
 #                   smartinit: getgrib.f: fixed bug with reading sref prob file
 # 2012-10-31  JTM : moved smartinit system to tide
 # 2012-12-03  JTM : Unified for nam parent and nested region runs
-# 2013-07-01  JTM : added extended conus (187) and guamnest hrw nest options (199)
+# 2013-07-01  JTM : added extended conus (187) and guamnest hrw options (199)
 # 2013-07-03  JTM : Adding use of cfg file for grid settup
 # 2013-08-27  JTM : Put in Vertical Structure
 # 2013-11-20  JTM : Added option to downscale DGEX 3 hrly files beyond 84 hrs w/ 6 hr precip
@@ -35,13 +35,13 @@
 # alaskanest   :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=198  
 # aknest3      :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=91
 # guamnest     :  GEFS-GRID???   HRW-GRID=guamnmm.t00z.wrfprs  NDFD-GRD=199
-# dgex         :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart    NDFD-GRD=184
-# dgexak       :  SREF-GRID=212  DGEXGRID=dgex_ak.tCCz.bsmart       NDFD-GRD=91
+# dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart    NDFD-GRD=184
+# dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart       NDFD-GRD=91
 #======================================================================
 
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
-if [ $RUNTYP = dgex ];then inest=1;fi  #set to read in 6hr precip for dgex files
+if [ $mdl = dgex ];then inest=1;fi  #set to read in 6hr precip for dgex files
 export rg=`echo $RUNTYP |cut -c1-2` 
 
 #=====================================================================
@@ -123,9 +123,15 @@ esac
 
 # FOR NESTS,parent script, exnam, sets forecast range (60 or 54h)
 case $cyc in
-  00|12) set -A A6HR 12 24 36 48 60 72 84;;
-  * )    set -A A6HR 18 30 42 54 66 78 999;;
+  00|12) set -A A6HR 12 24 36 48 60 72 84 96 108 120;;
+  * )    set -A A6HR 18 30 42 54 66 78 90 102 114 126;;
 esac
+if [ $mdl = dgex ];then
+case $cyc in
+  00|12) set -A A6HR 96 108 120 132 144 156 168 180 192;;
+  * )    set -A A6HR 90 102 114 126 138 150 162 174 186;;
+esac
+fi
 
 # srefcyc and gefscyc set in parent job (JNAM_SMINIT)
 typeset -Z2 srefcyc gefscyc pcphrl
@@ -245,7 +251,7 @@ let ffhr1=ffhr-1
 let ffhr2=ffhr-2
 hours="${ffhr}"
 if [ $ffhr -ge 3 ];then hours="${ffhr2} ${ffhr1} ${ffhr}";fi
-if [ $RUNTYP = dgex ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
+if [ $mdl = dgex ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
@@ -276,7 +282,7 @@ for fhr in $hours; do
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00   
         fi
 #     Reduce the input model file size for prdgen on wcoss 32 bit limited machines
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
@@ -285,9 +291,13 @@ for fhr in $hours; do
         mv temp WRFPRS${fhr}.tm00;;
       wrfprs)  
         mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
-        cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00;;
+        if [ $RUNTYP = guamnest ];then  #temporary fix for matt's exp
+          cp ${mdlin}${fhr} WRFPRS${fhr}.tm00   
+        else
+          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+        fi;;
            *) 
-        if [ $RUNTYP = dgex ];then 
+        if [ $mdl = dgex ];then 
           mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
@@ -302,7 +312,7 @@ for fhr in $hours; do
   if [ $fhr -gt ${fhrstr} ];then
 
 #   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
-    if [ ${RUNTYP} = dgex ];then inhrfrq=3;fi
+    if [ ${mdl} = dgex ];then inhrfrq=3;fi
 
 # nam_sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
@@ -343,7 +353,8 @@ for fhr in $hours; do
 # In addition, For 00/12 UTC valid times: Need to make 12 hour accumulations
 #-------------------------------------------------------------
   case $fhr in 
-    ${A6HR[0]}|${A6HR[1]}|${A6HR[2]}|${A6HR[3]}|${A6HR[4]}|${A6HR[5]}|${A6HR[6]} )
+    ${A6HR[0]}|${A6HR[1]}|${A6HR[2]}|${A6HR[3]}|${A6HR[4]}|${A6HR[5]}|${A6HR[6]}| \
+    ${A6HR[7]}|${A6HR[8]} )
     if [ $cycon -eq 1 -a inest -eq 0 ];then
       mk6p=6
       ppgm=make
@@ -352,7 +363,8 @@ for fhr in $hours; do
       mk6p=6
       mk12p=12
       ppgm=add
-    fi;;
+    fi
+    if [ $mdl = dgex ];then mk3p=3;mk12p=12;mk6p=0;ppgm=add;fi;;
   esac 
 
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
@@ -545,7 +557,8 @@ EOF5
 
 # At 12-hr times, input 12-hr max/min temps and 3 and 6-hr buckets
   case $fhr in 
-    ${A6HR[0]}|${A6HR[1]}|${A6HR[2]}|${A6HR[3]}|${A6HR[4]}|${A6HR[5]}|${A6HR[6]} )
+    ${A6HR[0]}|${A6HR[1]}|${A6HR[2]}|${A6HR[3]}|${A6HR[4]}|${A6HR[5]}|${A6HR[6]}| \
+    ${A6HR[7]}|${A6HR[8]})
     echo "********************************************************"
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
@@ -627,7 +640,7 @@ EOF5
        ln -fs " " fort.16
        mksmart=0
 #      Create downscaled 00 hour files 
-       if [ $fhr -eq 00 ];then mksmart=1;fi
+       if [ $fhr -eq $fhrstr ];then mksmart=1;fi
      fi;;
   esac
 
@@ -639,6 +652,8 @@ EOF5
    conus|conusnest) RGIN=CS;;
       conusnest2p5) RGIN=CS2P;hrlyfhr=36;;
         ak_rtmages) RGIN=AKRT;;
+           dgex_cs) RGIN=CS2P;;
+           dgex_ak) RGIN=AK3;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 

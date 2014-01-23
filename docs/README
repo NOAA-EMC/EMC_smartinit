@@ -336,3 +336,22 @@ gens files are 6 hourly after 126 hours.
 NOTE:  JGEFS2SREF system won't work past 126 hours so POPs not available from sref look-alike files 
         after 126 hours.
 
+01/15/2014  GETGRIB.f90, rdgrib.f90
+* Check if ifhr <= 126 to read in 3 hourly prob. precip files (for DGEX)
+* setvar subroutine:  Does not stop if wetting rain not found (for Guam)
+
+01/17/2014 DGEX sref_ens_gen.f postprocessor
+* Fixed fhr to write out 3 character forecast hour id (write(hr,i3.3) timestep)
+    This will impact smartinit reads, I think ?
+
+01/23/2014 DGEX smartinit
+* Created RUNTYP=dgex_cs for 06/18 z (fhrstr=78) conus run
+* Created RUNTYP=dgex_ak for 00/12 z (fhrstr=84) alaska run 
+smartinit.sh, GETGRIB.f90
+* Set mk3p/LHR3, and mk12p/LHR12 to make and read special precip files for 3,12 hr buckets
+* set AHR6 for dgex off/on cycles
+* set region for dgex_cs = cs2p, dgex_ak = ak3
+* created master file for dgex_ak
+
+Need 78 hours dgex file 1. wgrib nam, 2. copygb to dgex grid
+

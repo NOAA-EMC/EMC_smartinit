@@ -179,7 +179,7 @@ while [ $HR -le $ENDHOUR ];do
   mkdir -m 775 $DATA/gefs2sref/$HR
   echo "$HOMEsref/scripts/exsref_gefs2sref.sh.ecf $HR > $DATA/gefs2sref/${HR}.out" >>$DATA/gefs2sref/poescript
   HR=`expr $HR + $INCHOUR`
-  if [ HR -ge 126 ];then export INCHOUR=06;fi
+#TEST  if [ HR -ge 126 ];then export INCHOUR=06;fi
   if [ $HR -lt 10 ];then HR="0"${HR};fi 
 done
 
@@ -202,9 +202,9 @@ $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 212 222 > $DATA/212_3hrly.out
 #jtm cd $DATA/243_3hrly
 #jtm $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 243 222 > $DATA/243_3hrly.out 
 
-#jtm mkdir -p $DATA/216_3hrly
-#jtm cd $DATA/216_3hrly
-#jtm $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 216 222 > $DATA/216_3hrly.out 
+mkdir -p $DATA/216_3hrly
+cd $DATA/216_3hrly
+$HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 216 222 > $DATA/216_3hrly.out 
 
 cd $DATA
 cat $DATA/212_3hrly.out >>$pgmout
@@ -217,6 +217,6 @@ msg="JOB $job HAS COMPLETED NORMALLY."
 ./postmsg "$jlogfile" "$msg"
 
 cd $DATA_IN
-rm -rf $DATA
+#TEST   rm -rf $DATA
 
 date

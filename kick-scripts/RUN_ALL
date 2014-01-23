@@ -1,5 +1,5 @@
 #!/bin/ksh
-###set -x 
+set -x 
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
@@ -38,7 +38,7 @@ INCR=03            # Forecast hour increment
 #  Input sub-directory for model to downscale (/com/nam/prod, com/hiresw/prod)
 #  NCO should set NET and RUN before calling job
 
-export NET=nam  
+export NET=$mdl 
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
 #================END User Sets=======================================

@@ -469,15 +469,23 @@ cccc        DO 3000 i00=1,timestep                       !1,2,3,..... order
 c  Second loop: for ensmeble members:----------------------------------------
         DO 2000 irun=1,iens                       ! perturbation members
 
+        write(*,*) 'ihr,itime=', cyc,itime,irun
         if(itime.lt.100) then
-         write(hr,'(i2.2)') itime    !itime is forecast fours 
+!  safer to try read(itime,*) hr
+          write(hr,'(i2.2)') itime    !itime is forecast fours
         else
-         write(hr,'(i3.3)') itime
+          write(hr,'(i3.3)') itime
         end if
+        write(*,*) 'hr,itime=', hr,itime
 
         write(cyc,'(i2.2)') ihr       !ihr is cycle 
-        write(fhr,'(i3.3)') itime     !fhr is forecast hour :  Changed to I3 for hrs >100 jtm
-        write(*,*) 'cyc,fhr=', cyc,fhr
+!  safer to try read(itime,*) fhr
+        if(itime.lt.100) then
+         write(fhr,'(i2.2)') itime    !itime is forecast fours
+        else
+         write(fhr,'(i3.3)') itime     !fhr is forecast hour :  Changed to I3 for hrs >100 jtm
+        endif
+        write(*,*) 'cyc,fhr=', cyc, fhr
 
         fname=trim(fhead(irun)) // '.f' // trim(hr)
 
@@ -602,6 +610,7 @@ ccc     store accumulated variable-related info:  cccccccccccccccccccc
 !jtm &   itime.eq.30.or.itime.eq.36.or.itime.eq.42.or.itime.eq.48.or.
 !jtm &   itime.eq.54.or.itime.eq.60.or.itime.eq.66.or.itime.eq.72.or.
 !jtm &   itime.eq.78.or.itime.eq.84)
+!jtm  Changed to account for foreast hours >84
       if(itime.gt.0.and.mod(itime,6).eq.0)
      &   precip(:,irun,i00)=precip(:,irun,i00)-precip(:,irun,i00-1) !Jun Du: to convert GEFS's 6hrly apcp to 3hrly
           endif

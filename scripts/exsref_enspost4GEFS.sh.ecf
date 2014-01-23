@@ -12,6 +12,7 @@
 #
 #####################################################
 set -x
+echo ENSPOST4GEFS `pwd`
 
 freq=$1
 #freq=3hrly
@@ -76,7 +77,7 @@ if [ $freq = "3hrly" ]; then
   while [ $ihr -le $ENDHOUR ];do
     fhrs="$fhrs $ihr"
     ((ihr=ihr+interval))
-    if [ $ihr -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
+#TEST    if [ $ihr -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
     if [ $ihr -lt 10 ];then ihr="0"$ihr;fi
   done
 fi
@@ -228,7 +229,7 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       waittime=`expr $waittime + 1`
     done
     HR=`expr $HR + $interval`
-    if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
+#TEST    if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
     if [ $HR -lt 10 ];then HR="0"$HR;fi
    done
  
@@ -266,7 +267,7 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
        fi
 
        HR=`expr $HR + $interval`
-       if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
+#TEST       if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
        if [ $HR -lt 10 ];then HR="0"$HR;fi
       done
       echo ${MODEL[$nf]} ${MODEL_PAIR[$nf]} " done"  
@@ -277,7 +278,7 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       while [ $HR -le $ENDHOUR ];do
         ln -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR r_gribawips.${PAIR[$nf]}.f$HR
         HR=`expr $HR + $interval`
-        if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
+#TEST        if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
         if [ $HR -lt 10 ];then HR="0"$HR;fi
       done
       member[$nf]=1
@@ -290,7 +291,10 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
 
 done
 
-#  sref_ens_gen program below probably won't work with changing file hourly intervals jtm 
+#========================================================================
+#  sref_ens_gen program: PRODUCT GENERATION
+#  probably won't work with changing file hourly intervals jtm 
+#========================================================================
 echo $NENS $grid $KM $timestep $interval -1 > filename
 echo $fhrs >> filename
 
@@ -315,6 +319,7 @@ export pgm=sref_com_grib_gefs.$grid
 #. prep_step
 
 #startmsg
+echo SREF_ENS_GEN `pwd`
 rm -f variable.tbl
 cp $PARMsref/sref_product_variable.tbl_gefs variable.tbl
 $EXECsref/sref_ens_gen < input >> $pgmout 2>errfile

@@ -116,16 +116,17 @@
        LUGP12=11; LUGP12i=12
 
        IF(MOD(IFHR,3).EQ.0) LHR3=.TRUE.  
-       IF(MOD(IFHR,6).EQ.0) LHR6=.TRUE.
+       IF((IFHR-IFHRSTR).GE.6.and.MOD(IFHR,6).EQ.0) LHR6=.TRUE.
        IF(LCYCON) THEN
          IF(MOD(IFHR,12).EQ.9)  LHR9=.TRUE.
          IF(MOD(IFHR,12).EQ.0) LHR12=.TRUE.
        ELSE
-         IF(IFHR.GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
+         IF((IFHR-IFHRSTR).GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
        ENDIF
       
 !     Set precip unit numbers for nests
        IF (lnest) THEN
+! DGEX std file has 6 hr precip only (LUGP3=15, LUGP3i=16 ??
          LUGP6=15;LUGP6i=16
          LUGS6=17;LUGS6i=18
          LUGP12=19;LUGP12i=20
@@ -581,16 +582,7 @@
       print *,'READ UPPER LEVEL fields from unit ', LUGB,'KMAX',KMAX
       J=0
       KLTYP=109   !Hybrid vertical levels
-      if (REGION.EQ.'GM') then
-        KLTYP=100  !Pressure level file
-      ELSE
-! GUAM does not have pressure
-        DO LL=1,KMAX
-          JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=001; JPDS(6)=KLTYP
-          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT)
-          J=K
-        ENDDO
-      ENDIF
+
 !   get the vertical profile of height 
       J=0
       DO LL=1,KMAX  
@@ -598,7 +590,6 @@
        print *,KLTYP,LL,KMAX,J
        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HGHT(:,:,LL),IRET,ISTAT)
        J=K
-!TEST       if (REGION.EQ.'GM')J=PRES(LL)
       ENDDO
 
 !   get the vertical profile of temperature
@@ -721,9 +712,11 @@
         JPDS(5) = 75
         JPDS(6) = 234
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
-       endif 
+       endif  
+
+       IF (IFHR .LE. 126 ) THEN   ! DGEX GEFS files are 6 hourly after 126 fhrs
 !  READ SREF precip
-      print*; print *,'READ SREF Precip Probs', LUGB2
+      print*; print *,'READ SREF Precip Probs', LUGB2, IFHR
 
 ! 3-hr probability of .01"
       J=0     !J= number of records to skip in SREFPCP file
@@ -763,6 +756,13 @@
        print *, 'bailing out of sref pcp early IFHR=',IFHR
        RETURN
       ENDIF
+
+      ELSE
+!       If FHR > 126 for DGEX, GEFS only has 6,12 hourly precip probs
+        S3REF01(M,N) = 0.0
+        S3REF10(M,N) = 0.0
+        S3REF50(M,N) = 0.0
+      ENDIF  ! fhr > 126 check
 
 ! 6-hr probability of 0.01"
        J = 5     

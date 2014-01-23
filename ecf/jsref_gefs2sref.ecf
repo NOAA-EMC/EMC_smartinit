@@ -74,6 +74,7 @@ if [ $ENDHOUR -gt 126 ];then
 else
   export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 fi
+echo TOTAL_COUNT TASKS $TOTAL_COUNT
 
 # versions file for SREF model $model_ver
 VERSION_FILE=/nw${envir}/versions/sref.ver
