@@ -22,7 +22,7 @@
       INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC
 
       LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST
-      CHARACTER*4 CTMP,REGION
+      CHARACTER*4 CTMP,REGION,CORE
 
       CHARACTER*50, ALLOCATABLE :: WXSTRING(:,:)
 !-----------------------------------------------------------------------------------
@@ -148,7 +148,7 @@
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
     REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:) 
     REAL, ALLOCATABLE   :: SFCHTNEW(:,:)
-    LOGICAL, INTENT(IN)  :: VALIDPT(:,:)
+    LOGICAL, INTENT(INOUT)  :: VALIDPT(:,:)
      real exn0,exn1, wsp
      integer nmod(2)
      integer i,j, ierr,k,ib,jb, ivar,ix,iy
@@ -158,6 +158,26 @@
      real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
      real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
      real tmean,dz,theta1,theta6
+INTERFACE
+    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM)
+
+    use constants
+    use grddef
+    use aset2d
+    use aset3d
+
+    LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+    REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+    TYPE (GINFO)        :: GDIN
+    REAL, ALLOCATABLE   :: UB(:,:),VB(:,:)
+    REAL, ALLOCATABLE   :: PHI(:,:,:)
+    real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
+    integer itmax,ii,jj,kk,idir,it
+    END SUBROUTINE vadjust
+ END INTERFACE
+
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
@@ -208,9 +228,10 @@
       IFHRSTR=0
       if (nargc.gt.6) call getarg(7,ctmp)
       READ (ctmp,*) GDIN%IFHRSTR   !starting hour (0 or 87 for dgex)
+      call getarg(8,GDIN%CORE)  ! For hiresw core nmmb or arw
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
-      CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR
+      CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
       print *,  nargc,' Running Smartinit for FHR', FHR,' IFHRSTR ',IFHRSTR
       print *, 'RUN CYCLE ', CYC
       print *, 'REGION ',TRIM(REGION)
@@ -254,7 +275,6 @@
       if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
     endif
 
-    if (GDIN%REGION.EQ.'GM') GDIN%KMAX=10   ! Pressure level files
     KMAX=GDIN%KMAX
 
    ALLOCATE (THOLD(IM,JM,12),DHOLD(IM,JM,12),STAT=kret)
@@ -288,6 +308,15 @@
     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
     P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
 
+!!! Reset VEG here (Matt Pyle, 1/14)
+        print *,'VEG ',minval(veg),maxval(veg)
+        if (CORE .eq. 'nmmb') then
+          
+          print *,'MODEL CORE  ', CORE, ' ADJUSTING VEG'
+!TEST          where (VEG .le. 0.) VEG=16.
+          print *,'VEG ',minval(veg),maxval(veg)
+        endif
+
     print *,'MAIN VALIDPT, Temperature ',validpt(50,50),T(50,50,1)
 
 !   Initialize varbs to spval (for nests)
@@ -302,14 +331,14 @@
        ALLOCATE (DOWNT(IM,JM),DOWNDEW(IM,JM),STAT=kret)
        ALLOCATE (DOWNU(IM,JM),DOWNV(IM,JM),STAT=kret)
        ALLOCATE (DOWNQ(IM,JM),TOPO(IM,JM),STAT=kret)
-       ALLOCATE (DOWNP(IM,JM),TOPO(IM,JM),STAT=kret)
+       ALLOCATE (DOWNP(IM,JM),STAT=kret)
        ALLOCATE (WGUST(IM,JM),PBLMARK(IM,JM),STAT=kret)
        ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
 
        CALL NDFDgrid(VEG,DOWNT,DOWNDEW,DOWNU,DOWNV,DOWNQ,DOWNP,TOPO,VEG_NDFD,gdin,VALIDPT)
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
-       if (REGION .ne. 'GM') then
+       if (core .ne. 'nmmb'.and.core.ne.'arw') then
        IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
         WGUST=SPVAL;TEMP1=SPVAL
         where(validpt)
@@ -326,12 +355,13 @@
 !       where (downt .le. 10) validpt=.false.
 !       where (downq .gt. 1) validpt=.false.
 
-        print *, 'OUTPUT  main 3-hr block'
+        print *, 'OUTPUT  3-hrly downscaled Varibles',FHR
        RITEHD = .TRUE.
        ID(1:25) = 0
        ID(8)=11;ID(9)=1
        DEC=-2.0
        CALL GRIBIT(ID,RITEHD,DOWNT,GDIN,70,DEC)
+       print *, 'DOWNT',minval(downt),maxval(downt)
 
        ID(1:25) = 0
        ID(8)=17;ID(9)=1

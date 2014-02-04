@@ -1,6 +1,6 @@
-#BSUB -J smartinit.conus18-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.conus18-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.conus18-12
+#BSUB -J smartinit.conus18-06
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.conus18-06
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.conus18-06
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -166,7 +166,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-#### export PDY=20140106   #TEST
+ #TEST export PDY=20140122   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 

@@ -41,7 +41,7 @@
       PARAMETER(MBUF=2000000)
       CHARACTER CBUF(MBUF)
       CHARACTER*80 FNAME
-      CHARACTER*4 DUM1, REGION
+      CHARACTER*4 DUM1, REGION, CORE
       LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED
       LOGICAL LNEST   ! for nests
       INTEGER JENS(200),KENS(200),CYC
@@ -103,6 +103,7 @@
 !    MAX/MIN 12 hrs   prev 11 hrs        prev 11 hrs
 !----------------------------------------------------------------
 
+      CORE=GDIN%CORE  !arw or nmmb for hiresw runs
       IF (CYC.EQ.12.OR.CYC.EQ.00) LCYCON=.TRUE.
 
 !     Set full, sref and special precip file unit numbers
@@ -126,9 +127,16 @@
       
 !     Set precip unit numbers for nests
        IF (lnest) THEN
-! DGEX std file has 6 hr precip only (LUGP3=15, LUGP3i=16 ??
-         LUGP6=15;LUGP6i=16
-         LUGS6=17;LUGS6i=18
+! DGEX std file has 3 or  6 hr precip only 
+         if (trim(REGION) .EQ. 'DGX'.and. LHR6) THEN
+           LUGP6=11;LUGP6i=12
+           LUGS6=11;LUGS6i=12
+           LUGP3=15;  LUGP3i=16
+           LUGS3=15;  LUGS3i=16
+         else
+           LUGP6=15;LUGP6i=16
+           LUGS6=17;LUGS6i=18
+         endif
          LUGP12=19;LUGP12i=20
          LHR9=.FALSE.   ! nests have 3 hour precip in std parent grid (01-28-13, JTM)
        else
@@ -219,7 +227,7 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
-      print *,gdin%imax,jmax,kmax,numlev,itot
+      print *,gdin%imax,jmax,kmax,numlev,itot,core
 
       if (lfull) then
       print *, ' READING SREF HDRS',LUGB2,LUGI2
@@ -402,18 +410,21 @@
       JPDS=-1;J=0
       JPDS(5) = 11 
       JPDS(6) = 105 
+      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T2,IRET,ISTAT)
 
 ! 2-m spec hum
       JPDS=-1;J=0
       JPDS(5) = 51 
       JPDS(6) = 105
+      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,Q2,IRET,ISTAT)
 
 ! 2-m dew point 
       JPDS=-1;J=0
       JPDS(5) = 17 
       JPDS(6) = 105
+      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,D2,IRET,ISTAT)
 
 ! 10-m U
@@ -431,15 +442,16 @@
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,V10,IRET,ISTAT)
 
 ! vegetation TYPE or Land Mask(0-1)
-! Veg type Not available in HIRESW domains
-! Read land mask instead (id 81)
+! Veg type Not available in some HIRESW domains ??
+! Read land fraction instead (id 81)
+! id 225 = Veg Type (0-16)
 ! to use in NDFDgrid to perform land adjustment
-        JPDS=-1;J=0;JPDS(3) = IGDNUM
-        JPDS(5) = 225
-        if (GDIN%REGION.EQ.'GM') JPDS(5)=81
-        JPDS(6) = 001
 
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 225
+      JPDS(6) = 001
+      if (core.eq.'nmmb') JPDS(5)=81  
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
 
       if (lfull.or.lanl) then
 ! lowest wet bulb zero level
@@ -587,7 +599,6 @@
       J=0
       DO LL=1,KMAX  
        JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=007; JPDS(6)=KLTYP
-       print *,KLTYP,LL,KMAX,J
        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HGHT(:,:,LL),IRET,ISTAT)
        J=K
       ENDDO
@@ -607,9 +618,8 @@
 ! JTM 01-28-13: Added check for where previous temps are not at validpts
        do i=1,imax
        do j=1,jmax
-         if(validpt(i,j).and.T(i,j,1).le.10) then 
-            print *,' Inconsistent valid pt at :', i,j,' Temperature=',T(i,j,1)
-            validpt(i,j)=.false.
+         if(.not.validpt(i,j)) then 
+            print *,' Valid pt at :', i,j,' Temperature=',T(i,j,1)
          endif
        enddo
        enddo

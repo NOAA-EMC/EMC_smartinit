@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------
-      subroutine vadjust(VALIDPT,U,V,HTOPO,DX,DY)
+      subroutine vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM)
 !----------------------------------------------------------------------
 
 ! --- FROM CALMET   Version: 5.8        Level: 050328                 ADJUST
@@ -36,8 +36,9 @@
 !     ITERATION CRITERIA
 
       DATA ITMAX,EPSI,OVREL/75,0.02,1.5/
-      NX=gdin%IMAX;NY=gdin%JMAX
+      NX=IM;NY=JM
       KK = 1
+      print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY
       ALLOCATE (UB(NY,2),VB(NX,2),STAT=kret)
       ALLOCATE (PHI(NX,NY,2),STAT=kret)
 

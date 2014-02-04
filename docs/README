@@ -355,3 +355,9 @@ smartinit.sh, GETGRIB.f90
 
 Need 78 hours dgex file 1. wgrib nam, 2. copygb to dgex grid
 
+01/31/2014
+* VADJUST.f90 : Fixed input DX,DY=2500. for nests
+
+02/04/2014  hiresw (guam) runs
+* NDFDgrid.f90 : for nmmb hiresw core, adjusted model land mask (veg_nam_ndfd,1-16,veg type) to be 
+equivalent to input NDFD 2.5 km land mask (veg_ndfd, 0-1, veg fraction)

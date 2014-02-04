@@ -36,9 +36,9 @@ contains
           ENDIF
           VARB(M,N) = GRID(KK)
         ENDDO
-       IF(JPDS(6).ne.109 .or. JPDS(6).eq.109.and.J.le.40) &
+       IF(JPDS(6).ne.109 .or. JPDS(6).eq.109.and.J.le.100) &
         WRITE(6,100) JPDS(5),JPDS(6),JPDS(7),J,MINVAL(VARB),MAXVAL(VARB)
- 100   FORMAT('VARB UNPACKED ', 4I7,2G12.4)
+ 100   FORMAT('VARB UNPACKED ', 4I7,2F14.4)
       ELSE
        WRITE(6,*)'====================================================='
        WRITE(6,*)'COULD NOT UNPACK VARB FOR J= ',J,'GRID', JPDS(3),IRET
@@ -48,10 +48,10 @@ contains
        print *,'JPDS',jpds(1:25)
        ISTAT = IRET
 ! 01-29-13 JTM : past hour 60 nam output onli to level 35
-       if (JPDS(6).eq.109 .or. JPDS(6).eq.245) then 
+       if (JPDS(5).eq.191 .or. JPDS(6).eq.109 .or. JPDS(6).eq.245) then 
          print *, 'GRIB VARB READ ERROR: program continuing'
-       else
-         STOP 'ABORT: GRIB VARB READ ERROR'
+!       else
+!         STOP 'ABORT: GRIB VARB READ ERROR'
        endif
       ENDIF
 
@@ -81,7 +81,6 @@ contains
 
       IRGI = 1
       IRGS = 1
-!TEST 1/27/13      KMAX = 0
       JR=0
       KSKIP = 0
 
@@ -93,9 +92,9 @@ contains
 
       write(6,*)' IRET FROM GETGI ',IRGI,LUB,LUI,NLEN,NNUM
       IF(IRGI .NE. 0) THEN
-        WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE SO ABORT'
+        WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE '
         ISTAT = IRGI
-        STOP 'ABORT RDHDRS: GRIB INDEX FILE READ ERROR '
+!TEST        STOP 'ABORT RDHDRS: GRIB INDEX FILE READ ERROR '
       ENDIF
 
 
@@ -105,7 +104,6 @@ contains
         JGDS = -1
         CALL GETGB1S(CBUF,NLEN,NNUM,JR,JPDS,JGDS,JENS,KR,KPDS,KGDS,KENS,LSKIP,LGRIB,IRGS)
 
-!JTM    write(6,*)' IRET FROM GETGB1S ',IRGS,JR
         IF(IRGS .NE. 0) THEN
           WRITE(6,*)' PROBLEMS ON 1ST READ OF GRIB FILE SO ABORT'
           WRITE(6,280) IGDN,JPDS(4),JPDS(5)

@@ -45,7 +45,7 @@ cd $DATA
   if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=54;fi
   case $RUNTYP in
               ak_rtmages) export ENDHR=12;;
-                 gm|guam) export ENDHR=48;;       
+                 guamnmmb|guamarw) export ENDHR=48;;       
     conusnest2p5|aknest3) export ENDHR=60;;
   esac
 
@@ -53,10 +53,9 @@ cd $DATA
 #   Downscale from NAM nest for forecast hrs 03-->54/60
 #   Downscale from NAM parent for forecast hrs=0 and > ENDHR (54/60)
  
-  case $RUNTYP in guam|guamnmm) export RUNTYP=guamnest;; esac
   if [ $ffhr -gt $fhrstr -a $ffhr -le $ENDHR ];then
     case $RUNTYP in
-      conus) export RUNTYP=${RUNTYP}nest;;
+      conus ) export RUNTYP=${RUNTYP}nest;;
          hi) export RUNTYP=hawaiinest;;
          pr) export RUNTYP=priconest;;
          ak) export RUNTYP=alaskanest;;

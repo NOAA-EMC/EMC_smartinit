@@ -10,7 +10,7 @@
 #  ogrd :  output NDFD grid number (eg: 197,196,195,198...)
 #  outreg  :  output file region name (eg: conus,ak,pr,hi,conus2p5,ak3
 #=======================================================================
-
+outreg=$1    # mdlgrd used for guam to distinguish arw/nmm
 case $cyc in 
   00|12) cyctp=on;;
   06|18) cyctp=off;;

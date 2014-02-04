@@ -1,4 +1,4 @@
-      SUBROUTINE GRIBIT(ID,RITEHD,GRID,GDIN,LUNOUT,DECI)
+      SUBROUTINE GRIBIT(ID,RITEHD,GRID2D,GDIN,LUNOUT,DECI)
       use grddef
       use constants
     INTERFACE
@@ -79,7 +79,7 @@
 
       CHARACTER*1, ALLOCATABLE    :: KBUF(:)
       REAL,        ALLOCATABLE    :: HOLDGRID(:,:)
-      REAL,        INTENT(INOUT)  :: GRID(:,:)
+      REAL,        INTENT(INOUT)  :: GRID2D(:,:)
       INTEGER,     ALLOCATABLE    :: IBMAP(:,:),IGRD(:,:)
 
       LOGICAL  NEWFILE
@@ -233,11 +233,12 @@
       IBM = 0
       SGDG  = DECI 
 !     set bitmap
-       HOLDGRID=GRID
+       HOLDGRID=GRID2D
        IBMAP=0       !2-d array
-       where(abs(grid-spval).gt.small)ibmap=1
-       ibitm=count(abs(grid-spval).gt.small)
-        print *,'IBITM',ibitm,'IJOUT',IJOUT
+       where(abs(grid2d-spval).gt.small)ibmap=1
+!       ibitm=count(abs(grid2d-spval).gt.small)
+       ibitm=count(ibmap.gt.0)
+       print *,'IN GRIBIT:  IBITM',ibitm,'IJOUT',IJOUT
 
 !        ID(7) =0 IF NO BMS SECTION, =1 IF BMS INCLUDED
 
@@ -248,7 +249,7 @@
         ID(7) = 1
         IBM = 1
       ENDIF
-      CALL GET_BITS(IBM,SGDG,IJOUT,IBMAP,GRID,IDECI,GRID,GMIN,GMAX,NBIT)
+      CALL GET_BITS(IBM,SGDG,IJOUT,IBMAP,GRID2D,IDECI,GRID2D,GMIN,GMAX,NBIT)
 
 !     ID(25) = SCALING POWER OF 10
       ID(25) = IDECI
@@ -315,9 +316,9 @@
       IBLEN  = IJOUT
       IBDSFL(1:9) = 0
 
-      CALL W3FI72(ITYPE,GRID,IGRD,IBITL,IPFLAG,ID,PDS, IGFLAG,IGRID,IGDS,   &
+      CALL W3FI72(ITYPE,GRID2D,IGRD,IBITL,IPFLAG,ID,PDS, IGFLAG,IGRID,IGDS,   &
                   ICOMP,IBFLAG,IBMAP,IBLEN,IBDSFL,NPTS,KBUF,ITOT,IER)
-      GRID=HOLDGRID
+      GRID2D=HOLDGRID
 !     
 !     EXPLICITLY SET BYTE 12 OF KBUF (BYTE 4 OF THE PDS)
 !     TO 2.  THIS WILL REFER ALL QUANTITIES TO PARAMETER
@@ -382,7 +383,7 @@
 !        ID(10) = VALUE 1 OF LEVEL  (0 FOR 1-100,102,103,105,107
 !              111,160   LEVEL IS IN ID WORD 11)
 !        ID(11) = VALUE 2 OF LEVEL
-       WRITE(6,1050) ID(8),ID(9),ID(10),ID(18),ID(19),MINVAL(GRID),MAXVAL(GRID)
+       WRITE(6,1050) ID(8),ID(9),ID(10),ID(18),ID(19),MINVAL(GRID2D),MAXVAL(GRID2D)
  1050  FORMAT('GRIBIT:  ',5I5,2G10.3)
 
 !     END OF ROUTINE.

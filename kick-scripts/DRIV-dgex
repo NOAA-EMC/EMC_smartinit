@@ -35,7 +35,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=00  #TEST
+#TEST export cyc=00  #TEST
 case $cyc in 
  00|12 ) dgexrun=dgex_ak;;
  06|18 ) dgexrun=dgex_cs;;
@@ -51,7 +51,7 @@ for RUNTYP in $dgexrun;do  #conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   if [ $RUNTYP = conusnest2p5 ];then export ENDHRS=36;fi
-  if [ $RUNTYP = dgex_cs ];then export fhrstr=78;export mdl=dgex;export ENDHRS=90;fi
+  if [ $RUNTYP = dgex_cs ];then export fhrstr=78;export mdl=dgex;export ENDHRS=126;fi
   if [ $RUNTYP = dgex_ak ];then export fhrstr=84;export mdl=dgex;export ENDHRS=126;fi
   export NET=$mdl
   export RUN=$NET

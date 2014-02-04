@@ -42,10 +42,10 @@ cd $DATA
 
 if [ $RUNTYP = dgex_cs ];then 
   export fhrstr=${fhrstr:-78}
-  export ENDHR=${ENDHR:-96}
+  export ENDHR=${ENDHR:-126}
 elif [ $RUNTYP = dgex_ak ];then 
   export fhrstr=${fhrstr:-84}
-  export ENDHR=${ENDHR:-96}
+  export ENDHR=${ENDHR:-126}
 else 
   export fhrstr=00
   export ENDHR=60
