@@ -70,7 +70,7 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
 # Create and submit JNAM_SMINIT job
 
   echo SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /stmp/${USER}/${modeld}.${model_ver} 
-  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}.${model_ver}/smout-${RUNTYP} 2>&1 &
+  mkdir -p /stmp/${USER}/${modeld}.${model_ver}/${cyc}
+  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}.${model_ver}/${cyc}/smout-${RUNTYP} 2>&1 &
   sleep 10
 done

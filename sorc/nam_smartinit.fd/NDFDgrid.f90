@@ -4,7 +4,7 @@
     use grddef
     use aset2d
     use aset3d 
-    use rdgrib
+    use rdgrib     ! GRID and MASK defined in rdgrib
     
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
@@ -19,7 +19,7 @@
 
 !    LOGICAL*1,   ALLOCATABLE   :: MASK(:)
 !    REAL,        ALLOCATABLE   :: GRID(:)
-    CHARACTER *4 CORE
+    CHARACTER *4 CORE,REGION
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
       real exn0,exn1, wsp
       integer nmod(2)
@@ -30,10 +30,10 @@
       real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
       real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
       real tmean,dz,theta1,theta6,dx,dy
-      logical ladjland,lconus,lnest
+      logical ladjland,lconus,lnest,lhiresw,lvegtype
 
  INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM)
+    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
 
     use constants
     use grddef
@@ -59,22 +59,28 @@
       print *, '***********************************'
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
+      iprt=int(im/2);jprt=int(jm/2)
       ITOT=IM*JM
       core=gdin%core  ! For hiresw runs, nmmb core treated differently
+      lhiresw=gdin%lhiresw  ! For hiresw runs, nmmb core treated differently
+      region=gdin%region
       ladjland=.false.
       lconus=.false.
+      lvegtype=.false.
       lnest=gdin%lnest
+      lhiresw=gdin%lhiresw
 
       ALLOCATE (EXN(IM,JM),ROUGH_MOD(IM,JM),STAT=kret)
       ALLOCATE (TTMP(IM,JM),DTMP(IM,JM),STAT=kret)
       ALLOCATE (UTMP(IM,JM),VTMP(IM,JM),STAT=kret)
+      ALLOCATE (SFCHTNEW(IM,JM),STAT=kret)
 
 !  read in 5 km topography
 !  changed name for consistency with non-conus region names
 !  changed to unit 48 for consistency with other domains
 !  CHANGE to read GRIB FILES for non-conus regions 
-      if (gdin%region .eq. 'CS' ) then
-        lconus=.TRUE.
+      if (region .eq. 'CS' ) then
+        lconus=.TRUE.;lvegtype=.true.
         print *, 'read in Binary topo and veg files '
         open (46, file='TOPONDFD', form='unformatted')
         read (46) topo_ndfd
@@ -90,17 +96,17 @@
         rghlim=0.5
         veglim=0.5
         scale=100.
-        ivgid=81 ! all grids including CS2P grid 187 Extended CONUS
+        ivgid=81 ! all grids including CS2P grid 187 Extended CONUS, 0=water
+        if (region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type, 16=water
 
-        print* , ' set veglim,rghlim to:  ', veglim,rghlim
+        print* , ' set veglim,rghlim to:  ', veglim,rghlim, ivgid
         print*, ' gdin%region: ', gdin%region
-        if (gdin%region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type
 
         print *, 'READ IN NDFD GRIB  TOPO file'
         JGDS=-1
         CALL RDHDRS(46,47,IGDNUM,GDIN,NUMVAL)
-        DEALLOCATE(GRID,MASK)
-        ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
+         DEALLOCATE(GRID,MASK)
+         ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
         CALL SETVAR(46,47,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,topo_ndfd,IRET,ISTAT)
 !        DX=JGDS(9)
@@ -112,36 +118,37 @@
         CALL RDHDRS(48,49,IGDNUM,GDIN,NUMVAL)
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1
         CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
-        print*, ' min, max of veg_ndfd: ', minval(veg_ndfd),maxval(veg_ndfd)
-        print*, 'read ivgid: ', ivgid,NUMVAL
+        print*, ' min, max of veg_ndfd: ', minval(veg_ndfd),maxval(veg_ndfd),NUMVAL
 
-        if (gdin%region .eq. 'CS2P'.or. core.eq.'nmmb'.or.core.eq.'arw') then 
-          lconus=.TRUE.
-          where (veg_ndfd.le.0.)veg_ndfd=16.
+        if (LHIRESW .or. REGION .eq. 'CS2P') then 
+          if (region.eq.'CS2P') lconus=.TRUE.
+          lvegtype=.true.   ! or = false, then use veg fraction
+          where (veg_ndfd.le.0.) veg_ndfd=16. 
         endif
 
-!        DEALLOCATE(GRID,MASK)
+        DEALLOCATE(GRID,MASK)
       endif
      
-      if(lconus) then 
-        rghlim=0.05  !Why different for non-conus ????
+      if(lvegtype) then 
+        rghlim=0.05  ! Make consistent with ndfd land fraction 
         veglim=16.
         scale=1.
         print *, 'NDFD Land Mask grid file is VEG Fraction',rghlim, veglim 
+        print *, 'Convert Model land use to VEG Fraction (0-.1)'
         where(veg_nam_ndfd.eq.16.) veg_nam_ndfd = -1.
         where(veg_nam_ndfd.ne.16. .and. veg_nam_ndfd.gt.0.) veg_nam_ndfd = 0.10
         where(veg_nam_ndfd.eq.-1.) veg_nam_ndfd =  0.
       endif
 
-      print *,'NDFDgrid NDFD TOPO: ',MINVAL(topo_ndfd),MAXVAL(topo_ndfd)
-      print *,'MDL TOPO:  ',MINVAL(zsfc),MAXVAL(zsfc)
-      print *,'NDFD HGHT:      ',MINVAL(hght),MAXVAL(hght)
-      print *,'MDL  MASK:      ',MINVAL(veg_nam_ndfd),MAXVAL(veg_nam_ndfd)
-      print *,'NDFD MASK:      ',MINVAL(veg_ndfd),MAXVAL(veg_ndfd)
-      print *,'MDL Q :    ',MINVAL(q),MAXVAL(q)
-      print *,'MDL Q2:    ',MINVAL(q2),MAXVAL(q2)
-      print *,'MDL  T:     ',MINVAL(T),MAXVAL(T)
-      print *,'lconus,lnest        ',lconus,lnest
+      print *,'NDFD TOPO: ',MINVAL(topo_ndfd),MAXVAL(topo_ndfd)
+      print *,'MDL  TOPO: ',MINVAL(zsfc),MAXVAL(zsfc)
+      print *,'NDFD MASK: ',MINVAL(veg_ndfd),MAXVAL(veg_ndfd)
+      print *,'MDL  MASK: ',MINVAL(veg_nam_ndfd),MAXVAL(veg_nam_ndfd)
+      print *,'MDL Q :       ',MINVAL(q),MAXVAL(q)
+      print *,'MDL Q2:       ',MINVAL(q2),MAXVAL(q2)
+      print *,'MDL  T:       ',MINVAL(T),MAXVAL(T)
+      print *,'MDL GEOP HGT: ',MINVAL(hght),MAXVAL(hght)
+      print *,'lconus,lnest,lvegtype ',lconus,lnest,lvegtype
 
          zdif_max = -1000.
          n_rough_yes=0
@@ -208,7 +215,7 @@
 
 ! --- temperature
           tnew(i,j) = tsfc
-          if (i.eq.42.and. j.eq.42)print *,'topo<zs',i,j,validpt(i,j),tnew(i,j), &
+          if (i.eq.iprt.and. j.eq.jprt)print *,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j), &
           topo_ndfd(i,j),zs
 
 ! Set dewpoint depression to that at original sfc
@@ -225,16 +232,17 @@
 !============================================
           ELSE if (topo_ndfd(i,j).gt.zs) then
 !============================================
-! ----  Now only if topo_NDFD is above the NAM model elevation
+! ----  Now only if topo_NDFD is above the model elevation
 
-!        Here, when topo-NDFD > topo-NAM, we allow a small
+!        Here, when topo-NDFD > topo-MDL, we allow a small
 !        subisothermal lapse rate with slight warming with height.
 
           GAM = MIN(GAMD,MAX(GAM,GAMsubj))
 
           DO K=1,LM
-           if (hght(i,j,k) .gt. topo_ndfd(i,j)) exit
+           if (hght(i,j,k) .gt. topo_ndfd(i,j)) goto 781
           ENDDO 
+  781     continue
 
           if (k .eq. 1) then
             zbot=zs
@@ -264,8 +272,8 @@
           tup=t2(i,j)+frac*(t(i,j,k)-t2(i,j))
 
 ! Is Tup already Temperature for nests ???????  
-          if (.not.lconus) &
-          tup = thetavc*(pnew(i,j)/P1000)**rovcp_p/(1.+0.6078*qc)
+               if (.not.lconus) &
+               tup = thetavc*(pnew(i,j)/P1000)**rovcp_p/(1.+0.6078*qc)
             
 !  provisional 2m temp at NDFD topo
           tnew(i,j) = t2(i,j) + (tup-tp1)
@@ -278,8 +286,11 @@
       tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam
 
       if (tnew(i,j) .gt. t2(i,j))  tnew(i,j) = min(tnew(i,j),tsfc)
+      if (i.eq.iprt.and. j.eq.jprt) then 
+          print *,'NDFD > MDL topo',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
+          print *,' pnew ',pnew(i,j),' thetavc ',thetavc
+      endif
 
-    if (i.eq.42.and. j.eq.42) print *,'topo>zs',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
 
 ! --- Just use q at NAM 1st level in this case.
 !     should use q2, but the values dont look good
@@ -323,7 +334,7 @@
 120     continue
 
 !       Adjust winds to topography
-!TEST        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm)
+        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
@@ -341,11 +352,11 @@
          rough_mod = veg_nam_ndfd
 
         print*, ' min/max of rough_mod:  ', minval(rough_mod),maxval(rough_mod)
-        do J=JM,1,-JM/30
-        write(6,237) (rough_mod(I,J),I=1,IM,IM/30)
-        enddo
+!        do J=JM,1,-JM/10
+!        write(6,237) (rough_mod(I,J),I=1,IM,IM/10)
+!        enddo
 
-  237   format(35(f6.2,1x))
+  237   format(30f4.1)
 
 
 ! ----------------------------------------------------
@@ -360,11 +371,11 @@
         im1 = max(1,i-1)
         ip1 = min(im,i+1)
         ladjland=.false.
-        if (lconus .and. veg_ndfd(i,j).eq.veglim) ladjland=.true.
-        if (.not.lconus .and. veg_ndfd(i,j).lt.veglim) ladjland=.true.  
+        if (lvegtype .and. veg_ndfd(i,j).eq.veglim) ladjland=.true.  ! veg_ndfd = 16 (ndfd=water)
+        if (.not.lvegtype .and. veg_ndfd(i,j).lt.veglim) ladjland=.true.  ! veg_ndfd < 0.5
 
         if (ladjland) then
-         if(rough_mod(i,j).gt. rghlim) then
+         if(rough_mod(i,j).gt. rghlim) then                       ! mdl>0,land
           if(any(rough_mod(im1:ip1,jm1:jp1).lt.rghlim)) then 
              if(validpt(i,j)) then
               rough_mod(i,j) = 0.0
@@ -390,8 +401,8 @@
 
        do j=1,jm
        do i=1,im
-         if (veg_nam_ndfd(i,j).gt.rghlim) then
-          if (rough_mod(i,j).lt.rghlim) then
+         if (veg_nam_ndfd(i,j).gt.rghlim) then  ! mdl> 0 , land
+          if (rough_mod(i,j).lt.rghlim) then    ! ndfd = 0, water
 ! -----------------------------------------------------------------
 ! -- i.e.  NDFD grid-point is over WATER (per rough_mod)
 !          NAM-interp grid-point is over LAND
@@ -405,7 +416,7 @@
                
             do jw = ja,jb
             do iw = ia,ib
-              if (veg_nam_ndfd(iw,jw).lt.rghlim) then  ! should be roughlim ?
+              if (veg_nam_ndfd(iw,jw).lt.rghlim) then  ! mdl = 0, leave loop
                 if(validpt(iw,jw)) then
                  unew(i,j) = utmp(iw,jw)
                  vnew(i,j) = vtmp(iw,jw)
@@ -421,15 +432,18 @@
           end do
               
  883      continue 
-    if (i.eq.42.and. j.eq.42)print *,'z0-n >.05',validpt(i,j),tnew(i,j), &
-     topo_ndfd(i,j),zs,veg_nam_ndfd(i,j),rghlim
+    if (i.eq.iprt.and. j.eq.jprt)print *,'z0-n >.05',validpt(i,j),tnew(i,j), &
+     ' NDFD topo ',topo_ndfd(i,j),' MDL topo ',zs,veg_nam_ndfd(i,j),rghlim
           end if 
          end if 
 ! -----------------------------------------------------------------
 ! -- i.e.  NDFD grid-point is over LAND (per rough_mod)
 !          NAM-interp grid-point is over WATER
 ! -----------------------------------------------------------------
-          if (veg_nam_ndfd(i,j).lt.rghlim .and. rough_mod(i,j).gt.rghlim) then
+!          what about mdl masks where water=16
+!          if (lvegtype .and. veg_ndfd(i,j).eq.veglim) ladjland=.true.  ! veg_ndfd = 16 (ndfd=water)
+
+          if (veg_nam_ndfd(i,j).lt.rghlim .and. rough_mod(i,j).gt.rghlim) then  ! mdl=0 (water) ;ndfd>0 (land)
                
            do ibuf=1,10
             ia = max(1,i-ibuf)
@@ -439,7 +453,7 @@
                
             do jw = ja,jb
             do iw = ia,ib
-              if (veg_nam_ndfd(iw,jw).gt.rghlim) then
+              if (veg_nam_ndfd(iw,jw).gt.rghlim) then  ! mdl = land
                 if(validpt(iw,jw)) then
                  unew(i,j) = utmp(iw,jw)
                  vnew(i,j) = vtmp(iw,jw)
@@ -454,12 +468,13 @@
            end do
  783 continue
          end if
-    if (i.eq.42.and. j.eq.42)print *,'z0n<.05',validpt(i,j),tnew(i,j), &
+    if (i.eq.iprt.and. j.eq.iprt)print *,'z0n<.05',validpt(i,j),tnew(i,j), &
      topo_ndfd(i,j),zs,veg_nam_ndfd(i,j),rghlim,rough_mod(i,j)
 
        end do
        end do
        print *,'TNEW ',minval(tnew),maxval(tnew)
+       print *,'PNEW ',minval(pnew),maxval(pnew)
        where(validpt)  
          where (dewnew.lt.spval) &
          qnew=PQ0/PSFC*EXP(A2*(dewnew-A3)/(dewnew-A4))

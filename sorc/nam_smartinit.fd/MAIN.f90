@@ -21,7 +21,7 @@
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
       INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC
 
-      LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST
+      LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST,LHIRESW
       CHARACTER*4 CTMP,REGION,CORE
 
       CHARACTER*50, ALLOCATABLE :: WXSTRING(:,:)
@@ -72,8 +72,8 @@
     PARAMETER(MBUF=2000000)
     CHARACTER CBUF(MBUF)
     CHARACTER*80 FNAME
-    CHARACTER*4 DUM1, REGION
-    LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED,LNEST
+    CHARACTER*4 DUM1, REGION, CORE
+    LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED,LNEST,LHIRESW
     INTEGER JENS(200),KENS(200),CYC
    INTEGER, INTENT(INOUT) :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
    REAL,    INTENT(INOUT) :: P03M(:,:),P06M(:,:),P12M(:,:),SN03(:,:),SN06(:,:)
@@ -159,7 +159,7 @@
      real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
      real tmean,dz,theta1,theta6
 INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM)
+    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,GDIN)
 
     use constants
     use grddef
@@ -211,6 +211,7 @@ INTERFACE
    END INTERFACE
 !-----------------------------------------------------------------------------------------
       LNEST=.FALSE.
+      LHIRESW=.FALSE.
       LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
       nargc=iargc()
       call getarg(1,CTMP)
@@ -232,6 +233,8 @@ INTERFACE
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
       CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
+      if (CORE.eq.'nmmb'.or. CORE.eq.'arw') GDIN%LHIRESW=.true.
+      LHIRESW=GDIN%LHIRESW
       print *,  nargc,' Running Smartinit for FHR', FHR,' IFHRSTR ',IFHRSTR
       print *, 'RUN CYCLE ', CYC
       print *, 'REGION ',TRIM(REGION)
@@ -338,7 +341,7 @@ INTERFACE
        CALL NDFDgrid(VEG,DOWNT,DOWNDEW,DOWNU,DOWNV,DOWNQ,DOWNP,TOPO,VEG_NDFD,gdin,VALIDPT)
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
-       if (core .ne. 'nmmb'.and.core.ne.'arw') then
+       if (.not.lhiresw) then
        IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
         WGUST=SPVAL;TEMP1=SPVAL
         where(validpt)
@@ -600,7 +603,7 @@ INTERFACE
         print *, 'Compute SKYCVR',FHR
         ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
         ALLOCATE (SKY(IM,JM),STAT=kret)
-         if(lnest) then
+         if(lnest.and. .not.lhiresw) then
            SKY=SPVAL
            where(validpt)
              TEMP1=AMAX1(LCLD,MCLD)

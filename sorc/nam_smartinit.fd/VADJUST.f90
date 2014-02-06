@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------
-      subroutine vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM)
+      subroutine vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
 !----------------------------------------------------------------------
 
 ! --- FROM CALMET   Version: 5.8        Level: 050328                 ADJUST

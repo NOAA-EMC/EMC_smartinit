@@ -684,7 +684,7 @@ EOF5
   esac
 
 #========================================================
-# Run Smartinit
+# Run SMARTINIT
 #========================================================
   hrlyfhr=12  # forecast hour to output hourly files to
   case $RUNTYP in

@@ -23,9 +23,11 @@
 # 2013-08-27  JTM           - Put in vertical structure
 #
 # NCO SUBMISSION  HRS       RUNTYP
+#  NAM:   all cycs
 #                 00-12     ak_rtmages
 #                 00-84     conus,ak,hi,pr
 #                 00-60     aknest3,conusnest2p5
+#  hiresw 00/12Z  00-48     guamnmmb, guamarw
 
 # NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #

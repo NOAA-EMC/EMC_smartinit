@@ -42,7 +42,7 @@
       CHARACTER CBUF(MBUF)
       CHARACTER*80 FNAME
       CHARACTER*4 DUM1, REGION, CORE
-      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED
+      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED, LHIRESW
       LOGICAL LNEST   ! for nests
       INTEGER JENS(200),KENS(200),CYC
 
@@ -104,6 +104,7 @@
 !----------------------------------------------------------------
 
       CORE=GDIN%CORE  !arw or nmmb for hiresw runs
+      LHIRESW=GDIN%LHIRESW  !For hiresw runs
       IF (CYC.EQ.12.OR.CYC.EQ.00) LCYCON=.TRUE.
 
 !     Set full, sref and special precip file unit numbers
@@ -227,7 +228,7 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
-      print *,gdin%imax,jmax,kmax,numlev,itot,core
+      print *,gdin%imax,jmax,kmax,numlev,itot,core,lhiresw
 
       if (lfull) then
       print *, ' READING SREF HDRS',LUGB2,LUGI2
@@ -450,7 +451,7 @@
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 225
       JPDS(6) = 001
-      if (core.eq.'nmmb') JPDS(5)=81  
+      if (lhiresw) JPDS(5)=81  
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
 
       if (lfull.or.lanl) then
@@ -594,6 +595,11 @@
       print *,'READ UPPER LEVEL fields from unit ', LUGB,'KMAX',KMAX
       J=0
       KLTYP=109   !Hybrid vertical levels
+        DO LL=1,KMAX
+          JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=001; JPDS(6)=KLTYP
+          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT)
+          J=K
+        ENDDO
 
 !   get the vertical profile of height 
       J=0
@@ -616,13 +622,13 @@
          WHERE(T(:,:,1).LE.10.) VALIDPT = .FALSE.
 
 ! JTM 01-28-13: Added check for where previous temps are not at validpts
-       do i=1,imax
-       do j=1,jmax
-         if(.not.validpt(i,j)) then 
-            print *,' Valid pt at :', i,j,' Temperature=',T(i,j,1)
-         endif
-       enddo
-       enddo
+!       do i=1,imax
+!       do j=1,jmax
+!         if(.not.validpt(i,j)) then 
+!            print *,' NOT Valid pt at :', i,j,' Temperature=',T(i,j,1)
+!         endif
+!       enddo
+!       enddo
        print *,'VALIDPT=',validpt(20,20),'max/min Temp at lvl 1',maxval(T),minval(T)
 
 !   get the vertical profile of q

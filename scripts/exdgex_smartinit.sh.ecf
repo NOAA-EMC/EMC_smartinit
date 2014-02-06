@@ -24,10 +24,12 @@
 # 2013-11-25h JTM           - added option to downscale dgex to 192 forecast hours
 #
 # NCO SUBMISSION  HRS       RUNTYP
+#   NAM  all cycs
 #                 00-12     ak_rtmages
 #                 00-84     conus,ak,hi,pr
 #                 00-60     aknest3,conusnest2p5
-#                 87-192    dgex, dgexak
+#  dgex  00/12Z   84-192    dgex_ak   * run jgefstosref beforehand
+#        06/18Z   78-192    dgex_cs
 
 # NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #

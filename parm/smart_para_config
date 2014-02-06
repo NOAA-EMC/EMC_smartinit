@@ -53,7 +53,7 @@ elif [ $RUNTYP = guamnmmb -o $RUNTYP = guamarw ];then
   export COM_IN=${COMROOT}/${mdl}/prod   #Test with ER para files
 fi
 
-export DATA_IN=/stmp/$USER/smartinit.${model_ver}
+export DATA_IN=/stmp/$USER/smartinit.${model_ver}/$cyc
 
 ####export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
 export COM_OUT=/ptmp/$USER
