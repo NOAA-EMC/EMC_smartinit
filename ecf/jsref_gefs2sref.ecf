@@ -1,0 +1,146 @@
+#BSUB -J jsref_gefs2sref
+#BSUB -o /ptmp/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -e /ptmp/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -L /bin/ksh   #moved from sh to ksh
+#BSUB -q dev
+#BSUB -cwd /stmp/Jeff.McQueen/tmpnwprd
+#BSUB -R "span[ptile=8]"  #jtm or 16 if using all tasks on node
+#BSUB -n 43               #jtm Depends on the number of forecast hours, 43 nodes for 126 fhrs
+#BSUB -W 1:30 
+#BSUB -P meso
+#BSUB -a poe
+#BSUB -x    # not_shared
+
+#=====================================================================================
+# This ecflow script combines all jsref_wrf_gefsprep_p##_CC.ecf and jsref_gefs2sref_CC.ecf scripts
+# jsref_wrf_gefsprep creates the global gens pgrb files.
+# These are input to JSREF_GEFS2SREF JOB to create gens lookalike files and products in SREF form.
+# The GENS product files are then used by NAM_SMART (DNG) to downscale probability of precip 
+# if SREF is missing or for DGEX downscaling beyond 87 forecast hours
+
+# NOTE: NCO should set sref cyc below (03,09,15, 21) 
+# 12-17-2013  Jeff McQueen NCEP/EMC
+#=====================================================================================
+# %include "/ecf/ecfnets/scripts/head.h"
+#NCO set -x
+
+# jtm lib loads
+export stutil=/hwrf/noscrub/soft/modulefiles
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+module use $stutil
+module load ruby emc-utils
+
+
+export LD_PRELOAD=/u/James.A.Abeles/mpi_trace_linux_x86_64/shared/libmpitrace.so
+
+#  envir and cyc should be set by NCO
+export envir=para
+SIVER="v3.2.3"
+nwdir=${nwdir:-/meso/save/${USER}/smartinit.$SIVER}  # or nwprod
+export utilscript=${utilscript:-/nwprod/util/ush}
+$utilscript/setup.sh
+#TEST export PDY=20140103    #TEST
+
+export DATE=$PDY
+outd=${outd:-/ptmp/Jeff.McQueen/com/sref/prod/sref.$DATE}
+
+# Determine cycle (NCO WILL SET)
+let HH=`date +%H`
+if [ $HH -ge 05 -a $HH -le 10 ];then export cyc=00;
+elif [ $HH -le 16 ];then export cyc=06;
+elif [ $HH -le 22 ];then export cyc=12;
+else
+  export cyc=18
+fi
+#TEST export cyc=00   #TEST
+
+iperstr=01
+iperend=20
+
+#  PURPOSE:      To execute the SREF Post Procestep must line up to the number job  submissions
+#  Set NODES: (e.g.: 90/3 +1=31)
+export ENDHOUR=126    # Difficult to go beyond 126 hours since interval changes for 3 to 6 after
+export INCHOUR=3
+
+export INCR=${INCHOUR}
+export CYC=${cyc}
+export LENGTH=${ENDHOUR}
+export DATE=$PDY
+if [ $ENDHOUR -gt 126 ];then
+  export TOTAL_COUNT=`expr 126 / $INCR` 
+  export END_COUNT=`expr ($ENDHOUR - 132) / 6 `
+  export TOTAL_COUNT=`expr TOTAL_COUNT + END_COUNT + 1`
+else
+  export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
+fi
+echo TOTAL_COUNT TASKS $TOTAL_COUNT
+
+# versions file for SREF model $model_ver
+VERSION_FILE=/nw${envir}/versions/sref.ver
+if [ -f $VERSION_FILE ]; then
+  . $VERSION_FILE
+else
+  exit
+fi
+#=======================================================
+#1. jtm  Create SREF look-alike files from GEFS run
+#=======================================================
+if [ $iperstr -eq 1 ];then
+for MEMBER in c00 ctl;do
+  export MEMBER
+  export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
+  ${nwdir}/jobs/JSREF_WRF_GFSPREP
+done
+fi
+
+ipert=$iperstr
+while [ $ipert -le $iperend ];do
+  export MEMBER="p${ipert}"
+  export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
+  echo "SUBMIT JSREF_WRF_GFSPREP for MEMBER" $MEMBER  CYC $cyc
+  ${nwdir}/jobs/JSREF_WRF_GFSPREP
+  ipert=`expr $ipert + 1`
+  if [ $ipert -lt 10 ];then ipert=0${ipert};fi
+done
+
+
+# wait for completion of gefs pgrb file creation  (NCO make separate ecflow script)
+if [ ! -s "$outd/global_pgrb/gens_p20.t{cyc}z.pgrbf${LENGTH}" ];then
+  sleep 60
+fi
+
+#=======================================================
+#2. Create SREF look-alike products from GEFS run
+#=======================================================
+#set sref cycle
+srefcyc=`expr $cyc + 3`
+if [ $srefcyc -lt 10 ];then srefcyc="0"${srefcyc};fi 
+export cyc=$srefcyc
+
+export job=sref_gefs2sref
+echo "SUBMIT JSREF_GEFS2SREF for CYC" $cyc
+${nwdir}/jobs/JSREF_GEFS2SREF
+
+# if [ $? -ne 0 ]; then
+#  ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
+#  ecflow_client --abort
+#  exit
+# fi
+
+
+# %include "/ecf/ecfnets/scripts/tail.h"
+# %manual
+######################################################################
+#
+#
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+# %end
