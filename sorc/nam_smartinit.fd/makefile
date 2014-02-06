@@ -4,20 +4,22 @@ SHELL=/bin/sh
 GETGRIB.f90 MAIN.f90 BOUND.f90 GRIBIT.f90 GET_BITS.f90  MAKESTRING.f90 NDFDgrid.f90 VADJUST.f90
 
 OBJS1= aset3d.o aset2d.o grddef.o constants.o asetdown.o rdgrib.o 
-OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o VADJUST.o
+OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VADJUST.o
 
-FC =   ifort -convert big_endian -g -traceback	
+FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format	
 
 LIBS = -L/usr/local/lib   \
 	-L/nwprod/lib  -lip_4 -lw3nco_4 -lw3emc_4 -lbacio_4
 NCEP_LIB_DIR = 
 
-### FFLAGS = -O -fp-model strict -list
-###LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused 
- FFLAGS = -O2
- LDFLAGS =-FR -assume byterecl 
+# FFLAGS = -O -fp-model strict -list 
+# LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused  
 
-CMD =	nam_smartinit
+FFLAGS = -O -list # -fp-model strict -list 
+LDFLAGS =-FR -assume byterecl # -check all -debug all -warn nounused  
+
+CMD =	../../exec/smartinit
+
 PROFLIB =	-lprof
 
 all:		$(CMD)
@@ -32,4 +34,4 @@ $(CMD):		$(OBJS1) $(OBJS2)
 	$(FC) $(FFLAGS) $(LDFLAGS) -o $(@) $(OBJS1) $(OBJS2) $(LIBS)
 
 clean:
-	-rm -f $(OBJS)
+	-rm -f $(OBJS1) $(OBJS2) *.mod

@@ -1,4 +1,4 @@
-     1   1   0   0   0   2   1   SURFACE PRESSURE          
+    1   1   0   0   0   2   1   SURFACE PRESSURE          
 84/199/X/-0.1/mesogm.NDFD/0/0                     
     7   1   0   0   0   2   1   SURFACE HEIGHT            
 84/199/X/-2.0/mesogm.NDFD/0/0                     
@@ -44,145 +44,881 @@
 84/199/X/2.7/mesogm.NDFD/0/0                      
   131 101  50 100   0   2   1   LIFTED INDEX--SURFCE      
 84/199/X/2.7/mesogm.NDFD/0/0                      
-    7 100   1  44   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   1  44   0   2   1   TEMP ON PRESS SFCS
+    1 109   0   1   0   2   1   PRESS ON MDL SFCS         
+84/199/X/2.7/mesogm.NDFD/0/0                      
+    7 109   0   1   0   2   1   HEIGHT ON MDL SFCS        
 84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   1  44   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   1  44   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   1  44   0   2   1   U WIND ON PRESS SFCS      
+   11 109   0   1   0   2   1   TEMP ON MDL SFCS          
 84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   1  44   0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   1  44   0   2   1   REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   1  144   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   1  144   0   2   1  TEMP ON PRESS SFCS
+   51 109   0   1   0   2   1   SPEC HUM ON MDL SFCS      
+84/199/X/2.7/mesogm.NDFD/0/0                      
+   33 109   0   1   0   2   1   U WIND ON MDL SFCS        
 84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   1  144   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   1  144   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   1  144   0   2   1   U WIND ON PRESS SFCS      
+   34 109   0   1   0   2   1   V WIND ON MDL SFCS        
 84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   1  144   0   2   1   V WIND ON PRESS SFCS      
+  153 109   0   1   0   2   1   CLD WTR ON MDL SFC        
+84/199/X/2.7/mesogm.NDFD/0/0                      
+   58 109   0   1   0   2   1   CLD ICE ON MDL SFC        
+84/199/X/2.7/mesogm.NDFD/0/0                      
+   13 109   0   1   0   2   1   POT TEMP ON MDL SFCS 
 84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   1  144   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   1 244   0   2   1   HEIGHT OF PRESS SFCS
+   71 109   0   1   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   2   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    7 109   0   2   0   2   1   HEIGHT ON MDL SFCS
 84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   2   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   51 109   0   2   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   33 109   0   2   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   2   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+  153 109   0   2   0   2   1   CLD WTR ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   58 109   0   2   0   2   1   CLD ICE ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   2   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   3   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    7 109   0   3   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   3   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   51 109   0   3   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   33 109   0   3   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   3   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+  153 109   0   3   0   2   1   CLD WTR ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   58 109   0   3   0   2   1   CLD ICE ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   3   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   4   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    7 109   0   4   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   4   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   51 109   0   4   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   33 109   0   4   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   4   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+  153 109   0   4   0   2   1   CLD WTR ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   58 109   0   4   0   2   1   CLD ICE ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   4   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   5   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    7 109   0   5   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   5   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   51 109   0   5   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   33 109   0   5   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   5   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+  153 109   0   5   0   2   1   CLD WTR ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   58 109   0   5   0   2   1   CLD ICE ON MDL SFC
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   5   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   11 109   0   6   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   7   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   8   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0   9   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  10   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  11   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  12   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  13   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  14   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  15   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  16   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  17   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  18   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  19   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  20   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  21   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  22   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  23   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  24   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  25   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  26   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  27   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  28   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  29   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  30   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  31   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  32   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  33   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  34   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  35   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  36   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  37   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  38   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  39   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  40   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  41   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  42   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  43   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  44   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  45   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  46   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  47   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  48   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  49   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  50   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  51   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  52   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  53   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  54   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  55   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  56   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  57   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  58   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  59   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   11 109   0  60   0   2   1   TEMP ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0   6   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0   7   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0   8   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0   9   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  10   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  11   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  12   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  13   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  14   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  15   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  16   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  17   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  18   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  19   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  20   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  21   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  22   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  23   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  24   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  25   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  26   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  27   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  28   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  29   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  30   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  31   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  32   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  33   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  34   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  35   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  36   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  37   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  38   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  39   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  40   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  41   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  42   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  43   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  44   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  45   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  46   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  47   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  48   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  49   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  50   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  51   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  52   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  53   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  54   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  55   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  56   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  57   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  58   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  59   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    7 109   0  60   0   2   1   HEIGHT ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   51 109   0   6   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0   7   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0   8   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0   9   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  10   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  11   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  12   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  13   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  14   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  15   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  16   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  17   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  18   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  19   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  20   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  21   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  22   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  23   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  24   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  25   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  26   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  27   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  28   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  29   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  30   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  31   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  32   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  33   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  34   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  35   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  36   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  37   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  38   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  39   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  40   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  41   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  42   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  43   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  44   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  45   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  46   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  47   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  48   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  49   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  50   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  51   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  52   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  53   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  54   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  55   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  56   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  57   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  58   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  59   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   51 109   0  60   0   2   1   SPEC HUM ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   33 109   0   6   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0   7   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0   8   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0   9   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  10   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  11   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  12   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  13   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  14   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  15   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  16   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  17   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  18   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  19   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  20   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  21   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  22   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  23   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  24   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  25   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  26   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  27   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  28   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  29   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  30   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  31   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  32   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  33   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  34   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  35   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  36   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  37   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  38   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  39   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  40   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  41   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  42   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  43   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  44   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  45   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  46   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  47   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  48   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  49   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  50   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  51   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  52   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  53   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  54   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  55   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  56   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  57   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  58   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  59   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   33 109   0  60   0   2   1   U WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   6   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   7   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   8   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0   9   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  10   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  11   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  12   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  13   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  14   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  15   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  16   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  17   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  18   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  19   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  20   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  21   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  22   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  23   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  24   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  25   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  26   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  27   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  28   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  29   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  30   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  31   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  32   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  33   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  34   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  35   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  36   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  37   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  38   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  39   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  40   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  41   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  42   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  43   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  44   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  45   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  46   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  47   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  48   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  49   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  50   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  51   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  52   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  53   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  54   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  55   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  56   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  57   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  58   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  59   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+   34 109   0  60   0   2   1   V WIND ON MDL SFCS
+84/199/X/-3.0/mesogm.NDFD/0/0
+    1 109   0   5   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   6   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   7   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   8   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0   9   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  10   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  11   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  12   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  13   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  14   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  15   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  16   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  17   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  18   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  19   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  20   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  21   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  22   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  23   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  24   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  25   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  26   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  27   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  28   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  29   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  30   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  31   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  32   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  33   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  34   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  35   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  36   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  37   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  38   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  39   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  40   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  41   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  42   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  43   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  44   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  45   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  46   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  47   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  48   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  49   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  50   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  51   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  52   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  53   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  54   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  55   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  56   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  57   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  58   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  59   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+    1 109   0  60   0   2   1   PRESS ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   6   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   7   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   8   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0   9   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  10   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  11   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  12   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  13   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  14   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  15   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  16   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  17   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  18   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  19   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  20   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  21   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  22   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  23   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  24   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  25   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  26   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  27   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  28   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  29   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  30   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  31   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  32   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  33   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  34   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  35   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  36   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  37   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  38   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  39   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  40   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  41   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  42   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  43   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  44   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  45   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  46   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  47   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  48   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  49   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  50   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  51   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  52   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  53   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  54   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  55   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  56   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  57   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  58   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  59   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
+   71 109   0  60   0   2   1   CLD FRAC ON MDL SFCS
+84/199/X/2.7/mesogm.NDFD/0/0
    11 100   1 244   0   2   1   TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   1 244   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   1 244   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   1 244   0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   1 244   0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   1  244   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   2 188   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
+84/199/X/-2.0/mesogm.NDFD/0/0
    11 100   2 188   0   2   1   TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   2 188   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   2 188   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   2 188   0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   2 188   0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   2  188   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   2 238   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   2 238   0   2   1   TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   2 238   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   2 238   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   2 238   0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   2 238   0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   2  238   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   2  88   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   2  88   0   2   1   TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   2  88   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   2  88   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   2  88   0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   2  88   0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   2  88   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   3  82   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
+84/199/X/-2.0/mesogm.NDFD/0/0
    11 100   3  82   0   2   1   TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   3  82   0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   3  82   0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   3  82   0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   3  82   0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
+84/199/X/-2.0/mesogm.NDFD/0/0
+   11 100   3 182   0   2   1   TEMP ON PRESS SFCS
+84/199/X/-2.0/mesogm.NDFD/0/0
+   52 100   2 188   0   2   1   REL HUMID ON P SFC
+84/199/X/-0.1/mesogm.NDFD/0/0
    52 100   3  82   0   2   1   REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   3  157   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   3  157   0   2   1  TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   3  157  0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   3  157  0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   3  157  0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   3  157  0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   3  157   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   3  232   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   3  232   0   2   1  TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   3  232  0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   3  232  0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   3  232  0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   3  232  0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   3  232   0   2   1  REL HUMID ON P SFC
-84/199/X/-0.1/mesogm.NDFD/0/0
-    7 100   3  132   0   2   1   HEIGHT OF PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   11 100   3  132   0   2   1  TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   17 100   3  132  0   2   1   DWPT TEMP ON PRESS SFCS
-84/199/X/-3.0/mesogm.NDFD/0/0
-   51 100   3  132  0   2   1   SPEC HUMID ON PRESS SFCS
-84/199/X/-0.1/mesogm.NDFD/0/0                     
-   33 100   3  132  0   2   1   U WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0                     
-   34 100   3  132  0   2   1   V WIND ON PRESS SFCS      
-84/199/X/-3.0/mesogm.NDFD/0/0
-   52 100   3  132   0   2   1  REL HUMID ON P SFC
 84/199/X/-0.1/mesogm.NDFD/0/0
    11   1   0   0   0   2   1   SFC (SKIN) TEMPRATUR      
 84/199/X/-3.0/mesogm.NDFD/0/0                     

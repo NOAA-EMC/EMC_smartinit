@@ -41,8 +41,8 @@
       PARAMETER(MBUF=2000000)
       CHARACTER CBUF(MBUF)
       CHARACTER*80 FNAME
-      CHARACTER*4 DUM1, REGION
-      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED
+      CHARACTER*4 DUM1, REGION, CORE
+      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED, LHIRESW
       LOGICAL LNEST   ! for nests
       INTEGER JENS(200),KENS(200),CYC
 
@@ -79,10 +79,10 @@
       IHROFF=0;LHR12=.FALSE.; LHR6=.FALSE.; LHR3=.FALSE.
       LFULL=.FALSE.;LANL=.FALSE.;LLIMITED=.FALSE.;LCYCON=.FALSE.
 
-      FHR=GDIN%FHR;IFHR=FHR;CYC=GDIN%CYC;LNEST=GDIN%LNEST
-      REGION=GDIN%REGION
-      print *, 'REGION=', GDIN%REGION
-      IF (IFHR.EQ.0) THEN
+      FHR=GDIN%FHR;IFHR=FHR;CYC=GDIN%CYC;LNEST=GDIN%LNEST;INHRFRQ=GDIN%INHRFRQ
+      REGION=GDIN%REGION;IFHRSTR=GDIN%IFHRSTR
+      print *, 'REGION=', GDIN%REGION, GDIN%IFHRSTR
+      IF (IFHR.EQ.IFHRSTR) THEN
         LANL=.TRUE.
       ELSE
         IF (MOD(IFHR,3).EQ.0) THEN 
@@ -103,6 +103,8 @@
 !    MAX/MIN 12 hrs   prev 11 hrs        prev 11 hrs
 !----------------------------------------------------------------
 
+      CORE=GDIN%CORE  !arw or nmmb for hiresw runs
+      LHIRESW=GDIN%LHIRESW  !For hiresw runs
       IF (CYC.EQ.12.OR.CYC.EQ.00) LCYCON=.TRUE.
 
 !     Set full, sref and special precip file unit numbers
@@ -116,18 +118,26 @@
        LUGP12=11; LUGP12i=12
 
        IF(MOD(IFHR,3).EQ.0) LHR3=.TRUE.  
-       IF(MOD(IFHR,6).EQ.0) LHR6=.TRUE.
+       IF((IFHR-IFHRSTR).GE.6.and.MOD(IFHR,6).EQ.0) LHR6=.TRUE.
        IF(LCYCON) THEN
          IF(MOD(IFHR,12).EQ.9)  LHR9=.TRUE.
          IF(MOD(IFHR,12).EQ.0) LHR12=.TRUE.
        ELSE
-         IF(IFHR.GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
+         IF((IFHR-IFHRSTR).GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
        ENDIF
       
 !     Set precip unit numbers for nests
        IF (lnest) THEN
-         LUGP6=15;LUGP6i=16
-         LUGS6=17;LUGS6i=18
+! DGEX std file has 3 or  6 hr precip only 
+         if (trim(REGION) .EQ. 'DGX'.and. LHR6) THEN
+           LUGP6=11;LUGP6i=12
+           LUGS6=11;LUGS6i=12
+           LUGP3=15;  LUGP3i=16
+           LUGS3=15;  LUGS3i=16
+         else
+           LUGP6=15;LUGP6i=16
+           LUGS6=17;LUGS6i=18
+         endif
          LUGP12=19;LUGP12i=20
          LHR9=.FALSE.   ! nests have 3 hour precip in std parent grid (01-28-13, JTM)
        else
@@ -218,7 +228,7 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
-      print *,gdin%imax,jmax,kmax,numlev,itot
+      print *,gdin%imax,jmax,kmax,numlev,itot,core,lhiresw
 
       if (lfull) then
       print *, ' READING SREF HDRS',LUGB2,LUGI2
@@ -401,18 +411,21 @@
       JPDS=-1;J=0
       JPDS(5) = 11 
       JPDS(6) = 105 
+      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T2,IRET,ISTAT)
 
 ! 2-m spec hum
       JPDS=-1;J=0
       JPDS(5) = 51 
       JPDS(6) = 105
+      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,Q2,IRET,ISTAT)
 
 ! 2-m dew point 
       JPDS=-1;J=0
       JPDS(5) = 17 
       JPDS(6) = 105
+      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,D2,IRET,ISTAT)
 
 ! 10-m U
@@ -430,15 +443,16 @@
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,V10,IRET,ISTAT)
 
 ! vegetation TYPE or Land Mask(0-1)
-! Veg type Not available in HIRESW domains
-! Read land mask instead (id 81)
+! Veg type Not available in some HIRESW domains ??
+! Read land fraction instead (id 81)
+! id 225 = Veg Type (0-16)
 ! to use in NDFDgrid to perform land adjustment
-        JPDS=-1;J=0;JPDS(3) = IGDNUM
-        JPDS(5) = 225
-        if (GDIN%REGION.EQ.'GM') JPDS(5)=81
-        JPDS(6) = 001
 
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
+      JPDS=-1;J=0;JPDS(3) = IGDNUM
+      JPDS(5) = 225
+      JPDS(6) = 001
+      if (lhiresw) JPDS(5)=81  
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
 
       if (lfull.or.lanl) then
 ! lowest wet bulb zero level
@@ -520,21 +534,25 @@
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
 
 ! Get min/max temperature values for full 12-hr period for F12,24...
@@ -577,24 +595,18 @@
       print *,'READ UPPER LEVEL fields from unit ', LUGB,'KMAX',KMAX
       J=0
       KLTYP=109   !Hybrid vertical levels
-      if (REGION.EQ.'GM') then
-        KLTYP=100  !Pressure level file
-      ELSE
-! GUAM does not have pressure
         DO LL=1,KMAX
           JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=001; JPDS(6)=KLTYP
-          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT)
+          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT)
           J=K
         ENDDO
-      ENDIF
+
 !   get the vertical profile of height 
       J=0
       DO LL=1,KMAX  
        JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=007; JPDS(6)=KLTYP
-       print *,KLTYP,LL,KMAX,J
        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HGHT(:,:,LL),IRET,ISTAT)
        J=K
-!TEST       if (REGION.EQ.'GM')J=PRES(LL)
       ENDDO
 
 !   get the vertical profile of temperature
@@ -610,14 +622,13 @@
          WHERE(T(:,:,1).LE.10.) VALIDPT = .FALSE.
 
 ! JTM 01-28-13: Added check for where previous temps are not at validpts
-       do i=1,imax
-       do j=1,jmax
-         if(validpt(i,j).and.T(i,j,1).le.10) then 
-            print *,' Inconsistent valid pt at :', i,j,' Temperature=',T(i,j,1)
-            validpt(i,j)=.false.
-         endif
-       enddo
-       enddo
+!       do i=1,imax
+!       do j=1,jmax
+!         if(.not.validpt(i,j)) then 
+!            print *,' NOT Valid pt at :', i,j,' Temperature=',T(i,j,1)
+!         endif
+!       enddo
+!       enddo
        print *,'VALIDPT=',validpt(20,20),'max/min Temp at lvl 1',maxval(T),minval(T)
 
 !   get the vertical profile of q
@@ -717,9 +728,11 @@
         JPDS(5) = 75
         JPDS(6) = 234
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
-       endif 
+       endif  
+
+       IF (IFHR .LE. 126 ) THEN   ! DGEX GEFS files are 6 hourly after 126 fhrs
 !  READ SREF precip
-      print*; print *,'READ SREF Precip Probs', LUGB2
+      print*; print *,'READ SREF Precip Probs', LUGB2, IFHR
 
 ! 3-hr probability of .01"
       J=0     !J= number of records to skip in SREFPCP file
@@ -759,6 +772,13 @@
        print *, 'bailing out of sref pcp early IFHR=',IFHR
        RETURN
       ENDIF
+
+      ELSE
+!       If FHR > 126 for DGEX, GEFS only has 6,12 hourly precip probs
+        S3REF01(M,N) = 0.0
+        S3REF10(M,N) = 0.0
+        S3REF50(M,N) = 0.0
+      ENDIF  ! fhr > 126 check
 
 ! 6-hr probability of 0.01"
        J = 5     

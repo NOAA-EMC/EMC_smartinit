@@ -19,10 +19,10 @@
 !   12-11-30  J McQueen  - Converted to f90, unified for different domains
 !========================================================================
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
-      INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD
+      INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC
 
-      LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST
-      CHARACTER*4 CTMP,REGION
+      LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST,LHIRESW
+      CHARACTER*4 CTMP,REGION,CORE
 
       CHARACTER*50, ALLOCATABLE :: WXSTRING(:,:)
 !-----------------------------------------------------------------------------------
@@ -68,12 +68,12 @@
 
     TYPE (GINFO) :: GDIN
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN
+    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR
     PARAMETER(MBUF=2000000)
     CHARACTER CBUF(MBUF)
     CHARACTER*80 FNAME
-    CHARACTER*4 DUM1, REGION
-    LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED,LNEST
+    CHARACTER*4 DUM1, REGION, CORE
+    LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED,LNEST,LHIRESW
     INTEGER JENS(200),KENS(200),CYC
    INTEGER, INTENT(INOUT) :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
    REAL,    INTENT(INOUT) :: P03M(:,:),P06M(:,:),P12M(:,:),SN03(:,:),SN06(:,:)
@@ -148,7 +148,7 @@
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
     REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:) 
     REAL, ALLOCATABLE   :: SFCHTNEW(:,:)
-    LOGICAL, INTENT(IN)  :: VALIDPT(:,:)
+    LOGICAL, INTENT(INOUT)  :: VALIDPT(:,:)
      real exn0,exn1, wsp
      integer nmod(2)
      integer i,j, ierr,k,ib,jb, ivar,ix,iy
@@ -158,6 +158,26 @@
      real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
      real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
      real tmean,dz,theta1,theta6
+INTERFACE
+    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,GDIN)
+
+    use constants
+    use grddef
+    use aset2d
+    use aset3d
+
+    LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+    REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+    TYPE (GINFO)        :: GDIN
+    REAL, ALLOCATABLE   :: UB(:,:),VB(:,:)
+    REAL, ALLOCATABLE   :: PHI(:,:,:)
+    real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
+    integer itmax,ii,jj,kk,idir,it
+    END SUBROUTINE vadjust
+ END INTERFACE
+
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
@@ -191,7 +211,9 @@
    END INTERFACE
 !-----------------------------------------------------------------------------------------
       LNEST=.FALSE.
+      LHIRESW=.FALSE.
       LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+      nargc=iargc()
       call getarg(1,CTMP)
       READ (ctmp,*) GDIN%CYC
       call getarg(2,CTMP)
@@ -202,14 +224,22 @@
       call getarg(5,ctmp)
       READ (ctmp,*) INEST
       if(inest.gt.0)GDIN%LNEST=.TRUE.
+      call getarg(6,ctmp)
+      READ (ctmp,*) GDIN%INHRFRQ   !hrly freq of input files (eg 1 or 3 hrly)
+      IFHRSTR=0
+      if (nargc.gt.6) call getarg(7,ctmp)
+      READ (ctmp,*) GDIN%IFHRSTR   !starting hour (0 or 87 for dgex)
+      call getarg(8,GDIN%CORE)  ! For hiresw core nmmb or arw
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
-      CYC=GDIN%CYC;LNEST=GDIN%LNEST
-      print *, 'Running Smartinit for FHR', FHR
+      CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
+      if (CORE.eq.'nmmb'.or. CORE.eq.'arw') GDIN%LHIRESW=.true.
+      LHIRESW=GDIN%LHIRESW
+      print *,  nargc,' Running Smartinit for FHR', FHR,' IFHRSTR ',IFHRSTR
       print *, 'RUN CYCLE ', CYC
       print *, 'REGION ',TRIM(REGION)
       print *, 'OUTPUT GRID # ',OGRD
-      print *, 'LNEST ',LNEST
+      print *, 'LNEST ',LNEST, ' INPUT FILE FREQ ',INHRFRQ,' HRS'
 
       FHR3=FHR-3
       FHR6=FHR-6
@@ -217,9 +247,9 @@
 
       IF (CYC.EQ.12.OR.CYC.EQ.00) LCYCON=.TRUE.
       IF(MOD(FHR,3).EQ.0) LHR3=.TRUE.
-      IF(LCYCON.AND.MOD(FHR,12).EQ.0) LHR12=.TRUE.
+      IF((FHR-IFHRSTR).GE.12.and.LCYCON.AND.MOD(FHR,12).EQ.0) LHR12=.TRUE.
       IF(.NOT.LCYCON) THEN
-        IF(FHR.GT.6 .AND. MOD(FHR-6,12).EQ.0) LHR12=.TRUE.
+        IF((FHR-IFHRSTR).GT.6 .AND. MOD(FHR-6,12).EQ.0) LHR12=.TRUE.
       ENDIF
       GDIN%LCYCON=LCYCON;GDIN%LHR12=LHR12
 
@@ -248,7 +278,6 @@
       if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
     endif
 
-    if (GDIN%REGION.EQ.'GM') GDIN%KMAX=10   ! Pressure level files
     KMAX=GDIN%KMAX
 
    ALLOCATE (THOLD(IM,JM,12),DHOLD(IM,JM,12),STAT=kret)
@@ -282,6 +311,15 @@
     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
     P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
 
+!!! Reset VEG here (Matt Pyle, 1/14)
+        print *,'VEG ',minval(veg),maxval(veg)
+        if (CORE .eq. 'nmmb') then
+          
+          print *,'MODEL CORE  ', CORE, ' ADJUSTING VEG'
+!TEST          where (VEG .le. 0.) VEG=16.
+          print *,'VEG ',minval(veg),maxval(veg)
+        endif
+
     print *,'MAIN VALIDPT, Temperature ',validpt(50,50),T(50,50,1)
 
 !   Initialize varbs to spval (for nests)
@@ -296,14 +334,14 @@
        ALLOCATE (DOWNT(IM,JM),DOWNDEW(IM,JM),STAT=kret)
        ALLOCATE (DOWNU(IM,JM),DOWNV(IM,JM),STAT=kret)
        ALLOCATE (DOWNQ(IM,JM),TOPO(IM,JM),STAT=kret)
-       ALLOCATE (DOWNP(IM,JM),TOPO(IM,JM),STAT=kret)
+       ALLOCATE (DOWNP(IM,JM),STAT=kret)
        ALLOCATE (WGUST(IM,JM),PBLMARK(IM,JM),STAT=kret)
        ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
 
        CALL NDFDgrid(VEG,DOWNT,DOWNDEW,DOWNU,DOWNV,DOWNQ,DOWNP,TOPO,VEG_NDFD,gdin,VALIDPT)
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
-       if (REGION .ne. 'GM') then
+       if (.not.lhiresw) then
        IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
         WGUST=SPVAL;TEMP1=SPVAL
         where(validpt)
@@ -320,12 +358,13 @@
 !       where (downt .le. 10) validpt=.false.
 !       where (downq .gt. 1) validpt=.false.
 
-        print *, 'OUTPUT  main 3-hr block'
+        print *, 'OUTPUT  3-hrly downscaled Varibles',FHR
        RITEHD = .TRUE.
        ID(1:25) = 0
        ID(8)=11;ID(9)=1
        DEC=-2.0
        CALL GRIBIT(ID,RITEHD,DOWNT,GDIN,70,DEC)
+       print *, 'DOWNT',minval(downt),maxval(downt)
 
        ID(1:25) = 0
        ID(8)=17;ID(9)=1
@@ -564,7 +603,7 @@
         print *, 'Compute SKYCVR',FHR
         ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
         ALLOCATE (SKY(IM,JM),STAT=kret)
-         if(lnest) then
+         if(lnest.and. .not.lhiresw) then
            SKY=SPVAL
            where(validpt)
              TEMP1=AMAX1(LCLD,MCLD)
@@ -954,7 +993,7 @@
       ID(2)=2
       ID(8)=209;ID(9)=1
       DEC=1.0
-      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
+!jtm not needed      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
 
        print *, 'completed main'
       STOP

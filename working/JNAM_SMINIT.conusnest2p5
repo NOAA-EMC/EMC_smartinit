@@ -1,14 +1,14 @@
-#BSUB -J smartinit.conusnest2p512-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.conusnest2p512-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.1/list/osmartinit.conusnest2p512-12
+#BSUB -J smartinit.conusnest2p512-33
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.conusnest2p512-33
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.conusnest2p512-33
 #BSUB -n 1
-#BSUB -W 1:00
+#BSUB -W 2:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]
 #BSUB -R rusage[mem=4800]
 #!/bin/ksh
-##set -xa   #NCO preferred setting
+####NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -38,7 +38,8 @@
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
-export modeld=${modeld:-smartinit}
+#Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
+export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
 
 echo cyc is ${cyc:?}
 echo envir is ${envir:?}
@@ -62,7 +63,7 @@ export SENDECF=${SENDECF:-YES}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export mdl=${NET}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -87,8 +88,11 @@ export mdl=${NET}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
+   export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
    export pcom=${pcom:-/pcom/${envir}/${NET}}
  fi
+else
+ dng_para_config${RUNTYP}   #EMC User set
 fi
 
 export PS4='$SECONDS + '
@@ -100,6 +104,7 @@ date
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
 export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+#NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -134,8 +139,8 @@ export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
-export HOMEdng=${HOMEdng:-${ROOTdng}/${modeld}.$model_ver}
+export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
+export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
@@ -161,7 +166,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-#TEST export PDY=20130926
+### export PDY=20140205   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
@@ -172,7 +177,7 @@ sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}
+export COM_IN=${COM_IN:-/com/${NET}/prod}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
@@ -216,7 +221,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-env  
+####NCO SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"
