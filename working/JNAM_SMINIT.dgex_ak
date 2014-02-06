@@ -1,6 +1,6 @@
-#BSUB -J smartinit.dgex_ak00-84
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/00/list/osmartinit.dgex_ak00-84
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/00/list/osmartinit.dgex_ak00-84
+#BSUB -J smartinit.dgex_ak12-84
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.dgex_ak12-84
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.dgex_ak12-84
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -184,7 +184,7 @@ export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
-cp ${PARMdng}/NAM-SMINIT.CTL $DATA
+cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
 if [ $srefcyc -lt 0 ] ; then
