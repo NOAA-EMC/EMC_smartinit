@@ -20,7 +20,7 @@
 #======================================================================
 #  Set Defaults fcst hours,cycle,model,region in config_nam_nwpara called in parent job
 
-# RUNTYP: OUTPUT REGION TO DOWNSCALE TO  (IN NAM-SMINIT.CTL FILE)
+# RUNTYP: OUTPUT REGION TO DOWNSCALE TO  (IN SMINIT.CTL FILE)
 #=================================================================
 # conus        : Downscale NAM 12 over CONUS  
 #              :  SREF-GRD=212  NAM-GRD=bgrd  NDFD-GRD=197
@@ -34,8 +34,10 @@
 # hawaiinest   :  SREF-GRID=243  NAM-GRID=hawaiinest.bsmart    NDFD-GRD=196  
 # alaskanest   :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=198  
 # aknest3      :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=91
+
 # guamnmmb     :  GEFS-GRID???   HRW-GRID=guamnmmb.t00z.wrfprs NDFD-GRD=199
 # guamarw      :  GEFS-GRID???   HRW-GRID=guamarw.t00z.wrfprs  NDFD-GRD=199
+
 # dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=184
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
 #======================================================================
@@ -73,11 +75,11 @@ EXECmdl=$(eval echo \$$tempvar)
 #=====================================================================
 
 # READ IN GRID INFO
-linemax=`cat NAM-SMINIT.CTL |wc -l`
-echo NAM-SMINIT  $linemax
+linemax=`cat SMINIT.CTL |wc -l`
+echo SMINIT  $linemax
 let iline=0
 while [ $iline -le $linemax ];do
-  head -n $iline NAM-SMINIT.CTL >tempfile
+  head -n $iline SMINIT.CTL >tempfile
   line=`tail -n1 tempfile`
   let k=1
   for word in $line; do
@@ -112,11 +114,12 @@ while [ $iline -le $linemax ];do
     let iline=iline+1
     if [ $iline -gt $linemax ];then
       echo;echo  $RUNTYP not found in SMINIT.CTL file
-      echo  EXITING NAM-SMARTINIT; exit
+      echo  EXITING SMARTINIT; exit
     fi
   fi
 done
-case $rg in dgx|gm) inest=1;;esac  #set to read in 6hr precip for dgex files
+case $rg in dgx) inest=1;;esac  #set to read in 6hr precip for dgex files
+if [ $mdl = "hiresw" ];then inest=1;fi
 
 set -x
 
@@ -291,10 +294,10 @@ if [ $fhr -gt 00 ];then
  if [ $fhr9 -lt 10 ];then fhr9="0"${fhr9};fi
 fi
 
-# Check that NAM 00 hr analysis is from NDAS or GDAS
+# Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
       bgrd3d) 
-#     Check that NAM 00 hr analysis is from NDAS or GDAS (08/2013)
+#     Check that  00 hr analysis is from NDAS or GDAS (08/2013)
         if [ $fhr -eq 00 -a $GUESS = GDAS ];then
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate $ ${cyc}Z CYCLE $mdl $pcfhr FORECAST;echo
@@ -305,7 +308,7 @@ fi
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-          if [ $rg = gm ];then
+          if [ $mdl = "hiresw" ];then
             cp ${mdlin}${fhr} WRFPRS${fhr}.tm00
           else
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00   
@@ -318,7 +321,7 @@ fi
         mv temp WRFPRS${fhr}.tm00;;
       wrfprs)  
         mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
-        if [ $rg = gm ];then
+        if [ $mdl = "hiresw" ];then
           cp ${mdlin}${fhr} WRFPRS${fhr}.tm00
         else
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
@@ -419,7 +422,7 @@ fi
         pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
       esac
    
-    if [ $rg = gm ];then
+    if [ $mdl = "hiresw" ];then
       cp ${mdlin}${FHRFRQ} WRFPRS${FHRFRQ}.tm00
     else
       cp ${mdlin}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
@@ -456,7 +459,7 @@ fi
       esac
       $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
-      if [ $rg = gm ];then
+      if [ $mdl = "hiresw" ];then
         cp ${mdlin}${fhr6} WRFPRS${fhr6}.tm00
       else
         cp ${mdlin}${fhr6}.tm00 WRFPRS${fhr6}.tm00
@@ -518,8 +521,8 @@ EOF5
 #   To interp nests to 5 km, just use same parent nam master files 
 #   To interp ak/cs nests to ak3/cs2p5, use special smartmaster ctl files
     case $rg in
-      ak|hi|pr) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
-          con|ak3|gm) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
+         ak|hi|pr) cp -p $PARMdng/${mdl}_master${rg}.ctl master${fhr}.ctl;;
+       con|ak3|gm) cp -p $PARMdng/${mdl}_smartmaster${RUNTYP}.ctl master${fhr}.ctl;;
               dgx) cp -p $PARMdng/${mdl}_master${outreg}.ctl master${fhr}.ctl
     esac
     ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
@@ -529,7 +532,7 @@ EOF5
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
 
-# POINT TO NAM Network prdgen (/nwprod/exec) 
+# POINT TO Network prdgen (/nwprod/exec) 
   ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
   export err=$?;  err_chk
 
@@ -655,7 +658,7 @@ EOF5
          ln -sf "MAXMIN1i"  fort.22
 
        else           
-#        READ PRECIP FROM INPUT NAM GRIB FILE 
+#        READ PRECIP FROM INPUT MDL GRIB FILE 
 #        ON-CYC:  Forecast hours 3,15,27,39....already  have 3-hr buckets,
 #        OFF-CYC: 3 hour buckets available for all 3 hour forecast times
 #        ALL-CYC: Input only  max/min temp data for the previous 2 hours
@@ -719,7 +722,7 @@ EOF5
    export cyc  
    export fhr=$fhr
    export ogrd 
-   if [ $rg = gm ];then
+   if [ $mdl = "hiresw" ];then
    ${USHdng}/dng_awp.sh $mdlgrd
    else
    ${USHdng}/dng_awp.sh $outreg

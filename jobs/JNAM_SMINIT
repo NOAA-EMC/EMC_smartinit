@@ -175,7 +175,7 @@ export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
-cp ${PARMdng}/NAM-SMINIT.CTL $DATA
+cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
 if [ $srefcyc -lt 0 ] ; then

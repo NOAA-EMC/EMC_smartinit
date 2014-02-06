@@ -1,6 +1,6 @@
-#BSUB -J smartinit.conusnest2p500-09
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/00/list/osmartinit.conusnest2p500-09
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/00/list/osmartinit.conusnest2p500-09
+#BSUB -J smartinit.conusnest2p512-33
+#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.conusnest2p512-33
+#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.conusnest2p512-33
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA

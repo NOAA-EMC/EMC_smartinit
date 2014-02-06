@@ -84,8 +84,8 @@
         print *, 'read in Binary topo and veg files '
         open (46, file='TOPONDFD', form='unformatted')
         read (46) topo_ndfd
-        DX=5000.;DY=5000.
         close (46)
+        DX=5000.;DY=5000.
      
 !  Read in 5 km vegetation for CONUS domain
         open (48, file='LANDNDFD', form='unformatted')
@@ -105,13 +105,13 @@
         print *, 'READ IN NDFD GRIB  TOPO file'
         JGDS=-1
         CALL RDHDRS(46,47,IGDNUM,GDIN,NUMVAL)
-         DEALLOCATE(GRID,MASK)
-         ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
+        DEALLOCATE(GRID,MASK)
+        ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
         CALL SETVAR(46,47,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,topo_ndfd,IRET,ISTAT)
 !        DX=JGDS(9)
 !        DY=JGDS(10)
-        DX=2500.;DY=2500.
+        DX=2500.;DY=2500. ! hardwired for conus nests
         print *,'DX DY ',DX,DY,im,jm,NUMVAL
 
         print *, 'READ IN NDFD GRIB LAND COVER file'
@@ -150,50 +150,49 @@
       print *,'MDL GEOP HGT: ',MINVAL(hght),MAXVAL(hght)
       print *,'lconus,lnest,lvegtype ',lconus,lnest,lvegtype
 
-         zdif_max = -1000.
-         n_rough_yes=0
-         n_rough_no =0
+      zdif_max = -1000.
+      n_rough_yes=0
+      n_rough_no =0
 !C ****************************************************************
 ! -- Now let's start reducing to NDFD topo elevation.
 !C ****************************************************************
-        where (zsfc .lt. 0.) zsfc=0.0
-        sfchtnew = topo_ndfd
-        tnew=spval;qnew=spval
-        dewnew=spval;unew=spval;vnew=spval
-        pnew=spval  
+      where (zsfc .lt. 0.) zsfc=0.0
+      sfchtnew = topo_ndfd
+      tnew=spval;qnew=spval
+      dewnew=spval;unew=spval;vnew=spval
+      pnew=spval  
 
-        do 120 j=1,jm
-        do 120 i=1,im
+      do 120 j=1,jm
+      do 120 i=1,im
         if (.not. validpt(i,j)) goto 120
         exn(i,j) = cpd_p*(psfc(i,j)/P1000)**rovcp_p
 ! ---   z = surface elevation
-          zs = zsfc(i,j)
+        zs = zsfc(i,j)
 
 ! --- q = specific humidity at 2m from NAM model sfc
 ! --- dew-point temperature at original sfc
-         td_orig=d2(i,j)
+        td_orig=d2(i,j)
 
 ! --- dewpoint depression
-          tddep = max(0.,t2(i,j) - td_orig )
-          qv= q(i,j,1)
-          QQ = QV/(1.+QV)
-          tp1=T(I,J,1)
+         tddep = max(0.,t2(i,j) - td_orig )
+         qv= q(i,j,1)
+         QQ = QV/(1.+QV)
+         tp1=T(I,J,1)
           
 ! --- Base Td on 2m q
-          qv = qq/(1.-qq)
+         qv = qq/(1.-qq)
 
 ! ---   get values at level 6 for lapse rate calculations
+         QQ = Q(I,J,6)/(1.+Q(i,j,6))
 
-          QQ = Q(I,J,6)/(1.+Q(i,j,6))
-
-          exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
-          T6=T(I,J,6)
-          Z1=HGHT(I,J,1)
-          Z6=HGHT(I,J,6)
-          GAM = (TP1-T6)/(Z6-Z1)
+         exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
+         T6=T(I,J,6)
+         Z1=HGHT(I,J,1)
+         Z6=HGHT(I,J,6)
+         GAM = (TP1-T6)/(Z6-Z1)
 
 !============================================
-          if (topo_ndfd(i,j).le.zs ) then
+         if (topo_ndfd(i,j).le.zs ) then
 !============================================
           GAM = MIN(GAMD,MAX(GAM,GAMi))
 
@@ -215,7 +214,7 @@
 
 ! --- temperature
           tnew(i,j) = tsfc
-          if (i.eq.iprt.and. j.eq.jprt)print *,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j), &
+          if (i.eq.iprt.and.j.eq.jprt)print *,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j), &
           topo_ndfd(i,j),zs
 
 ! Set dewpoint depression to that at original sfc
@@ -230,7 +229,7 @@
           vnew(i,j) = v10(i,j)
 
 !============================================
-          ELSE if (topo_ndfd(i,j).gt.zs) then
+         ELSE if (topo_ndfd(i,j).gt.zs) then
 !============================================
 ! ----  Now only if topo_NDFD is above the model elevation
 
@@ -272,8 +271,8 @@
           tup=t2(i,j)+frac*(t(i,j,k)-t2(i,j))
 
 ! Is Tup already Temperature for nests ???????  
-               if (.not.lconus) &
-               tup = thetavc*(pnew(i,j)/P1000)**rovcp_p/(1.+0.6078*qc)
+          if (.not.lconus) &
+            tup = thetavc*(pnew(i,j)/P1000)**rovcp_p/(1.+0.6078*qc)
             
 !  provisional 2m temp at NDFD topo
           tnew(i,j) = t2(i,j) + (tup-tp1)
@@ -283,13 +282,13 @@
 !     This will avoid the problem with NDFD temp values
 !     being set to be much warmer than NAM 2m temp.
 
-      tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam
+          tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam
 
-      if (tnew(i,j) .gt. t2(i,j))  tnew(i,j) = min(tnew(i,j),tsfc)
-      if (i.eq.iprt.and. j.eq.jprt) then 
-          print *,'NDFD > MDL topo',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
-          print *,' pnew ',pnew(i,j),' thetavc ',thetavc
-      endif
+          if (tnew(i,j) .gt. t2(i,j))  tnew(i,j) = min(tnew(i,j),tsfc)
+          if (i.eq.iprt.and. j.eq.jprt) then 
+           print *,'NDFD > MDL topo',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),' thetavc ',thetavc
+          endif
 
 
 ! --- Just use q at NAM 1st level in this case.
@@ -300,22 +299,22 @@
 !---> Alaska, Choose q at 1st level for more realistic output 
 !     Also for CONUS....others ???
 !TEST      if (gdin%region .eq. 'AK' .or. lnest) qv=q(i,j,1)
-       qv=q(i,j,1)
+         qv=q(i,j,1)
 
-      e=pnew(i,j)/100.*qv/(0.62197+qv)
+         e=pnew(i,j)/100.*qv/(0.62197+qv)
 ! --- dew-point temperature at original sfc
-      ENL = ALOG(E)
-      DWPT = (243.5*ENL-440.8)/(19.48-ENL)
-      td = dwpt + 273.15
+         ENL = ALOG(E)
+         DWPT = (243.5*ENL-440.8)/(19.48-ENL)
+         td = dwpt + 273.15
 ! --- dewpoint temperature
-      dewnew(i,j) = min(td,tnew(i,j))
-      if (k .eq. 1) then
-        uc = u10(i,j)+frac * (uwnd(i,j,k)-u10(i,j))
-        vc = v10(i,j)+frac * (vwnd(i,j,k)-v10(i,j))
-      else
-        uc = uwnd(i,j,k-1)+frac * (uwnd(i,j,k)-uwnd(i,j,k-1))
-        vc = vwnd(i,j,k-1)+frac * (vwnd(i,j,k)-vwnd(i,j,k-1))
-      endif
+         dewnew(i,j) = min(td,tnew(i,j))
+         if (k .eq. 1) then
+           uc = u10(i,j)+frac * (uwnd(i,j,k)-u10(i,j))
+           vc = v10(i,j)+frac * (vwnd(i,j,k)-v10(i,j))
+         else
+           uc = uwnd(i,j,k-1)+frac * (uwnd(i,j,k)-uwnd(i,j,k-1))
+           vc = vwnd(i,j,k-1)+frac * (vwnd(i,j,k)-vwnd(i,j,k-1))
+         endif
 
 ! -- 0.7 factor is a wag at surface effects on wind speed
 !     when interpolating from the free atmosphere to
@@ -324,8 +323,8 @@
 !          speedc = 0.7*sqrt(uc*uc+vc*vc)
 !          speed = sqrt(uc)**2 + vc)**2)
 !          ratio = max(1.,speedc/(max(0.001,speed)) )
-          unew(i,j) = uc
-          vnew(i,j) = vc
+         unew(i,j) = uc
+         vnew(i,j) = vc
 
 !============================================
         END IF
@@ -352,11 +351,6 @@
          rough_mod = veg_nam_ndfd
 
         print*, ' min/max of rough_mod:  ', minval(rough_mod),maxval(rough_mod)
-!        do J=JM,1,-JM/10
-!        write(6,237) (rough_mod(I,J),I=1,IM,IM/10)
-!        enddo
-
-  237   format(30f4.1)
 
 
 ! ----------------------------------------------------
