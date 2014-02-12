@@ -14,8 +14,8 @@ set -x
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.2.3
-export code_ver=v3.2.3
+export model_ver=v3.2.4
+export code_ver=v3.2.4
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 export RUN_ENVIR=emc
@@ -35,7 +35,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#TEST export cyc=00  #TEST
+export cyc=00  #TEST
 case $cyc in 
  00|12 ) dgexrun=dgex_ak;;
  06|18 ) dgexrun=dgex_cs;;
@@ -51,7 +51,7 @@ for RUNTYP in $dgexrun;do  #conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   if [ $RUNTYP = conusnest2p5 ];then export ENDHRS=36;fi
-  if [ $RUNTYP = dgex_cs ];then export fhrstr=78;export mdl=dgex;export ENDHRS=126;fi
+  if [ $RUNTYP = dgex_cs ];then export fhrstr=90;export mdl=dgex;export ENDHRS=126;fi
   if [ $RUNTYP = dgex_ak ];then export fhrstr=84;export mdl=dgex;export ENDHRS=126;fi
   export NET=$mdl
   export RUN=$NET
@@ -70,7 +70,7 @@ for RUNTYP in $dgexrun;do  #conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
 # Create and submit JNAM_SMINIT job
 
   echo SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /stmp/${USER}/${modeld}.${model_ver} 
-  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}.${model_ver}/smout-${RUNTYP} 2>&1 &
+  mkdir -p /stmp/${USER}/${modeld}.${model_ver}/${cyc}
+  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}.${model_ver}/${cyc}/smout-${RUNTYP} 2>&1 &
   sleep 10
 done

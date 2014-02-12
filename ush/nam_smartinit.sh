@@ -57,6 +57,7 @@ fi
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
+echo EXECmdl $EXECmdl
 
 #=====================================================================
 # Set special filename extensions for mdl,sref,master,wgt,output files

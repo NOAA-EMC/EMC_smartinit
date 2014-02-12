@@ -51,7 +51,7 @@ while [ $ffhr -le $ENDHRS ];do
   if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
   export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
  
-  rm -f /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
+#  rm -f /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
 
 # Create and invoke config file needed by Job 
   echo "export RUNTYP=$RUNTYP"   >$wkdir/dng_para_config${RUNTYP}

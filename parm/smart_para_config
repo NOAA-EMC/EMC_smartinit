@@ -34,6 +34,7 @@ export SENDDBN_GB2=NO
 export HOMEdng=/meso/save/$USER/smartinit.${model_ver}            # home dir
 export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm files
 export EXECnam=/nwprod/exec   #Location of nam_prdgen
+export EXECdgex=/nwprod/exec   #Location of dgex_prdgen
 export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 export COMROOT=/com
 export COM_IN=${COMROOT}/${mdl}/prod
@@ -50,7 +51,7 @@ if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then
 elif [ $RUNTYP = guamnmmb -o $RUNTYP = guamarw ];then
   export COM_SREF=/com/sref/para
   export COMROOT="/meso/noscrub/Matthew.Pyle/com"
-  export COM_IN=${COMROOT}/${mdl}/prod   #Test with ER para files
+  export COM_IN=${COMROOT}/${mdl}/prod   #Test with Matt Pyle's hiresw para files
 fi
 
 export DATA_IN=/stmp/$USER/smartinit.${model_ver}/$cyc
