@@ -1,0 +1,163 @@
+#!/bin/ksh      
+########################################
+# JNAM_NAM2DGEX
+# Create the conus dgex initial file on dgex grid from NAM 
+# to initialize dgex downscaling over CONUS (fhr=78)
+# change log:
+# 12/10/2013, Jeff McQueen: 
+#             Initial configuration to interpolate NAM native grid to DGEX native grid
+#
+########################################
+#NCO set -xa
+export OMP_NUM_THREADS=1
+export MP_EUIDEVICE=sn_all
+export MP_EUILIB=us
+export MP_MPILIB=mpich2
+
+#
+# Specify whether the run is production or development
+#
+export RUN_ENVIR=${RUN_ENVIR:-para}
+export SENDECF=${SENDECF:-YES}
+
+###############################
+# Specify NET and RUN name
+##############################
+export NET=dgex
+export RUN=dgex
+
+#####################################################################################
+# Run config file to get input parameters
+# This config file should define the following variables
+# DATA_IN: Location of working directory, default to /tmpnwprd
+# DEV_SMS: If the job is to be running using ecFflow, default to YES
+# SENDDBN: Set to NO for developers, default to YES
+# COM_IN:  Directory for input files, default to /com/$NET/${envir}
+# COM_OUT: Directory for output file, default to /com/$NET/${envir}
+# gespath: Directory for the guess or restart files, default to /nwges/${envir}
+#####################################################################################
+if [ "$RUN_ENVIR" != prod ];then ### For Developers, "group_name" is passed from the ecFflow script
+  export userid=$LOGNAME
+  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.v3.2.3/parm/smart_para_config}
+  . $CONFIG_FILE
+  export DATA_IN=${DATA_IN:-/stmp/$userid/tmpnwprd}
+  export COM_OUT=/meso/noscrub/${USER}/com/${NET}/para  
+  export RM_TMPDIR=NO
+fi
+
+###############################################################
+# This block can be modified for different test environment
+###############################################################
+if [ $RUN_ENVIR = prod -a $envir != prod ]; then
+  export DBNROOT=/nwprod/spa_util/fakedbn
+  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+fi
+
+echo `date` $0 `date -u` begin
+export PS4='$SECONDS + '
+
+########################################################### 
+# obtain unique process id (pid) and make temp directories
+# Note: ctl member needs to be run only once and can be used 
+# for both NMM and ARW cores!
+###########################################################
+export pid=$$
+export DATA_IN=${DATA_IN:-/tmpnwprd1}
+
+export DATA=$DATA_IN/${job}.${pid}
+# Remove old directory if it exists
+rm -rf $DATA
+mkdir -p $DATA
+cd $DATA 
+
+####################################
+# File To Log Msgs
+####################################
+export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.${pid}}
+
+####################################
+# Determine Job Output Name on System
+####################################
+export outid="LL$job"
+export jobid="${outid}.o${pid}"
+export pgmout="OUTPUT.${pid}"
+export pgmerr=errfile
+
+export cycle=t${cyc}z 
+
+
+##################################################
+# SAVEGES  - Copy Files From TMPDIR to $GESdir
+# SENDECF  - Flag Events on ecFflow
+# SENDCOM  - Copy Files From TMPDIR to $COMOUT
+# SENDDBN  - Issue DBNet Client Calls
+# RERUN    - Rerun fcst from beginning (default no)
+##################################################
+export SENDCOM=${SENDCOM:-YES}
+export SENDECF=${SENDECF:-YES}
+export SENDDBN=${SENDDBN:-NO}
+#jtm export VERBOSE=${VERBOSE:-YES}
+
+export HOMEdgex=${HOMEdgex:-/nw${envir}/${NET}.${model_ver}}
+export EXECdgex=${EXECdgex:-$HOMEnam/exec}
+export FIXdgex=${FIXdgex:-$HOMEnam/fix}
+export USHdgex=${USHdgex:-$HOMEnam/ush}
+export HOMEdng=${HOMEdng:-/nw${envir}/nam_smartinit.${model_ver}}
+export PARMdng=${PARMdng:-$HOMEdng/parm}
+
+###################################
+# Set up the UTILITIES
+###################################
+export utilscript=/nwprod/util/ush
+export utilexec=/nwprod/util/exec
+
+# Run setup to initialize working directory and utility scripts
+sh $utilscript/setup.sh
+
+# Run setpdy and initialize PDY variables
+sh $utilscript/setpdy.sh
+. ./PDY
+
+#############################################
+# COMIN and COMOUT
+#############################################
+export COMIN=${COMIN:/com/${NET}/prod/${mdl}.${PDY}}
+export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
+export COMOUT=$COM_OUT/${RUN}.${PDY}
+
+export cyc MEMBER
+export CYC=${cyc}
+export DATE=$PDY
+
+echo "Begin  JNAM_NAM2DGEX for cyc" $cyc 
+case $cyc in 06|18 )
+  fhr=78;mdl=$NET;natgrd=bgrd3d
+  mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
+  cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+
+#  Reduce the NAM model file size 
+   ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
+   ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
+   mv temp WRFPRS${fhr}.tm00
+
+#  Interpolate NAM Native bgrd3d file to dgex grid 185
+   mdl=dgex;mdlgrd=conus;natgrd=".bsmart"
+   mkdir -p $COMOUT
+   mdlout=$COMOUT/${mdl}_${mdlgrd}.t${CYC}z${natgrd}
+   $utilexec/copygb -g 185 -i3 -x WRFPRS${fhr}.tm00 ${mdlout}${fhr}.tm00;;
+esac
+
+env
+
+cat $pgmout
+
+msg="JOB COMPLETED NORMALLY"
+./postmsg "$jlogfile" "$msg"
+
+################################
+# Remove the Working Directory
+################################
+cd $DATA_IN
+if [ ${RM_TMPDIR:-YES} = YES ]; then rm -rf $DATA; fi
+
+date

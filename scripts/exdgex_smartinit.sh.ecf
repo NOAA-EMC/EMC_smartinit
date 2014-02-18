@@ -40,15 +40,15 @@ msg="JOB $job HAS BEGUN"
 
 cd $DATA
 
-# 00/12 UTC CYCLE smartinit CONFIGURE
 
-if [ $RUNTYP = dgex_cs ];then 
+if [ $RUNTYP = dgex_cs ];then  # 06/18 UTC Cycle 
   export fhrstr=${fhrstr:-78}
   export ENDHR=${ENDHR:-126}
-elif [ $RUNTYP = dgex_ak ];then 
+elif [ $RUNTYP = dgex_ak ];then  #00/12 UTC cycle
   export fhrstr=${fhrstr:-84}
   export ENDHR=${ENDHR:-126}
 else 
+# 00/12 UTC CYCLE smartinit CONFIGURE
   export fhrstr=00
   export ENDHR=60
 fi

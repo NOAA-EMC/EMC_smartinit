@@ -51,10 +51,10 @@ export SENDECF=${SENDECF:-YES}
 # Specify NET and RUN Name and model
 ####################################
 #NCO set NET = nam, dgex or hiresw for GUAM run
-export NET=${NET:-nam}
-export RUN=${RUN:-nam}
+export NET=${NET:-dgex}
+export RUN=${RUN:-dgex}
 export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+export mdl=${mdl:-dgex}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -135,6 +135,7 @@ export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
+export EXECdgex=${EXECdgex:-${ROOTdng}/exec}   #Point to dgex_prdgen until dgex is in vert structure
  export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
  export USHdng=${USHdng:-${HOMEdng}/ush}
@@ -157,7 +158,6 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-### export PDY=20140205   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
@@ -195,13 +195,10 @@ fi
 
 export srefcyc
 let srefcyc2=$srefcyc
-###typeset -Z2 srefcyc2
 
 export gefscyc
 let gefscyc2=$gefscyc
-###typeset -Z2 gefscyc2
 
-#DEV TEST typeset problem
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
