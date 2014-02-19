@@ -32,28 +32,28 @@ module load ruby emc-utils
 
 #  envir and cyc should be set by NCO
 export envir=para
-IVER="v3.2.4"
-nwdir=${nwdir:-/meso/save/${USER}/smartinit.$IVER}  # or nwprod
+export model_ver="v3.2.4"
+nwdir=${nwdir:-/meso/save/${USER}/smartinit.$model_ver}  # or nwprod
 export utilscript=${utilscript:-/nwprod/util/ush}
 $utilscript/setup.sh
 
 export DATE=$PDY
-outd=${outd:-/ptmp/Jeff.McQueen/com/sref/prod/sref.$DATE}
 
 # Determine cycle (NCO WILL SET)
 let HH=`date +%H`
-if [ $HH -ge 05 -a $HH -le 10 ];then export cyc=00;
-elif [ $HH -le 16 ];then export cyc=06;
-elif [ $HH -le 22 ];then export cyc=12;
+if [ $HH -ge 03 -a $HH -le 09 ];then export cyc=00;
+elif [ $HH -le 15 ];then export cyc=06;
+elif [ $HH -le 21 ];then export cyc=12;
 else
   export cyc=18
 fi
+export cyc=06 #TEST
 
 #=====================================================================
 # Create the CONUS dgex initial file (fhr=78) on dgex grid from nam
 #=====================================================================
 export job=jdgex_nam2dgex
-echo "SUBMIT JDGEX_NAM2DGEX for CYC" $CYC
+echo "SUBMIT JDGEX_NAM2DGEX for CYC" $cyc
 ${nwdir}/jobs/JDGEX_NAM2DGEX 
 
 # if [ $? -ne 0 ]; then

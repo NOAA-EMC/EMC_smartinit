@@ -6,9 +6,10 @@
 # change log:
 # 12/10/2013, Jeff McQueen: 
 #             Initial configuration to interpolate NAM native grid to DGEX native grid
+#             (NAM rotated lat-lon Arakowa B grid) to (DGEX rotated lat-lon Arakowa B grid)
 #
 ########################################
-#NCO set -xa
+set -xa
 export OMP_NUM_THREADS=1
 export MP_EUIDEVICE=sn_all
 export MP_EUILIB=us
@@ -25,6 +26,8 @@ export SENDECF=${SENDECF:-YES}
 ##############################
 export NET=dgex
 export RUN=dgex
+export mdl=$NET
+export RUNTYP=${RUNTYP:-dgex_cs}
 
 #####################################################################################
 # Run config file to get input parameters
@@ -38,10 +41,13 @@ export RUN=dgex
 #####################################################################################
 if [ "$RUN_ENVIR" != prod ];then ### For Developers, "group_name" is passed from the ecFflow script
   export userid=$LOGNAME
-  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.v3.2.3/parm/smart_para_config}
-  . $CONFIG_FILE
-  export DATA_IN=${DATA_IN:-/stmp/$userid/tmpnwprd}
+#  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${model_ver}/parm/smart_para_config}
+# . $CONFIG_FILE
+  export DATA_IN=${DATA_IN:-/stmp/${userid}/tmpnwprd}
+  export COM_IN=/com/nam/prod
   export COM_OUT=/meso/noscrub/${USER}/com/${NET}/para  
+  export HOMEdng=/meso/save/${USER}/smartinit.${model_ver}
+  export jlogfile=${jlogfile:-/ptmp/${USER}/com/logs/jlogfiles/jlogfile.${job}.${pid}}
   export RM_TMPDIR=NO
 fi
 
@@ -96,13 +102,13 @@ export cycle=t${cyc}z
 export SENDCOM=${SENDCOM:-YES}
 export SENDECF=${SENDECF:-YES}
 export SENDDBN=${SENDDBN:-NO}
-#jtm export VERBOSE=${VERBOSE:-YES}
+export VERBOSE=${VERBOSE:-YES}
 
 export HOMEdgex=${HOMEdgex:-/nw${envir}/${NET}.${model_ver}}
 export EXECdgex=${EXECdgex:-$HOMEnam/exec}
 export FIXdgex=${FIXdgex:-$HOMEnam/fix}
 export USHdgex=${USHdgex:-$HOMEnam/ush}
-export HOMEdng=${HOMEdng:-/nw${envir}/nam_smartinit.${model_ver}}
+export HOMEdng=${HOMEdng:-/nw${envir}/smartinit.${model_ver}}
 export PARMdng=${PARMdng:-$HOMEdng/parm}
 
 ###################################
@@ -121,7 +127,7 @@ sh $utilscript/setpdy.sh
 #############################################
 # COMIN and COMOUT
 #############################################
-export COMIN=${COMIN:/com/${NET}/prod/${mdl}.${PDY}}
+export COM_IN=${COM_IN:-/com/nam/${envir}/${mdl}.${PDY}}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
@@ -129,22 +135,28 @@ export cyc MEMBER
 export CYC=${cyc}
 export DATE=$PDY
 
-echo "Begin  JNAM_NAM2DGEX for cyc" $cyc 
 case $cyc in 06|18 )
-  fhr=78;mdl=$NET;natgrd=bgrd3d
-  mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-  cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+  echo "Begin  JNAM_NAM2DGEX for cyc" $CYC 
+  export mdl=nam
+  export fhr=78;natgrd=bgrd3d
+  export COMIN=${COMIN:-${COM_IN}/${mdl}.${PDY}}
+  mdlin=${mdl}.t${cyc}z.${natgrd}
+  cp ${COMIN}/${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
 
 #  Reduce the NAM model file size 
    ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
    ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
    mv temp WRFPRS${fhr}.tm00
 
-#  Interpolate NAM Native bgrd3d file to dgex grid 185
-   mdl=dgex;mdlgrd=conus;natgrd=".bsmart"
+#  Interpolate NAM Native bgrd3d file to dgex Native grid 
+   mdl=dgex
+   mdlgrd=conus;natgrd=".bsmart"
    mkdir -p $COMOUT
-   mdlout=$COMOUT/${mdl}_${mdlgrd}.t${CYC}z${natgrd}
-   $utilexec/copygb -g 185 -i3 -x WRFPRS${fhr}.tm00 ${mdlout}${fhr}.tm00;;
+   mdlout=${mdl}_${mdlgrd}.t${CYC}z${natgrd}
+
+#DGEX 185 LCC   grid='255 3 491 303 19943 234907 8 262000 12000 12000 0 64 40000 40000'
+grid='255 205 421 302 19757 -125034 136 40000 -98000 126 108 64 50073 -56203' 
+   ${utilexec}/copygb -g "${grid}" -x WRFPRS${fhr}.tm00 ${COMOUT}/${mdlout}${fhr}.tm00;;
 esac
 
 env

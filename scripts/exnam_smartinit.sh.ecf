@@ -2,8 +2,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         exnam_prdgen.sh
-# Script description:  Run nam product generator jobs
+# Script name:         exnam_smartinit.sh
+# Script description:  Run NAM smartiniti downscaling jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
@@ -49,9 +49,9 @@ cd $DATA
     conusnest2p5|aknest3) export ENDHR=60;;
   esac
 
-# For 5 km NDFD output grids:
+# For 5 km NAM downscaled NDFD output grids:
 #   Downscale from NAM nest for forecast hrs 03-->54/60
-#   Downscale from NAM parent for forecast hrs=0 and > ENDHR (54/60)
+#   Downscale from MDL NAM parent for forecast hrs=0 and > ENDHR (54/60)
  
   case $RUNTYP in gm|guam) export RUNTYP=guamnest;; esac
   if [ $ffhr -gt $fhrstr -a $ffhr -le $ENDHR ];then
@@ -63,7 +63,7 @@ cd $DATA
       esac
   fi
 
-  ${NAM_SMINIT_SSH:-$USHdng/nam_smartinit.sh}
+  ${SMINIT_SSH:-$USHdng/smartinit.sh}
 
 set -x
 #####################################################################

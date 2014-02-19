@@ -2,8 +2,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         exnam_prdgen.sh
-# Script description:  Run nam product generator jobs
+# Script name:         exdgex_smartinit.sh
+# Script description:  Run DGDEX smartinit downscaling jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
@@ -76,7 +76,7 @@ fi
       esac
   fi
 
-  ${NAM_SMINIT_SSH:-$USHdng/nam_smartinit.sh}
+  ${SMINIT_SSH:-$USHdng/smartinit.sh}
 
 #NCO set -x
 #####################################################################

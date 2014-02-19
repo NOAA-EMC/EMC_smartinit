@@ -39,6 +39,7 @@ INCR=03            # Forecast hour increment
 #  NCO should set NET and RUN before calling job
 
 export NET=$mdl 
+export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
 #================END User Sets=======================================
@@ -66,7 +67,7 @@ while [ $ffhr -le $ENDHRS ];do
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 
-# Create JNAM_SMINIT job
+# Create J{MDL}_SMINIT job
   echo "#BSUB -J ${job}"             >${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -oo /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -eo /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
@@ -78,7 +79,7 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -R "rusage[mem=4800]"" >>${wkdir}/bjobcards-dev${RUNTYP}
 
   cd ${wkdir}
-  cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
+  cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/J${MDL}_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`

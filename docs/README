@@ -361,3 +361,15 @@ Need 78 hours dgex file 1. wgrib nam, 2. copygb to dgex grid
 02/04/2014  hiresw (guam) runs
 * NDFDgrid.f90 : for nmmb hiresw core, adjusted model land mask (veg_nam_ndfd,1-16,veg type) to be 
 equivalent to input NDFD 2.5 km land mask (veg_ndfd, 0-1, veg fraction)
+
+HIRESW GUAM INTERFACE COMPLETE
+
+****************************************V3.2.4********************************************
+
+02/19/2014
+* Created nam_nam2dgex.ecf and NAM_NAM2DGEX jobs to copygb 78 hr NAM to DGEX bgrd native format.
+* Interface for dgex_cs RUNTYP (needs 78 hr DGEX like file) 
+* Removed ush/sorc nam_smartinit dependencies.
+    Now using smartinit.sh and smartinit sorc indepedent of model
+    But still using {mdl}_smartinit.ecf, J{MDL}_SMINIT, and ex{mdl}smartinit.ecf.sh for mdls=nam,dgex and hiresw
+* smartinit.sh : added option for dgex precip (03 or 06 hr buckets) in mkpcp logic

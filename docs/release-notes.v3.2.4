@@ -1,0 +1,52 @@
+smartinit.v3.2.4
+Q3FY14 Implementation
+
+
+1.  DGEX DOWN-SCALING (NET=DGEX, RUN=DGEX
+Additional jobs are needed to extend SREF GEFS look-alike files from 90-192 forecast hours 
+
+The following prep jobs are triggered once the GEFS 21 member sig files thru 192 forecast hours are available  
+(by arount +5:30 hours after cycle time)
+==============================================================================
+ECF PREP JOB: 
+~/smartinit.v3.2.4/ecf/jsref_gefs2sref.ecf   (mpmd job)
+    JOBS  
+    ../jobs/JSREF_WRFGFSPREP  ---> Create individual GEFS member files interpolated to SREF grids
+    ../jobs/JSREF_GEFS2SREF     --->  Create SREF ensemble product files from interpolated GEFS members.
+Also
+../jobs/JDGEX_NAM2DGEX  --> Interpolate NAM 78 hour native grid parent forecast files  
+                            to DGEX Conus grid (185) for conus dgex downscaling.
+
+   SCRIPTS
+    ../scripts/exsref_wrf_gfsprep.sh.ecf
+    ../scripts/exsref_gefs2sref.sh.ecf
+   ../scripts exsref_enspost4GEFS.sh.ecf
+   /nwprod/sref.v6.1.1/ush/sref_prep_sig2pgb.sh  (not modified, use this script in the SREF NETwork.
+
+  SOURCE
+ ../sorc/sref_ens_gen.fd
+
+These jobs and scripts perform the same tasks (with the same names) that are
+currently run as part of the SREF system through fhr=87.
+===============================================================================
+
+
+For JNAM_SMINIT   --> downscale dgex step
+=========================================================================
+ECF additional dgex smartinit jobs:   
+  ~/smartinit.v3.2.4/ecf/jdgex_sminit_conus_fHH.ecf (HH=78,81...192)   CYCLE 06/18 UTC
+  ~/smartinit.v3.2.4/ecf/jdgex_sminit_ak3_fHH.ecf (HH=90,93..192)      CYCLE 00/12 UTC
+
+Additional parm  prdgen control files
+  ../parm/dgex_masterak3.ctl
+  ../parm/dgex_masterconus.ctl
+
+Additional fix wgt prdgen files
+ ../fix/wgt/dgex_wgt_184_conus   (interp to 2.5 km grid 184)
+../fix/wgt/dgex_wgt_91_alaska    (interp to 3 km grid 91)
+=============================================================================================
+
+Once the jsref_gefs2sref.ecf ecf job is complete, the smartinit system (JDGEX_SMINIT) can be run with
+export RUNTYP=dgex_ak   for alaska grid downscaling at cycles 00/12 UTC  (forecast hours 84-->192)
+export RUNTYP=dgex_cs   for conus grid downscaling at cycles 06/18 UTC    (forecast hours 78-->192)
+
