@@ -47,7 +47,7 @@ elif [ $HH -le 21 ];then export cyc=12;
 else
   export cyc=18
 fi
-export cyc=06 #TEST
+#TEST export cyc=06 #TEST
 
 #=====================================================================
 # Create the CONUS dgex initial file (fhr=78) on dgex grid from nam

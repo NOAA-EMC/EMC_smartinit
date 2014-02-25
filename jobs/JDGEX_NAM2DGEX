@@ -153,10 +153,12 @@ case $cyc in 06|18 )
    mdlgrd=conus;natgrd=".bsmart"
    mkdir -p $COMOUT
    mdlout=${mdl}_${mdlgrd}.t${CYC}z${natgrd}
+   mdloutlcc=${mdl}_${mdlgrd}.t${CYC}z.awp185
 
-#DGEX 185 LCC   grid='255 3 491 303 19943 234907 8 262000 12000 12000 0 64 40000 40000'
+gridlcc='255 3 491 303 19943 234907 8 262000 12000 12000 0 64 40000 40000'
 grid='255 205 421 302 19757 -125034 136 40000 -98000 126 108 64 50073 -56203' 
-   ${utilexec}/copygb -g "${grid}" -x WRFPRS${fhr}.tm00 ${COMOUT}/${mdlout}${fhr}.tm00;;
+   ${utilexec}/copygb -g "${grid}" -x WRFPRS${fhr}.tm00 ${COMOUT}/${mdlout}${fhr}.tm00
+   ${utilexec}/copygb -g "${gridlcc}" -x WRFPRS${fhr}.tm00 ${COMOUT}/${mdloutlcc}${fhr}.tm00;;
 esac
 
 env

@@ -50,7 +50,7 @@ mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 while [ $ffhr -le $ENDHRS ];do
   if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
-  export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
+  export job="DNG${cyc}.${RUNTYP}-${ffhr}"
  
 #  rm -f /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
 

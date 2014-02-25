@@ -8,8 +8,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Job name:         nam_smartinitconus.job
-# Job description:  Run nam smartinit jobs
+# Job name:         J{MDL}_SMINIT
+# Job description:  Run dgex smartinit jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #

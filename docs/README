@@ -373,3 +373,17 @@ HIRESW GUAM INTERFACE COMPLETE
     Now using smartinit.sh and smartinit sorc indepedent of model
     But still using {mdl}_smartinit.ecf, J{MDL}_SMINIT, and ex{mdl}smartinit.ecf.sh for mdls=nam,dgex and hiresw
 * smartinit.sh : added option for dgex precip (03 or 06 hr buckets) in mkpcp logic
+
+02/25/2014
+* nam_smartinit.fd  : 
+*  Added option to compute dgex 6 hr precip if input fhr3>0 but fhr4<0
+     At 3 hr times (check6 ne 0), need 6 hr special precip file
+       Pfhr6=pfhr+(pfhr3-pfhr6)
+* Fixed smartinit.sh to point to correct precip files for 6 hr precip calc (check=0,check6.ne.0)
+     ln -fs 13 --> fhr6 hr old 3 hr precip    (pfhr1)  eg: 78
+            15 --> current hr  3 hr precip    (pfhr2)  eg: 84
+            17 --> fh3 hr old  6 hr precip    (pfhr3)  eg: 81
+     and for 12 hr precip, sum up the current and previous 6 hour old precip buckets
+     ln -fs 13 --> 6hr old 6 hr precip
+     ln -fs 15 --> current 6 hr precip
+           

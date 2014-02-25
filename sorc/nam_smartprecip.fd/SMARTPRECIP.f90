@@ -17,12 +17,23 @@
 !                for 3 or 6 hour buckets, set fhr3,fh4 to -99
 !                For 12 hour buckets: 
 !                    smartprecip  fhr fhr-3 fhr-6 fhr-9 
+!  02-20-14 JTM Added DGEX option addsub to compute 6 hr precip
+!               from 3 dgex files
+!               fhr1 (fhr) 3 hr precip
+!               fhr2 (fh3 old) 6 hr precip
+!               fhr3 (fh6 old) 3 hr precip
+!                 then mk6p=fhr+(fhr3-fhr6) for DGEX
+!               Added DGEX 12 hr precip option
+!               fhr1=fhr6 6hr precip
+!               fhr2=fhr  6hr precip
+!                 12hrp=fhr6 + fhr
+
 ! ATTRIBUTES:
 !   LANGUAGE: FORTRAN-90
 !   MACHINE:  WCOSS     
 !======================================================================
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-      INTEGER FHR0,FHR1, FHR2, FHR3, FHR4
+      INTEGER FHR0,FHR1, FHR2, FHR3, FHR4, FHR6
       CHARACTER*80 FNAME
       LOGICAL*1 LSUB
 
@@ -56,12 +67,15 @@
 !====================================================================
 !     FHR3 = -99 signals a 6 hour summation requested
 !     FHR4 GT 00 signals a 12 hour summation requested
+!     FHR3 GT 0 but FHR4 = -99 signals a 6 hour summation For DGEX (fhr1+(fhr2-fh3))
 !     FHR1 GT FHR2 signals do a 3 hour subtraction of files
+!     FHR2 LT FHR1 signals do an addition (eg: DGEX, fhr1+fhr2=12h pr)
       READ (5,*) FHR1, FHR2,FHR3,FHR4
 !====================================================================
 
 !==>  Make 3 hour buckets by subtracting fhr3 - fhr files
       LSUB=.FALSE.
+      FHR6=-99
       IF (FHR1.GT.FHR2) THEN
        FHR0=FHR2
        FHR2=FHR1
@@ -74,11 +88,19 @@
        ENDIF
       ELSE
 
-!==>  sum up precip files
-        if (fhr3 .lt. 0) FHR3=FHR1-3
-
-!==>    make 12 hr precip 
-        if (fhr4 .ge. 0) FHR0=FHR1-3
+!==>    sum up precip files
+        if (fhr4.lt.0) then 
+          if (fhr3 .lt. 0) then  
+            FHR3=FHR1-3
+            FHR6=-99
+          else
+            FHR6=FHR3
+          endif
+        else 
+!==>      make 12 hr precip 
+          FHR0=FHR1-3
+          FHR6=FHR3
+        endif
       ENDIF
 
       print *, 'fhr0,fhr1 fhr2 fhr3 fhr4 ',FHR0, FHR1, FHR2, FHR3,FHR4
@@ -161,10 +183,10 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,     &
                  K,KPDS,KGDS,MASK,GRID,SNOW2,IRET,ISTAT)
 
-      IF (FHR4.GT.0 ) THEN
-
+      IF (FHR6.GT.0 ) THEN
 !=======================================================
 !  READ INDEX FILE TO GET GRID SPECS for 3rd file
+!  For 12 hr precip summations and DGEX 6 hr calculations
 !=======================================================
       CALL RDHDRS(LUGB3,LUGI3,JPDS,JGDS,              &
                   IGDNUM,IMAX,JMAX,KMAX,NUMVAL)
@@ -195,10 +217,12 @@
         JPDS(15) = FHR3
       CALL SETVAR(LUGB3,LUGI3,NUMVAL,J,JPDS,JGDS,KF,      &
                  K,KPDS,KGDS,MASK,GRID,SNOW3,IRET,ISTAT)
+      ENDIF
 
 !=======================================================
 !  READ INDEX FILE TO GET GRID SPECS for 4th file
 !=======================================================
+      IF (FHR4.GT.0) THEN
       CALL RDHDRS(LUGB4,LUGI4,JPDS,JGDS,                  &
                   IGDNUM,IMAX,JMAX,KMAX,NUMVAL)
 
@@ -240,6 +264,7 @@
        STOP
       END IF
 
+
       IF (LSUB) THEN
        APCPOUT=APCP2-APCP1
        CAPCPOUT=CAPCP2-CAPCP1
@@ -250,9 +275,15 @@
        SNOWOUT=SNOW2+SNOW1
  
        IF (FHR4 .GT.0 )THEN
-          APCPOUT=APCPOUT+APCP3+APCP4
-          CAPCPOUT=CAPCPOUT+CAPCP3+CAPCP4
-          SNOWOUT=SNOWOUT+SNOW3+SNOW4
+!        12 hr precip
+         APCPOUT=APCPOUT+APCP3+APCP4
+         CAPCPOUT=CAPCPOUT+CAPCP3+CAPCP4
+         SNOWOUT=SNOWOUT+SNOW3+SNOW4
+       ELSEIF (FHR6.gt.0) THEN   
+!        6 hr precip for DGEX
+         APCPOUT=APCP1+(APCP3-APCP2)
+         CAPCOUT=CAPC1+(CAPC3-CAPC2)
+         SNOWOUT=SNOW1+(SNOW3-SNOW2)
        ENDIF
       ENDIF
 
