@@ -65,12 +65,12 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
   M=$(echo $dayrm | cut  -c 5-6 )
   D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
-  rm -rf /ptmp/${USER}/nam.${wdayd}
+  rm -rf /ptmpp1/${USER}/nam.${wdayd}
 
 # Create and submit JNAM_SMINIT job
 
   echo SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /stmp/${USER}/${modeld}.${model_ver}/${cyc}
-  ${kickd}/RUN_ALL >/stmp/$USER/${modeld}.${model_ver}/${cyc}/smout-${RUNTYP} 2>&1 &
+  mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
+  ${kickd}/RUN_ALL >/stmpp1/$USER/${modeld}.${model_ver}/${cyc}/smout-${RUNTYP} 2>&1 &
   sleep 10
 done

@@ -28,21 +28,21 @@
 
   export RUN_TCTRACK=NO
 
-  export DATA_IN=/stmp/${LOGNAME}/tmpnwprd
+  export DATA_IN=/stmpp1/${LOGNAME}/tmpnwprd
   export jlogfile=$DATA_IN/jlogfile
 
- export com=/ptmp/$LOGNAME/com/sref/${envir}
- export COM=/ptmp/$LOGNAME/com/sref/${envir}
+ export com=/ptmpp1/$LOGNAME/com/sref/${envir}
+ export COM=${com}
 
- export COM_IN=/ptmp/$LOGNAME/com/sref/${envir}  #jtm
+ export COM_IN=/ptmpp1/$LOGNAME/com/sref/${envir}  #jtm
 #jtm  export COM_IN=/com/sref/prod #jtm
 #  export COM=$COM_IN
 #  export com=$COM_IN
 
 
-  export COM_OUT=/ptmp/$LOGNAME/com/sref/${envir}
+  export COM_OUT=/ptmpp1/$LOGNAME/com/sref/${envir}
 
-#jtm  export gespath=/ptmp/$LOGNAME/nwges/${envir}
+#jtm  export gespath=/ptmpp1/$LOGNAME/nwges/${envir}
   export gespath=/nwges/prod
   export GESNDAS=/nwges/prod
 

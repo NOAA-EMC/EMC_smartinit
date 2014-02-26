@@ -40,7 +40,7 @@ export COM_SREF=${COMROOT}/sref/prod
 if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then 
   export COMROOT="/meso/noscrub/Eric.Rogers/com"
   export COM_IN=${COMROOT}/${mdl}/para  
-  export COM_SREF=/ptmp/Jeff.McQueen/com/sref/para
+  export COM_SREF=/ptmpp1/Jeff.McQueen/com/sref/para
 
 #TEST until hiresw wrprs files are available from production run
 elif [ $RUNTYP = guamnmmb -o $RUNTYP = guamarw ];then
@@ -48,8 +48,8 @@ elif [ $RUNTYP = guamnmmb -o $RUNTYP = guamarw ];then
   export COM_IN=${COMROOT}/${mdl}/prod   
 fi
 
-export DATA_IN=/stmp/$USER/smartinit.${model_ver}/$cyc
+export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
 
-export COM_OUT=/ptmp/$USER
+export COM_OUT=/ptmpp1/$USER
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`

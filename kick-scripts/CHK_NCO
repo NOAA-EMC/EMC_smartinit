@@ -30,7 +30,7 @@ if [ $cyc -eq 06 -o $cyc -eq 18 ];then let ioff=6;fi
 # location of smartinit files
 #===============================================================
 ncodir=/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
-devdir=/ptmp/${USER}/smart${RUNTYP}/${mdl}.${yymmdd}     #EMC PARA 
+devdir=/ptmpp1/${USER}/smart${RUNTYP}/${mdl}.${yymmdd}     #EMC PARA 
 
 #===============================================================
 # GRIB1 FILE PREFIX NAME FORMAT (eg: nam.t12z.bgrd3d42.tm00)

@@ -41,7 +41,7 @@ date
 export pid=$$
 if [ "$RUN_ENVIR" != prod ]   ### For Developers
 then
-  export DATA_IN=${DATA_IN:-/stmp/$LOGNAME/tmpnwprd}
+  export DATA_IN=${DATA_IN:-/stmpp1/$LOGNAME/tmpnwprd}
 else                        ### For Operations
   export DATA_IN=/tmpnwprd
 fi
@@ -135,8 +135,8 @@ fi
 
 if [ "$RUN_ENVIR" != prod ]     ### For Developers
 then
-  export COM_IN=${COM_IN:-/ptmp/$LOGNAME/com/${NET}/${envir}}   #jtm
-  export COM_OUT=${COM_OUT:-/ptmp/$LOGNAME/com/${NET}/${envir}}
+  export COM_IN=${COM_IN:-/ptmpp1/$LOGNAME/com/${NET}/${envir}}   #jtm
+  export COM_OUT=${COM_OUT:-/ptmpp1/$LOGNAME/com/${NET}/${envir}}
   export COMIN=$COM_IN/${RUN}.${PDY}/pgrb_gefs/$gefscyc
   export COMOUT=$COM_OUT/${RUN}.${PDY}/ensprod_gefs/$gefscyc
 else                          ### For Operations

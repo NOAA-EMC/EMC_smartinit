@@ -43,11 +43,11 @@ if [ "$RUN_ENVIR" != prod ];then ### For Developers, "group_name" is passed from
   export userid=$LOGNAME
 #  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${model_ver}/parm/smart_para_config}
 # . $CONFIG_FILE
-  export DATA_IN=${DATA_IN:-/stmp/${userid}/tmpnwprd}
+  export DATA_IN=${DATA_IN:-/stmpp1/${userid}/tmpnwprd}
   export COM_IN=/com/nam/prod
   export COM_OUT=/meso/noscrub/${USER}/com/${NET}/para  
   export HOMEdng=/meso/save/${USER}/smartinit.${model_ver}
-  export jlogfile=${jlogfile:-/ptmp/${USER}/com/logs/jlogfiles/jlogfile.${job}.${pid}}
+  export jlogfile=${jlogfile:-/ptmpp1/${USER}/com/logs/jlogfiles/jlogfile.${job}.${pid}}
   export RM_TMPDIR=NO
 fi
 

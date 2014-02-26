@@ -44,7 +44,7 @@ then
  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.v3.2.3/parm/sref_para_config}
   . $CONFIG_FILE
   export userid=$LOGNAME
-  export DATA_IN=${DATA_IN:-/stmp/$userid/tmpnwprd}
+  export DATA_IN=${DATA_IN:-/stmpp1/$userid/tmpnwprd}
   export RM_TMPDIR=NO
 fi
 

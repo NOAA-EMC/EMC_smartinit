@@ -1,9 +1,9 @@
 #BSUB -J jsref_gefs2sref
-#BSUB -o /ptmp/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
-#BSUB -e /ptmp/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -o /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -e /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
 #BSUB -L /bin/ksh   #moved from sh to ksh
 #BSUB -q dev
-#BSUB -cwd /stmp/Jeff.McQueen/tmpnwprd
+#BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
 #BSUB -R "span[ptile=8]"  #jtm or 16 if using all tasks on node
 #BSUB -n 43               #jtm Depends on the number of forecast hours, 43 nodes for 126 fhrs
 #BSUB -W 1:30 
@@ -39,7 +39,7 @@ export utilscript=${utilscript:-/nwprod/util/ush}
 $utilscript/setup.sh
 
 export DATE=$PDY
-outd=${outd:-/ptmp/Jeff.McQueen/com/sref/prod/sref.$DATE}
+outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/prod/sref.$DATE}
 
 # Determine cycle (NCO WILL SET)
 let HH=`date +%H`

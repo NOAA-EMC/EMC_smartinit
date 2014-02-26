@@ -45,14 +45,14 @@ if [ $RUNTYP = guam ];then export NET=hiresw;fi
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/stmp/${USER}/${modeld}.${model_ver}/${cyc}
+export DATA_IN=/stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 while [ $ffhr -le $ENDHRS ];do
   if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
   export job="DNG${cyc}.${RUNTYP}-${ffhr}"
  
-#  rm -f /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
+#  rm -f /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
 
 # Create and invoke config file needed by Job 
   echo "export RUNTYP=$RUNTYP"   >$wkdir/dng_para_config${RUNTYP}
@@ -69,8 +69,8 @@ while [ $ffhr -le $ENDHRS ];do
 
 # Create J{MDL}_SMINIT job
   echo "#BSUB -J ${job}"             >${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -oo /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -eo /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -W 2:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -P RTMA"             >>${wkdir}/bjobcards-dev${RUNTYP}

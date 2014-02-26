@@ -1,9 +1,9 @@
 #BSUB -J jdgex_nam2dgex 
-#BSUB -o /ptmp/Jeff.McQueen/com/output/prod/today/dgex_nam2dgex.o%J
-#BSUB -e /ptmp/Jeff.McQueen/com/output/prod/today/dgex_nam2dgex.o%J
+#BSUB -o /ptmpp1/Jeff.McQueen/com/output/prod/today/dgex_nam2dgex.o%J
+#BSUB -e /ptmpp1/Jeff.McQueen/com/output/prod/today/dgex_nam2dgex.o%J
 #BSUB -L /bin/ksh   #moved from sh to ksh
 #BSUB -q dev
-#BSUB -cwd /stmp/Jeff.McQueen/tmpnwprd
+#BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
 #BSUB -R affinity[core]
 #BSUB -R rusage[mem=1000]
 #BSUB -n 1              
