@@ -25,7 +25,7 @@
 ################################################################################
 
 #NCO set -x
-echo WRF_GFSPREP `pwd`
+echo "******WRF_GFSPREP*******" `pwd`
 yy=`echo $PDY | cut -c1-4`
 mm=`echo $PDY | cut -c5-6`
 dd=`echo $PDY | cut -c7-8`
@@ -37,8 +37,8 @@ typeset -Z2 gfscyc
 # ------------------------------------------------------------------------------
 # convert global sigma data to pgrb data FOR GENERATING INITIAL AND BOUNDARY CONDITIONS
 # -----------------------------------------------------------------------------
-last=$LENGTH
-whr=00
+last=$ENDHOUR
+whr=${STRHOUR:-00}
 gfscyc=$cyc
 
 if [ $MEMBER = "ctl" ];then
@@ -61,8 +61,8 @@ fhr=$whr
 >$DATA/cmdfile_$gmdl
 while [ $fhr -le $last ]; do
   mkdir -p $DATA/${MEMBER}_$fhr
-  echo "SUBMIT sref_prep_sig2pgb for"  MEMBER $MEMBER  FHR $fhr  MODEL $MODEL
-  echo "$USHsref/sref_prep_sig2pgb.sh $DATE $gfscyc $MEMBER $MEMBER $fhr 5 $MODEL >$DATA/postgb_${fhr}.out" >>$DATA/cmdfile_$gmdl
+  echo "SUBMIT sref_prep_sig2pgb for" GFSCYC $gfscyc  MEMBER $MEMBER  MODEL $MODEL FHR $fhr
+  echo "$USHsref/sref_prep_sig2pgb.sh $DATE $gfscyc $MEMBER $MEMBER $fhr 5 $MODEL >$DATA/postgb_${fhr}.out 2>&1" >>$DATA/cmdfile_$gmdl
 
   fhr=`expr $fhr + $INCR`
   if [ $fhr -ge 126 ];then INCR=06;fi   #jtm (GEFS file increment change)
@@ -76,7 +76,13 @@ export MP_STDOUTMODE=ordered
 export MP_LABELIO=yes
 export MP_INFOLEVEL=3
 
-mpirun.lsf -cmdfile $DATA/cmdfile_$gmdl  -pgmmodel mpmd
+echo "MPIRUN cmdfile_$gmdl"
+echo "IN DIR" ${DATA}
+echo "COMENS" $COMENS
+echo "COMGFS" $COMGFS
+cat cmdfile_$gmdl
+
+mpirun.lsf -cmdfile $DATA/cmdfile_$gmdl  -pgmmodel mpmd >${DATA}/postgbmpi_$fhr.out 2>&1 
 
 rm -f flxfile sigfile
 rm -f ${MODEL}.t${gfscyc}z.master.grbif*

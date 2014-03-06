@@ -41,7 +41,8 @@ export SENDECF=${SENDECF:-YES}
 if [ "$RUN_ENVIR" != prod ]      ### For Developers, "group_name" is passed from the ecFflow script
 then
 #jtm  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/sref/nwprod/parm/sref_para_config}
- CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.v3.2.3/parm/sref_para_config}
+# SMVER=smartinit.ver for TESTING
+ CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${SMVER}/parm/sref_para_config}
   . $CONFIG_FILE
   export userid=$LOGNAME
   export DATA_IN=${DATA_IN:-/stmpp1/$userid/tmpnwprd}
@@ -131,10 +132,10 @@ export utilscript=/nwprod/util/ush
 export utilexec=/nwprod/util/exec
 
 # Run setup to initialize working directory and utility scripts
-sh $utilscript/setup.sh
+sh $utilscript/setup.sh >setup.out
 
 # Run setpdy and initialize PDY variables
-sh $utilscript/setpdy.sh
+sh $utilscript/setpdy.sh >setpdy.out
 . ./PDY
 
 #############################################
@@ -150,7 +151,7 @@ export COMENS=${COMENS:-/com/gens/prod}
 
 mkdir -p -m 775 $COMOUT $GFSOUT
  
-env
+#NCO env
 
 export cyc MEMBER
 export CYC=${cyc}

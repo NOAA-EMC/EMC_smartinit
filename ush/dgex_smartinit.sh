@@ -401,10 +401,13 @@ for fhr in $hours; do
       echo BEGIN Making $MKPCP hr PRECIP Buckets for $fhr Hour $ppgm freq $freq
       echo ====================================================================
       pfhr3=-99;pfhr4=-99
+      ln -sf "WRFPRS${fhr}.tm00"     fort.15   # ln current forecast hour file for 3,6hr precip
+      ln -sf "WRFPRS${fhr}i.tm00"    fort.16
       case $MKPCP in
         $mk3p )
           FHRFRQ=$fhr3;freq=3
-          pfhr1=$fhr;pfhr2=$fhr3;;
+          pfhr1=$fhr;pfhr2=$fhr3
+          if [ $rg = dgx ];then pfhr3=$fhr6;fi;;  
 
         $mk6p )
           FHRFRQ=$fhr6;freq=6
@@ -415,20 +418,28 @@ for fhr in $hours; do
           fi
           if [ $rg = dgx ];then
             ppgm=addsub
-            pfhr1=$fhr;pfhr2=$fhr3;pfhr3=$fhr6         # fhr + (fhr3-fhr6)
-            ln -sf "WRFPRS${fhr3}.tm00"     fort.17    # Will contain 6 hr precip
-            ln -sf "WRFPRS${fhr3}i.tm00"    fort.18
+            pfhr1=$fhr6;pfhr2=$fhr3;pfhr3=$fhr         # fhr + (fhr3-fhr6)
+            cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+            $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+            ln -sf "WRFPRS${fhr3}.tm00"     fort.15    # Will contain 6 hr precip
+            ln -sf "WRFPRS${fhr3}i.tm00"    fort.16
+            ln -sf "WRFPRS${fhr}.tm00"     fort.17
+            ln -sf "WRFPRS${fhr}i.tm00"    fort.18
           fi;;
 
         $mk12p )
           FHRFRQ=$fhr9;freq=12
           pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr
+          ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
+          ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
 
 #         DGEX 12 hr precip = Precip@fh6 + Precip@fhr   
           if [ $rg = dgx ];then 
             ppgm=add
             FHRFRQ=$fhr6
-            pfhr1=$fhr6;pfhr2=$fhr;pfhr3=-99;pfhr4=-99
+            pfhr1=$fhr6;pfhr2=$fhr;pfhr3=$fhr;pfhr4=$fhr
+            ln -sf "WRFPRS${fhr}.tm00"      fort.15    
+            ln -sf "WRFPRS${fhr}i.tm00"     fort.16
           fi;;  
       esac
       cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
@@ -437,14 +448,11 @@ for fhr in $hours; do
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
         mv temp WRFPRS${FHRFRQ}.tm00;;
       esac
-      $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
-      export pgm=nam_smartprecip; . prep_step
+      export pgm=${mdl}_smartprecip; . prep_step
       ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
       ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
-      ln -sf "WRFPRS${fhr}.tm00"     fort.15
-      ln -sf "WRFPRS${fhr}i.tm00"    fort.16
       ln -sf "${freq}precip.${fhr}"  fort.50
       ln -sf "${freq}cprecip.${fhr}" fort.51
       ln -sf "${freq}snow.${fhr}"    fort.52
@@ -466,8 +474,6 @@ for fhr in $hours; do
         esac
         $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
-        ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
-        ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
         ln -sf "WRFPRS${fhr3}.tm00"      fort.17
         ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
         ln -sf "WRFPRS${fhr}.tm00"       fort.19
@@ -476,9 +482,15 @@ for fhr in $hours; do
 
 #===============================================================
 # nam_smartprecip : Create Precip Buckets for smartinit 
+#  if pfhr1 > pfhr2: create 3hr precip=prcp:fhr - prcp-3 -->  All 3hr buckets
+#  This option also used for dgex to create 3hr precip at 6 hr times, check6=0
+#  if pfhr1 < pfhr2: create 6hr precip=prcp-3 +prcp:fhr  -->  All 3 hr buckets
+#     and pfhr3>0  : Create 3hr precip=prcp:fhr + (prcp:fhr-3 - prcp:fhr-6)
+#     Note: prcp:fhr-6, assumed to be 6 hr bucket
+#  if pfhr4 > 0    : create 12h precip=prcp-9 + prcp-6 + prcp-3 +prcp:fhr, All 3hr buckets
 #===============================================================
-      echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-      $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip.out${fhr}
+      echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3 $pfhr4
+      $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${freq}.out${fhr}
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk

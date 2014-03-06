@@ -65,7 +65,7 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
   M=$(echo $dayrm | cut  -c 5-6 )
   D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
-  rm -rf /ptmpp1/${USER}/nam.${wdayd}
+  rm -rf /ptmpp1/${USER}/${mdl}.${wdayd}
 
 # Create and submit JNAM_SMINIT job
 

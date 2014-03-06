@@ -8,7 +8,7 @@ export RUN_ENVIR=para
 # 12/02/2013, Jeff McQueen: Incorporated into DNG smartinit processing
 #
 ############################################
-#NCO  set -xa
+#NCO set -xa
 
 export OMP_NUM_THREADS=1
 export MP_EUIDEVICE=sn_all
@@ -26,7 +26,8 @@ export job=${job:-sref2gefs} #TEST
 if [ "$RUN_ENVIR" != prod ]          ### For Developers
 then
 #jtm  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/sref/nwprod/parm/sref_para_config}
-  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.v3.2.3/parm/sref_para_config}
+# SMVER = smartinit.ver for Testing
+  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${SMVER}/parm/sref_para_config}
   . $CONFIG_FILE
 fi
 
@@ -170,7 +171,8 @@ mkdir -m 775 $DATA/gefs2sref
 cd $DATA/gefs2sref
 rm -rf $DATA/gefs2sref/poescript
 
-HR=00
+
+export HR=${STRHOUR:-00}
 
 #================================================================================
 #1. Convert gefs to sref
@@ -179,12 +181,11 @@ while [ $HR -le $ENDHOUR ];do
   mkdir -m 775 $DATA/gefs2sref/$HR
   echo "$HOMEsref/scripts/exsref_gefs2sref.sh.ecf $HR > $DATA/gefs2sref/${HR}.out" >>$DATA/gefs2sref/poescript
   HR=`expr $HR + $INCHOUR`
-#TEST  if [ HR -ge 126 ];then export INCHOUR=06;fi
+#TEST set in ecf script  if [ HR -ge 126 ];then export INCHOUR=06;fi
   if [ $HR -lt 10 ];then HR="0"${HR};fi 
 done
 
-echo "SUBMIT gefs2sref poe script"  ENDHOUR $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
-
+echo "SUBMIT gefs2sref poe script" STR $STRHOUR  END $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
 chmod 775 $DATA/gefs2sref/poescript
 export MP_PGMMODEL=mpmd
 export MP_CMDFILE=$DATA/gefs2sref/poescript
@@ -192,31 +193,41 @@ mpirun.lsf -cmdfile $DATA/gefs2sref/poescript -pgmmodel mpmd -ilevel 3 -labelio 
 
 #================================================================================
 #2. Create GEFS SREF look-alike  ensemble products for CONUS, Alaska and Hawaii
+#     Wait until all 192 hours are done with before linking r_gribawips.n#PNO.fHHH 
+#       files to /com/sref/para/sref.YYYYMMDD/pgrb_gefs pgrb files 
+#       created by gefs2sref.sh.ecf above.
+#     Once available then run post4GEFS.sh.ecf below for all  00-192 fhrs
+#     to create final ensprod files
 #================================================================================
-echo "SUBMIT enspost script"  ENDHOUR $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
-mkdir -p $DATA/212_3hrly
-cd $DATA/212_3hrly
-$HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 212 222 > $DATA/212_3hrly.out 
+if [ $ENDHOUR -gt 126 ];then
+  export STRHOUR=00  # Compute prob products for all forecast hours
+  echo "SUBMIT enspost script" STR $STRHOUR  END $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
 
+# Create CONUS ensemble post products
+  mkdir -p $DATA/212_3hrly
+  cd $DATA/212_3hrly
+  $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 212 222 > $DATA/212_3hrly.out 
+
+# Create Hawaii ensemble post products
 #jtm mkdir -p $DATA/243_3hrly
 #jtm cd $DATA/243_3hrly
 #jtm $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 243 222 > $DATA/243_3hrly.out 
 
-mkdir -p $DATA/216_3hrly
-cd $DATA/216_3hrly
-$HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 216 222 > $DATA/216_3hrly.out 
+# Create Alaska ensemble post products
+  mkdir -p $DATA/216_3hrly
+  cd $DATA/216_3hrly
+  $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 216 222 > $DATA/216_3hrly.out 
 
-cd $DATA
-cat $DATA/212_3hrly.out >>$pgmout
-cat $DATA/243_3hrly.out >>$pgmout
-cat $DATA/216_3hrly.out >>$pgmout
-
-cat $pgmout
-
+  cd $DATA
+  cat $DATA/212_3hrly.out >>$pgmout
+  cat $DATA/243_3hrly.out >>$pgmout
+  cat $DATA/216_3hrly.out >>$pgmout
+  cat $pgmout
+fi
+  
 msg="JOB $job HAS COMPLETED NORMALLY."
 ./postmsg "$jlogfile" "$msg"
 
 cd $DATA_IN
-#TEST   rm -rf $DATA
-
+#TEST   rm -rf $DATA    #jtm
 date

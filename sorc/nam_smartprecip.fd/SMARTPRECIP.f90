@@ -33,9 +33,9 @@
 !   MACHINE:  WCOSS     
 !======================================================================
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-      INTEGER FHR0,FHR1, FHR2, FHR3, FHR4, FHR6
+      INTEGER SHR1,FHR1, FHR2, FHR3, FHR4
       CHARACTER*80 FNAME
-      LOGICAL*1 LSUB
+      LOGICAL*1 LSUB, MK3P,MK6P,MK12P,LADDSUB,LRD3,LRD4
 
       REAL,     ALLOCATABLE :: GRID(:)
       REAL,     ALLOCATABLE :: APCP1(:),APCP2(:),APCP3(:),APCP4(:)
@@ -69,46 +69,79 @@
 !     FHR4 GT 00 signals a 12 hour summation requested
 !     FHR3 GT 0 but FHR4 = -99 signals a 6 hour summation For DGEX (fhr1+(fhr2-fh3))
 !     FHR1 GT FHR2 signals do a 3 hour subtraction of files
-!     FHR2 LT FHR1 signals do an addition (eg: DGEX, fhr1+fhr2=12h pr)
-      READ (5,*) FHR1, FHR2,FHR3,FHR4
+!     FHR2 GT FHR1 signals do an addition (eg: DGEX, fhr1+fhr2=6h pr)
 !====================================================================
+      READ (5,*) FHR1, FHR2,FHR3,FHR4
+      print *,' SMARTPRECIP ', FHR1,FHR2,FHR3,FHR4
 
-!==>  Make 3 hour buckets by subtracting fhr3 - fhr files
+      LRD3=.FALSE.;LRD4=.FALSE.
+!==>  Make 3 hour buckets by subtracting the 1st file from the 2nd
       LSUB=.FALSE.
-      FHR6=-99
+      LADDSUB=.FALSE.
       IF (FHR1.GT.FHR2) THEN
-       FHR0=FHR2
-       FHR2=FHR1
-       FHR1=FHR0
-       LSUB=.TRUE.
-       IF (MOD(FHR2,12).EQ. 0.) THEN
-         FHR3=FHR2-12
-        ELSE
-         FHR3=FHR2-MOD(FHR2,12)
-       ENDIF
+        MK3P=.TRUE.
+        SHR1=FHR2
+        FHR2=FHR1   ! T
+        FHR1=SHR1   ! T-3
+        IF (FHR3.GT.0) SHR1=FHR3  ! DGEX, T-6
+        LSUB=.TRUE.
+
+!==>    Set SHR1 to read NAM Accumulated snowfall bucket : 3,6,9 or 12 hr snow
+!         =initial hour for snow bucket (T-3, -6, -9, -12
+        if (FHR3 .lt. 0) then    ! For NON-DGEX grids
+!         NAM has 12 hr snow buckets at 00 and 12 UTC Valid times
+          IF (MOD(FHR2,12).EQ. 0.) THEN   
+            SHR1=FHR2-12
+          ELSE
+            SHR1=FHR2-MOD(FHR2,12) 
+          ENDIF
+        else
+          SHR1=FHR2-6
+        endif
+        print *, 'SUB: Create 3 hr precip from two files'
+        print *, ' FHR1=', FHR1,' FHR2=',FHR2,' Snow SHR1=',SHR1
+
       ELSE
 
-!==>    sum up precip files
-        if (fhr4.lt.0) then 
-          if (fhr3 .lt. 0) then  
-            FHR3=FHR1-3
-            FHR6=-99
+!==>    ADD or ADDSUB: Make 6 hr precip 
+        LSUB=.FALSE.
+        if (FHR4.LT.0) then 
+          MK6P=.TRUE.
+          if (FHR3 .LT. 0) then   ! NAM grid
+            SHR1=FHR1-3  ! T-6
+            print *,'ADD: Create 6 hr precip from two files: '
+            print *,'FHR1=',FHR1,' FHR2=',FHR2,'Snow SHR1=',SHR1
           else
-            FHR6=FHR3
+            SHR1=FHR1-3  ! T-3
+            LADDSUB=.TRUE.  ! T-6   DGEX grid, 3rd file 
+            LRD3=.TRUE.
+            print *,'ADDSUB: Create 6 hr precip from 3 files:'
+            print *, 'FHR3:',FHR3,'+ (FHR2:',FHR2,' - FHR1:',FHR1,')'
           endif
+
         else 
-!==>      make 12 hr precip 
-          FHR0=FHR1-3
-          FHR6=FHR3
+
+!==>      ADD: make 12 hr precip 
+          MK12P=.TRUE.
+          if ( FHR3 .GT. FHR2 ) Then
+            SHR1=FHR1-3  ! T-12
+            print *, 'ADD: Create 12 hr precip from four 3-hr buckets'
+            print *, 'FHR1=',FHR1,' FHR2=',FHR2,' FHR3=',FHR3,' FHR4=',FHR4
+            print *, 'Snow SHR1=',SHR1
+            LRD3=.TRUE.;LRD4=.TRUE.
+          else
+            SHR1=FHR1-6  ! T-12, Add 2 6 hr precip buckets
+            print *, 'ADD: Create 12 hr precip from two 6-hr buckets'  
+            print *, 'FHR1=',FHR1,' FHR2=',FHR2
+            print *, 'Snow SHR1=',SHR1
+            LRD3=.FALSE.;LRD4=.FALSE.
+          endif
         endif
       ENDIF
-
-      print *, 'fhr0,fhr1 fhr2 fhr3 fhr4 ',FHR0, FHR1, FHR2, FHR3,FHR4
 
       LUGB=13;LUGI=14; LUGB2=15;LUGI2=16
       LUGB3=17;LUGI3=18;LUGB4=19;LUGI4=20
       LUGB5=50; LUGB6=51; LUGB7=52
-
       ISTAT = 0
 
 !=======================================================
@@ -116,7 +149,7 @@
 !=======================================================
       CALL RDHDRS(LUGB,LUGI,JPDS,JGDS,IGDNUM,IMAX,JMAX,KMAX,NUMVAL)
 
-! -== GET SURFACE FIELDS ==-
+! -== GET PRECIP FIELDS ==-
 
       ALLOCATE (MASK(NUMVAL),GRID(NUMVAL),STAT=kret)
       ALLOCATE (APCP1(NUMVAL),CAPCP1(NUMVAL),SNOW1(NUMVAL),STAT=kret)
@@ -125,10 +158,11 @@
        STOP
       END IF
 
-!   PRECIP 
+!   1st PRECIP FILE
       J = 0;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 061;JPDS(6) = 001
       JPDS(13) = 1
+      print *;print *,'FHR1= ',FHR1, ' READ 1st PRECIP FILE ', LUGB,LUGI
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,      &
                 K,KPDS,KGDS,MASK,GRID,APCP1,IRET,ISTAT)
 
@@ -139,18 +173,19 @@
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,       &
                  K,KPDS,KGDS,MASK,GRID,CAPCP1,IRET,ISTAT)
 
-!  SNOWFALL 
+!  1st SNOWFALL File
       J = 0;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 065;JPDS(6) = 001
-      JPDS(14) = FHR3
-      JPDS(15) = FHR1
-      if (fhr4.gt.0) JPDS(14)=FHR0
+      JPDS(14) = SHR1   ! T-6 or T-3 accumulated snow
+      JPDS(15) = FHR1   ! T
+      print *,'FHRS ',JPDS(14),JPDS(15),' READ 1st SNOW FILE ', LUGB,LUGI
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,      &
                  K,KPDS,KGDS,MASK,GRID,SNOW1,IRET,ISTAT)
 
 !=======================================================
 !  READ INDEX FILE TO GET GRID SPECS for 2nd file
 !=======================================================
+      print *;print *,'RD 2nd File', FHR2,LUGB2,LUGI2
       CALL RDHDRS(LUGB2,LUGI2,JPDS,JGDS,IGDNUM,IMAX,JMAX,KMAX,NUMVAL)
       JGDS=-1
 
@@ -164,6 +199,7 @@
       J = -1;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 061;JPDS(6) = 001
       JPDS(13) = 1 
+      print *;print *,' FHR2= ',FHR2,' READ 2nd PRECIP FILE ', LUGB2,LUGI2
       CALL SETVAR(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,     &
                  K,KPDS,KGDS,MASK,GRID,APCP2,IRET,ISTAT)
 
@@ -174,16 +210,17 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,     &
                  K,KPDS,KGDS,MASK,GRID,CAPCP2,IRET,ISTAT)
 
-!     SNOWFALL
+!     2nd SNOWFALL File
       J = 0;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 065;JPDS(6) = 001
-      JPDS(14) = FHR1
-      JPDS(15) = FHR2
-      IF (LSUB) JPDS(14)=FHR3
+      JPDS(14) = FHR1  
+      JPDS(15) = FHR2 
+      IF (LSUB) JPDS(14)=SHR1   ! T-3  Shouldnt need this ??
+      print *,'FHRS ',JPDS(14),JPDS(15),' READ 2nd SNOW FILE ', LUGB2,LUGI2
       CALL SETVAR(LUGB2,LUGI2,NUMVAL,J,JPDS,JGDS,KF,     &
                  K,KPDS,KGDS,MASK,GRID,SNOW2,IRET,ISTAT)
 
-      IF (FHR6.GT.0 ) THEN
+      IF (LRD3) THEN
 !=======================================================
 !  READ INDEX FILE TO GET GRID SPECS for 3rd file
 !  For 12 hr precip summations and DGEX 6 hr calculations
@@ -196,10 +233,12 @@
        WRITE(*,*)'ERROR allocation source location: ',numval
        STOP
       END IF
+
 !     ACCUMULATED PRECIP 
       J = 1;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 061;JPDS(6) = 001
       JPDS(13) = 1
+      print *;print *,'FHR3=',FHR3,' READ 3rd PRECIP FILE ', LUGB3,LUGI3
       CALL SETVAR(LUGB3,LUGI3,NUMVAL,J,JPDS,JGDS,KF,      &
                  K,KPDS,KGDS,MASK,GRID,APCP3,IRET,ISTAT)
 
@@ -210,19 +249,20 @@
       CALL SETVAR(LUGB3,LUGI3,NUMVAL,J,JPDS,JGDS,KF,      &
                  K,KPDS,KGDS,MASK,GRID,CAPCP3,IRET,ISTAT)
 
-!     SNOWFALL
+!     3rd SNOWFALL File (for NAM 12 hour or DGEX 6 hour buckets)
       J = 0 ;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 065;JPDS(6) = 001
-        JPDS(14) = FHR2
-        JPDS(15) = FHR3
+        JPDS(14) = FHR2  ! T-6
+        JPDS(15) = FHR3  ! T-3
+      print *,JPDS(14),JPDS(15),' READ 3rd SNOW FILE ', LUGB3,LUGI3
       CALL SETVAR(LUGB3,LUGI3,NUMVAL,J,JPDS,JGDS,KF,      &
                  K,KPDS,KGDS,MASK,GRID,SNOW3,IRET,ISTAT)
       ENDIF
 
 !=======================================================
-!  READ INDEX FILE TO GET GRID SPECS for 4th file
+!  READ INDEX FILE TO GET GRID SPECS for 4th file (FOR 12 hour NAM precip)
 !=======================================================
-      IF (FHR4.GT.0) THEN
+      IF (MK12P .and. LRD4) THEN
       CALL RDHDRS(LUGB4,LUGI4,JPDS,JGDS,                  &
                   IGDNUM,IMAX,JMAX,KMAX,NUMVAL)
 
@@ -231,10 +271,12 @@
        WRITE(*,*)'ERROR allocation source location: ',numval
        STOP
       END IF
+
 !     ACCUMULATED PRECIP 
       J = 1;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 061;JPDS(6) = 001
       JPDS(13) = 1
+      print *;print *,'FHR4=',FHR4,' READ 4th PRECIP FILE ', LUGB4,LUGI4
       CALL SETVAR(LUGB4,LUGI4,NUMVAL,J,JPDS,JGDS,KF,     &
                  K,KPDS,KGDS,MASK,GRID,APCP4,IRET,ISTAT)
 
@@ -245,18 +287,19 @@
       CALL SETVAR(LUGB4,LUGI4,NUMVAL,J,JPDS,JGDS,KF,       &
                  K,KPDS,KGDS,MASK,GRID,CAPCP4,IRET,ISTAT)
 
-!     SNOWFALL
+!     4th SNOWFALL File
       J = 0 ;JPDS = -1;JPDS(3) = IGDNUM
       JPDS(5) = 065;JPDS(6) = 001
-        JPDS(14) = FHR3
-        JPDS(15) = FHR4
+        JPDS(14) = FHR3  ! T-3
+        JPDS(15) = FHR4  ! T
+      print *,JPDS(14),JPDS(15),' READ 4th SNOW FILE ', LUGB4,LUGI4
       CALL SETVAR(LUGB4,LUGI4,NUMVAL,J,JPDS,JGDS,KF,      &
                  K,KPDS,KGDS,MASK,GRID,SNOW4,IRET,ISTAT)
 
       ENDIF 
 
 !=======================================================
-!      OUTPUT 3, 6 or 12 hr PRECIP BUCKETS
+!     OUTPUT 3, 6 or 12 hr PRECIP BUCKETS
 !=======================================================
       ALLOCATE (APCPOUT(NUMVAL),CAPCPOUT(NUMVAL),SNOWOUT(NUMVAL),STAT=kret)
       IF(kret.ne.0)THEN
@@ -264,36 +307,51 @@
        STOP
       END IF
 
-
+      print *
       IF (LSUB) THEN
        APCPOUT=APCP2-APCP1
        CAPCPOUT=CAPCP2-CAPCP1
        SNOWOUT=SNOW2-SNOW1
+       KPDS(14)=FHR1
+       KPDS(15)=FHR2
+       print *, 'OUTPUT 3 HR PRECIP: SUB ', FHR1,FHR2, maxval(apcpout)
+
       ELSE
-       APCPOUT=APCP2+APCP1
-       CAPCPOUT=CAPCP2+CAPCP1
-       SNOWOUT=SNOW2+SNOW1
+        APCPOUT=APCP2+APCP1
+        CAPCPOUT=CAPCP2+CAPCP1
+        SNOWOUT=SNOW2+SNOW1
+
+!       6 hr precip 
+        IF (MK6P) THEN
+          KPDS(14)=FHR3
+          IF (LADDSUB) THEN   
+            KPDS(15)=FHR1
+            APCPOUT=APCP3+(APCP2-APCP1)
+            CAPCOUT=CAPC3+(CAPC2-CAPC1)
+            SNOWOUT=SNOW3+(SNOW2-SNOW1)
+            print *, 'OUTPUT 06 HR PRECIP: ADDSUB',FHR1,FHR2,FHR3,maxval(apcpout)
+          ELSE
+            KPDS(15)=FHR2
+            print *,'OUTPUT 6 HR PRECIP: ADD', FHR1,FHR2,maxval(apcpout)
+          ENDIF
+        ENDIF
  
-       IF (FHR4 .GT.0 )THEN
-!        12 hr precip
-         APCPOUT=APCPOUT+APCP3+APCP4
-         CAPCPOUT=CAPCPOUT+CAPCP3+CAPCP4
-         SNOWOUT=SNOWOUT+SNOW3+SNOW4
-       ELSEIF (FHR6.gt.0) THEN   
-!        6 hr precip for DGEX
-         APCPOUT=APCP1+(APCP3-APCP2)
-         CAPCOUT=CAPC1+(CAPC3-CAPC2)
-         SNOWOUT=SNOW1+(SNOW3-SNOW2)
-       ENDIF
+!       12 hr precip
+        IF (MK12P) THEN
+          KPDS(14)=SHR1
+          KPDS(15)=FHR4
+          IF (LRD4) THEN
+            APCPOUT=APCPOUT+APCP3+APCP4
+            CAPCPOUT=CAPCPOUT+CAPCP3+CAPCP4
+            SNOWOUT=SNOWOUT+SNOW3+SNOW4
+            print *, ' OUTPUT 12 HR PRECIP: ADD 4 ',FHR1,FHR2,FHR3,FHR4,maxval(apcpout)
+          ELSE
+            print *, ' OUTPUT 12 HR PRECIP: ADD 2 ',FHR1,FHR2,maxval(apcpout)
+          ENDIF
+        ENDIF
+
       ENDIF
 
-      KPDS(14)=FHR3
-      KPDS(15)=FHR2
-      IF (LSUB) KPDS(14)=FHR1
-      IF (FHR4.GT.0)THEN
-        KPDS(14)=FHR0
-        KPDS(15)=FHR4
-      ENDIF
 
       KPDS(5)=61
       print *, 'writing precip', KPDS(5),KPDS(14),KPDS(15),LUGB5,MAXVAL(APCPOUT)

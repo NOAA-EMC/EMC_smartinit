@@ -55,7 +55,7 @@ fi
 
 # For Off-Cycles must stop nest at 54 hours, so that 12-hr totals at
 # f66 aren't split between nest and parent
-  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=$ENDHR-6;fi
+#NOT for DGEX  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=`expr $ENDHR - 6`;fi
   case $RUNTYP in
               ak_rtmages) export ENDHR=12;;
                  gm|guam) export ENDHR=48;;       

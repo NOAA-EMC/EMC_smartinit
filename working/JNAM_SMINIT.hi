@@ -1,6 +1,6 @@
-#BSUB -J smartinit.hi12-12
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.hi12-12
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/12/list/osmartinit.hi12-12
+#BSUB -J DNG12.hi-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/12/list/oDNG12.hi-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/12/list/oDNG12.hi-12
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -59,10 +59,10 @@ export SENDECF=${SENDECF:-YES}
 ###################################
 # Specify NET and RUN Name and model
 ####################################
-#NCO set NET = hiresw for GUAM run
+#NCO set NET = nam, dgex or hiresw for GUAM run
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
-export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
 export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################
@@ -184,7 +184,7 @@ export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
-cp ${PARMdng}/NAM-SMINIT.CTL $DATA
+cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
 if [ $srefcyc -lt 0 ] ; then

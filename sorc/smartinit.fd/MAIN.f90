@@ -342,120 +342,119 @@ INTERFACE
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
        if (.not.lhiresw) then
-       IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
-        WGUST=SPVAL;TEMP1=SPVAL
-        where(validpt)
-         TEMP1=SQRT(DOWNU*DOWNU+DOWNV*DOWNV)
-         WGUST=MAX(GUST,TEMP1)
-        endwhere
-        WGUST=MIN(WGUST,SPVAL)
-        print *, 'WGUST',minval(wgust),maxval(wgust)
-      ENDIF
-      endif
+         IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
+           WGUST=SPVAL;TEMP1=SPVAL
+           where(validpt)
+             TEMP1=SQRT(DOWNU*DOWNU+DOWNV*DOWNV)
+             WGUST=MAX(GUST,TEMP1)
+           endwhere
+           WGUST=MIN(WGUST,SPVAL)
+           print *, 'WGUST',minval(wgust),maxval(wgust)
+         ENDIF
+       endif
 
-      IF (MOD(FHR,3).EQ.0) THEN 
-!       Find inconsistent valid points  JTM 1-28-2013
-!       where (downt .le. 10) validpt=.false.
-!       where (downq .gt. 1) validpt=.false.
+!      OUTPUT FULL Downscaled fields every 3 forecast hours
+!=================================================
+       IF (MOD(FHR,3).EQ.0) THEN 
+!=================================================
 
-        print *, 'OUTPUT  3-hrly downscaled Varibles',FHR
-       RITEHD = .TRUE.
-       ID(1:25) = 0
-       ID(8)=11;ID(9)=1
-       DEC=-2.0
-       CALL GRIBIT(ID,RITEHD,DOWNT,GDIN,70,DEC)
-       print *, 'DOWNT',minval(downt),maxval(downt)
-
-       ID(1:25) = 0
-       ID(8)=17;ID(9)=1
-       DEC=-2.0
-       CALL GRIBIT(ID,RITEHD,DOWNDEW,GDIN,70,DEC)
-
-       ID(1:25) = 0
-       ID(8)=51;ID(9)=1
-       DEC=3.0
-       CALL GRIBIT(ID,RITEHD,DOWNQ,GDIN,70,DEC)
-
-
-       ID(1:25) = 0
-       ID(8)=33;ID(9)=1
-       DEC=-2.0
-       CALL GRIBIT(ID,RITEHD,DOWNU,GDIN,70,DEC)
-
-       ID(1:25) = 0
-       ID(8)=34;ID(9)=1
-       DEC=-2.0
-       CALL GRIBIT(ID,RITEHD,DOWNV,GDIN,70,DEC)
-       print *, 'DOWNU',minval(downu),maxval(downu)
-       print *, 'DOWNV',minval(downv),maxval(downv)
-
-       ID(1:25) = 0
-       ID(8)=180;ID(9)=1
-       DEC=3.0 
-       CALL GRIBIT(ID,RITEHD,WGUST,GDIN,70,DEC)
-
-       ID(1:25) = 0
-       ID(8)=1;ID(9)=1
-       DEC=3.0
-       CALL GRIBIT(ID,RITEHD,DOWNP,GDIN,70,DEC)
-
-!      Output high res topo,land for nests ??
-!      Output topo for all grids 03-07-13
+         print *, 'OUTPUT  3-hrly downscaled Varibles',FHR
+         RITEHD = .TRUE.
          ID(1:25) = 0
-         ID(8)=7    !EQ 8 in ndfd ???????
+         ID(8)=11;ID(9)=1
+         DEC=-2.0
+         CALL GRIBIT(ID,RITEHD,DOWNT,GDIN,70,DEC)
+         print *, 'DOWNT',minval(downt),maxval(downt)
+
+         ID(1:25) = 0
+         ID(8)=17;ID(9)=1
+         DEC=-2.0
+         CALL GRIBIT(ID,RITEHD,DOWNDEW,GDIN,70,DEC)
+
+         ID(1:25) = 0
+         ID(8)=51;ID(9)=1
+         DEC=3.0
+         CALL GRIBIT(ID,RITEHD,DOWNQ,GDIN,70,DEC)
+
+         ID(1:25) = 0
+         ID(8)=33;ID(9)=1
+         DEC=-2.0
+         CALL GRIBIT(ID,RITEHD,DOWNU,GDIN,70,DEC)
+
+         ID(1:25) = 0
+         ID(8)=34;ID(9)=1
+         DEC=-2.0
+         CALL GRIBIT(ID,RITEHD,DOWNV,GDIN,70,DEC)
+         print *, 'DOWNU',minval(downu),maxval(downu)
+         print *, 'DOWNV',minval(downv),maxval(downv)
+
+         ID(1:25) = 0
+         ID(8)=180;ID(9)=1
+         DEC=3.0 
+         CALL GRIBIT(ID,RITEHD,WGUST,GDIN,70,DEC)
+
+         ID(1:25) = 0
+         ID(8)=1;ID(9)=1
+         DEC=3.0
+         CALL GRIBIT(ID,RITEHD,DOWNP,GDIN,70,DEC)
+ 
+!        Output high res topo,land for nests ??
+!        Output topo for all grids 03-07-13
+         ID(1:25) = 0
+         ID(8)=7  
          ID(9)=1
          DEC=-2.0
          CALL GRIBIT(ID,RITEHD,TOPO,GDIN,70,DEC)
-       IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
-         ID(1:25) = 0
-         ID(8)=81
-         ID(9)=1
-         DEC=1.0
-         CALL GRIBIT(ID,RITEHD,VEG_NDFD,GDIN,70,DEC)
-       ENDIF
-
+         IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
+           ID(1:25) = 0
+           ID(8)=81
+           ID(9)=1
+           DEC=1.0
+           CALL GRIBIT(ID,RITEHD,VEG_NDFD,GDIN,70,DEC)
+         ENDIF
 
 !  Boundary layer computations, find the # levels within the lowest 180 mb
 !??? do we need to check for validpt ????
-       print *, 'Calculate PBL Levels',FHR
-       ktop=kmax
-       if(lnest)ktop=35
-       DO J=1,JM
-       DO I=1,IM
-         PBLMARK(I,J)=1
-         TOP=PSFC(I,J)-18000.
-         DO L=ktop,1,-1
-          IF(PMID(I,J,L).GT.TOP)THEN
-           PBLMARK(I,J)=L
-           GOTO 60
-          ENDIF 
+         print *, 'Calculate PBL Levels',FHR
+         ktop=kmax
+         if(lnest)ktop=35
+         DO J=1,JM
+         DO I=1,IM
+           PBLMARK(I,J)=1
+           TOP=PSFC(I,J)-18000.
+           DO L=ktop,1,-1
+             IF(PMID(I,J,L).GT.TOP)THEN
+               PBLMARK(I,J)=L
+               GOTO 60
+             ENDIF 
+           ENDDO
+ 60        CONTINUE
          ENDDO
- 60     CONTINUE
-       ENDDO
-       ENDDO
+         ENDDO
 
 !  Compute RH
-       print *, 'Calculate RH',FHR
-       ALLOCATE (RH(IM,JM,KMAX),STAT=kret)
-       ktop=kmax
-       DO J=1,JM
-       DO I=1,IM
-         if (validpt(I,J)) then
-           DO L=1,ktop
-            RH(I,J,L)=Q(I,J,L)/CalcQ(PMID(I,J,L),T(I,J,L))
-           ENDDO
-         endif
-       ENDDO
-       ENDDO
+         print *, 'Calculate RH',FHR
+         ALLOCATE (RH(IM,JM,KMAX),STAT=kret)
+         ktop=kmax
+         DO J=1,JM
+         DO I=1,IM
+           if (validpt(I,J)) then
+              DO L=1,ktop
+                RH(I,J,L)=Q(I,J,L)/CalcQ(PMID(I,J,L),T(I,J,L))
+              ENDDO
+           endif
+        ENDDO
+        ENDDO
 
 !  skip precip fields if FHR=0
-       IF (FHR .EQ. 0) GOTO 444
+        IF (FHR .EQ. 0) GOTO 444
+!         CALL OUTPRCP
 !--------------------------------------------------------------------------
 ! QPF - simply take model QPF and change units to inches
 !---------------------------------------- --------------------------------
   
-       print *, 'Calculate QPF',FHR
-        ALLOCATE (QPF3(IM,JM),QPF6(IM,JM),QPF12(IM,JM),STAT=kret)
+         print *, 'Calculate QPF',FHR
+         ALLOCATE (QPF3(IM,JM),QPF6(IM,JM),QPF12(IM,JM),STAT=kret)
          QPF3  = P03M / 25.4   ! convert from millimeters to inches
          QPF6  = P06M / 25.4
          QPF12 = P12M / 25.4
@@ -468,56 +467,56 @@ INTERFACE
 !--------------------------------------------------------------------------
 !     COMPUTE POPS
 !--------------------------------------------------------------------------
-        print *, 'Compute POPs',FHR
-        ALLOCATE (POP3(IM,JM),POP6(IM,JM),POP12(IM,JM),STAT=kret)
-        POP3=SPVAL;POP6=SPVAL;POP12=SPVAL
+         print *, 'Compute POPs',FHR
+         ALLOCATE (POP3(IM,JM),POP6(IM,JM),POP12(IM,JM),STAT=kret)
+         POP3=SPVAL;POP6=SPVAL;POP12=SPVAL
 
 ! 3-hr POP
-        CALL MKPOP(PBLMARK,RH,BLI,P3CP01,P3CP10,P12CP01,P12CP10,QPF3,POP3,GDIN,3,VALIDPT)
-        CALL BOUND(POP3,0.,100.)
-
-        ID(1:25) = 0
-        ID(8)=193;ID(9)=1
-        ID(18)=FHR3;ID(19)=FHR
-        ID(20)=4
-        DEC=3.0
-        CALL GRIBIT(ID,RITEHD,POP3,GDIN,70,DEC)
-        ID(8)=61;ID(9)=1
-        CALL GRIBIT(ID,RITEHD,P03M,GDIN,70,DEC)
-
-! 6-hr POP
-       IF(MOD(FHR,6).EQ.0) THEN
-       CALL MKPOP(PBLMARK,RH,BLI,P6CP01,P6CP10,P12CP01,P12CP10,QPF6,POP6,GDIN,6,VALIDPT)
-         WHERE(POP6.LT.POP3) POP6=POP3
-         CALL BOUND(POP6,0.,100.)
+         CALL MKPOP(PBLMARK,RH,BLI,P3CP01,P3CP10,P12CP01,P12CP10,QPF3,POP3,GDIN,3,VALIDPT)
+         CALL BOUND(POP3,0.,100.)
 
          ID(1:25) = 0
          ID(8)=193;ID(9)=1
-         ID(18)=FHR6;ID(19)=FHR
+         ID(18)=FHR3;ID(19)=FHR
          ID(20)=4
          DEC=3.0
-         CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
+         CALL GRIBIT(ID,RITEHD,POP3,GDIN,70,DEC)
          ID(8)=61;ID(9)=1
-         CALL GRIBIT(ID,RITEHD,P06M,GDIN,70,DEC)
-       ENDIF
+         CALL GRIBIT(ID,RITEHD,P03M,GDIN,70,DEC)
+ 
+! 6-hr POP
+        IF(MOD(FHR,6).EQ.0) THEN
+          CALL MKPOP(PBLMARK,RH,BLI,P6CP01,P6CP10,P12CP01,P12CP10,QPF6,POP6,GDIN,6,VALIDPT)
+          WHERE(POP6.LT.POP3) POP6=POP3
+          CALL BOUND(POP6,0.,100.)
+
+          ID(1:25) = 0
+          ID(8)=193;ID(9)=1
+          ID(18)=FHR6;ID(19)=FHR
+          ID(20)=4
+          DEC=3.0
+          CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
+          ID(8)=61;ID(9)=1
+          CALL GRIBIT(ID,RITEHD,P06M,GDIN,70,DEC)
+        ENDIF
 
 ! 12-hr POP
        IF (LHR12) THEN
-        IF(LCYCON .OR. .NOT.LCYCON.AND.FHR.NE.6) THEN
-       CALL MKPOP(PBLMARK,RH,BLI,P12CP01,P12CP10,P12CP01,P12CP10,QPF12,POP12,GDIN,12,VALIDPT)
-         WHERE (POP12.LT.POP6) POP12=POP6
-         CALL BOUND(POP12,0.,100.)
+         IF(LCYCON .OR. .NOT.LCYCON.AND.FHR.NE.6) THEN
+           CALL MKPOP(PBLMARK,RH,BLI,P12CP01,P12CP10,P12CP01,P12CP10,QPF12,POP12,GDIN,12,VALIDPT)
+           WHERE (POP12.LT.POP6) POP12=POP6
+           CALL BOUND(POP12,0.,100.)
 
-         ID(1:25) = 0
-         ID(8)=193;ID(9)=1
-         ID(18)=FHR12;ID(19)=FHR
-         ID(20)=4
-         DEC=3.0
-         CALL GRIBIT(ID,RITEHD,POP12,GDIN,70,DEC)
-         ID(8)=61;ID(9)=1
-         CALL GRIBIT(ID,RITEHD,P12M,GDIN,70,DEC)
-        ENDIF
-       ENDIF
+           ID(1:25) = 0
+           ID(8)=193;ID(9)=1
+           ID(18)=FHR12;ID(19)=FHR
+           ID(20)=4
+           DEC=3.0
+           CALL GRIBIT(ID,RITEHD,POP12,GDIN,70,DEC)
+           ID(8)=61;ID(9)=1
+           CALL GRIBIT(ID,RITEHD,P12M,GDIN,70,DEC)
+         ENDIF
+      ENDIF
 
       print *, 'Compute GRIDWX',FHR
       ALLOCATE (WXSTRING(IM,JM),GRIDWX(IM,JM),STAT=kret)
@@ -640,7 +639,6 @@ INTERFACE
       CALL GRIBIT(ID,RITEHD,WETFRZ,GDIN,70,DEC)
 
 ! VISIBILITY
-
       ID(1:25) = 0
       ID(8)=20;ID(9)=1
       DEC=2.7
@@ -795,7 +793,10 @@ INTERFACE
       ID(8)=132;ID(9)=1
       DEC=2.0     ! HI DEC=3.0 ????
       CALL GRIBIT(ID,RITEHD,LAL,GDIN,70,DEC)
-    ENDIF  ! 3 hour writes
+
+!=================================================
+    ENDIF  ! END 3 hour writes
+!=================================================
 
     IF(LCYCON .AND. .NOT.LHR12 .OR.             &
       .NOT.LCYCON.AND.MOD(FHR-6,12).NE.0) THEN 
@@ -818,12 +819,14 @@ INTERFACE
 !   11/2013: Conus 2.5 km hrly output extended to 36 hours for wave model input
       fhrhrly=12  
       IF (TRIM(REGION).EQ.'CS2P') fhrhrly=36
+
       print *, 'REGION ',TRIM(REGION),fhrhrly
       IF (TRIM(REGION).EQ.'HI' .or. TRIM(REGION).EQ.'PR'  & 
       .or. TRIM(REGION).EQ.'AK' .or. TRIM(REGION).EQ.'AK3' & 
-      .or. TRIM(REGION).EQ.'AKRT' .or. TRIM(REGION).EQ.'CS2P') THEN
-        print *, 'GET GRIBLIMITIED ',TRIM(REGION),fhrhrly
-        IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(70,GDIN)
+      .or. TRIM(REGION).EQ.'AKRT' .or. TRIM(REGION).EQ.'CS2P' &
+      .or. TRIM(REGION).EQ.'GM') THEN
+         print *, 'GET GRIBLIMITIED ',TRIM(REGION),fhrhrly
+         IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(70,GDIN)
       ENDIF
 
 !  write older T/Td data for max/min to grib file
@@ -937,7 +940,7 @@ INTERFACE
 !  now compute the max and min values if end of 12-hr period
       ALLOCATE(TMAX12(IM,JM),RHMAX12(IM,JM),STAT=kret)
       ALLOCATE(TMIN12(IM,JM),RHMIN12(IM,JM),STAT=kret)
-       IF (LHR12 .AND. FHR.NE.0) THEN 
+      IF (LHR12 .AND. FHR.NE.0) THEN 
         print *, '12-hr max min',FHR
 !----------------Make into subroutine CalcMAX
 !       calcmax(psfc,thold,dhold,downt,downdew,tmax,tmin,rhmax,rhmin)kj
@@ -946,56 +949,57 @@ INTERFACE
         THOLD(:,:,1)=DOWNT;DHOLD(:,:,1)=DOWNDEW
         DO J=1,JM
         DO I=1,IM
-        if (validpt(i,j)) then
-         TMAX12(I,J)=-SPVAL;RHMAX12(I,J)=-SPVAL 
-         DO L=1,12
-          IF(THOLD(I,J,L).GT.TMAX12(I,J)) TMAX12(I,J)=THOLD(I,J,L)
-          IF(THOLD(I,J,L).LT.TMIN12(I,J)) TMIN12(I,J)=THOLD(I,J,L)
-          QX=CalcQ(psfc(i,j),dhold(i,j,l))
-          QSX=CalcQ(psfc(i,j),thold(i,j,l))
-          RELH=100*QX/QSX
-          IF(RELH.GT.RHMAX12(I,J)) RHMAX12(I,J)=RELH
-          IF(RELH.LT.RHMIN12(I,J)) RHMIN12(I,J)=RELH
-         ENDDO
-        endif
+         if (validpt(i,j)) then
+          TMAX12(I,J)=-SPVAL;RHMAX12(I,J)=-SPVAL 
+          DO L=1,12
+            IF(THOLD(I,J,L).GT.TMAX12(I,J)) TMAX12(I,J)=THOLD(I,J,L)
+            IF(THOLD(I,J,L).LT.TMIN12(I,J)) TMIN12(I,J)=THOLD(I,J,L)
+            QX=CalcQ(psfc(i,j),dhold(i,j,l))
+            QSX=CalcQ(psfc(i,j),thold(i,j,l))
+            RELH=100*QX/QSX
+            IF(RELH.GT.RHMAX12(I,J)) RHMAX12(I,J)=RELH
+            IF(RELH.LT.RHMIN12(I,J)) RHMIN12(I,J)=RELH
+          ENDDO
+         endif
         ENDDO
         ENDDO
         CALL BOUND(RHMAX12,0.,100.)
         CALL BOUND(RHMIN12,0.,100.)
 
-         ID(1:25) = 0
-         ID(8)=15;ID(9)=1
-         ID(18)=FHR12;ID(19)=FHR
-         ID(20)=4
-         DEC=-2.0
-         CALL GRIBIT(ID,RITEHD,TMAX12,GDIN,70,DEC)
-         ID(8)=16;ID(9)=1
+        ID(1:25) = 0
+        ID(8)=15;ID(9)=1
+        ID(18)=FHR12;ID(19)=FHR
+        ID(20)=4
+        DEC=-2.0
+        CALL GRIBIT(ID,RITEHD,TMAX12,GDIN,70,DEC)
+        ID(8)=16;ID(9)=1
 
-!        1-28-13 JTM : check for incorrect tmin even for validpt=true 
-         where(tmin12.le.10)tmin12=spval
-         CALL GRIBIT(ID,RITEHD,TMIN12,GDIN,70,DEC)
+!       1-28-13 JTM : check for incorrect tmin even for validpt=true 
+        where(tmin12.le.10)tmin12=spval
+        CALL GRIBIT(ID,RITEHD,TMIN12,GDIN,70,DEC)
 
-         ID(2)=129
-         ID(8)=218;ID(9)=1
-         DEC=3.0
-         CALL GRIBIT(ID,RITEHD,RHMAX12,GDIN,70,DEC)
-         ID(8)=217;ID(9)=1
-         CALL GRIBIT(ID,RITEHD,RHMIN12,GDIN,70,DEC)
-       ENDIF
+        ID(2)=129
+        ID(8)=218;ID(9)=1
+        DEC=3.0
+        CALL GRIBIT(ID,RITEHD,RHMAX12,GDIN,70,DEC)
+        ID(8)=217;ID(9)=1
+        CALL GRIBIT(ID,RITEHD,RHMIN12,GDIN,70,DEC)
 
-!      Compute Haines Index
-      CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
-      ID(1:25) = 0
-      ID(2)=129
-      ID(8)=250;ID(9)=1
-      DEC=3.0
-      CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
-      ID(2)=2
-      ID(8)=209;ID(9)=1
-      DEC=1.0
-!jtm not needed      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
+!       Compute Haines Index
+        print *,'OUTPUT HAINES INDEX'
+        CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
+        ID(1:25) = 0
+        ID(2)=129
+        ID(8)=250;ID(9)=1
+        DEC=3.0
+        CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
+        ID(2)=2
+        ID(8)=209;ID(9)=1
+        DEC=1.0
+!HLVL    CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
+      ENDIF
 
-       print *, 'completed main'
+      print *, 'completed main'
       STOP
       END PROGRAM smartinit
 
@@ -1330,8 +1334,6 @@ INTERFACE
       ID(8)=20;ID(9)=1
       DEC=2.7
       CALL GRIBIT(ID,RITEHD,VIS,GDIN,IUNIT,DEC)
-
-
 
        return
        END SUBROUTINE griblimited
