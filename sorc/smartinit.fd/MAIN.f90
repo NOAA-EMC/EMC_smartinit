@@ -391,15 +391,18 @@ INTERFACE
          ID(1:25) = 0
          ID(8)=180;ID(9)=1
          DEC=3.0 
+         print *,'Output Wind Gust',FHR
          CALL GRIBIT(ID,RITEHD,WGUST,GDIN,70,DEC)
 
          ID(1:25) = 0
          ID(8)=1;ID(9)=1
          DEC=3.0
+         print *,'Output Downscaled Pressure',FHR
          CALL GRIBIT(ID,RITEHD,DOWNP,GDIN,70,DEC)
  
 !        Output high res topo,land for nests ??
 !        Output topo for all grids 03-07-13
+         print *,'Output High Res Topography',FHR
          ID(1:25) = 0
          ID(8)=7  
          ID(9)=1
@@ -410,6 +413,7 @@ INTERFACE
            ID(8)=81
            ID(9)=1
            DEC=1.0
+           print *,'Output High Res Veg Fraction',FHR
            CALL GRIBIT(ID,RITEHD,VEG_NDFD,GDIN,70,DEC)
          ENDIF
 
@@ -480,6 +484,7 @@ INTERFACE
          ID(18)=FHR3;ID(19)=FHR
          ID(20)=4
          DEC=3.0
+         print *, 'Output 03 hr POP and precip',FHR
          CALL GRIBIT(ID,RITEHD,POP3,GDIN,70,DEC)
          ID(8)=61;ID(9)=1
          CALL GRIBIT(ID,RITEHD,P03M,GDIN,70,DEC)
@@ -495,6 +500,7 @@ INTERFACE
           ID(18)=FHR6;ID(19)=FHR
           ID(20)=4
           DEC=3.0
+          print *, 'Output 06 hr POP and precip',FHR
           CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
           ID(8)=61;ID(9)=1
           CALL GRIBIT(ID,RITEHD,P06M,GDIN,70,DEC)
@@ -512,6 +518,7 @@ INTERFACE
            ID(18)=FHR12;ID(19)=FHR
            ID(20)=4
            DEC=3.0
+           print *, 'Output 12 hr precip',FHR
            CALL GRIBIT(ID,RITEHD,POP12,GDIN,70,DEC)
            ID(8)=61;ID(9)=1
            CALL GRIBIT(ID,RITEHD,P12M,GDIN,70,DEC)
@@ -623,6 +630,7 @@ INTERFACE
         ID(2)=129
         ID(8)=212;ID(9)=200
         DEC=3.0
+        print *, 'Output Reflectivity',FHR
         CALL GRIBIT(ID,RITEHD,REFC,GDIN,70,DEC)
 
 !========================================================================
@@ -636,9 +644,11 @@ INTERFACE
       ID(1:25) = 0
       ID(8)=7;ID(9)=245
       DEC=3.0
+      print *, 'Output Snow Level',FHR
       CALL GRIBIT(ID,RITEHD,WETFRZ,GDIN,70,DEC)
 
 ! VISIBILITY
+      print *, 'Output Visibility',FHR
       ID(1:25) = 0
       ID(8)=20;ID(9)=1
       DEC=2.7
@@ -678,11 +688,13 @@ INTERFACE
       ID(1:25) = 0
       ID(8)=31;ID(9)=220
       DEC=3.0
+      print *, 'Output PBL Wind Direction',FHR
       CALL GRIBIT(ID,RITEHD,DIRTRANS,GDIN,70,DEC)
 
       ID(1:25) = 0
       ID(8)=32;ID(9)=220
       DEC=-3.0
+      print *, 'Output PBL Wind Speed',FHR
       CALL GRIBIT(ID,RITEHD,MGTRANS,GDIN,70,DEC)
 
 !  compute PBL RH
@@ -793,6 +805,19 @@ INTERFACE
       ID(8)=132;ID(9)=1
       DEC=2.0     ! HI DEC=3.0 ????
       CALL GRIBIT(ID,RITEHD,LAL,GDIN,70,DEC)
+
+!     Compute Haines Index
+      print *,'Compute HAINES INDEX'
+      CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
+      ID(1:25) = 0
+      ID(2)=129
+      ID(8)=250;ID(9)=1
+      DEC=3.0
+      CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
+      ID(2)=2
+      ID(8)=209;ID(9)=1
+      DEC=1.0
+!NMXL      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
 
 !=================================================
     ENDIF  ! END 3 hour writes
@@ -935,7 +960,7 @@ INTERFACE
 
        ID(8)=217;ID(9)=1
        CALL GRIBIT(ID,RITEHD,RHMIN3,GDIN,70,DEC)
-      ENDIF
+      ENDIF  !LHR3
 
 !  now compute the max and min values if end of 12-hr period
       ALLOCATE(TMAX12(IM,JM),RHMAX12(IM,JM),STAT=kret)
@@ -984,20 +1009,7 @@ INTERFACE
         CALL GRIBIT(ID,RITEHD,RHMAX12,GDIN,70,DEC)
         ID(8)=217;ID(9)=1
         CALL GRIBIT(ID,RITEHD,RHMIN12,GDIN,70,DEC)
-
-!       Compute Haines Index
-        print *,'OUTPUT HAINES INDEX'
-        CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
-        ID(1:25) = 0
-        ID(2)=129
-        ID(8)=250;ID(9)=1
-        DEC=3.0
-        CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
-        ID(2)=2
-        ID(8)=209;ID(9)=1
-        DEC=1.0
-!HLVL    CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
-      ENDIF
+      ENDIF !LHR12
 
       print *, 'completed main'
       STOP

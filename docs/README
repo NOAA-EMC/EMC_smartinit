@@ -439,5 +439,11 @@ scripts/sref_ensGEFSpost.ecf.sh
                     PAIR (GEFS pert number)
                     MODEL_PAIR (SREF pert type) 
 
+03/07/2014
+ush/dng_awp.sh
+* Added special haines grib/grib2 file creation using wgrib
+kick-scripts/ftpmet.sh
+* new script to ftp haines grib2 tar file to emcrzdm
+
 
            

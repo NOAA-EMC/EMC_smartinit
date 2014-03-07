@@ -19,7 +19,12 @@ esac
 REGCP=`echo $outreg |tr '[a-z]'  '[A-Z]' `
 echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $fhr 
 
-# CREATE GRIB2 FILE
+   
+# Create HAINES INDEX GRIB FILE
+wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
+  wgrib -i -grib  MESO${RGIN}${fhr}.tm00 -o hindex.t${cyc}z.smart${outreg}${fhr}.tm00
+
+$utilexec/cnvgrib -g12 -p40 ${hindex}.t${cyc}z.smart${outreg}${fhr}.tm00  ${hindex}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 
 # Processing grids for AWIPS
@@ -48,7 +53,9 @@ else
 fi
 
 mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00
 mv ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 
 # Move grib2 awips file to pcom
 if [ $outreg = ak3 ];then

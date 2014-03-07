@@ -4,8 +4,8 @@
 #BSUB -L /bin/ksh   #moved from sh to ksh
 #BSUB -q dev
 #BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
-#BSUB -R "span[ptile=02]" #jtm or 16 if using all tasks on node
-#BSUB -n 02               #jtm Depends on the number of forecast hours, 43 nodes for 126 fhrs
+#BSUB -R "span[ptile=06]" #jtm or 16 if using all tasks on node
+#BSUB -n 11               #jtm Depends on the number of forecast hours, 43 nodes for 126 fhrs
 #BSUB -W 1:30 
 #BSUB -P meso
 #BSUB -a poe
@@ -57,7 +57,7 @@ else
   export cyc=${cyc:-18}
 fi
 
-export cyc=06 #######TEST
+#TEST export cyc=06 #######TEST
 
 
 #====================================================================

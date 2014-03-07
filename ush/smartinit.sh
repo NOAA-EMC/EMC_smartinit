@@ -685,6 +685,7 @@ EOF5
   fi
 
   if [ $mksmart -eq 1 ];then
+
 #   Run NCO processing to convert output to grib2 and awips
     export RUNTYP
     export RGIN=$RGIN  # Region id (eg: CS, HI, PR,AK..)
