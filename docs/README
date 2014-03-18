@@ -445,5 +445,11 @@ ush/dng_awp.sh
 kick-scripts/ftpmet.sh
 * new script to ftp haines grib2 tar file to emcrzdm
 
+03/18/2014
+* ush/dng_awp.sh Fixed haines index file creation to point to wgrib
+* scripts/gefs2sref POST : Fixed set up of MODEL, PAIR, MODEL_PAIR arrays
+* ecf/ gefs2sref : Set PDY for development runs
+* jobs/GEFS2SREF : use strhour properly
+
 
            
