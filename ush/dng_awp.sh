@@ -21,10 +21,10 @@ echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $
 
    
 # Create HAINES INDEX GRIB FILE
-wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
-  wgrib -i -grib  MESO${RGIN}${fhr}.tm00 -o hindex.t${cyc}z.smart${outreg}${fhr}.tm00
+${utilexec}/wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
+  ${utilexec}/wgrib -i -grib  MESO${RGIN}${fhr}.tm00 -o hindex.t${cyc}z.smart${outreg}${fhr}.tm00
 
-$utilexec/cnvgrib -g12 -p40 ${hindex}.t${cyc}z.smart${outreg}${fhr}.tm00  ${hindex}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+$utilexec/cnvgrib -g12 -p40 hindex.t${cyc}z.smart${outreg}${fhr}.tm00  hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 
 # Processing grids for AWIPS

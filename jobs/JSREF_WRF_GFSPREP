@@ -136,7 +136,7 @@ sh $utilscript/setup.sh >setup.out
 
 # Run setpdy and initialize PDY variables
 sh $utilscript/setpdy.sh >setpdy.out
-. ./PDY
+. ${DATA}/PDY
 
 #############################################
 # COMIN and COMOUT

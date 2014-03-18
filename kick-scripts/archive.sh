@@ -7,41 +7,60 @@
 module load ibmpe ics lsf
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
+#TEST export yyyymmdd=20140307   #TEST
+
+# Location of smartinit gif plot files
+#===========================================================
 export pldir=/stmpp1/${USER}/smartplt
+#===========================================================
+
+hpssdir=/NCEPDEV/hpssuser/g01/wx22mc
+
 export wdir=${pldir}/archive
-export regions="conus conus2p5 ak ak3 hi pr"
-export plregs="conus conus2p5 ak ak3 hi pr"
 
 mkdir -p $wdir
 
 for mdl in nam dgex;do
-  indir=/ptmpp1/${USER}/${mdl}.$yyyymmdd
-  if [ $mdl = nam ];then 
-    export plregs="${plegs} ase boi mfr nyc pajn phnl sdb vgt pu hi"
-  fi
+# Location of smartinit grib files
+#==========================================
+  indir=/ptmpp1/${USER}/${mdl}.${yyyymmdd}
+#==========================================
+  case $mdl in 
+    nam)
+      export regions="conus conus2p5 ak ak3 hi pr"
+      export plregs="${regions} ase boi mfr nyc pajn phnl sdb vgt pu hi";;
+    dgex)
+      export regions="conus ak3" 
+      export plregs="conus2p5 ak3";;
+  esac
 
 # Archive GRIB files
   for REG in ${regions};do
     cd $wdir
-    tar -cvf smart${REG}.${yyyymmdd}.tar  ${indir}/${mdl}.t??z.smart${REG}??.tm00
-    hsi put smart${REG}.${yyyymmdd}.tar /NCEPDEV/hpssuser/g01/wx22mc/smartpara/smart${REG}.${yyyymmdd}.tar
+    if [ -s $indir ];then
+      hpsstar put ${hpssdir}/smartpara/${mdl}smart${REG}.${yyyymmdd}.tar \
+                  ${indir}/${mdl}.t??z.smart${REG}??.tm00
+    else
+      echo MODEL DIR  ${indir} $REG  NOT FOUND
+    fi
   done
 
 # Archive Plot files
   for REG in ${plregs};do
+    ifound=0
+    rm -rf $pldir/plarchive
+    mkdir -p $pldir/plarchive
     for cyc in 00 06 12 18;do
-      if [ -s $pldir/d2${REG}$cyc ];then
-        cd $pldir/d2${REG}${cyc}
-        if [ -s ${wdir}/smartplts${REG}.${yyyymmdd}.tar ];then
-          tar --append --file=${wdir}/smartplts${REG}.${yyyymmdd}.tar  *gif
-        else
-          tar -cvf ${wdir}/smartplts${REG}.${yyyymmdd}.tar  *gif
-        fi
+      if [ -s $pldir/d2${mdl}${REG}$cyc ];then
+        cd $pldir/d2${mdl}${REG}${cyc}
+        cp *gif $pldir/plarchive
+        ifound=1
       else
-        echo PLOT DIR to be ARCHIVED ${pldir}/d2${REG}${cyc}  NOT FOUND
+        echo $mdl $cyc $REG PLOT DIR  ${pldir}/d2${mdl}${REG}${cyc}  NOT FOUND
       fi
     done
-    hsi put ${wdir}/smartplts${REG}.${yyyymmdd}.tar \
-           /NCEPDEV/hpssuser/g01/wx22mc/smartplts/smartplts${REG}.${yyyymmdd}.tar
+    cd $pldir/plarchive
+    if [ $ifound = 1 ];then
+      hpsstar put ${hpssdir}/smartplts/${mdl}smartplts${REG}.${yyyymmdd}.tar *gif;fi
   done
-done
+done  #MDL Loop

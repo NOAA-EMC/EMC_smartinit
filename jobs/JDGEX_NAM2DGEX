@@ -122,8 +122,7 @@ sh $utilscript/setup.sh
 
 # Run setpdy and initialize PDY variables
 sh $utilscript/setpdy.sh
-. ./PDY
-export PDY=20140227   #TEST****************************
+. ${DATA}/PDY
 
 #############################################
 # COMIN and COMOUT

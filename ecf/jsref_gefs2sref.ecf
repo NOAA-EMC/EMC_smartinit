@@ -46,17 +46,23 @@ nwdir=${nwdir}/smartinit.${SMVER}
 export utilscript=${utilscript:-/nwprod/util/ush}
 $utilscript/setup.sh
 
-export DATE=$PDY
-outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/prod/sref.$DATE}  #NCO /com/sref/prod...
-
 # Determine cycle (NCO WILL SET)
 let HH=`date +%H`
 if [ $HH -ge 05 -a $HH -le 10 ];then export cyc=${cyc:-00};
 elif [ $HH -le 16 ];then export cyc=${cyc:-06};
-elif [ $HH -le 22 ];then export cyc=${cyc:-12};
+elif [ $HH -le 21 ];then export cyc=${cyc:-12};
 else
   export cyc=${cyc:-18}
 fi
+export cycle=t${cyc}z
+
+cd ${nwdir}     #NCO to set
+sh ${utilscript}/setpdy.sh 
+. ${nwdir}/PDY   #NCO to set
+export DATE=$PDY
+
+if [ $HH -lt 05 ];then export DATE=$PDYm1;fi
+outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/para/sref.$DATE}  #NCO /com/sref/prod...
 
 #====================================================================
 # Begin converting GEFS to SREF format files for POP downscaling
@@ -117,7 +123,10 @@ done
 # wait for completion of gefs pgrb file creation  
 # (NCO should make separate ecflow script triggered once GENS input is ready 
 # for a particular forecast )
-if [ ! -s "$outd/global_pgrb/gens_p20.t{cyc}z.pgrbf${ENDHOUR}" ];then
+if [ -s "$outd/global_pgrb/gens_p20.t{cyc}z.pgrbf${ENDHOUR}" ];then
+  echo ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc FOUND
+else
+  echo WAITING FOR ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc file  
   sleep 60
 fi
 

@@ -22,6 +22,7 @@
 # if SREF is missing or for DGEX downscaling beyond 87 forecast hours
 
 # NOTE: NCO should set run  cyc below (00,06,12, 12) 
+#       This script should be triggered after jgefs2sref.ecf is complete
 # 12-17-2013  Jeff McQueen NCEP/EMC
 #=====================================================================================
 # %include "/ecf/ecfnets/scripts/head.h"
@@ -43,22 +44,26 @@ export SMVER="v3.2.4"  #TEST NEW SMARTINIT VER 3.2.4
 
 nwdir=${nwdir}/smartinit.${SMVER}  # NCO CHANGE to sref.v6....
 export utilscript=${utilscript:-/nwprod/util/ush}
-$utilscript/setup.sh >setup.out
-
-export DATE=$PDY
-outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/prod/sref.$DATE}
+${utilscript}/setup.sh 
 
 # Determine cycle (NCO WILL SET)
 let HH=`date +%H`
 if [ $HH -ge 05 -a $HH -le 10 ];then export cyc=${cyc:-00};
 elif [ $HH -le 16 ];then export cyc=${cyc:-06};
-elif [ $HH -le 22 ];then export cyc=${cyc:-12};
+elif [ $HH -le 21 ];then export cyc=${cyc:-12};
 else
   export cyc=${cyc:-18}
 fi
+export cycle=t${cyc}z
 
-#TEST export cyc=06 #######TEST
+cd ${nwdir}    #NCO Will SET
+sh ${utilscript}/setpdy.sh
+. ${nwdir}/PDY  #NCO WILL SET 
+export DATE=${PDY}
 
+if [ $HH -lt 05 ];then export DATE=$PDYm1;fi  #18 Z run if starts too late
+outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/para/sref.$DATE}  #NCO /com/sref/prod...
+echo OUTD ${outd}
 
 #====================================================================
 # Begin converting GEFS to SREF format files for POP downscaling
@@ -74,7 +79,6 @@ export INCHOUR=6
 export INCR=${INCHOUR}
 export CYC=${cyc}
 export LENGTH=${ENDHOUR}
-export DATE=$PDY
 
 #  To execute the SREF Post Proc. Step must line up to the number job  submissions
 #  Set NODES: (e.g.: 90/3 +1=31)
@@ -114,9 +118,12 @@ while [ $ipert -le $iperend ];do
   if [ $ipert -lt 10 ];then ipert=0${ipert};fi
 done
 
-
 # wait for completion of gefs pgrb file creation  (NCO make separate ecflow script)
-if [ ! -s "$outd/global_pgrb/gens_p20.t{cyc}z.pgrbf${ENDHOUR}" ];then
+#  Should wait for all pert members rather than just p20
+if [ -s "$outd/global_pgrb/gens_p20.t{cyc}z.pgrbf${ENDHOUR}" ];then
+  echo ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc FOUND
+else
+  echo WAITING FOR ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc file
   sleep 60
 fi
 

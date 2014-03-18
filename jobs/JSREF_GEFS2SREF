@@ -118,7 +118,7 @@ msg="JOB $job HAS BEGUN"
 
 # Run setpdy and initialize PDY variables
 sh $utilscript/setpdy.sh
-. ./PDY
+. ${DATA}/PDY
 
 typeset -Z2 gefscyc
 if [ $cyc -eq 03 ];then

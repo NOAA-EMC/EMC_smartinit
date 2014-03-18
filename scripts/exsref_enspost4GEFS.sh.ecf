@@ -22,7 +22,27 @@ freq=$1
 # Part I: Fetching SREF data from /com 
 ######################################
 # clean directory before job starts
-#jtm rm -f r_gribawips.*
+rm -f r_gribawips.ctl*
+rm -f r_gribawips.p01*
+rm -f r_gribawips.p02*
+rm -f r_gribawips.p03*
+rm -f r_gribawips.p04*
+rm -f r_gribawips.p05*
+rm -f r_gribawips.p06*
+rm -f r_gribawips.p07*
+rm -f r_gribawips.p08*
+rm -f r_gribawips.p09*
+rm -f r_gribawips.p10*
+rm -f r_gribawips.n01*
+rm -f r_gribawips.n02*
+rm -f r_gribawips.n03*
+rm -f r_gribawips.n04*
+rm -f r_gribawips.n05*
+rm -f r_gribawips.n06*
+rm -f r_gribawips.n07*
+rm -f r_gribawips.n08*
+rm -f r_gribawips.n09*
+rm -f r_gribawips.n10*
 rm -f *
 
 export XLFRTEOPTS="namelist=old"
@@ -42,27 +62,32 @@ echo "gefs cyc = ",$gefscyc
 
 system=$3
 
+#jtm if [ $freq = "3hrly" ]; then
+#jtm ENDHOUR=90
+#jtm INCHOUR=3
+#jtm fi
+
 if [ $freq = "3hrly" ]; then
-  ihr=00
-  interval=00
-#jtm  timestep=${TOTAL_COUNT}  #this should correspond to the number of poe job submissions (eg: 90/3+1=31)
+#jtm fhrs="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90"
+  ihr=$STRHOUR
+  interval=$INCHOUR
   let timestep=0
   fhrs=;
   while [ $ihr -le $ENDHOUR ];do
-    ((timestep=timestep+1))  #Total number of input hours  jtm
     fhrs="$fhrs $ihr"
+    ((ihr=ihr+interval))
+
 #   GENS pgrb file interval change after 126 hours     jtm
     if [ $ihr -lt 126 ];then 
       interval=03 
     else 
       interval=06
     fi
-    ((ihr=ihr+interval))
     if [ $ihr -lt 10 ];then ihr="0"$ihr;fi
+
+   ((timestep=timetep+1))  # Number of forecast hours to process
   done
 fi
-echo NUMBER OF FORECAST HOURS FOR ENS POST-PROCESSING : $timestep
-echo FHRS $fhrs
 
 # calculation based on the following order
 # nmb_ctl: p01 
@@ -91,41 +116,52 @@ echo FHRS $fhrs
 
 typeset -Z2 ipair
 let imp=1;let ipair=01;let isrf=0
-# MPTYP set for each SREF-pert type:
-set -A MPTYP ctl n1 p1 n2 p2 n3 p3
+set -A MPTYP null ctl n1 p1 n2 p2 n3 p3
 
-MODEL[0]=; MODEL_PAIR[0]=;PAIR[0]=
+MODEL[0]=
+MODEL_PAIR[0]=
+PAIR[0]=
+
 while [ $imp -le 21 ];do
-  case $imp in 
-     [1-7]          ) MODEL[imp]=sref_nmb;;
-     [8-9] | 1[0-4] ) MODEL[imp]=sref_nmm;;
-     1[5-9] |2[0-1] ) MODEL[imp]=sref_em;;
+
+# SET SREF MODEL TYPE
+  case $imp in
+            [1-7] ) MODEL[imp]=sref_nmb;;
+    [8-9] |1[0-4] ) MODEL[imp]=sref_nmm;;
+   1[5-9] |2[0-1] ) MODEL[imp]=sref_em;;
   esac
 
-  MODEL_PAIR[imp]=${MPTYP[isrf]}   # SREF Pair type
-  ((isrf=isrf+1))
+# Set SREF ENSEMBLE PAIR
   if [ $isrf  -gt 6 ];then isrf=0;fi
+  MODEL_PAIR[imp]=${MPTYP[isrf]}
+  echo $isrf ${MPTYP[isrf]} ${MODEL_PAIR[imp]}
+  ((isrf=isrf+1))
 
-  PAIR[imp]="p"${ipair}
-  if [ $ipair -gt 10 ];then PAIR[imp]=ctl;fi
-  if [ $(expr $imp % 2) -eq 0 ];then 
+# Set GENS ENSEMBLE PAIR
+  PAIR[imp]="p"${ipair}    
+  if [ `expr $imp % 2` -eq 0 ];then
     PAIR[imp]="n"${ipair}
     ((ipair=ipair+1))
   fi
-  echo MODEL PAIR $imp MODEL ${MODEL[imp]} PAIR ${PAIR[imp]} MODEL_PAIR ${MODEL_PAIR[imp]}
+  if [ $imp -eq 21 ];then PAIR[imp]=ctl;fi
+
+  echo "GEFS member $imp   SREF MODEL TYPE  ${MODEL[imp]}   GENS PAIR ${PAIR[imp]}   SREF PAIR ${MODEL_PAIR[imp]}"
   ((imp=imp+1))
 done
-MODEL[22]=;MODEL_PAIR[22]=;PAIR[22]=
 
+MODEL[22]=
+MODEL_PAIR[22]=
+PAIR[22]=
 #--------------------
+
+HR=00
 
 NENS=0                               #total number of available members counted
 nf=1
 while [ $nf -le $TOTMBR ];do         #loop for all members
-   echo;echo "FIRST CHECK OF EXISTANCE OF sref pgrb file MEMBER" $nf $TOTMBR  $ENDHOUR
    HR=00
    hasfile="yes"
-   export interval=03
+   export interval=$INCHOUR
    while [ $HR -le $ENDHOUR ];do
     waittime=0
     cklast="no"
@@ -156,15 +192,19 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       waittime=`expr $waittime + 1`
     done
 #   GENS pgrb file interval change after 126 hours     jtm
-    if [ $HR -ge 126 ];then interval=06;fi
+    if [ $HR -lt 126 ];then 
+      interval=03 
+    else 
+      interval=06
+    fi
     HR=`expr $HR + $interval`
+#TEST    if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
     if [ $HR -lt 10 ];then HR="0"$HR;fi
    done
  
-# Further check each fcst time files
-   echo;echo "SECOND CHECK OF EXISTANCE OF sref pgrb file MEMBER"  $nf $TOTMBR  $hasfile
-   HR=00
-   export interval=03
+ # Further check each fcst time files
+    HR=00
+    export interval=$INCHOUR
     while [ $HR -le $ENDHOUR ] && [ $hasfile = "yes" ]; do
       ckall="no"
       icnt=1
@@ -195,21 +235,22 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
          err_exit $msg
        fi
 
-#     GENS pgrb file interval change after 126 hours     jtm
-       if [ $HR -ge 126 ];then interval=06;fi
        HR=`expr $HR + $interval`
        if [ $HR -lt 10 ];then HR="0"$HR;fi
       done
       echo ${MODEL[$nf]} ${MODEL_PAIR[$nf]} " done"  
 
-#   LINK INPUT SREF pgrb files
     HR=00 
-    export interval=03
+#jtm    export interval=$INCHOUR
     if [ $hasfile = "yes" ] ; then
       while [ $HR -le $ENDHOUR ];do
         ln -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR r_gribawips.${PAIR[$nf]}.f$HR
-#      GENS pgrb file interval change after 126 hours     jtm
-        if [ $HR -ge 126 ];then interval=06;fi
+#       GENS pgrb file interval change after 126 hours     jtm
+        if [ $HR -lt 126 ];then 
+          interval=03 
+        else 
+          interval=06
+        fi
         HR=`expr $HR + $interval`
         if [ $HR -lt 10 ];then HR="0"$HR;fi
       done
@@ -225,6 +266,7 @@ done
 
 #========================================================================
 #  sref_ens_gen program: PRODUCT GENERATION
+#  ???? probably won't work with changing file hourly intervals jtm 
 #========================================================================
 echo $NENS $grid $KM $timestep $interval -1 > filename
 echo $fhrs >> filename
@@ -250,14 +292,14 @@ export pgm=sref_com_grib_gefs.$grid
 #. prep_step
 
 #startmsg
-echo RUN SREF_ENS_GEN `pwd`
+echo SREF_ENS_GEN `pwd`
 rm -f variable.tbl
 cp $PARMsref/sref_product_variable.tbl_gefs variable.tbl
 $EXECsref/sref_ens_gen < input >> $pgmout 2>errfile
 export err=$?;#NCO ./err_chk
 
 HR=00
-export interval=03
+#jtm export interval=$INCHOUR
 while [ $HR -le $ENDHOUR ];do
   mv mean.sref.f$HR   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.f$HR
   mv spread.sref.f$HR $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.f$HR
@@ -295,7 +337,11 @@ while [ $HR -le $ENDHOUR ];do
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.f$HR
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.f$HR
 # GENS pgrb file interval change after 126 hours     jtm
-  if [ $HR -ge 126 ];then interval=06;fi
+  if [ $HR -lt 126 ];then 
+    interval=03 
+   else 
+    interval=06
+  fi
   HR=`expr $HR + $interval`
   if [ $HR -lt 10 ];then HR="0"$HR;fi
 done
