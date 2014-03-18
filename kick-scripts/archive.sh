@@ -38,7 +38,8 @@ for mdl in nam dgex;do
   for REG in ${regions};do
     cd $wdir
     if [ -s $indir ];then
-      hpsstar put ${hpssdir}/smartpara/${mdl}smart${REG}.${yyyymmdd}.tar \
+     /gpfs/gd2/emc/hwrf/noscrub/soft/emc-utils-1.0.0/bin/hpsstar \
+     put ${hpssdir}/smartpara/${mdl}smart${REG}.${yyyymmdd}.tar \
                   ${indir}/${mdl}.t??z.smart${REG}??.tm00
     else
       echo MODEL DIR  ${indir} $REG  NOT FOUND

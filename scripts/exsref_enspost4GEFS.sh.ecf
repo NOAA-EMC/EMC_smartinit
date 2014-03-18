@@ -68,8 +68,8 @@ system=$3
 #jtm fi
 
 if [ $freq = "3hrly" ]; then
-#jtm fhrs="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90"
-  ihr=$STRHOUR
+#jtm  ihr=$STRHOUR
+  ihr=00  #jtm reset to hr 00 since post script run for all forecast hours
   interval=$INCHOUR
   let timestep=0
   fhrs=;
@@ -85,7 +85,7 @@ if [ $freq = "3hrly" ]; then
     fi
     if [ $ihr -lt 10 ];then ihr="0"$ihr;fi
 
-   ((timestep=timetep+1))  # Number of forecast hours to process
+   ((timestep=timestep+1))  # Number of forecast hours to process
   done
 fi
 
@@ -116,7 +116,7 @@ fi
 
 typeset -Z2 ipair
 let imp=1;let ipair=01;let isrf=0
-set -A MPTYP null ctl n1 p1 n2 p2 n3 p3
+set -A MPTYP ctl n1 p1 n2 p2 n3 p3
 
 MODEL[0]=
 MODEL_PAIR[0]=
@@ -134,7 +134,6 @@ while [ $imp -le 21 ];do
 # Set SREF ENSEMBLE PAIR
   if [ $isrf  -gt 6 ];then isrf=0;fi
   MODEL_PAIR[imp]=${MPTYP[isrf]}
-  echo $isrf ${MPTYP[isrf]} ${MODEL_PAIR[imp]}
   ((isrf=isrf+1))
 
 # Set GENS ENSEMBLE PAIR
@@ -292,7 +291,8 @@ export pgm=sref_com_grib_gefs.$grid
 #. prep_step
 
 #startmsg
-echo SREF_ENS_GEN `pwd`
+echo RUN SREF_ENS_GEN `pwd`
+echo timestep $timestep ENDHOUR $ENDHOUR freq $freq  GEFSCYC $gefscyc GRID $grid
 rm -f variable.tbl
 cp $PARMsref/sref_product_variable.tbl_gefs variable.tbl
 $EXECsref/sref_ens_gen < input >> $pgmout 2>errfile
