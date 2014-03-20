@@ -38,11 +38,11 @@ export FORT51=grib2.t${cyc}z.smart${outreg}f${fhr}
 
 # Define grib2 awips parm file 
 if [ $outreg = conus2p5 ];then
-  awpparm=$utilparm/grib2_awpnamdngconus${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awp${mdl}dngconus${cyctp}f${fhr}.${ogrd}
 elif [ $outreg = ak3 ];then
-  awpparm=$utilparm/grib2_awpnamdngak${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
 else
-  awpparm=$utilparm/grib2_awpnamsmart${outreg}${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awp${mdl}smart${outreg}${cyctp}f${fhr}.${ogrd}
 fi
 
 if [ -s "$awpparm" ];then
@@ -59,21 +59,21 @@ mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/hindex.t${cyc}z.smart
 
 # Move grib2 awips file to pcom
 if [ $outreg = ak3 ];then
-  mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awpnamsmart3.ak${fhr}_awips_f${fhr}_${cyc}
+  mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
 else
-  mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awpnamsmart.${outreg}${fhr}_awips_f${fhr}_${cyc}
+  mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
 fi
 
 if [ -s "$awpparm" ];then
   if [ $SENDDBN = YES ];then #bsm 25 feb 2008 - added code for awips alerts
     if [ $outreg = ak3 ];then
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job $pcom/grib2.awpnamsmart3.ak${fhr}_awips_f${fhr}_${cyc}
+      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job $pcom/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
     else
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job $pcom/grib2.awpnamsmart.${outreg}${fhr}_awips_f${fhr}_${cyc}
+      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job $pcom/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
     fi
   fi
 fi
 
 if [ $SENDDBN_GB2 = YES ];then
-  $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2_PARA $job $COMOUT/nam.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+  $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2_PARA $job $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi

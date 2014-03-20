@@ -693,6 +693,7 @@ EOF5
     export cyc  
     export fhr=$fhr
     export ogrd 
+    export mdl
     if [ $mdl = "hiresw" ];then
       ${USHdng}/dng_awp.sh $mdlgrd
     else
