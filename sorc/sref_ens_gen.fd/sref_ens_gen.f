@@ -157,7 +157,8 @@ C original
        character*15 spout
        character*13 prout
        character*10 date
-       character*2 pert2,cyc,fhr,fhr_1
+       character*2 pert2
+       character*3 cyc,fhr,fhr_1   !jtm forecast hours >99
        character*3 hr,pert
        character*19 fname,head
 
@@ -271,7 +272,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
        read(1,*) IENS,GRIBID,KM,timestep,interval,nfhr     !nfhr new added to consider cluster case
        read(1,201) (fnn(i),i=1,timestep)
 201    format(<timestep>(i3))
-       write(*,*) IENS,GRIBID,KM,timestep,interval,nfhr
+       write(*,*) 'IENS',IENS,' GRIBID',GRIBID,' KM',KM,' TIMESTEP', timestep,'INTERVAL',interval,'nfhr',nfhr
+       print *, 'FNN(1)',fnn(1),' FNN(timestep)',fnn(timestep)
       
        if(GRIBID.eq.256) then
 c        im=134                 !2008 Beijing Olympic Game domain
@@ -323,7 +325,7 @@ c        jm=101
         end if
        end if
  
-       write(*,*) 'im, jm, jf=', im, jm, jf
+       write(*,*) 'IM, JM, JF=', im, jm, jf
        loutput=timestep
        write(*,*) 'timestep, interval, loutput=', 
      +             timestep, interval, loutput
@@ -469,23 +471,21 @@ cccc        DO 3000 i00=1,timestep                       !1,2,3,..... order
 c  Second loop: for ensmeble members:----------------------------------------
         DO 2000 irun=1,iens                       ! perturbation members
 
-        write(*,*) 'ihr,itime=', cyc,itime,irun
         if(itime.lt.100) then
-!  safer to try read(itime,*) hr
+!  better to read(itime,*) hr
           write(hr,'(i2.2)') itime    !itime is forecast fours
         else
           write(hr,'(i3.3)') itime
         end if
-        write(*,*) 'hr,itime=', hr,itime
 
-        write(cyc,'(i2.2)') ihr       !ihr is cycle 
 !  safer to try read(itime,*) fhr
         if(itime.lt.100) then
-         write(fhr,'(i2.2)') itime    !itime is forecast fours
+         write(cyc,'(i2.2)') ihr       !ihr is cycle  
+         write(fhr,'(i2.2)') itime     !itime is forecast fours
         else
+         write(cyc,'(i3.3)') ihr       !ihr is cycle  ???
          write(fhr,'(i3.3)') itime     !fhr is forecast hour :  Changed to I3 for hrs >100 jtm
         endif
-        write(*,*) 'cyc,fhr=', cyc, fhr
 
         fname=trim(fhead(irun)) // '.f' // trim(hr)
 
@@ -495,7 +495,7 @@ c  Second loop: for ensmeble members:----------------------------------------
         print*,'Opening ',fname
         call baopenr(iunit,fname,ierr)
 
-c        print*,'itime=',itime, ' for member# ', irun
+        print*,itime,' cyc=',cyc,' fhr=',fhr, ' for member# ', irun
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c STEP (1): 

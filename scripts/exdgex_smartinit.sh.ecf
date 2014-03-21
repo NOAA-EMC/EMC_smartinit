@@ -2,8 +2,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         exnam_prdgen.sh
-# Script description:  Run nam product generator jobs
+# Script name:         exdgex_smartinit.sh
+# Script description:  Run DGDEX smartinit downscaling jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
@@ -40,22 +40,22 @@ msg="JOB $job HAS BEGUN"
 
 cd $DATA
 
-# 00/12 UTC CYCLE smartinit CONFIGURE
 
-if [ $RUNTYP = dgex_cs ];then 
+if [ $RUNTYP = dgex_cs ];then  # 06/18 UTC Cycle 
   export fhrstr=${fhrstr:-78}
   export ENDHR=${ENDHR:-126}
-elif [ $RUNTYP = dgex_ak ];then 
+elif [ $RUNTYP = dgex_ak ];then  #00/12 UTC cycle
   export fhrstr=${fhrstr:-84}
   export ENDHR=${ENDHR:-126}
 else 
+# 00/12 UTC CYCLE smartinit CONFIGURE
   export fhrstr=00
   export ENDHR=60
 fi
 
 # For Off-Cycles must stop nest at 54 hours, so that 12-hr totals at
 # f66 aren't split between nest and parent
-  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=$ENDHR-6;fi
+#NOT for DGEX  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=`expr $ENDHR - 6`;fi
   case $RUNTYP in
               ak_rtmages) export ENDHR=12;;
                  gm|guam) export ENDHR=48;;       
@@ -76,7 +76,7 @@ fi
       esac
   fi
 
-  ${NAM_SMINIT_SSH:-$USHdng/nam_smartinit.sh}
+  ${SMINIT_SSH:-$USHdng/dgex_smartinit.sh}
 
 #NCO set -x
 #####################################################################

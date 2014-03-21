@@ -10,8 +10,23 @@
 contains
      SUBROUTINE SETVAR(LUB,LUI,NUMV,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VARB,IRET,ISTAT)
 !============================================================================
-!     This Routine reads in a grib field and initializes a 2-D variable
-!     Requested from w3lib GETGRB routine
+!     This Routine reads in a grib field, GRID, and initializes a 2-D variable,
+!     VARB.
+!     CALLS: w3lib GETGB routine
+!     INPUT 
+!        LUB : Input GRIB GRID file unit number
+!        LUI : Input GRIB GRID Index file unit number
+!        NUMV: Total number of grid points (NX * NY)
+!           J: Input record number to skip to 
+!        JPDS: Array containing grid variable definition parms.
+!              At minimum The following two ids should be defined
+!               JPDS(5) = grib variable id  (see grib office note 388, Table 2)
+!               JPDS(6) = grib vertical level type (see grib office note 388,
+!               Table 3)
+!        JGDS: Array containing grid definitions, default set = -1
+!     OUTPUT: 
+!       GRID, MASK : 1D nx*ny array of grib field and land sea mask
+!       VARB       : 2-D grib field variable array (NX,NY)
 !     10-2012   Jeff McQueen
 !     NOTE: ONLY WORKS for REAL Type Variables
 !============================================================================
@@ -62,10 +77,20 @@ contains
       SUBROUTINE RDHDRS(LUB,LUI,IGDN,GDIN,NUMV)
       use grddef
 !=============================================================
-!     This Routine Reads GRIB index file and returns its contents
+!     This Routine Reads a GRIB index file and returns its contents
 !     (GETGI)
 !     Also reads GRIB index and grib file headers to
 !     find a GRIB message and unpack pds/gds parameters (GETGB1S)
+!     Calls : BAOPEN,GETGI and GETGB1S
+!     INPUT: 
+!       LUB,LUI --> Input grib file and grib index file unit numbers 
+!     OUTPUT: 
+!       IGDN    --> Grib Grid domain number  (KPDS(3), see on 388, Table B)
+!       GDIN TYPE variable with following grid information defined in module
+!       grddef
+!       GDIN%NX --> number of X grid points: also KGDS(2)
+!       GDIN%NY --> number of Y grid points: also KGDS(3)
+!       NUMV    --> Total number of horizontal grid points
 !
 !     10-2012  Jeff McQueen
 !=============================================================

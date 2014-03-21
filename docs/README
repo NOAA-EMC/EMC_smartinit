@@ -361,3 +361,98 @@ Need 78 hours dgex file 1. wgrib nam, 2. copygb to dgex grid
 02/04/2014  hiresw (guam) runs
 * NDFDgrid.f90 : for nmmb hiresw core, adjusted model land mask (veg_nam_ndfd,1-16,veg type) to be 
 equivalent to input NDFD 2.5 km land mask (veg_ndfd, 0-1, veg fraction)
+
+HIRESW GUAM INTERFACE COMPLETE
+
+****************************************V3.2.4********************************************
+
+02/19/2014
+* Created nam_nam2dgex.ecf and NAM_NAM2DGEX jobs to copygb 78 hr NAM to DGEX bgrd native format.
+* Interface for dgex_cs RUNTYP (needs 78 hr DGEX like file) 
+* Removed ush/sorc nam_smartinit dependencies.
+    Now using smartinit.sh and smartinit sorc indepedent of model
+    But still using {mdl}_smartinit.ecf, J{MDL}_SMINIT, and ex{mdl}smartinit.ecf.sh for mdls=nam,dgex and hiresw
+* smartinit.sh : added option for dgex precip (03 or 06 hr buckets) in mkpcp logic
+
+02/25/2014
+* nam_smartinit.fd  : 
+*  Added option to compute dgex 6 hr precip if input fhr3>0 but fhr4<0
+     At 3 hr times (check6 ne 0), need 6 hr special precip file
+       Pfhr6=pfhr+(pfhr3-pfhr6)
+     Introduced shr1 = snow starting bucket hour for 1st precip file
+       eg:  T-12, T-6 or T-3
+
+* Fixed ush/dgex_smartinit.sh to point to correct precip files links
+   For 6 hr precip calc (check=0,check6.ne.0)
+     ln -fs 13 --> fhr6 hr old 3 hr precip    (pfhr1)  eg: 78
+            15 --> fh3 hr old  6 hr precip    (pfhr2)  eg: 81
+            17 --> current hr  3 hr precip    (pfhr3)  eg: 84
+   For 12 hr precip, sum up the current and previous 6 hour old precip buckets
+     ln -fs 13 --> 6hr old 6 hr precip
+     ln -fs 15 --> current 6 hr precip
+
+* ush/dgex_smartinit.sh modified to create new options depending on pfhr1,pfhr2,pfhr3,pfhr4 
+   NEW OPTIONS for input to SMARTINIT.f90:
+   #  if pfhr1 > pfhr2: Create 3hr precip=prcp@fhr - prcp@fhr-3  with  3hr bucket files
+   #   and pfhr3 > 0  : Create 3hr precip at 6 hr times, check6=0 (for dgex files)
+        eg: 3h prcp=prcp@fhr - prcp@fhr-3       where prcp@fhr is 6 hr bucket
+
+   #  if pfhr1 < pfhr2: create 6hr precip=prcp@fhr-3 +prcp@fhr  -->  All 3 hr buckets
+   #     And pfhr3>0  : Create 3hr precip=prcp@fhr + (prcp@fhr-3 - prcp@fhr-6)
+   #     Note: prcp@fhr-6, assumed to be 6 hr bucket
+
+   #  if pfhr4 > 0    : create 12h precip=prcp-9 + prcp-6 + prcp-3 +prcp@fhr, All 3hr buckets
+   #    ANd fhr3=fhr2 : create 12h precip=prcp-6 + prcp@fhr, All 6hr buckets
+
+
+02/26/2014
+* Created ecf/jsref_gefs2sref132.ecf
+     -  To process GEFS files at 6 hour intervals from fhrs 132-192
+     -  11 tasks needed for this LSF bjob
+WARNING:   STILL NEED to CHECK if STRHOUR=132 is used properly in dependent jobs/scripts
+
+
+02/27/2014   sorc/smarprecip.fd/SMARTPRECIP.f90
+ * Corrected DGEX option addsub to compute 6 hr precip from 3 dgex files
+                fhr1 (fhr) 3 hr precip
+                fhr2 (fh3 old) 6 hr precip
+                fhr3 (fh6 old) 3 hr precip
+                    then mk6p=fhr+(fhr3-fhr6) for DGEX
+*  Added DGEX 12 hr precip option
+                fhr1=fhr6  6 hour old 6hr precip bucket file
+                fhr2=fhr   Current    6hr precip bucket file
+                  12hrp=fhr6 + fhr
+
+03/04/2014  ecf/sref_gefs2sref.ecf, SREF_ Jobs, sref_para_config
+* smartinit version number, SMVER, now set once in ecf or smartinit.ver file
+* Modified JSREF jobs and scripts to use STRHOUR for ecf/sref_gefs2sref132.ecf frun
+
+03/05/2014  
+sorc/sref_ens_gen.f
+* Fixed fhr, cyc to character *3  for fhrs >99
+
+scripts/sref_ensGEFSpost.ecf.sh 
+* Only call when all 192 gefs pgrb files are available 
+    (after jsref_gefs2sref132.ecf is run)
+* After 126 hours, set interval=06
+* Optimized set up MODEL (sref model type)
+                    PAIR (GEFS pert number)
+                    MODEL_PAIR (SREF pert type) 
+
+03/07/2014
+ush/dng_awp.sh
+* Added special haines grib/grib2 file creation using wgrib
+kick-scripts/ftpmet.sh
+* new script to ftp haines grib2 tar file to emcrzdm
+
+03/18/2014
+* ush/dng_awp.sh  : Fixed haines index file creation to point to wgrib
+* scripts/gefs2sref POST : Fixed set up of MODEL, PAIR, MODEL_PAIR arrays
+* ecf/ gefs2sref : Set PDY for development runs
+* jobs/GEFS2SREF : use strhour properly
+
+03/20/2014
+* scripts/gefs2sref POST : 
+  - Added 3 hr avg file creation for GEFS sref look-alike members
+    after forecast hour 126.  Used wgrib2 -fcst-ave option
+           

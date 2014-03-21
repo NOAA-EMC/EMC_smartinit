@@ -121,19 +121,19 @@
        IF((IFHR-IFHRSTR).GE.6.and.MOD(IFHR,6).EQ.0) LHR6=.TRUE.
        IF(LCYCON) THEN
          IF(MOD(IFHR,12).EQ.9)  LHR9=.TRUE.
-         IF(MOD(IFHR,12).EQ.0) LHR12=.TRUE.
+         IF(MOD((IFHR-IFHRSTR),12).EQ.0) LHR12=.TRUE.
        ELSE
          IF((IFHR-IFHRSTR).GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
        ENDIF
       
 !     Set precip unit numbers for nests
        IF (lnest) THEN
-! DGEX std file has 3 or  6 hr precip only 
+!        DGEX std file has 3 or  6 hr precip only 
          if (trim(REGION) .EQ. 'DGX'.and. LHR6) THEN
            LUGP6=11;LUGP6i=12
            LUGS6=11;LUGS6i=12
            LUGP3=15;  LUGP3i=16
-           LUGS3=15;  LUGS3i=16
+           LUGS3=17;  LUGS3i=18
          else
            LUGP6=15;LUGP6i=16
            LUGS6=17;LUGS6i=18

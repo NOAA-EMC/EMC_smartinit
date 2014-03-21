@@ -1,6 +1,6 @@
 #######################################################
 # This file defines the various input varibles for the
-# SREF model run
+# SREF GEFS2SREF model Post processing run
 #######################################################
 #jtm export HOMEsref=/meso/save/$LOGNAME/sref/nwprod
   export HOMEsref=/nwprod/sref.v6.1.1
@@ -8,8 +8,9 @@
   export FIXsref=$HOMEsref/fix
   export USHsref=$HOMEsref/ush
 
-# Needed to modify exsref_enspost4GEFS.sh.ecf for varying ENDHOUR (jtm, 12/02/13)
-  export HOMEsref=/meso/save/$LOGNAME/smartinit.v3.2.3
+# SMVER set in ecf job
+  export SMVER=${SMVER:-"v3.2.4"}
+  export HOMEsref=/meso/save/$LOGNAME/smartinit.${SMVER}
   export SCRIPTSsref=$HOMEsref/scripts
   export EXECsref=$HOMEsref/exec
   export PARMsref=$HOMEsref/parm
@@ -28,21 +29,21 @@
 
   export RUN_TCTRACK=NO
 
-  export DATA_IN=/stmp/${LOGNAME}/tmpnwprd
+  export DATA_IN=/stmpp1/${LOGNAME}/tmpnwprd
   export jlogfile=$DATA_IN/jlogfile
 
- export com=/ptmp/$LOGNAME/com/sref/${envir}
- export COM=/ptmp/$LOGNAME/com/sref/${envir}
+ export com=/ptmpp1/$LOGNAME/com/sref/${envir}
+ export COM=${com}
 
- export COM_IN=/ptmp/$LOGNAME/com/sref/${envir}  #jtm
+ export COM_IN=/ptmpp1/$LOGNAME/com/sref/${envir}  #jtm
 #jtm  export COM_IN=/com/sref/prod #jtm
 #  export COM=$COM_IN
 #  export com=$COM_IN
 
 
-  export COM_OUT=/ptmp/$LOGNAME/com/sref/${envir}
+  export COM_OUT=/ptmpp1/$LOGNAME/com/sref/${envir}
 
-#jtm  export gespath=/ptmp/$LOGNAME/nwges/${envir}
+#jtm  export gespath=/ptmpp1/$LOGNAME/nwges/${envir}
   export gespath=/nwges/prod
   export GESNDAS=/nwges/prod
 

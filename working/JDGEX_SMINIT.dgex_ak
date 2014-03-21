@@ -1,6 +1,6 @@
-#BSUB -J smartinit.dgex06-90
-#BSUB -oo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.dgex06-90
-#BSUB -eo /stmp/Jeff.McQueen/smartinit.v3.2.3/list/osmartinit.dgex06-90
+#BSUB -J DNG12.dgex_ak-111
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/12/list/oDNG12.dgex_ak-111
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/12/list/oDNG12.dgex_ak-111
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -17,8 +17,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Job name:         nam_smartinitconus.job
-# Job description:  Run nam smartinit jobs
+# Job name:         J{MDL}_SMINIT
+# Job description:  Run dgex smartinit jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
@@ -59,11 +59,11 @@ export SENDECF=${SENDECF:-YES}
 ###################################
 # Specify NET and RUN Name and model
 ####################################
-#NCO set NET = hiresw for GUAM run
-export NET=${NET:-nam}
-export RUN=${RUN:-nam}
-export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+#NCO set NET = nam, dgex or hiresw for GUAM run
+export NET=${NET:-dgex}
+export RUN=${RUN:-dgex}
+export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export mdl=${mdl:-dgex}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -144,6 +144,7 @@ export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
+export EXECdgex=${EXECdgex:-${ROOTdng}/exec}   #Point to dgex_prdgen until dgex is in vert structure
  export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
  export USHdng=${USHdng:-${HOMEdng}/ush}
@@ -166,7 +167,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-#### export PDY=20140106   #TEST
+#TEST export PDY=20140227  #TEST###########################
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
@@ -184,7 +185,7 @@ export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
-cp ${PARMdng}/NAM-SMINIT.CTL $DATA
+cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
 if [ $srefcyc -lt 0 ] ; then
@@ -204,13 +205,10 @@ fi
 
 export srefcyc
 let srefcyc2=$srefcyc
-###typeset -Z2 srefcyc2
 
 export gefscyc
 let gefscyc2=$gefscyc
-###typeset -Z2 gefscyc2
 
-#DEV TEST typeset problem
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 

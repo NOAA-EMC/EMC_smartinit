@@ -1,22 +1,15 @@
 #!/bin/ksh      
 ########################################
-# Preliminary data setup step for exsref_wrf_gfsprep.sh.ecf
+# JNAM_NAM2DGEX
+# Create the conus dgex initial file on dgex grid from NAM 
+# to initialize dgex downscaling over CONUS (fhr=78)
 # change log:
-# 08/14/2007, Jun Du: Initial Implementation
-# 05/20/2008, Jun Du: run it separately by disconnecting to $model and $member
-#                     for generality
-# 9/20/2009, Julia Zhu   Scripts are modified to be sharable
-#                        between EMC and NCO
-#         Please note that variable "RUN_ENVIR" is set and used
-#         in the development enviroment only.
-# 9/27/2011, Jun Du: To speed it up, this step is now submitted sinutaneously 
-#                    for all members (ctl, c00, p01, p02, p03, p04, p05, p06) 
-#                    separately for each cycle (cyc)
-# 12/10/2013, Jeff McQueen: Extended forecast hour range to 192 hours
-#             for DGEX downscaling
+# 12/10/2013, Jeff McQueen: 
+#             Initial configuration to interpolate NAM native grid to DGEX native grid
+#             (NAM rotated lat-lon Arakowa B grid) to (DGEX rotated lat-lon Arakowa B grid)
 #
 ########################################
-#NCO set -xa
+set -xa
 export OMP_NUM_THREADS=1
 export MP_EUIDEVICE=sn_all
 export MP_EUILIB=us
@@ -25,8 +18,16 @@ export MP_MPILIB=mpich2
 #
 # Specify whether the run is production or development
 #
-export RUN_ENVIR=${RUN_ENVIR:-para}  #jtm
+export RUN_ENVIR=${RUN_ENVIR:-para}
 export SENDECF=${SENDECF:-YES}
+
+###############################
+# Specify NET and RUN name
+##############################
+export NET=dgex
+export RUN=dgex
+export mdl=$NET
+export RUNTYP=${RUNTYP:-dgex_cs}
 
 #####################################################################################
 # Run config file to get input parameters
@@ -38,14 +39,15 @@ export SENDECF=${SENDECF:-YES}
 # COM_OUT: Directory for output file, default to /com/$NET/${envir}
 # gespath: Directory for the guess or restart files, default to /nwges/${envir}
 #####################################################################################
-if [ "$RUN_ENVIR" != prod ]      ### For Developers, "group_name" is passed from the ecFflow script
-then
-#jtm  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/sref/nwprod/parm/sref_para_config}
-# SMVER=smartinit.ver for TESTING
- CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${SMVER}/parm/sref_para_config}
-  . $CONFIG_FILE
+if [ "$RUN_ENVIR" != prod ];then ### For Developers, "group_name" is passed from the ecFflow script
   export userid=$LOGNAME
-  export DATA_IN=${DATA_IN:-/stmpp1/$userid/tmpnwprd}
+#  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${model_ver}/parm/smart_para_config}
+# . $CONFIG_FILE
+  export DATA_IN=${DATA_IN:-/stmpp1/${userid}/tmpnwprd}
+  export COM_IN=/com/nam/prod
+  export COM_OUT=/meso/noscrub/${USER}/com/${NET}/para  
+  export HOMEdng=/meso/save/${USER}/smartinit.${model_ver}
+  export jlogfile=${jlogfile:-/ptmpp1/${USER}/com/logs/jlogfiles/jlogfile.${job}.${pid}}
   export RM_TMPDIR=NO
 fi
 
@@ -70,7 +72,7 @@ export DATA_IN=${DATA_IN:-/tmpnwprd1}
 
 export DATA=$DATA_IN/${job}.${pid}
 # Remove old directory if it exists
-####jtm  rm -rf $DATA
+rm -rf $DATA
 mkdir -p $DATA
 cd $DATA 
 
@@ -89,11 +91,6 @@ export pgmerr=errfile
 
 export cycle=t${cyc}z 
 
-###############################
-# Specify NET and RUN name
-##############################
-export NET=sref
-export RUN=sref
 
 ##################################################
 # SAVEGES  - Copy Files From TMPDIR to $GESdir
@@ -105,26 +102,15 @@ export RUN=sref
 export SENDCOM=${SENDCOM:-YES}
 export SENDECF=${SENDECF:-YES}
 export SENDDBN=${SENDDBN:-NO}
-#jtm export VERBOSE=${VERBOSE:-YES}
+export VERBOSE=${VERBOSE:-YES}
 
-export HOMEsref=${HOMEsref:-/nw${envir}/${NET}.${model_ver}}
-export EXECsref=${EXECsref:-$HOMEsref/exec}
-export FIXsref=${FIXsref:-$HOMEsref/fix}
-export PARMsref=${PARMsref:-$HOMEsref/parm}
-export USHsref=${USHsref:-$HOMEsref/ush}
+export HOMEdgex=${HOMEdgex:-/nw${envir}/${NET}.${model_ver}}
+export EXECdgex=${EXECdgex:-$HOMEnam/exec}
+export FIXdgex=${FIXdgex:-$HOMEnam/fix}
+export USHdgex=${USHdgex:-$HOMEnam/ush}
+export HOMEdng=${HOMEdng:-/nw${envir}/smartinit.${model_ver}}
+export PARMdng=${PARMdng:-$HOMEdng/parm}
 
-# used for those global scripts
-export HOMEglobal=${HOMEglobal:-/nwprod}
-export EXECglobal=${EXECglobal:-$HOMEglobal/exec}
-export FIXglobal=${FIXglobal:-$HOMEglobal/fix}
-export PARMglobal=${PARMglobal:-$HOMEglobal/parm}
-export USHglobal=${USHglobal:-$HOMEglobal/ush}
-
-##XXW for global_postgp
-###jtm export POSTGPSH=$HOMEsref/ush/global_postgp.sh
-###jtm export POSTGPEXEC=$HOMEsref/exec/global_postgs
- export POSTGPSH=/nwprod/sref.v6.1.1/ush/global_postgp.sh
- export POSTGPEXEC=/nwprod/sref.v6.1.1/exec/global_postgs
 ###################################
 # Set up the UTILITIES
 ###################################
@@ -132,38 +118,51 @@ export utilscript=/nwprod/util/ush
 export utilexec=/nwprod/util/exec
 
 # Run setup to initialize working directory and utility scripts
-sh $utilscript/setup.sh >setup.out
+sh $utilscript/setup.sh
 
 # Run setpdy and initialize PDY variables
-sh $utilscript/setpdy.sh >setpdy.out
+sh $utilscript/setpdy.sh
 . ${DATA}/PDY
 
 #############################################
 # COMIN and COMOUT
 #############################################
+export COM_IN=${COM_IN:-/com/nam/${envir}/${mdl}.${PDY}}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
-
 export COMOUT=$COM_OUT/${RUN}.${PDY}
-export GFSOUT=$COMOUT/global_pgrb
-
-export COMGFS=${COMGFS:-/com/gfs/prod}
-export COMENS=${COMENS:-/com/gens/prod}
-
-mkdir -p -m 775 $COMOUT $GFSOUT
- 
-#NCO env
 
 export cyc MEMBER
 export CYC=${cyc}
-#export LENGTH=03     #jtm
-#export INCR=3
 export DATE=$PDY
-#export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 
-########################################################
-# Execute the script.
-$HOMEsref/scripts/exsref_wrf_gfsprep.sh.ecf
-########################################################
+case $cyc in 06|18 )
+  echo "Begin  JNAM_NAM2DGEX for cyc" $CYC 
+  export mdl=nam
+  export fhr=78;natgrd=bgrd3d
+  export COMIN=${COMIN:-${COM_IN}/${mdl}.${PDY}}
+  mdlin=${mdl}.t${cyc}z.${natgrd}
+  cp ${COMIN}/${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+
+#  Reduce the NAM model file size 
+   ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
+   ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
+   mv temp WRFPRS${fhr}.tm00
+
+#  Interpolate NAM Native bgrd3d file to dgex Native grid 
+   mdl=dgex
+   mdlgrd=conus;natgrd=".bsmart"
+   mkdir -p $COMOUT
+   mdlout=${mdl}_${mdlgrd}.t${CYC}z${natgrd}
+   mdloutlcc=${mdl}_${mdlgrd}.t${CYC}z.awp185
+
+gridlcc='255 3 491 303 19943 234907 8 262000 12000 12000 0 64 40000 40000'
+grid='255 205 421 302 19757 -125034 136 40000 -98000 126 108 64 50073 -56203' 
+   ${utilexec}/copygb -g "${grid}" -x WRFPRS${fhr}.tm00 ${COMOUT}/${mdlout}${fhr}.tm00
+   ${utilexec}/copygb -g "${gridlcc}" -x WRFPRS${fhr}.tm00 ${COMOUT}/${mdloutlcc}${fhr}.tm00;;
+esac
+
+env
+
 cat $pgmout
 
 msg="JOB COMPLETED NORMALLY"

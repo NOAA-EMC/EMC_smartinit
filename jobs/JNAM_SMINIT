@@ -50,10 +50,10 @@ export SENDECF=${SENDECF:-YES}
 ###################################
 # Specify NET and RUN Name and model
 ####################################
-#NCO set NET = hiresw for GUAM run
+#NCO set NET = nam, dgex or hiresw for GUAM run
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
-export GUESS=${GUESS:-NAM}  #Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
 export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 
 #####################################################################################

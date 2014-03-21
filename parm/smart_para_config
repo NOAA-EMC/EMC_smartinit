@@ -1,15 +1,9 @@
 # nam_smartinit configuration
 # Jeff McQueen 01/2013 
 
-# export ymd=20130313   
-
-# ffhr,cyc,RUNTYP set in RUN_ALL
-#TEST export ffhr=06        # end of 3 hr forecast processing block
-#TEST export cyc=06
 
 # OUTPUT REGION TO DOWNSCALE TO
-# valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3
-#TEST export RUNTYP=ak    
+# valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
 
 export RUN_ENVIR=emc
 export envir=emc
@@ -31,32 +25,31 @@ export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
 
-export HOMEdng=/meso/save/$USER/smartinit.${model_ver}            # home dir
-export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm #grib2 parm files
-export EXECnam=/nwprod/exec   #Location of nam_prdgen
+export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
+export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm  # grib2 parm files dir
+export EXECnam=/nwprod/exec    # Location of nam_prdgen
+export EXECdgex=/nwprod/exec   # Location of dgex_prdgen
 export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
+
 export COMROOT=/com
 export COM_IN=${COMROOT}/${mdl}/prod
-
-# Testing dgex thru 192 forecast hours
-# use locally created gefs files
+# for dgex downscling thru 192 forecast hours, use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod
 
 #TEST until dgex bsmart files are available from production run
 if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then 
-  export COM_SREF=/ptmp/Jeff.McQueen/com/sref/para
   export COMROOT="/meso/noscrub/Eric.Rogers/com"
-  export COM_IN=${COMROOT}/${mdl}/para   #Test with ER para files
+  export COM_IN=${COMROOT}/${mdl}/para  
+  export COM_SREF=/ptmpp1/Jeff.McQueen/com/sref/para
+
+#TEST until hiresw wrprs files are available from production run
 elif [ $RUNTYP = guamnmmb -o $RUNTYP = guamarw ];then
-  export COM_SREF=/com/sref/para
   export COMROOT="/meso/noscrub/Matthew.Pyle/com"
-  export COM_IN=${COMROOT}/${mdl}/prod   #Test with ER para files
+  export COM_IN=${COMROOT}/${mdl}/prod   
 fi
 
-export DATA_IN=/stmp/$USER/smartinit.${model_ver}/$cyc
+export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
 
-####export COM_OUT=/ptmp/${USER}/smart${RUNTYP}
-export COM_OUT=/ptmp/$USER
+export COM_OUT=/ptmpp1/$USER
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
-

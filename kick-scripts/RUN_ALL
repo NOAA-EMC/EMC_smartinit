@@ -10,7 +10,7 @@ module load ruby emc-utils
 #=======================================================
 # Driving script to run a smartinit domain
 # Called by DRIVER
-# Submits JNAM_SMINIT.${RUNTYP}
+# Submits J{MDL}_SMINIT.${RUNTYP}
 # RUNTYP : conus ak alaskanest hi pr conusnest2p5 aknest3
 #
 # Uses ${cfgdir}/smart_para_config --> directory config
@@ -39,19 +39,20 @@ INCR=03            # Forecast hour increment
 #  NCO should set NET and RUN before calling job
 
 export NET=$mdl 
+export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/stmp/${USER}/${modeld}.${model_ver}/${cyc}
+export DATA_IN=/stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 while [ $ffhr -le $ENDHRS ];do
   if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
-  export job="${modeld}.${RUNTYP}${cyc}-${ffhr}"
+  export job="DNG${cyc}.${RUNTYP}-${ffhr}"
  
-  rm -f /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
+#  rm -f /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}
 
 # Create and invoke config file needed by Job 
   echo "export RUNTYP=$RUNTYP"   >$wkdir/dng_para_config${RUNTYP}
@@ -66,10 +67,10 @@ while [ $ffhr -le $ENDHRS ];do
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 
-# Create JNAM_SMINIT job
+# Create J{MDL}_SMINIT job
   echo "#BSUB -J ${job}"             >${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -oo /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -eo /stmp/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -oo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -eo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -W 2:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -P RTMA"             >>${wkdir}/bjobcards-dev${RUNTYP}
@@ -78,13 +79,13 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -R "rusage[mem=4800]"" >>${wkdir}/bjobcards-dev${RUNTYP}
 
   cd ${wkdir}
-  cat ${wkdir}/bjobcards-dev${RUNTYP} ${jobd}/JNAM_SMINIT > ${wkdir}/JNAM_SMINIT.${RUNTYP}
+  cat bjobcards-dev${RUNTYP} ${jobd}/J${MDL}_SMINIT > J${MDL}_SMINIT.${RUNTYP}
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`
   echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
 
-  bsub <${wkdir}/JNAM_SMINIT.${RUNTYP}
+  bsub < J${MDL}_SMINIT.${RUNTYP}
 
   jobid=`qac -u $USER -d |grep $job | awk '{ print $1 }'`
   sleep 10     

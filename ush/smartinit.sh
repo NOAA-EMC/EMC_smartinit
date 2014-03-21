@@ -17,8 +17,9 @@
 # 2013-07-03  JTM : Adding use of cfg file for grid settup
 # 2013-08-27  JTM : Put in Vertical Structure
 # 2013-11-20  JTM : Added option to downscale DGEX 3 hrly files beyond 84 hrs w/ 6 hr precip
+# 2014-01-20  JTM : completed option to downscale hiresw guamnmmb, guamarw to 48 hours 
 #======================================================================
-#  Set Defaults fcst hours,cycle,model,region in config_nam_nwpara called in parent job
+#  Set Defaults fcst hours,cycle,model,region in smart_config_para called in parent job
 
 # RUNTYP: OUTPUT REGION TO DOWNSCALE TO  (IN SMINIT.CTL FILE)
 #=================================================================
@@ -41,7 +42,6 @@
 # dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=184
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
 #======================================================================
-
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
@@ -57,6 +57,7 @@ fi
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
+echo EXECmdl $EXECmdl
 
 #=====================================================================
 # Set special filename extensions for mdl,sref,master,wgt,output files
@@ -118,10 +119,12 @@ while [ $iline -le $linemax ];do
     fi
   fi
 done
-case $rg in dgx) inest=1;;esac  #set to read in 6hr precip for dgex files
-if [ $mdl = "hiresw" ];then inest=1;fi
-
-set -x
+typeset -Z2 srefcyc gefscyc pcphrl
+text=".tm00"
+if [ $mdl = "hiresw" ];then 
+  inest=1
+  text=;
+fi
 
 prdgfl=meso${rg}.NDFD  # output prdgen grid name (eg: mesocon.NDFD,mesoak...)
 case $RUNTYP in
@@ -143,15 +146,12 @@ case $cyc in
   * )    set -A A6HR 18 30 42 54 66 78 90 102 114 126;;
 esac
 if [ $rg = dgx ];then
-case $cyc in
-  00|12) set -A A6HR 96 108 120 132 144 156 168 180 192;;
-  * )    set -A A6HR 90 102 114 126 138 150 162 174 186;;
-esac
+  inest=1  #set to read in 6hr precip for dgex files
+  case $cyc in
+    00|12) set -A A6HR 96 108 120 132 144 156 168 180 192;;
+       * ) set -A A6HR 90 102 114 126 138 150 162 174 186;;
+  esac
 fi
-
-# srefcyc and gefscyc set in parent job (JNAM_SMINIT)
-typeset -Z2 srefcyc gefscyc pcphrl
-
 #======================================================================
 #  Configure input met grib, land-sea mask and topo file names
 #======================================================================
@@ -171,10 +171,10 @@ typeset -Z2 srefcyc gefscyc pcphrl
 #          (eg: 197,196,195,198,184)
 #--------------------------------------------------------------------------
 if [ $gtyp -ne $ogrd ];then
-case $RUNTYP in
-  ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
-                      *) grid="255 $grid  0 64 2500 2500";;
-esac
+  case $RUNTYP in
+    ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
+                        *) grid="255 $grid  0 64 2500 2500";;
+  esac
 fi
 
 # Set NDFD output grid topo and land mask filenames
@@ -208,25 +208,22 @@ let pcphr3=pcphr-3
 # fhr should be gt 0 since precip is not available at initial time
 if [ $ffhr -gt ${fhrstr} ]; then
 
-# get the sref precip fields that we need
-
+# Get the sref precip fields that we need
   if [ ! -s SREFPROB -o $rg = gm -o $rg = dgx ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   fi
-
   $utilexec/grbindex SREFPROB SREFPROBI
  
   let IP=0
   if [ $ffhr -lt 6 ]; then pcphr6=;pcphr12=;fi
   if [ $ffhr -lt 12 ]; then pcphr12=;fi
   grbpre="2 0 0 0 0"
-  for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 
+  for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 #   prob of pcp > 0.01
     $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 64 64 0 0"|grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
-
     let IP=IP+1
     mv dump srefpcp$IP
 
@@ -273,6 +270,7 @@ if [ $rg = dgx ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
 #===========================================================
+set -x
 for fhr in $hours; do
   rm -f *out${fhr}
   mk3p=0;mk6p=0;mk12p=0
@@ -283,16 +281,15 @@ for fhr in $hours; do
   let fhr3=fhr-3
   let fhr6=fhr-6
   let fhr9=fhr-9
-#  typeset -Z2 fhr1 fhr2 fhr3 fhr6 fhr9 fhr ffhr  #modified for dgex >99 hrs
-echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
-if [ $fhr -gt 00 ];then 
- if [ $fhr -lt 10 -a $check -ne 0 ];then fhr="0"${fhr};fi
- if [ $fhr1 -lt 10 ];then fhr1="0"${fhr1};fi
- if [ $fhr2 -lt 10 ];then fhr2="0"${fhr2};fi
- if [ $fhr3 -lt 10 ];then fhr3="0"${fhr3};fi
- if [ $fhr6 -lt 10 ];then fhr6="0"${fhr6};fi
- if [ $fhr9 -lt 10 ];then fhr9="0"${fhr9};fi
-fi
+  if [ $fhr -gt 00 ];then 
+   if [ $fhr -lt 10 -a $check -ne 0 ];then fhr="0"${fhr};fi
+   if [ $fhr1 -lt 10 ];then fhr1="0"${fhr1};fi
+   if [ $fhr2 -lt 10 ];then fhr2="0"${fhr2};fi
+   if [ $fhr3 -lt 10 ];then fhr3="0"${fhr3};fi
+   if [ $fhr6 -lt 10 ];then fhr6="0"${fhr6};fi
+   if [ $fhr9 -lt 10 ];then fhr9="0"${fhr9};fi
+  fi
+  echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
@@ -308,26 +305,20 @@ fi
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-          if [ $mdl = "hiresw" ];then
-            cp ${mdlin}${fhr} WRFPRS${fhr}.tm00
-          else
-            cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00   
-          fi
+          cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
         fi
-#     Reduce the input model file size for prdgen on wcoss 32 bit limited machines
+#       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
         mv temp WRFPRS${fhr}.tm00;;
+
       wrfprs)  
         mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
-        if [ $mdl = "hiresw" ];then
-          cp ${mdlin}${fhr} WRFPRS${fhr}.tm00
-        else
-          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
-        fi;;
+        cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00;;
            *) 
         if [ $rg = dgx ];then 
+          if [ $fhr -eq 78 ];then COMIN=/meso/noscrub/${USER}/com/dgex/para/dgex.${PDY};fi #TEST
           mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
@@ -340,7 +331,6 @@ fi
   inhrfrq=1
 
   if [ $fhr -gt ${fhrstr} ];then
-
 #   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
     if [ ${rg} = dgx ];then inhrfrq=3;fi
 
@@ -355,7 +345,7 @@ fi
 #     Create 12 hour precip at 00/12 UTC valid times
 #-------------------------------------------------------------
     mk3p=0
-    if [ $check6 -eq 0 ];then 
+    if [ $check6 -eq 0 -a $rg != dgx ];then 
       mk6p=6
       ppgm=add
     fi
@@ -366,6 +356,7 @@ fi
 #   ON-CYC: The 3-hr fhrs (3,15,27,39....) --> Already have 3-hr buckets
 #   For in-between fhrs (22,23,25) --> Create 3-hr buckets
 #   since we only gather max/min data at those hours to compute 12 hr max/mins
+#   DGEX has 6 hr precip at 6hr times and 3 hr precip at other times
 #-------------------------------------------------------------
     if [ $cycon -eq 1 -a $inest -eq 0 ];then
       if [ $hr3bkt -ne 0 -a $check -eq 0 ];then
@@ -374,6 +365,7 @@ fi
       fi
     else
       hr3bkt=0
+      if [ $rg = dgx -a $check6 -eq 0 ];then mk3p=3;ppgm=make;fi
     fi #cycon check
   fi  #fhr -ne 0
 
@@ -393,121 +385,101 @@ fi
       mk6p=6
       mk12p=12
       ppgm=add
-    fi
-    if [ $rg = dgx ];then mk3p=3;mk12p=12;mk6p=0;ppgm=add;fi;;
+      if [ $rg = dgx ];then mk6p=0;fi
+    fi;;
   esac 
 
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
   for MKPCP in $mk3p $mk6p $mk12p;do
     if [ $MKPCP -ne 0 ];then
-    echo ====================================================================
-    echo BEGIN Making $MKPCP hr PRECIP Buckets for $fhr Hour $ppgm freq $freq
-    echo ====================================================================
+      echo ====================================================================
+      echo BEGIN Making $MKPCP hr PRECIP Buckets for $fhr Hour $ppgm freq $freq
+      echo ====================================================================
       pfhr3=-99;pfhr4=-99
       case $MKPCP in
         $mk3p )
-        FHRFRQ=$fhr3;freq=3
-        pfhr1=$fhr;pfhr2=$fhr3;;
+          FHRFRQ=$fhr3;freq=3
+          pfhr1=$fhr;pfhr2=$fhr3;;
 
         $mk6p )
-        FHRFRQ=$fhr6;freq=6
-        pfhr1=$fhr;pfhr2=$fhr6
-        if [ $ppgm = add ];then 
-          FHRFRQ=$fhr3
-          pfhr1=$fhr3;pfhr2=$fhr
-        fi;;
+          FHRFRQ=$fhr6;freq=6
+          pfhr1=$fhr;pfhr2=$fhr6
+          if [ $ppgm = add ];then 
+            FHRFRQ=$fhr3
+            pfhr1=$fhr3;pfhr2=$fhr
+          fi;;
 
         $mk12p )
-        FHRFRQ=$fhr9;freq=12
-        pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
+          FHRFRQ=$fhr9;freq=12
+          pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
       esac
-   
-    if [ $mdl = "hiresw" ];then
-      cp ${mdlin}${FHRFRQ} WRFPRS${FHRFRQ}.tm00
-    else
-      cp ${mdlin}${FHRFRQ}.tm00 WRFPRS${FHRFRQ}.tm00
-    fi
-    case $natgrd in 
-      bgrd3d) 
+      cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
+      case $natgrd in bgrd3d) 
         ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
         mv temp WRFPRS${FHRFRQ}.tm00;;
-    esac
-    $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
-    $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+      esac
+      $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+      $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
-    export pgm=nam_smartprecip; . prep_step
-    ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
-    ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
-    ln -sf "WRFPRS${fhr}.tm00"     fort.15
-    ln -sf "WRFPRS${fhr}i.tm00"    fort.16
-    ln -sf "${freq}precip.${fhr}"  fort.50
-    ln -sf "${freq}cprecip.${fhr}" fort.51
-    ln -sf "${freq}snow.${fhr}"    fort.52
+      export pgm=nam_smartprecip; . prep_step
+      ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
+      ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
+      ln -sf "WRFPRS${fhr}.tm00"     fort.15
+      ln -sf "WRFPRS${fhr}i.tm00"    fort.16
+      ln -sf "${freq}precip.${fhr}"  fort.50
+      ln -sf "${freq}cprecip.${fhr}" fort.51
+      ln -sf "${freq}snow.${fhr}"    fort.52
 
-    if [ $MKPCP -eq $mk12p ];then
-      if [ $rg = gm ];then
-        cp ${mdlin}${fhr3} WRFPRS${fhr3}.tm00
-      else
-        cp ${mdlin}${fhr3}.tm00 WRFPRS${fhr3}.tm00
-      fi
-      case $natgrd in 
-        bgrd3d) 
+      if [ $MKPCP -eq $mk12p ];then
+        cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+        case $natgrd in bgrd3d) 
           ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
           ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
           mv temp WRFPRS${fhr3}.tm00;;
-      esac
-      $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+        esac
+        $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
-      if [ $mdl = "hiresw" ];then
-        cp ${mdlin}${fhr6} WRFPRS${fhr6}.tm00
-      else
-        cp ${mdlin}${fhr6}.tm00 WRFPRS${fhr6}.tm00
-      fi
-      case $natgrd in 
-        bgrd3d) 
-         ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
-         ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
-         mv temp WRFPRS${fhr6}.tm00;;
-      esac
-      $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+        cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
+        case $natgrd in bgrd3d) 
+          ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
+          ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
+          mv temp WRFPRS${fhr6}.tm00;;
+        esac
+        $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
-      ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
-      ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
-      ln -sf "WRFPRS${fhr3}.tm00"      fort.17
-      ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
-      ln -sf "WRFPRS${fhr}.tm00"       fort.19
-      ln -sf "WRFPRS${fhr}i.tm00"      fort.20
-    fi  # mk12p
+        ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
+        ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
+        ln -sf "WRFPRS${fhr3}.tm00"      fort.17
+        ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
+        ln -sf "WRFPRS${fhr}.tm00"       fort.19
+        ln -sf "WRFPRS${fhr}i.tm00"      fort.20
+      fi  # mk12p
 
 #===============================================================
 # nam_smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
-    echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-###     ${LAUNCH} $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
-    $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
+      echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
+      $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
-     export err=$?;  err_chk
+      export err=$?;  err_chk
 
-#    Interp precip to smartinit GRID
-     cpgbgrd=$grid
-     if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
-     if [ $RUNTYP = aknest3 ];then cpgbgrd=$grid;fi
-     $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}precip.${fhr} ${freq}precip
-     $utilexec/grbindex ${freq}precip ${freq}precipi
-     $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
-     $utilexec/grbindex ${freq}snow ${freq}snowi
+#     Interp precip to smartinit GRID
+      cpgbgrd=$grid
+      if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
+      if [ $RUNTYP = aknest3 ];then cpgbgrd=$grid;fi
+      $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}precip.${fhr} ${freq}precip
+      $utilexec/grbindex ${freq}precip ${freq}precipi
+      $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
+      $utilexec/grbindex ${freq}snow ${freq}snowi
     fi #MKPCP>0
-#   nam_sminit_mkprcp.sh END ################################################
   done #MKPCP loop
 
 #=================================================================
 #  RUN PRODUCT GENERATOR
 #=================================================================
-
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
-
   echo creating $prdgfl file for fhr $fhr
   cat >input${fhr}.prd <<EOF5
 WRFPRS${fhr}.tm00
@@ -532,7 +504,7 @@ EOF5
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
 
-# POINT TO Network prdgen (/nwprod/exec) 
+# POINT TO NETwork prdgen (/nwprod/exec) 
   ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
   export err=$?;  err_chk
 
@@ -547,14 +519,12 @@ EOF5
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
-
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 
 #=================================================================
 #   DECLARE INPUTS and RUN SMARTINIT 
 #=================================================================
 
-# CHANGE : for non-conus look in FIXdng for topo,land files
   cp $FIXdng/topo/${topofl} TOPONDFD
   cp $FIXdng/mask/${maskfl} LANDNDFD
   ln -sf TOPONDFD     fort.46
@@ -567,7 +537,7 @@ EOF5
   fi
 
   mksmart=1
-  if [ $check -eq 0 -a $fhr -ne 00 ];then 
+  if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
     cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
     if [ -s MAXMIN${fhr1}.tm00 ];then
@@ -715,21 +685,21 @@ EOF5
   fi
 
   if [ $mksmart -eq 1 ];then
-# Run NCO processing to convert output to grib2 and awips
-   export RUNTYP
-   export RGIN=$RGIN  # Region id (eg: CS, HI, PR,AK..)
-   export outreg
-   export cyc  
-   export fhr=$fhr
-   export ogrd 
-   if [ $mdl = "hiresw" ];then
-   ${USHdng}/dng_awp.sh $mdlgrd
-   else
-   ${USHdng}/dng_awp.sh $outreg
-   fi
 
+#   Run NCO processing to convert output to grib2 and awips
+    export RUNTYP
+    export RGIN=$RGIN  # Region id (eg: CS, HI, PR,AK..)
+    export outreg
+    export cyc  
+    export fhr=$fhr
+    export ogrd 
+    export mdl
+    if [ $mdl = "hiresw" ];then
+      ${USHdng}/dng_awp.sh $mdlgrd
+    else
+      ${USHdng}/dng_awp.sh $outreg
+    fi
   fi
-  echo
 done  #fhr loop
 
 exit
