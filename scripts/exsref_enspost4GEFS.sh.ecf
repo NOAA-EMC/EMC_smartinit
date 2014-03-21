@@ -18,6 +18,9 @@ freq=$1
 #freq=3hrly
 #freq=1hrly
 
+CNVGRIB=${CNVGRIB:-/nwprod/util/exec/cnvgrib}
+WGRIB2=${WGRIB2:-/nwprod/util/exec/wgrib2}
+
 ######################################
 # Part I: Fetching SREF data from /com 
 ######################################
@@ -197,75 +200,104 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       interval=06
     fi
     HR=`expr $HR + $interval`
-#TEST    if [ $HR -ge 126 ];then interval=06;fi   #GEFS hr interval change jtm
     if [ $HR -lt 10 ];then HR="0"$HR;fi
    done
- 
- # Further check each fcst time files
-    HR=00
-    export interval=$INCHOUR
-    while [ $HR -le $ENDHOUR ] && [ $hasfile = "yes" ]; do
-      ckall="no"
-      icnt=1
-      dump=-99
-      while [ $icnt -lt 120 ];do
-        if [ -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR ];then
+
+#========================================================= 
+# Further check each fcst time files
+#========================================================= 
+  HR=00
+  export interval=$INCHOUR
+  while [ $HR -le $ENDHOUR ] && [ $hasfile = "yes" ]; do
+    ckall="no"
+    icnt=1
+    dump=-99
+    while [ $icnt -lt 120 ];do
+      if [ -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR ];then
 #       Get file size in block (1024 bytes)
-          str=`ls -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR` 
-          set -A fsize $str
-          if [ ${fsize[0]} -gt 100 ] ; then
-            dump=0
-            break
-          else
-            sync
-            sleep 5
-            echo  $icnt WAITING for $COMIN ${MODEl[nf]} $gefscyc ${MODEL_PAIR[nf]} FILE
-          fi
-         fi
-         sync
-         sleep 5
-         icnt=$((icnt + 1))
-       done
-       if [ $dump -ne 0 ];then
-         echo $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR DOES NOTE EXIST
-         hasfile="no"
-         msg="ABORTING after 10 minutes of waiting for" \ 
-      " $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR"
-         err_exit $msg
-       fi
-
-       HR=`expr $HR + $interval`
-       if [ $HR -lt 10 ];then HR="0"$HR;fi
-      done
-      echo ${MODEL[$nf]} ${MODEL_PAIR[$nf]} " done"  
-
-    HR=00 
-#jtm    export interval=$INCHOUR
-    if [ $hasfile = "yes" ] ; then
-      while [ $HR -le $ENDHOUR ];do
-        ln -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR r_gribawips.${PAIR[$nf]}.f$HR
-#       GENS pgrb file interval change after 126 hours     jtm
-        if [ $HR -lt 126 ];then 
-          interval=03 
-        else 
-          interval=06
+        str=`ls -s $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR` 
+        set -A fsize $str
+        if [ ${fsize[0]} -gt 100 ] ; then
+          dump=0
+          break
+        else
+          sync
+          sleep 5
+          echo  $icnt WAITING for $COMIN ${MODEl[nf]} $gefscyc ${MODEL_PAIR[nf]} FILE
         fi
-        HR=`expr $HR + $interval`
-        if [ $HR -lt 10 ];then HR="0"$HR;fi
-      done
-      member[$nf]=1
-      NENS=`expr $NENS + 1`
-    else
-      member[$nf]=0
-    fi
+       fi
+       sync
+       sleep 5
+       icnt=$((icnt + 1))
+     done
+     if [ $dump -ne 0 ];then
+       echo $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR DOES NOTE EXIST
+       hasfile="no"
+       msg="ABORTING after 10 minutes of waiting for" \ 
+    " $COMIN/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR"
+       err_exit $msg
+     fi
+
+     HR=`expr $HR + $interval`
+     if [ $HR -lt 10 ];then HR="0"$HR;fi
+    done
+    echo ALL ${MODEL[$nf]} ${MODEL_PAIR[$nf]} " FILES FOUND"  
+
+#========================================================= 
+#   Link input GEFS sref look-alike pgrb files
+#========================================================= 
+    HR=00 
+    let timestep=0
+#jtm   export interval=$INCHOUR
+  if [ $hasfile = "yes" ] ; then
+    interval=03 
+    while [ $HR -le $ENDHOUR ];do
+      ((timestep=timestep+1))
+      srefmem=${MODEL[nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[nf]}
+      ln -s ${COMIN}/${srefmem}.f${HR}  r_gribawips.${PAIR[nf]}.f$HR
+
+#     GENS pgrb file interval change after 126 hours     jtm
+#       Create 3 hr avg model pair file after 126 hrs
+#       using T-3 and T+3 pgrb file 
+      if [ $HR -gt 126 ];then 
+        int126=6
+        if [ `expr $HR % $int126` -ne 0 -a $HR -lt $ENDHOUR ];then
+          ((HLST=HR-interval))
+          ((HNXT=HR+interval))
+          echo "$nf Create intermediate SREF gens member file for hr $HR" \
+               " Using ${MODEL[nf]} ${MODEL_PAIR[nf]} fhrs $HRLST -> $HNXT"
+          echo FILE $srefmem
+
+          cat ${COMIN}/${srefmem}.f${HLST} ${COMIN}/${srefmem}.f${HNXT} > INGRIB
+          $CNVGRIB -g12 -p40 INGRIB INGRIB2
+          $WGRIB2 INGRIB2 | sort -t: -k4,4 -k5,5 -k6,6 -k3,3 | \
+            $WGRIB2 -i INGRIB2 -set_grib_type c3 -fcst_ave 6hr \
+            r_gribawips.${PAIR[nf]}.f${HR}.grb2
+          $CNVGRIB -g21 r_gribawips.${PAIR[nf]}.f${HR}.grb2 \ 
+            r_gribawips.${PAIR[nf]}.f${HR}
+          ((timestep=timestep+1))
+        fi
+      fi
+
+      HR=`expr $HR + $interval`
+      if [ $HR -lt 10 ];then HR="0"$HR;fi
+    done
+    member[nf]=1
+    NENS=`expr $NENS + 1`
+  else
+    member[nf]=0
+  fi
 
   nf=`expr $nf + 1`
 
 done
 
+# Set back to 3 hrly interval as average GEFS SREF look alike files
+# were created above
+interval=03
+
 #========================================================================
 #  sref_ens_gen program: PRODUCT GENERATION
-#  ???? probably won't work with changing file hourly intervals jtm 
 #========================================================================
 echo $NENS $grid $KM $timestep $interval -1 > filename
 echo $fhrs >> filename
@@ -349,8 +381,6 @@ done
 ############################
 # Convert to grib2 format
 ############################
-CNVGRIB=${CNVGRIB:-/nwprod/util/exec/cnvgrib}
-WGRIB2=${WGRIB2:-/nwprod/util/exec/wgrib2}
 $CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.mean_$freq.grib2
 $CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq $COMOUT/sref.t${gefscyc}z.pgrb${grid}.spread_$freq.grib2
 $CNVGRIB -g12 -p40 -nv $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq   $COMOUT/sref.t${gefscyc}z.pgrb${grid}.prob_$freq.grib2

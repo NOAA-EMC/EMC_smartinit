@@ -21,24 +21,25 @@ ECF PREP JOB:
 =============
 NOTE: SMVER= smartinit version number if running JSREF ecf/jobs from smartinit dir.
       SMVER set in jsref_gefs2sref.ecf or versions/smartinit.ver = v3.2.4
-/meso/save/Jeff.McQueen/smartinit.v3.2.4/ecf/jsref_gefs2sref.ecf     
+I.  /meso/save/Jeff.McQueen/smartinit.v3.2.4/ecf/jsref_gefs2sref.ecf     
 (mpmd job,43 tasks, 3 hrly GEFS Fhrs 00-->126)
 (NOTE: This should replace current operational ecf script in SREEF network)
 Can be submitted once GEFS sig files are available thru 126 hours.
 
-/meso/save/Jeff.McQueen/smartinit.v3.2.4/ecf/jsref_gefs2sref132.ecf  
-(mpmd job,11 tasks, 6 hrsly GEFS Fhrs 132-->192)
+II.  /meso/save/Jeff.McQueen/smartinit.v3.2.4/ecf/jsref_gefs2sref132.ecf  
+(mpmd job,11 tasks, 6 hrly GEFS Fhrs 132-->192)
 Can be submitted once GEFS sig files are available thru 192 hours.
 
 NOTE: One task is required for each GEFS forecast hour for this ECF MPMD script
-The ecf script is further divided into two parts:
+
+The driving ecf script is further divided into two parts:
 
 * One for all 3 hour GEFS forecast hours:  00 thru 126       (43 Tasks Used,~40 mins).
   and 
 * One for all 6 hour GEFS forecast hours:  132 thru 192      (11 Tasks required, ~ 10 mins).
   This is because after 126 hours, GEFS sig outputs are only available every 6 hours.
 NOTE: if changing the starting and ending forecast hours, you must change the number of tasks in 
-the ecf BSUB cards to correspond to the number of forecast files to be processed.
+the driving ecf script  BSUB cards to correspond to the number of forecast files to be processed.
 
  JOBS: 
 ========
@@ -47,7 +48,7 @@ the ecf BSUB cards to correspond to the number of forecast files to be processed
 also
    ../jobs/JDGEX_NAM2DGEX  --> Interpolate NAM 78 hour native grid parent forecast files  
                             to DGEX Conus grid (185) for conus dgex downscaling.
-  NOTE: this NAM2DGEX job will be implemented as part of the DGEX sysetm upgrade
+  NOTE: this NAM2DGEX job will be implemented as part of the DGEX system upgrade
 
  SCRIPTS:
 ==========
@@ -108,12 +109,17 @@ where
 1B.  JDGEX_SMINIT   --> downscale dgex step
 =========================================================================
 ECF additional dgex smartinit jobs: that are run every 3 hrs to 192 DGEX forecast hours 
+NCO should run JDGEX_SMINIT every 3 forecast hours beginning with the DGEX start hour 
+and ending at DGEX forecast hour 192.
+The downscaling is run once the dgex bsmart files are available.  Otherwise, run as is done
+for NAM smartinit ecflow processing.
+In ecf dir:
   ~/smartinit.v3.2.4/ecf/jdgex_sminit_conus_fHH.ecf (HH=78,81...192)   CYCLE 06/18 UTC
   ~/smartinit.v3.2.4/ecf/jdgex_sminit_ak3_fHH.ecf (HH=84,93..192)      CYCLE 00/12 UTC
 
-JOBS: JDGEX_SMINIT
-SCRIPTS: jdgex_smartinit.sh.ecf
-USH: jdgex_smartinit.sh
+JOBS (/jobs):       JDGEX_SMINIT
+SCRIPTS (/scripts): jdgex_smartinit.sh.ecf
+USH (/ush):         jdgex_smartinit.sh
 
 Additional parm  prdgen control files
   ../parm/dgex_masterak3.ctl
@@ -126,6 +132,7 @@ Additional fix wgt prdgen files
 
 Once the jsref_gefs2sref.ecf ecf job is complete from the SREF Network, 
 the smartinit system (JDGEX_SMINIT) can be run with: 
+
 export RUNTYP=dgex_ak --->  for downscaling to Alaska 3 km grid at cycles 00/12 UTC  
 (smartinit invoked from ECFlow every 3 hrs for forecast hours 84-->192)
 
@@ -133,10 +140,12 @@ export RUNTYP=dgex_cs --->  for downscaling to CONUS 2.5 km grid at cycles 06/18
 (smartinit invoked from ECFLOW every 3 hrs for forecast hours 78-->192)
 
 INPUT: dgex bsmart files
-OUTPUT: dgex.t{06/18}.smartconus2p5{HHH}.tm00 (or grib2) from forecast hours 78 thru 192
+
+OUTPUT: dgex.t{06/18}z.smartconus2p5{HHH}.tm00 (or grib2) from forecast hours 78 thru 192
 90-130 MB per 3 hr forecast hour
 5 wall clock mins/forecast hr
-OUTPUT: dgex.t{06/18}.smartak3{HHH}.tm00 (or grib2)      from forecast hours 84 thru 192
+
+OUTPUT: dgex.t{00/12}z.smartak3{HHH}.tm00 (or grib2)      from forecast hours 84 thru 192
 45-64 MB per 3 hr forecast hour
 3 wall clock mins/forecast hr
 

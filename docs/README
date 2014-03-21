@@ -446,10 +446,13 @@ kick-scripts/ftpmet.sh
 * new script to ftp haines grib2 tar file to emcrzdm
 
 03/18/2014
-* ush/dng_awp.sh Fixed haines index file creation to point to wgrib
+* ush/dng_awp.sh  : Fixed haines index file creation to point to wgrib
 * scripts/gefs2sref POST : Fixed set up of MODEL, PAIR, MODEL_PAIR arrays
 * ecf/ gefs2sref : Set PDY for development runs
 * jobs/GEFS2SREF : use strhour properly
 
-
+03/20/2014
+* scripts/gefs2sref POST : 
+  - Added 3 hr avg file creation for GEFS sref look-alike members
+    after forecast hour 126.  Used wgrib2 -fcst-ave option
            
