@@ -1,0 +1,79 @@
+#BSUB -J jdgex_nam2dgex 
+#BSUB -o /ptmpp1/Jeff.McQueen/com/output/prod/today/dgex_nam2dgex.o%J
+#BSUB -e /ptmpp1/Jeff.McQueen/com/output/prod/today/dgex_nam2dgex.o%J
+#BSUB -L /bin/ksh   #moved from sh to ksh
+#BSUB -q dev
+#BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=1000]
+#BSUB -n 1              
+#BSUB -W 0:30 
+#BSUB -P meso
+
+#=====================================================================================
+# This ecflow script combines all jsref_wrf_gefsprep_p##_CC.ecf and jsref_gefs2sref_CC.ecf scripts
+# jsref_wrf_gefsprep creates the global gens pgrb files.
+# These are input to JSREF_GEFS2SREF JOB to create gens lookalike files and products in SREF form.
+# The GENS product files are then used by NAM_SMARTINIT (DNG) to downscale probability of precip 
+# if SREF is missing or for DGEX downscaling beyond 87 forecast hours
+
+# NOTE: NCO should set run  cyc below (00,06,12, 12) 
+# 12-17-2013  Jeff McQueen NCEP/EMC
+#=====================================================================================
+# %include "/ecf/ecfnets/scripts/head.h"
+#NCO set -x
+
+# jtm lib loads
+export stutil=/hwrf/noscrub/soft/modulefiles
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+module use $stutil
+module load ruby emc-utils
+
+#  envir and cyc should be set by NCO
+export envir=para
+export model_ver="v3.2.4"
+nwdir=${nwdir:-/meso/save/${USER}/smartinit.$model_ver}  # or nwprod
+export utilscript=${utilscript:-/nwprod/util/ush}
+$utilscript/setup.sh
+
+export DATE=$PDY
+
+# Determine cycle (NCO WILL SET)
+let HH=`date +%H`
+if [ $HH -ge 03 -a $HH -le 09 ];then export cyc=00;
+elif [ $HH -le 15 ];then export cyc=06;
+elif [ $HH -le 21 ];then export cyc=12;
+else
+  export cyc=18
+fi
+#TEST export cyc=06 #TEST
+
+#=====================================================================
+# Create the CONUS dgex initial file (fhr=78) on dgex grid from nam
+#=====================================================================
+export job=jdgex_nam2dgex
+echo "SUBMIT JDGEX_NAM2DGEX for CYC" $cyc
+${nwdir}/jobs/JDGEX_NAM2DGEX 
+
+# if [ $? -ne 0 ]; then
+#  ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
+#  ecflow_client --abort
+#  exit
+# fi
+
+# %include "/ecf/ecfnets/scripts/tail.h"
+# %manual
+######################################################################
+#
+#
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+# %end

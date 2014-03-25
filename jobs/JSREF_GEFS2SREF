@@ -1,0 +1,233 @@
+#!/bin/ksh
+export RUN_ENVIR=para 
+############################################
+# Set up environment for gefs2sref jobs
+#
+# change log:
+# 05/29/2012, Jun Du: Initial program 
+# 12/02/2013, Jeff McQueen: Incorporated into DNG smartinit processing
+#
+############################################
+#NCO set -xa
+
+export OMP_NUM_THREADS=1
+export MP_EUIDEVICE=sn_all
+export MP_EUILIB=us
+export MP_MPILIB=mpich2
+#jtm export MP_TASK_AFFINITY=core:1
+
+###########################################
+# Run sref_config to get input parameters
+###########################################
+export envir=${envir:-prod}  #TEST
+export job=${job:-sref2gefs} #TEST
+#jtm Set in ecf job twice export cyc=${cyc:-03}        #TEST
+
+if [ "$RUN_ENVIR" != prod ]          ### For Developers
+then
+#jtm  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/sref/nwprod/parm/sref_para_config}
+# SMVER = smartinit.ver for Testing
+  CONFIG_FILE=${CONFIG_FILE:-/meso/save/${LOGNAME}/smartinit.${SMVER}/parm/sref_para_config}
+  . $CONFIG_FILE
+fi
+
+# ###################################
+# SET SHELL PROCESSING VARIABLES
+# ###################################
+export PS4='$SECONDS + ' 
+date
+# 
+# obtain unique process id (pid) and make temp directories
+#
+export pid=$$
+if [ "$RUN_ENVIR" != prod ]   ### For Developers
+then
+  export DATA_IN=${DATA_IN:-/stmpp1/$LOGNAME/tmpnwprd}
+else                        ### For Operations
+  export DATA_IN=/tmpnwprd
+fi
+export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+
+rm -rf $DATA
+mkdir -p $DATA
+cd $DATA 
+
+####################################
+# File To Log Msgs
+####################################
+if [ "$RUN_ENVIR" != prod ]     ### For Developers
+then
+   export jlogfile=${jlogfile:-$DATA_IN/jlogfile}
+else                          ### For Operations
+   export jlogfile=/com/logs/jlogfiles/jlogfile.${job}.${pid}
+fi
+
+####################################
+# Determine Job Output Name on System
+####################################
+export outid="LL$job"
+export jobid="${outid}.o${pid}"
+export pgmout="OUTPUT.${pid}"
+
+export cycle=t${cyc}z 
+
+export NET=sref
+export RUN=sref
+
+##################################################
+# SAVEGES  - Copy Files From TMPDIR to $GESdir
+# SENDECF  - Flag Events on ecFlow
+# SENDCOM  - Copy Files From TMPDIR to $COMOUT
+# SENDDBN  - Issue DBNet Client Calls
+# RERUN    - Rerun fcst from beginning (default no)
+##################################################
+if [ "$RUN_ENVIR" != prod ]     ### For Developers
+then
+  export SENDCOM=${SENDCOM:-YES}
+  export SENDDBN=${SENDDBN:-YES}
+  export SENDECF=${SENDECF:-YES}
+  export RUN_TCTRACK=${RUN_TCTRACK:-NO}
+
+  export HOMEsref=${HOMEsref:-/nw${envir}}
+  export EXECsref=${EXECsref:-$HOMEsref/exec}
+  export FIXsref=${FIXsref:-$HOMEsref/fix}
+  export PARMsref=${PARMsref:-$HOMEsref/parm}
+  export USHsref=${USHsref:-$HOMEsref/ush}
+else                         ### For Operations
+  export SENDCOM=YES
+  export SENDDBN=NO
+  export SENDECF=YES
+
+  export HOMEsref=/nw${envir}/${NET}.${model_ver}
+  export EXECsref=$HOMEsref/exec
+  export FIXsref=$$HOMEsref/fix
+  export PARMsref=$HOMEsref/parm
+  export USHsref=$$HOMEsref/ush
+fi
+
+###################################
+# Set up the UTILITIES
+###################################
+export utilscript=/nwprod/util/ush
+export utilexec=/nwprod/util/exec
+# Run setup to initialize working directory and utility scripts
+sh $utilscript/setup.sh
+
+msg="JOB $job HAS BEGUN"
+./postmsg "$jlogfile" "$msg"
+
+# Run setpdy and initialize PDY variables
+sh $utilscript/setpdy.sh
+. ${DATA}/PDY
+
+typeset -Z2 gefscyc
+if [ $cyc -eq 03 ];then
+ export gefscyc=00
+elif [ $cyc -eq 09 ];then
+ export gefscyc=06
+elif [ $cyc -eq 15 ];then
+ export gefscyc=12
+elif [ $cyc -eq 21 ];then
+ export gefscyc=18
+else 
+ echo "INVALID SREF CYCLE : $cyc "
+ exit
+fi
+
+if [ "$RUN_ENVIR" != prod ]     ### For Developers
+then
+  export COM_IN=${COM_IN:-/ptmpp1/$LOGNAME/com/${NET}/${envir}}   #jtm
+  export COM_OUT=${COM_OUT:-/ptmpp1/$LOGNAME/com/${NET}/${envir}}
+  export COMIN=$COM_IN/${RUN}.${PDY}/pgrb_gefs/$gefscyc
+  export COMOUT=$COM_OUT/${RUN}.${PDY}/ensprod_gefs/$gefscyc
+else                          ### For Operations
+  export COM_IN=/com/${NET}/${envir}
+  export COM_OUT=/com/${NET}/${envir}
+  export COMIN=$COM_IN/${RUN}.${PDY}/pgrb_gefs/$gefscyc
+  export COMOUT=$COM_OUT/${RUN}.${PDY}/ensprod_gefs/$gefscyc
+fi
+mkdir -p $COMIN $COMOUT
+ 
+#######################################################
+# Pass information which is needed to run the Script
+#######################################################
+#  The timestep must line up to the number job  submissions 
+# (e.g.: 90/3 +1=31)
+#export ENDHOUR=03   
+#export INCHOUR=3
+#export INCR=${INCHOUR}
+#export CYC=${cyc}
+#export LENGTH=${ENDHOUR}
+export DATE=$PDY
+#export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
+
+#NCO env
+
+###################################################
+# Execute the Scripts
+###################################################
+
+mkdir -m 775 $DATA/gefs2sref
+cd $DATA/gefs2sref
+rm -rf $DATA/gefs2sref/poescript
+
+
+export HR=${STRHOUR:-00}
+
+#================================================================================
+#1. Convert gefs to sref
+#================================================================================
+while [ $HR -le $ENDHOUR ];do
+  mkdir -m 775 $DATA/gefs2sref/$HR
+  echo "$HOMEsref/scripts/exsref_gefs2sref.sh.ecf $HR > $DATA/gefs2sref/${HR}.out" >>$DATA/gefs2sref/poescript
+  HR=`expr $HR + $INCHOUR`
+#TEST set in ecf script  if [ HR -ge 126 ];then export INCHOUR=06;fi
+  if [ $HR -lt 10 ];then HR="0"${HR};fi 
+done
+
+echo "SUBMIT gefs2sref poe script" STR $STRHOUR  END $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
+chmod 775 $DATA/gefs2sref/poescript
+export MP_PGMMODEL=mpmd
+export MP_CMDFILE=$DATA/gefs2sref/poescript
+mpirun.lsf -cmdfile $DATA/gefs2sref/poescript -pgmmodel mpmd -ilevel 3 -labelio yes -stdoutmode ordered
+
+#================================================================================
+#2. Create GEFS SREF look-alike  ensemble products for CONUS, Alaska and Hawaii
+#     Wait until all 192 hours are done with before linking r_gribawips.n#PNO.fHHH 
+#       files to /com/sref/para/sref.YYYYMMDD/pgrb_gefs pgrb files 
+#       created by gefs2sref.sh.ecf above.
+#     Once available then run post4GEFS.sh.ecf below for all  00-192 fhrs
+#     to create final ensprod files
+#================================================================================
+if [ $ENDHOUR -gt 126 ];then
+  export STRHOUR=00  # Compute prob products for all forecast hours
+  echo "SUBMIT enspost script" STR $STRHOUR  END $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
+
+# Create CONUS ensemble post products
+  mkdir -p $DATA/212_3hrly
+  cd $DATA/212_3hrly
+  $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 212 222 > $DATA/212_3hrly.out 
+
+# Create Hawaii ensemble post products
+#jtm mkdir -p $DATA/243_3hrly
+#jtm cd $DATA/243_3hrly
+#jtm $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 243 222 > $DATA/243_3hrly.out 
+
+# Create Alaska ensemble post products
+  mkdir -p $DATA/216_3hrly
+  cd $DATA/216_3hrly
+  $HOMEsref/scripts/exsref_enspost4GEFS.sh.ecf 3hrly 216 222 > $DATA/216_3hrly.out 
+
+  cd $DATA
+  cat $DATA/212_3hrly.out >>$pgmout
+  cat $DATA/243_3hrly.out >>$pgmout
+  cat $DATA/216_3hrly.out >>$pgmout
+  cat $pgmout
+fi
+  
+msg="JOB $job HAS COMPLETED NORMALLY."
+./postmsg "$jlogfile" "$msg"
+
+cd $DATA_IN
+#TEST   rm -rf $DATA    #jtm
+date
