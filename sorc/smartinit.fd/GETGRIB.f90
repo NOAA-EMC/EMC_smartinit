@@ -730,7 +730,6 @@
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
        endif  
 
-       IF (IFHR .LE. 126 ) THEN   ! DGEX GEFS files are 6 hourly after 126 fhrs
 !  READ SREF precip
       print*; print *,'READ SREF Precip Probs', LUGB2, IFHR
 
@@ -773,12 +772,6 @@
        RETURN
       ENDIF
 
-      ELSE
-!       If FHR > 126 for DGEX, GEFS only has 6,12 hourly precip probs
-        S3REF01(M,N) = 0.0
-        S3REF10(M,N) = 0.0
-        S3REF50(M,N) = 0.0
-      ENDIF  ! fhr > 126 check
 
 ! 6-hr probability of 0.01"
        J = 5     

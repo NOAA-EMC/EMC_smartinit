@@ -1,15 +1,17 @@
 #BSUB -J jsref_gefs2sref
 #BSUB -o /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
 #BSUB -e /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
-#BSUB -L /bin/ksh   #moved from sh to ksh
+#BSUB -L /bin/ksh 
 #BSUB -q dev
 #BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
-#BSUB -R "span[ptile=8]"  #jtm or 16 if using all tasks on node
-#BSUB -n 43               #jtm Depends on the number of forecast hours, 43 nodes for 126 fhrs
+#BSUB -R "span[ptile=8]" 
+#BSUB -R "affinity[core(8):distribute=balance]"
+#BSUB -n 43             
 #BSUB -W 1:30 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared
+export OMP_NUM_THREADS=1
 
 #=====================================================================================
 # This ecflow script combines all jsref_wrf_gefsprep_p##_CC.ecf 
@@ -123,7 +125,7 @@ done
 # wait for completion of gefs pgrb file creation  
 # (NCO should make separate ecflow script triggered once GENS input is ready 
 # for a particular forecast )
-if [ -s "$outd/global_pgrb/gens_p20.t{cyc}z.pgrbf${ENDHOUR}" ];then
+if [ -s "$outd/global_pgrb/gens_p20.t${cyc}z.pgrbf${ENDHOUR}" ];then
   echo ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc FOUND
 else
   echo WAITING FOR ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc file  

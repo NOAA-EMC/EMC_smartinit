@@ -4,7 +4,7 @@ export stutil=/hwrf/noscrub/soft/modulefiles
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
-set -x
+#set -x
 
 #==========================================
 # Submit several nam_smartinit domain runs
@@ -52,8 +52,8 @@ for RUNTYP in $dgexrun;do  #conus ak hi pr ak_rtmages aknest3 conusnest2p5;do
   export mdl=nam
   if [ $RUNTYP = guam ];then export mdl=hiresw;fi
   if [ $RUNTYP = conusnest2p5 ];then export ENDHRS=36;fi
-  if [ $RUNTYP = dgex_cs ];then export fhrstr=78;export mdl=dgex;export ENDHRS=126;fi
-  if [ $RUNTYP = dgex_ak ];then export fhrstr=84;export mdl=dgex;export ENDHRS=126;fi
+  if [ $RUNTYP = dgex_cs ];then export fhrstr=78;export mdl=dgex;export ENDHRS=192;fi
+  if [ $RUNTYP = dgex_ak ];then export fhrstr=84;export mdl=dgex;export ENDHRS=192;fi
   export NET=$mdl
   export RUN=$NET
   export RUNTYP=$RUNTYP

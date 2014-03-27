@@ -1202,6 +1202,7 @@ INTERFACE
 
         WHERE (validpt .and. PCP10 .GT. PXCP10)
           TMPPCP=(PCP10+PXCP10)/2.      ! ERROR FOUND 09/26/13
+!          TMPPCP=(PCP01+PXCP01)/2.      
           PCP10  = TMPPCP
           PXCP10 = TMPPCP
         END WHERE
@@ -1237,6 +1238,7 @@ INTERFACE
 !    bullseyes from the model.   But since AK is less prone
 !    to model-generated convective bullseyes, and IC's are
 !    so important here, opted to give more weight to the SREF
+!    Using the Nested grid conus calculations  (jtm)
 
         if (gdin%region .eq. 'AK' .or. gdin%region .eq. 'AKRT' .or. gdin%region .eq. 'AK3' ) then
          IF (POPTMP .LT. 30.)  THEN
@@ -1262,6 +1264,10 @@ INTERFACE
           IF(POPTMP .GT. 70.) POP(I,J)=(2*POPTMP+2*PCP01(I,J)+PCP10(I,J))/5.
           IF(POPTMP .LT. 30.) POP(I,J)=(POPTMP+2*PCP01(I,J)+PCP10(I,J))/4.
           IF(POPTMP.GE.30 .AND. POPTMP.LE.70) POP(I,J)=AMAX1((POPTMP+PCP01(I,J))/2.,20.)
+          if (POPTMP .GT. 70 .and. IAHR.EQ.6) then
+            print *,I,J,' POP, PCP01,PCP10 ', POP(I,J), PCP01(I,J), PCP10(I,J)
+            print *,' POPTMP,qpf,lmbl,rhavg ',POPTMP,qpf(i,j),lmbl,rhavg
+          endif
          ENDIF
 
          endif  !alaska domain check
