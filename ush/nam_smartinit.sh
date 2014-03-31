@@ -141,12 +141,18 @@ typeset -Z2 srefcyc gefscyc pcphrl
 #          interpolated to smartinit output (ogrd)
 #   ogrd : output grib number for prdgen and smartinit codes 
 #          (eg: 197,196,195,198,184)
+#  gtyp  : output grid w3fi63 grid type indicator (for copygb)
+#       1: Mercator
+#       3: Lambert Conformal
+#       5: Polar Stereographic
 #--------------------------------------------------------------------------
 if [ $gtyp -ne $ogrd ];then
-case $RUNTYP in
-  ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
-                      *) grid="255 $grid  0 64 2500 2500";;
-esac
+  case $gtyp in
+#   kpds        1   2-9  10 11 12 13    14
+      3) grid="255 $grid  0 64 25000 25000";;
+      5) grid="255 $grid  0 64 25000 25000";;
+      1) grid="255 $grid  0 64 2500 2500";;
+  esac
 fi
 
 set -x
