@@ -814,6 +814,7 @@ INTERFACE
 
 !     Compute Haines Index
       print *,'Compute HAINES INDEX'
+      CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
       ID(1:25) = 0
       ID(2)=129
       ID(8)=250;ID(9)=1

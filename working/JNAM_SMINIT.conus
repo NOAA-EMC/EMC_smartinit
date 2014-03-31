@@ -1,6 +1,6 @@
-#BSUB -J DNG18.conus-03
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.conus-03
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.conus-03
+#BSUB -J DNG18.conus-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.conus-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.conus-12
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
