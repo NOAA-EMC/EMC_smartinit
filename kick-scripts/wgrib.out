@@ -1,0 +1,102 @@
+1:0:d=14033106:TMP:kpds5=11:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+2:739390:d=14033106:DPT:kpds5=17:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+3:1478780:d=14033106:SPFH:kpds5=51:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+4:2218170:d=14033106:UGRD:kpds5=33:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+5:2957560:d=14033106:VGRD:kpds5=34:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+6:3696950:d=14033106:GUST:kpds5=180:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+7:4528754:d=14033106:PRES:kpds5=1:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+8:5360558:d=14033106:HGT:kpds5=7:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+9:6654422:d=14033106:TCDC:kpds5=71:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+10:7301400:d=14033106:REFC:kpds5=212:kpds6=200:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:atmos col:anl:NAve=0
+11:8225616:d=14033106:HGT:kpds5=7:kpds6=245:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:lowest level of wet bulb zero:anl:NAve=0
+12:9149832:d=14033106:VIS:kpds5=20:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+13:9149926:d=14033106:WDIR:kpds5=31:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+14:9981730:d=14033106:WIND:kpds5=32:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+15:10721120:d=14033106:RH:kpds5=52:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+16:11645336:d=14033106:DIST:kpds5=8:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+17:13031612:d=14033106:4LFTX:kpds5=132:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+1:0:d=14033106:TMP:kpds5=11:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+2:739390:d=14033106:DPT:kpds5=17:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+3:1478780:d=14033106:SPFH:kpds5=51:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+4:2218170:d=14033106:UGRD:kpds5=33:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+5:2957560:d=14033106:VGRD:kpds5=34:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+6:3696950:d=14033106:GUST:kpds5=180:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+7:4528754:d=14033106:PRES:kpds5=1:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+8:5360558:d=14033106:HGT:kpds5=7:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+9:6654422:d=14033106:TCDC:kpds5=71:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+10:7301400:d=14033106:REFC:kpds5=212:kpds6=200:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:atmos col:anl:NAve=0
+11:8225616:d=14033106:HGT:kpds5=7:kpds6=245:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:lowest level of wet bulb zero:anl:NAve=0
+12:9149832:d=14033106:VIS:kpds5=20:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+13:9149926:d=14033106:WDIR:kpds5=31:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+14:9981730:d=14033106:WIND:kpds5=32:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+15:10721120:d=14033106:RH:kpds5=52:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+16:11645336:d=14033106:DIST:kpds5=8:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+17:13031612:d=14033106:4LFTX:kpds5=132:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+1:0:d=14033106:TMP:kpds5=11:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+2:739390:d=14033106:DPT:kpds5=17:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+3:1478780:d=14033106:SPFH:kpds5=51:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+4:2218170:d=14033106:UGRD:kpds5=33:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+5:2957560:d=14033106:VGRD:kpds5=34:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+6:3696950:d=14033106:GUST:kpds5=180:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+7:4528754:d=14033106:PRES:kpds5=1:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+8:5360558:d=14033106:HGT:kpds5=7:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+9:6654422:d=14033106:TCDC:kpds5=71:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+10:7301400:d=14033106:REFC:kpds5=212:kpds6=200:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:atmos col:anl:NAve=0
+11:8225616:d=14033106:HGT:kpds5=7:kpds6=245:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:lowest level of wet bulb zero:anl:NAve=0
+12:9149832:d=14033106:VIS:kpds5=20:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+13:9149926:d=14033106:WDIR:kpds5=31:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+14:9981730:d=14033106:WIND:kpds5=32:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+15:10721120:d=14033106:RH:kpds5=52:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+16:11645336:d=14033106:DIST:kpds5=8:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+17:13031612:d=14033106:4LFTX:kpds5=132:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+1:0:d=14033106:TMP:kpds5=11:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+2:739390:d=14033106:DPT:kpds5=17:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+3:1478780:d=14033106:SPFH:kpds5=51:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+4:2218170:d=14033106:UGRD:kpds5=33:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+5:2957560:d=14033106:VGRD:kpds5=34:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+6:3696950:d=14033106:GUST:kpds5=180:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+7:4528754:d=14033106:PRES:kpds5=1:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+8:5360558:d=14033106:HGT:kpds5=7:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+9:6654422:d=14033106:TCDC:kpds5=71:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+10:7301400:d=14033106:REFC:kpds5=212:kpds6=200:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:atmos col:anl:NAve=0
+11:8225616:d=14033106:HGT:kpds5=7:kpds6=245:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:lowest level of wet bulb zero:anl:NAve=0
+12:9149832:d=14033106:VIS:kpds5=20:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+13:9149926:d=14033106:WDIR:kpds5=31:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+14:9981730:d=14033106:WIND:kpds5=32:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+15:10721120:d=14033106:RH:kpds5=52:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+16:11645336:d=14033106:DIST:kpds5=8:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+17:13031612:d=14033106:4LFTX:kpds5=132:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+1:0:d=14033106:TMP:kpds5=11:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+2:739390:d=14033106:DPT:kpds5=17:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+3:1478780:d=14033106:SPFH:kpds5=51:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+4:2218170:d=14033106:UGRD:kpds5=33:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+5:2957560:d=14033106:VGRD:kpds5=34:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+6:3696950:d=14033106:GUST:kpds5=180:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+7:4528754:d=14033106:PRES:kpds5=1:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+8:5360558:d=14033106:HGT:kpds5=7:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+9:6654422:d=14033106:TCDC:kpds5=71:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+10:7301400:d=14033106:REFC:kpds5=212:kpds6=200:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:atmos col:anl:NAve=0
+11:8225616:d=14033106:HGT:kpds5=7:kpds6=245:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:lowest level of wet bulb zero:anl:NAve=0
+12:9149832:d=14033106:VIS:kpds5=20:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+13:9149926:d=14033106:WDIR:kpds5=31:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+14:9981730:d=14033106:WIND:kpds5=32:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+15:10721120:d=14033106:RH:kpds5=52:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+16:11645336:d=14033106:DIST:kpds5=8:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+17:13031612:d=14033106:4LFTX:kpds5=132:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+1:0:d=14033106:TMP:kpds5=11:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+2:739390:d=14033106:DPT:kpds5=17:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+3:1478780:d=14033106:SPFH:kpds5=51:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+4:2218170:d=14033106:UGRD:kpds5=33:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+5:2957560:d=14033106:VGRD:kpds5=34:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+6:3696950:d=14033106:GUST:kpds5=180:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+7:4528754:d=14033106:PRES:kpds5=1:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+8:5360558:d=14033106:HGT:kpds5=7:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+9:6654422:d=14033106:TCDC:kpds5=71:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+10:7301400:d=14033106:REFC:kpds5=212:kpds6=200:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:atmos col:anl:NAve=0
+11:8225616:d=14033106:HGT:kpds5=7:kpds6=245:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:lowest level of wet bulb zero:anl:NAve=0
+12:9149832:d=14033106:VIS:kpds5=20:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
+13:9149926:d=14033106:WDIR:kpds5=31:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+14:9981730:d=14033106:WIND:kpds5=32:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+15:10721120:d=14033106:RH:kpds5=52:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+16:11645336:d=14033106:DIST:kpds5=8:kpds6=220:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:planetary boundary layer (from Richardson no.):anl:NAve=0
+17:13031612:d=14033106:4LFTX:kpds5=132:kpds6=1:kpds7=0:TR=0:P1=0:P2=0:TimeU=1:sfc:anl:NAve=0
