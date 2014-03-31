@@ -1,0 +1,16 @@
+#!/bin/ksh
+# Create ecf trigger jobs for smartinit
+# Jeff McQueen 3/20/14
+wdir=`pwd`
+cd $wdir
+fhr=84
+endhr=192
+mdl=dgex
+reg=ak
+file=${wdir}/j${mdl}_sminit_${reg}-fHH.ecf
+
+while [ $fhr -le $endhr ]; do
+  sed s/HH/$fhr/g $file > j${mdl}_sminit_${reg}_f${fhr}.ecf
+  svn add j${mdl}_sminit_${reg}_f${fhr}.ecf
+  ((fhr=fhr+3))
+done
