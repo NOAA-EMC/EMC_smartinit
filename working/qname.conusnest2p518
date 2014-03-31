@@ -1,3 +1,27 @@
+<<<<<<< .mine
+       1702190       R  03/30 22:45   DNG18.conusnest2p5-36
+       1701938       C  03/30 22:36   DNG18.conusnest2p5-33
+       1701540       C  03/30 22:25   DNG18.conusnest2p5-30
+       1701315       C  03/30 22:16   DNG18.conusnest2p5-27
+       1701140       C  03/30 22:05   DNG18.conusnest2p5-24
+       1700986       C  03/30 21:56   DNG18.conusnest2p5-21
+       1700751       C  03/30 21:44   DNG18.conusnest2p5-18
+       1695191    11 Q  03/30 18:15   jsref_gefs2sref132
+       1686018    11 Q  03/30 12:15   jsref_gefs2sref132
+       1676776    11 Q  03/30 06:15   jsref_gefs2sref132
+       1664606    11 RM 03/29 23:15   jsref_gefs2sref132
+       1702017    43 Q  03/30 22:40   jsref_gefs2sref
+       1694001    43 Q  03/30 17:30   jsref_gefs2sref
+       1684976    43 Q  03/30 11:30   jsref_gefs2sref
+       1675609    43 Q  03/30 05:30   jsref_gefs2sref
+       1663733    43 Q  03/29 22:40   jsref_gefs2sref
+       1655165    43 Q  03/29 17:30   jsref_gefs2sref
+       1645951    43 Q  03/29 11:30   jsref_gefs2sref
+       1634098    43 Q  03/29 05:30   jsref_gefs2sref
+       1615941    43 Q  03/28 22:40   jsref_gefs2sref
+       1601345    43 Q  03/28 17:30   jsref_gefs2sref
+       1700362       C  03/30 21:30   jdgex_nam2dgex
+=======
        1487297       C  03/24 21:51   nam18.prpu-met
        1487386       C  03/24 21:56   nam18.prpu-diff
        1486926       C  03/24 21:46   nam18.hiphnl-met
@@ -63,3 +87,4 @@
        1487523       C  03/24 22:02   DNG18.conusnest2p5-21
        1486951       C  03/24 21:47   DNG18.conusnest2p5-18
        1488316    43 Q  03/24 22:40   jsref_gefs2sref
+>>>>>>> .r38621

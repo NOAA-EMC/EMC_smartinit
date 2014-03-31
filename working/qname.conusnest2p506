@@ -1,3 +1,31 @@
+<<<<<<< .mine
+       1721307       R  03/31 10:43   DNG06.conusnest2p5-36
+       1721138       C  03/31 10:34   DNG06.conusnest2p5-33
+       1720870       C  03/31 10:23   DNG06.conusnest2p5-30
+       1720736       C  03/31 10:13   DNG06.conusnest2p5-27
+       1720492       C  03/31 10:03   DNG06.conusnest2p5-24
+       1720348       C  03/31 09:54   DNG06.conusnest2p5-21
+       1720123       C  03/31 09:42   DNG06.conusnest2p5-18
+       1719831       C  03/31 09:30   mksfcsvnmm
+       1719650       C  03/31 09:25   mksfcsvnam2
+       1721024       R  03/31 10:30   mksfcsvOZ
+       1721048       C  03/31 10:30   mksfcsvOZ
+       1719414       C  03/31 09:20   mksfcsv4
+       1714469    11 Q  03/31 06:15   jsref_gefs2sref132
+       1702871    11 R  03/30 23:15   jsref_gefs2sref132
+       1713411    43 Q  03/31 05:30   jsref_gefs2sref
+       1702017    43 Q  03/30 22:40   jsref_gefs2sref
+       1694001    43 Q  03/30 17:30   jsref_gefs2sref
+       1684976    43 Q  03/30 11:30   jsref_gefs2sref
+       1675609    43 Q  03/30 05:30   jsref_gefs2sref
+       1663733    43 Q  03/29 22:40   jsref_gefs2sref
+       1655165    43 Q  03/29 17:30   jsref_gefs2sref
+       1645951    43 Q  03/29 11:30   jsref_gefs2sref
+       1634098    43 Q  03/29 05:30   jsref_gefs2sref
+       1615941    43 Q  03/28 22:40   jsref_gefs2sref
+       1601345    43 Q  03/28 17:30   jsref_gefs2sref
+       1721025       C  03/31 10:30   jdgex_nam2dgex
+=======
        1504993       C  03/25 09:51   nam06.prpu-met
        1505128       C  03/25 09:56   nam06.prpu-diff
        1504855       C  03/25 09:45   nam06.hiphnl-met
@@ -67,3 +95,4 @@
        1506171       RM 03/25 10:30   mksfcsvOZ
        1504037       C  03/25 09:20   mksfcsv4
        1506136       C  03/25 10:30   jdgex_nam2dgex
+>>>>>>> .r38621

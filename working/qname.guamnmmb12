@@ -1,3 +1,30 @@
+<<<<<<< .mine
+       1730375       C  03/31 15:54   nam06.conus-met
+       1731327       C  03/31 16:25   plftpnamvgt06
+       1731321       C  03/31 16:25   plftpnamsfo06
+       1731328       C  03/31 16:25   plftpnamsdb06
+       1731330       C  03/31 16:25   plftpnampu06
+       1731331       C  03/31 16:25   plftpnampajn06
+       1731324       C  03/31 16:25   plftpnamnyc06
+       1731325       C  03/31 16:25   plftpnammfr06
+       1731326       C  03/31 16:25   plftpnamlas06
+       1731320       C  03/31 16:25   plftpnamconus06
+       1731322       C  03/31 16:25   plftpnamboi06
+       1731323       C  03/31 16:25   plftpnamase06
+       1731937       C  03/31 16:42   DNG12.conusnest2p5-33
+       1731613       C  03/31 16:32   DNG12.conusnest2p5-30
+       1731224       C  03/31 16:22   DNG12.conusnest2p5-27
+       1730906       C  03/31 16:11   DNG12.conusnest2p5-24
+       1730634       C  03/31 16:02   DNG12.conusnest2p5-21
+       1730335       C  03/31 15:51   DNG12.conusnest2p5-18
+       1729660       C  03/31 15:30   mksfcsvnmm
+       1729531       C  03/31 15:25   mksfcsvnam2
+       1731544       C  03/31 16:30   mksfcsvOZ
+       1731513       R  03/31 16:30   mksfcsvOZ
+       1729295       C  03/31 15:20   mksfcsv4
+       1723397    11 Q  03/31 12:15   jsref_gefs2sref132
+       1722413    43 Q  03/31 11:30   jsref_gefs2sref
+=======
        1510521       R  03/25 13:45   dgex06.conus-met
        1512207       C  03/25 14:45   plftpdgexconus06
        1512549       C  03/25 14:55   DNG12.pr-12
@@ -41,3 +68,4 @@
        1513314       R  03/25 15:25   mksfcsvnam2
        1513186       R  03/25 15:20   mksfcsv4
        1513202       C  03/25 15:20   mksfcsv4
+>>>>>>> .r38621

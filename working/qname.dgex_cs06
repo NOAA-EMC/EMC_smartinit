@@ -1,3 +1,29 @@
+<<<<<<< .mine
+       1723879       C  03/31 12:38   west06smoke-hys
+       1723876       C  03/31 12:38   east06smoke-hys
+       1723696       C  03/31 12:30   conus06smoke-hys
+       1723874       C  03/31 12:38   06smoke-hys
+       1724011       C  03/31 12:46   ftphysplit
+       1723871       C  03/31 12:38   ftphysplit
+       1724270       RM 03/31 12:50   DNG06.dgex_cs-78
+       1724013       C  03/31 12:46   west06dust-hys
+       1724012       C  03/31 12:46   east06dust-hys
+       1723881       C  03/31 12:38   conus06dust-hys
+       1723397    11 Q  03/31 12:15   jsref_gefs2sref132
+       1714469    11 Q  03/31 06:15   jsref_gefs2sref132
+       1722413    43 Q  03/31 11:30   jsref_gefs2sref
+       1713411    43 Q  03/31 05:30   jsref_gefs2sref
+       1702017    43 Q  03/30 22:40   jsref_gefs2sref
+       1694001    43 Q  03/30 17:30   jsref_gefs2sref
+       1684976    43 Q  03/30 11:30   jsref_gefs2sref
+       1675609    43 Q  03/30 05:30   jsref_gefs2sref
+       1663733    43 Q  03/29 22:40   jsref_gefs2sref
+       1655165    43 Q  03/29 17:30   jsref_gefs2sref
+       1645951    43 Q  03/29 11:30   jsref_gefs2sref
+       1634098    43 Q  03/29 05:30   jsref_gefs2sref
+       1615941    43 Q  03/28 22:40   jsref_gefs2sref
+       1601345    43 Q  03/28 17:30   jsref_gefs2sref
+=======
        1510521       R  03/25 13:45   dgex06.conus-met
        1512207       C  03/25 14:45   plftpdgexconus06
        1512549       R  03/25 14:55   DNG12.pr-12
@@ -23,3 +49,4 @@
        1512518       R  03/25 14:54   DNG12.ak-06
        1512472       C  03/25 14:52   DNG12.ak-03
        1512397       C  03/25 14:50   DNG12.ak-00
+>>>>>>> .r38621
