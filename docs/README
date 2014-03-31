@@ -456,3 +456,8 @@ kick-scripts/ftpmet.sh
   - Added 3 hr avg file creation for GEFS sref look-alike members
     after forecast hour 126.  Used wgrib2 -fcst-ave option
            
+3/28/2013
+* ush/smartinit.sh, dgex_smartinit.sh
+  - Corrected grid variable configuration for copygb CONUS Lambert Conformal grids
+  - Restructured grid config based on gtyp varb (1=merc,3=LC, 5=PS)
+

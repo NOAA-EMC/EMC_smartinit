@@ -13,6 +13,7 @@
 #BSUB -x   
 
 export OMP_NUM_THREADS=1
+export MALLOC_MMAP_MAX_=1024
 #=====================================================================================
 # This ecflow script combines all jsref_wrf_gefsprep_p##_CC.ecf and jsref_gefs2sref_CC.ecf scripts
 # for forecast hours 132-192

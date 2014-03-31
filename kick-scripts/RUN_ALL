@@ -63,7 +63,8 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export NET=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export RUN=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export DATA=/${DATA_IN}/${job}"        >>$wkdir/dng_para_config${RUNTYP}
-  cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
+#TEST  cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
+  cat $cfgdir/smgfs_para_config >>$wkdir/dng_para_config${RUNTYP}
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 

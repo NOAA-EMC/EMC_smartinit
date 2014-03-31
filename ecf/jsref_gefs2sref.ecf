@@ -12,6 +12,7 @@
 #BSUB -a poe
 #BSUB -x    # not_shared
 export OMP_NUM_THREADS=1
+export MALLOC_MMAP_MAX_=1024
 
 #=====================================================================================
 # This ecflow script combines all jsref_wrf_gefsprep_p##_CC.ecf 

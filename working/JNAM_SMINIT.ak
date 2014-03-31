@@ -1,6 +1,6 @@
-#BSUB -J DNG12.ak-00
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/12/list/oDNG12.ak-00
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/12/list/oDNG12.ak-00
+#BSUB -J DNG06.ak-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/06/list/oDNG06.ak-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.4/06/list/oDNG06.ak-12
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA

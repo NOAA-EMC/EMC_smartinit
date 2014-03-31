@@ -105,6 +105,7 @@ while [ $iline -le $linemax ];do
     let k=k+1
   done
   if [ $RUNTYP = "$RCFG" ];then
+    echo GTYP $gtyp OGRD $ogrd
     if [ "$gtyp" = "$ogrd" ];then 
       export grid=$ogrd
     else
@@ -167,13 +168,21 @@ fi
 #   grid : output grid to copygb sref precip and nam precip buckets to 
 #          one exception for non-nests where nam precip buckets are 
 #          interpolated to smartinit output (ogrd)
-#   ogrd : output grib number for prdgen and smartinit codes 
+#   ogrd : output grib number for prdgen and smartinit codes
+#          Also used fo nest copygb interpolation
 #          (eg: 197,196,195,198,184)
+#  gtyp  : output grid w3fi63 grid type indicator (for copygb)
+#       1: Mercator
+#       3: Lambert Conformal
+#       5: Polar Stereographic
 #--------------------------------------------------------------------------
+echo GTYP $gtyp OGRD $ogrd
 if [ $gtyp -ne $ogrd ];then
-  case $RUNTYP in
-    ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
-                        *) grid="255 $grid  0 64 2500 2500";;
+  case $gtyp in
+#   kpds        1   2-9  10 11 12 13    14
+      3) grid="255 $grid  0 64 25000 25000";;  
+      5) grid="255 $grid  0 64 25000 25000";;  
+      1) grid="255 $grid  0 64 2500 2500";;
   esac
 fi
 
@@ -189,7 +198,7 @@ echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INTERP GRID: $grid
+echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
 echo "============================================================"
 echo 
