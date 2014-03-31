@@ -1210,7 +1210,6 @@ INTERFACE
 
         WHERE (validpt .and. PCP10 .GT. PXCP10)
           TMPPCP=(PCP10+PXCP10)/2.      ! ERROR FOUND 09/26/13
-!          TMPPCP=(PCP01+PXCP01)/2.      
           PCP10  = TMPPCP
           PXCP10 = TMPPCP
         END WHERE
