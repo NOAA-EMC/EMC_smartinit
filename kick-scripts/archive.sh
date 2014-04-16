@@ -7,7 +7,7 @@
 module load ibmpe ics lsf
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
-#TEST export yyyymmdd=20140307   #TEST
+####export yyyymmdd=20140411   #TEST
 
 # Location of smartinit gif plot files
 #===========================================================
@@ -15,6 +15,7 @@ export pldir=/stmpp1/${USER}/smartplt
 #===========================================================
 
 hpssdir=/NCEPDEV/hpssuser/g01/wx22mc
+hpssexe=/u/Samuel.Trahan/build/emc-utils/bin
 
 export wdir=${pldir}/archive
 
@@ -38,7 +39,7 @@ for mdl in nam dgex;do
   for REG in ${regions};do
     cd $wdir
     if [ -s $indir ];then
-     /gpfs/gd2/emc/hwrf/noscrub/soft/emc-utils-1.0.0/bin/hpsstar \
+     ${hpssexe}/hpsstar \
      put ${hpssdir}/smartpara/${mdl}smart${REG}.${yyyymmdd}.tar \
                   ${indir}/${mdl}.t??z.smart${REG}??.tm00
     else
@@ -62,6 +63,6 @@ for mdl in nam dgex;do
     done
     cd $pldir/plarchive
     if [ $ifound = 1 ];then
-      hpsstar put ${hpssdir}/smartplts/${mdl}smartplts${REG}.${yyyymmdd}.tar *gif;fi
+      ${hpssexe}/hpsstar put ${hpssdir}/smartplts/${mdl}smartplts${REG}.${yyyymmdd}.tar *gif;fi
   done
 done  #MDL Loop
