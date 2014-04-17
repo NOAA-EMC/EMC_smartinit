@@ -15,7 +15,7 @@ export pldir=/stmpp1/${USER}/smartplt
 #===========================================================
 
 hpssdir=/NCEPDEV/hpssuser/g01/wx22mc
-hpssexe=/u/Samuel.Trahan/build/emc-utils/bin
+hpssexe=/nwprod/util/ush
 
 export wdir=${pldir}/archive
 
