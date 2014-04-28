@@ -63,6 +63,10 @@
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
          PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)
+
+!     CALCULATE THE VERTICAL VELOCITY DUE TO TOPOGRAPHIC EFFECTS (JTM)
+         WTOPO=U(I,J)*DHDX+V(I,J)*DHDY
+         PHI(I,J,1)=WTOPO
         endif
       enddo
       enddo
@@ -144,8 +148,14 @@
         IF(J.GT.1) PHIJM1=PHI(I,J-1,KK)
         IF(I.LT.NX) PHIIP1=PHI(I+1,J,KK)
         IF(J.LT.NY) PHIJP1=PHI(I,J+1,KK)
+        UOLD=U(I,J)
+        VOLD=V(I,J)
         U(I,J)=(PHIIP1-PHIIM1)*DXI+U(I,J)
         V(I,J)=(PHIJP1-PHIJM1)*DYI+V(I,J)
+        diffi=UOLD-U(i,j)
+        diffj=VOLD-V(i,j)
+        if (abs(diffi).gt.0.1)  print *,i,j,'VADJ PHII',PHIIP1, PHIIM1,DXI,UOLD,U(I,J)
+        if (abs(diffj).gt.0.1)   print *,i,j,'VADJ PHIJ',PHIJP1, PHIJM1,DYI,VOLD,V(I,J)
        endif
       enddo
       enddo
