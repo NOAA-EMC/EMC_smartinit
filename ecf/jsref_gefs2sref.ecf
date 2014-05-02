@@ -2,12 +2,12 @@
 #BSUB -o /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
 #BSUB -e /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
 #BSUB -L /bin/ksh 
-#BSUB -q dev
+#BSUB -q debug
 #BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
 #BSUB -R "span[ptile=8]" 
 #BSUB -R "affinity[core(8):distribute=balance]"
 #BSUB -n 43             
-#BSUB -W 1:30 
+#BSUB -W 0:30 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared

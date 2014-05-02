@@ -1,6 +1,6 @@
-#BSUB -J DNG12.ak-12
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.ak-12
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.ak-12
+#BSUB -J DNG18.ak-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.ak-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.ak-12
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -166,7 +166,7 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-### export PDY=20140205   #TEST
+####export PDY=20140501   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 

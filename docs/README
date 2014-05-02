@@ -460,4 +460,14 @@ kick-scripts/ftpmet.sh
 * ush/smartinit.sh, dgex_smartinit.sh
   - Corrected grid variable configuration for copygb CONUS Lambert Conformal grids
   - Restructured grid config based on gtyp varb (1=merc,3=LC, 5=PS)
+IMPLEMENTED ON MAY 6, 2014
+
+05/02/2014
+* sorc/smartinit.fd/VADJUST.f90
+  - Restricted u,v adjustment if less than 10 m/s and
+  - all 8 surrounding points are valid.
+  - also removed validpt check when solving Poisson equation for velocity potential
+  - also set PHI = 0.1 over not validpts
+Produces a larger impact 
+
 
