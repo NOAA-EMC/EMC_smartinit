@@ -170,12 +170,25 @@ fi
 #   ogrd : output grib number for prdgen and smartinit codes 
 #          (eg: 197,196,195,198,184)
 #--------------------------------------------------------------------------
+eco GTYP $gtyp OGRD $ogrd
 if [ $gtyp -ne $ogrd ];then
-  case $RUNTYP in
-    ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
-                        *) grid="255 $grid  0 64 2500 2500";;
+  case $gtyp in
+#   kpds        1   2-9  10 11 12 13    14
+      3) grid="255 $grid  0 64 0 25000 25000";;
+      5) grid="255 $grid  0 64 0 25000 25000";;
+      1) grid="255 $grid  0 64 2500 2500";;
   esac
 fi
+o GTYP $gtyp OGRD $ogrd
+if [ $gtyp -ne $ogrd ];then
+  case $gtyp in
+#   kpds        1   2-9  10 11 12 13    14
+      3) grid="255 $grid  0 64 0 25000 25000";;
+      5) grid="255 $grid  0 64 0 25000 25000";;
+      1) grid="255 $grid  0 64 2500 2500";;
+  esac
+fi
+
 
 # Set NDFD output grid topo and land mask filenames
 maskpre=${mdl}_smartmask${outreg}

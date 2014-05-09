@@ -15,7 +15,7 @@ export RUNTYP=conus
 GRID=smart        #smart, bgrd3d, bsmart
 mdl=nam
 
-yymmdd=20130731
+yymmdd=20140331
 export cyc=06       
 
 export ffhr=00     # Starting forecast hour
@@ -30,7 +30,8 @@ if [ $cyc -eq 06 -o $cyc -eq 18 ];then let ioff=6;fi
 # location of smartinit files
 #===============================================================
 ncodir=/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
-devdir=/ptmpp1/${USER}/smart${RUNTYP}/${mdl}.${yymmdd}     #EMC PARA 
+# devdir=/ptmpp1/${USER}/smart${RUNTYP}/${mdl}.${yymmdd}     #EMC PARA 
+devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}     #EMC PARA 
 
 #===============================================================
 # GRIB1 FILE PREFIX NAME FORMAT (eg: nam.t12z.bgrd3d42.tm00)

@@ -8,7 +8,7 @@ export RUN_ENVIR=para
 # 12/02/2013, Jeff McQueen: Incorporated into DNG smartinit processing
 #
 ############################################
-#NCO set -xa
+set -xa
 
 export OMP_NUM_THREADS=1
 export MP_EUIDEVICE=sn_all

@@ -502,8 +502,14 @@ INTERFACE
           DEC=3.0
           print *, 'Output 06 hr POP and precip',FHR
           CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
+
+! Test output SREF PoP > .01"
+          ID(8)=194;ID(9)=1
+          CALL GRIBIT(ID,RITEHD,P6CP01,GDIN,70,DEC)
+
           ID(8)=61;ID(9)=1
           CALL GRIBIT(ID,RITEHD,P06M,GDIN,70,DEC)
+         
         ENDIF
 
 ! 12-hr POP
@@ -1179,7 +1185,9 @@ INTERFACE
         REAL,    INTENT(OUT)   :: POP(:,:)
         REAL,    ALLOCATABLE   :: TMPPCP(:,:)
         LOGICAL, INTENT(IN)    :: VALIDPT(:,:)
+        INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
 
+      
         QPFMAX=0.40    ! QPF valuewhere raw PoP would be 75%
         RHexcess=60.0  ! RH above this can add to PoP and below will subtract
         adjAmount=30.0 ! amount of adjustment allowed
@@ -1189,6 +1197,7 @@ INTERFACE
 !  higher than the 12-hr pop at the same grid point.  Even it out if this occurs.
 !-------------------------------------------------------------------------------- 
       IM=GDIN%imax;JM=GDIN%jmax;IFHR=GDIN%FHR
+      IFHR6=IFHR-6
 
       print *,'Compute ',IAHR,' HR BUCKET    FHR=',IFHR 
 
@@ -1202,6 +1211,7 @@ INTERFACE
 
         WHERE (validpt .and. PCP10 .GT. PXCP10)
           TMPPCP=(PCP10+PXCP10)/2.      ! ERROR FOUND 09/26/13
+!          TMPPCP=(PCP01+PXCP01)/2.      
           PCP10  = TMPPCP
           PXCP10 = TMPPCP
         END WHERE
@@ -1237,6 +1247,7 @@ INTERFACE
 !    bullseyes from the model.   But since AK is less prone
 !    to model-generated convective bullseyes, and IC's are
 !    so important here, opted to give more weight to the SREF
+!    Using the Nested grid conus calculations  (jtm)
 
         if (gdin%region .eq. 'AK' .or. gdin%region .eq. 'AKRT' .or. gdin%region .eq. 'AK3' ) then
          IF (POPTMP .LT. 30.)  THEN
@@ -1248,7 +1259,6 @@ INTERFACE
         else 
         
          IF (IAHR.EQ.3) THEN
-          if (I.eq.90.and.J.eq.65) print *, 'POPTMP',POPTMP
           IF (BL .GT. 0.) THEN
             POP(I,J)=(POPTMP+PCP01(I,J))/2.
           ELSE
@@ -1268,7 +1278,9 @@ INTERFACE
         endif  !validpt check
        ENDDO
       ENDDO
-      print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(90,65), QPF(90,65),PCP01(90,65),PCP10(90,65),BLI(90,65)
+
+      print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(90,65), QPF(90,65),PCP01(90,65), &
+               PCP10(90,65),BLI(90,65)
       RETURN 
       END SUBROUTINE mkpop
 

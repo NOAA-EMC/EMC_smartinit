@@ -1,0 +1,34 @@
+DRIVER smartinit run CYC 06 fhr 0
+------------------------------------------------
+setup.sh - Utility to set PDY variables
+           This utility will output a file PDY in
+           the current working directory which can be
+           sourced in the parent script to set
+           PDY PDYm1-9
+------------------------------------------------
+History: Jul 27, 1998 - Implement new script.
+------------------------------------------------
+cycle var not set in J-Job
+SUBMIT RUN_ALL ak CYC 06 from 0 to 12
+------------------------------------------------
+setup.sh - Utility to set PDY variables
+           This utility will output a file PDY in
+           the current working directory which can be
+           sourced in the parent script to set
+           PDY PDYm1-9
+------------------------------------------------
+History: Jul 27, 1998 - Implement new script.
+------------------------------------------------
+cycle var not set in J-Job
+SUBMIT RUN_ALL hi CYC 06 from 0 to 12
+------------------------------------------------
+setup.sh - Utility to set PDY variables
+           This utility will output a file PDY in
+           the current working directory which can be
+           sourced in the parent script to set
+           PDY PDYm1-9
+------------------------------------------------
+History: Jul 27, 1998 - Implement new script.
+------------------------------------------------
+cycle var not set in J-Job
+SUBMIT RUN_ALL pr CYC 06 from 0 to 12
