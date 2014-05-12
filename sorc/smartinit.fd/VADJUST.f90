@@ -67,11 +67,11 @@
 !     CALCULATE THE VERTICAL VELOCITY DUE TO TOPOGRAPHIC EFFECTS (JTM)
            WTOPO=U(I,J)*DHDX+V(I,J)*DHDY
            PHI(I,J,1)=WTOPO
-!          TEST assume terrain following winds
-           PHI(I,J,1)=0.1
+!          TEST assume terrain following winds ??
+           PHI(I,J,1)=0.01
          else
-          PHI(I,J,1)=0.1
-          PHI(I,J,2)=0.1
+          PHI(I,J,1)=0.01
+          PHI(I,J,2)=0.01
         endif
       enddo
       enddo
@@ -169,8 +169,16 @@
           V(I,J)=(PHIJP1-PHIJM1)*DYI+V(I,J)
           diffi=UOLD-U(i,j)
           diffj=VOLD-V(i,j)
-          if (abs(diffi).gt.10.) U(I,J)=UOLD
-          if (abs(diffj).gt.10.) V(I,J)=VOLD
+          if (diffi.gt.10. .or. diffi.lt.-10.) then
+            if(diffi.gt.10) diffi=10
+            if(diffi.lt.-10) diffi=-10
+             U(I,J)=UOLD+diffi
+          endif
+          if (diffj.gt.10. .or. diffj.lt.-10.)  then
+            if(diffj.gt.10) diffj=10
+            if(diffj.lt.-10) diffj=-10
+            V(I,J)=VOLD+diffj
+          endif
        endif
       enddo
       enddo

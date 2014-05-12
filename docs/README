@@ -468,6 +468,8 @@ IMPLEMENTED ON MAY 6, 2014
   - all 8 surrounding points are valid.
   - also removed validpt check when solving Poisson equation for velocity potential
   - also set PHI = 0.1 over not validpts
+  - reduced W from terrain = phi2=0.01...this reduced impact
+    but is correct for terrain following input
 Produces a larger impact 
 
 

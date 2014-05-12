@@ -43,10 +43,10 @@ cd $DATA
 
 if [ $RUNTYP = dgex_cs ];then  # 06/18 UTC Cycle 
   export fhrstr=${fhrstr:-78}
-  export ENDHR=${ENDHR:-126}
+  export ENDHR=${ENDHR:-192}
 elif [ $RUNTYP = dgex_ak ];then  #00/12 UTC cycle
   export fhrstr=${fhrstr:-84}
-  export ENDHR=${ENDHR:-126}
+  export ENDHR=${ENDHR:-192}
 else 
 # 00/12 UTC CYCLE smartinit CONFIGURE
   export fhrstr=00

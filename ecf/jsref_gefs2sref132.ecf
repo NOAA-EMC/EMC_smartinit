@@ -4,8 +4,9 @@
 #BSUB -L /bin/ksh   
 #BSUB -q dev
 #BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
-#BSUB -R span[ptile=4]
-#BSUB -R affinity[core(4)]
+#BSUB -R span[ptile=11]
+#BSUB -R rusage[mem=2000]
+####BSUB -R affinity[core]
 #BSUB -n 11             
 #BSUB -W 3:00 
 #BSUB -P meso
@@ -29,7 +30,7 @@ export MALLOC_MMAP_MAX_=1024
 # 12-17-2013  Jeff McQueen NCEP/EMC
 #=====================================================================================
 # %include "/ecf/ecfnets/scripts/head.h"
-#NCO  set -x
+set -x
 
 # jtm lib loads
 export stutil=/hwrf/noscrub/soft/modulefiles
@@ -43,11 +44,11 @@ export envir=${envir:-para}
 nwdir=${nwdir:-/meso/save/${USER}}  # NCO: nwprod
 ${nwdir}/versions/smartinit.ver     # Set smartinit model ver if run from smartinit NETwork
 export SMVER=${model_ver}
-export SMVER="v3.2.4"  #TEST NEW SMARTINIT VER 3.2.4 
+export SMVER="v3.2.5"  #TEST NEW SMARTINIT VER 3.2.4 
 
 nwdir=${nwdir}/smartinit.${SMVER}  # NCO CHANGE to sref.v6....
 export utilscript=${utilscript:-/nwprod/util/ush}
-${utilscript}/setup.sh 
+#TEST sh ${utilscript}/setup.sh 
 
 # Determine cycle (NCO WILL SET)
 let HH=`date +%H`
@@ -57,6 +58,7 @@ elif [ $HH -le 21 ];then export cyc=${cyc:-12};
 else
   export cyc=${cyc:-18}
 fi
+#### export cyc=12   #TEST
 export cycle=t${cyc}z
 
 cd ${nwdir}    #NCO Will SET
@@ -66,6 +68,7 @@ export DATE=${PDY}
 
 if [ $HH -lt 05 ];then export DATE=$PDYm1;fi  #18 Z run if starts too late
 outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/para/sref.$DATE}  #NCO /com/sref/prod...
+mkdir -p $outd
 echo OUTD ${outd}
 
 #====================================================================
