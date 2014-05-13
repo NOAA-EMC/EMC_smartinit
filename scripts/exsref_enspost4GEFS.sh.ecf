@@ -13,6 +13,7 @@
 #####################################################
 #NCO set -x
 echo ENSPOST4GEFS `pwd`
+typeset -Z2 gefscyc cyc
 
 freq=$1
 #freq=3hrly
@@ -81,7 +82,7 @@ if [ $freq = "3hrly" ]; then
     ((ihr=ihr+interval))
 
 #   GENS pgrb file interval change after 126 hours     jtm
-    if [ $ihr -lt 126 ];then 
+    if [ $ihr -le 126 ];then 
       interval=03 
     else 
       interval=06
@@ -192,6 +193,9 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       fi  #jtm  Make sure file is available before doing an ls
 #      sleep 60
       waittime=`expr $waittime + 1`
+      if [ $waittime%10000 -eq 0 ];then
+      echo $waittime WAITING FOR ${COMIN}/${MODEL[$nf]}.t${gefscyc}z.pgrb${grid}.${MODEL_PAIR[$nf]}.f$HR 
+      fi
     done
 #   GENS pgrb file interval change after 126 hours     jtm
     if [ $HR -lt 126 ];then 
@@ -262,18 +266,22 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       if [ $HR -gt 126 ];then 
         int126=6
         if [ `expr $HR % $int126` -ne 0 -a $HR -lt $ENDHOUR ];then
-          ((HLST=HR-interval))
-          ((HNXT=HR+interval))
+          ((HRLST=HR-interval))
+          ((HRNXT=HR+interval))
+          ((HRAV1=HRLST-interval))
           echo "$nf Create intermediate SREF gens member file for hr $HR" \
-               " Using ${MODEL[nf]} ${MODEL_PAIR[nf]} fhrs $HRLST -> $HNXT"
+               " Using ${MODEL[nf]} ${MODEL_PAIR[nf]} fhrs $HRLST -> $HRNXT"
           echo FILE $srefmem
-
-          cat ${COMIN}/${srefmem}.f${HLST} ${COMIN}/${srefmem}.f${HNXT} > INGRIB
+          cat ${COMIN}/${srefmem}.f${HRLST}  ${COMIN}/${srefmem}.f${HRNXT} > INGRIB
           $CNVGRIB -g12 -p40 INGRIB INGRIB2
+
+# Create intermediate 6 hour average
           $WGRIB2 INGRIB2 | sort -t: -k4,4 -k5,5 -k6,6 -k3,3 | \
-            $WGRIB2 -i INGRIB2 -set_grib_type c3 -fcst_ave 6hr \
-            r_gribawips.${PAIR[nf]}.f${HR}.grb2
-          $CNVGRIB -g21 r_gribawips.${PAIR[nf]}.f${HR}.grb2 \ 
+            $WGRIB2 -i INGRIB2 -set_grib_type c3 -fcst_ave 6hr TMPGRIB2
+# Rename 6hr avg header time range
+          $WGRIB2 TMPGRIB2 -set_ave "$HRAV1-$HR hour acc fcst" r_gribawips.${PAIR[nf]}.f${HR}.grb2 
+
+          $CNVGRIB -g21 r_gribawips.${PAIR[nf]}.f${HR}.grb2 \
             r_gribawips.${PAIR[nf]}.f${HR}
           ((timestep=timestep+1))
         fi
@@ -316,6 +324,8 @@ cat <<paramEOF >input
  &end
 paramEOF
 
+echo "FILENAME INPUT for sref_ens_gen"
+cat filename
 ###############################################
 # Part III: decode, calculate and write to grib
 ###############################################

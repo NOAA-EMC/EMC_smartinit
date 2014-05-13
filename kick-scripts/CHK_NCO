@@ -11,15 +11,15 @@ typeset -Z2 cyc ffhr
 # RUNTYP for GRID bsmart: conusnest, alaskanest,hawaiinest,priconest
 # RUNTYP for GRID bgrd3d:
 #===============================================================
-export RUNTYP=conus
+export RUNTYP=${1:-conus}
 GRID=smart        #smart, bgrd3d, bsmart
 mdl=nam
 
-yymmdd=20140331
-export cyc=06       
+yymmdd=20140424
+export cyc=00       
 
 export ffhr=00     # Starting forecast hour
-export ENDHRS=00   # Ending forecast hour
+export ENDHRS=12   # Ending forecast hour
 INCR=03            # Forecast hour increment
 fhrstr=$ffhr       # hr to start comparisons
 
@@ -29,7 +29,7 @@ if [ $cyc -eq 06 -o $cyc -eq 18 ];then let ioff=6;fi
 #===============================================================
 # location of smartinit files
 #===============================================================
-ncodir=/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
+ncodir=/ptmpp1/Jeff.McQueen/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
 # devdir=/ptmpp1/${USER}/smart${RUNTYP}/${mdl}.${yymmdd}     #EMC PARA 
 devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}     #EMC PARA 
 
@@ -195,6 +195,7 @@ while [ $ffhr -le $ENDHRS ];do
   done
   echo
   let ffhr=$ffhr+$INCR 
+  if [ $ffhr -lt 10 ];then ffhr="0"$ffhr;fi
 done
 
 rm -f nco-prcp* nco-temp* nco-f* 

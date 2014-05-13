@@ -504,8 +504,8 @@ INTERFACE
           CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
 
 ! Test output SREF PoP > .01"
-          ID(8)=194;ID(9)=1
-          CALL GRIBIT(ID,RITEHD,P6CP01,GDIN,70,DEC)
+!          ID(8)=194;ID(9)=1
+!          CALL GRIBIT(ID,RITEHD,P6CP01,GDIN,70,DEC)
 
           ID(8)=61;ID(9)=1
           CALL GRIBIT(ID,RITEHD,P06M,GDIN,70,DEC)
@@ -820,9 +820,9 @@ INTERFACE
       ID(8)=250;ID(9)=1
       DEC=3.0
       CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
-      ID(2)=2
-      ID(8)=209;ID(9)=1
-      DEC=1.0
+!      ID(2)=2
+!      ID(8)=209;ID(9)=1
+!      DEC=1.0
 !NMXL      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
 
 !=================================================
@@ -1211,7 +1211,6 @@ INTERFACE
 
         WHERE (validpt .and. PCP10 .GT. PXCP10)
           TMPPCP=(PCP10+PXCP10)/2.      ! ERROR FOUND 09/26/13
-!          TMPPCP=(PCP01+PXCP01)/2.      
           PCP10  = TMPPCP
           PXCP10 = TMPPCP
         END WHERE

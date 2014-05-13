@@ -119,7 +119,7 @@ while [ $iline -le $linemax ];do
     fi
   fi
 done
-typeset -Z2 srefcyc gefscyc pcphrl
+typeset -Z2 srefcyc gefscyc 
 text=".tm00"
 if [ $mdl = "hiresw" ];then 
   inest=1
@@ -170,25 +170,15 @@ fi
 #   ogrd : output grib number for prdgen and smartinit codes 
 #          (eg: 197,196,195,198,184)
 #--------------------------------------------------------------------------
-eco GTYP $gtyp OGRD $ogrd
+echo GTYP $gtyp OGRD $ogrd
 if [ $gtyp -ne $ogrd ];then
   case $gtyp in
 #   kpds        1   2-9  10 11 12 13    14
-      3) grid="255 $grid  0 64 0 25000 25000";;
-      5) grid="255 $grid  0 64 0 25000 25000";;
+      3) grid="255 $grid  0 64 25000 25000";;
+      5) grid="255 $grid  0 64 25000 25000";;
       1) grid="255 $grid  0 64 2500 2500";;
   esac
 fi
-o GTYP $gtyp OGRD $ogrd
-if [ $gtyp -ne $ogrd ];then
-  case $gtyp in
-#   kpds        1   2-9  10 11 12 13    14
-      3) grid="255 $grid  0 64 0 25000 25000";;
-      5) grid="255 $grid  0 64 0 25000 25000";;
-      1) grid="255 $grid  0 64 2500 2500";;
-  esac
-fi
-
 
 # Set NDFD output grid topo and land mask filenames
 maskpre=${mdl}_smartmask${outreg}
@@ -210,6 +200,8 @@ echo
 #  Set Defaults pcp hours and frequencies
 let pcphr=ffhr+3
 let pcphrl=ffhr+3
+if [ $pcphrl -lt 10 ];then pcphrl="0"$pcphrl;fi
+if [ $pcphrl -lt 100 ];then pcphrl="0"$pcphrl;fi
 let pcphr12=pcphr-12
 let pcphr6=pcphr-6
 let pcphr3=pcphr-3
@@ -223,7 +215,26 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
 # Get the sref precip fields that we need
   if [ ! -s SREFPROB -o $rg = gm -o $rg = dgx ]; then
-    cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+    waitsref=0
+    waitend=1800
+    while [ $waitsref -le $waitend ];do
+      echo COMIN_GEFS $COMIN_GEFS
+      if [ -s $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly ];then 
+        echo "SREF PROB FILE FOUND  CYC=" $gefscyc  GRID= $sgrb
+        sleep 60
+        cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+        break
+      else
+        sleep 60
+        ((waitsref=waitsref+60))
+         echo `date +%T` "WAITING For SREF Prob File"  CYC= $gefscyc  GRID= $sgrb $waitsref
+        if [ $waitsref -gt $waitend ];then 
+           echo GEFSCYC $gefscyc GRID $sgrib
+           echo "SREF PROB FILE NOT AVAILABLE...RUN WITHOUT"
+           break
+        fi
+      fi
+    done
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   fi
@@ -233,6 +244,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
   if [ $ffhr -lt 6 ]; then pcphr6=;pcphr12=;fi
   if [ $ffhr -lt 12 ]; then pcphr12=;fi
   grbpre="2 0 0 0 0"
+
+set -x
 
   for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 #   prob of pcp > 0.01
@@ -260,6 +273,7 @@ if [ $ffhr -gt ${fhrstr} ]; then
     let IP=IP+1
     mv dump srefpcp$IP
   done
+set +x
 
   cat srefpcp1 srefpcp2 srefpcp3 srefpcp4 srefpcp5 > srefallpcp
   if [ $ffhr -ge 6 ]; then
@@ -269,8 +283,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
     cat srefpcp11 srefpcp12 srefpcp13 srefpcp14 srefpcp15 >> srefallpcp
   fi
 
-  $utilexec/copygb -g "$grid" -x srefallpcp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
-  $utilexec/grbindex srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
+  $utilexec/copygb -g "$grid" -x srefallpcp srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl}
+  $utilexec/grbindex srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
 
 fi #fhr -ge 0
 
@@ -283,7 +297,6 @@ if [ $rg = dgx ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
 #===========================================================
-set -x
 for fhr in $hours; do
   rm -f *out${fhr}
   mk3p=0;mk6p=0;mk12p=0
@@ -581,8 +594,8 @@ EOF5
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
-    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
-    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} SREFPCP
+    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl} SREFPCPi
     if [ -s MAXMIN${fhr1}.tm00 ];then
       cp MAXMIN${fhr2}.tm00 MAXMIN2
       cp MAXMIN${fhr1}.tm00 MAXMIN1

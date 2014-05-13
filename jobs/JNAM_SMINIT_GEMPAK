@@ -41,7 +41,7 @@ then
   package_name=${package_name:-nam}
   . /${group_name}/save/${LOGNAME}/${package_name}/nwprod/parm/${package_name}_para_config
   export userid=${userid:-$LOGNAME}
-  export DATA_IN=${DATA_IN:-/ptmp/$userid}
+  export DATA_IN=${DATA_IN:-/ptmpp1/$userid}
 fi
 
 export PS4='$SECONDS + '

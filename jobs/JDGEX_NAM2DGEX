@@ -29,6 +29,13 @@ export RUN=dgex
 export mdl=$NET
 export RUNTYP=${RUNTYP:-dgex_cs}
 
+########################################################### 
+# obtain unique process id (pid) and make temp directories
+# Note: ctl member needs to be run only once and can be used 
+# for both NMM and ARW cores!
+###########################################################
+export pid=$$
+
 #####################################################################################
 # Run config file to get input parameters
 # This config file should define the following variables
@@ -49,6 +56,8 @@ if [ "$RUN_ENVIR" != prod ];then ### For Developers, "group_name" is passed from
   export HOMEdng=/meso/save/${USER}/smartinit.${model_ver}
   export jlogfile=${jlogfile:-/ptmpp1/${USER}/com/logs/jlogfiles/jlogfile.${job}.${pid}}
   export RM_TMPDIR=NO
+  mkdir -p $COM_OUT
+  mkdir -p /ptmpp1/${USER}/com/logs/jlogfiles/
 fi
 
 ###############################################################
@@ -62,12 +71,6 @@ fi
 echo `date` $0 `date -u` begin
 export PS4='$SECONDS + '
 
-########################################################### 
-# obtain unique process id (pid) and make temp directories
-# Note: ctl member needs to be run only once and can be used 
-# for both NMM and ARW cores!
-###########################################################
-export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd1}
 
 export DATA=$DATA_IN/${job}.${pid}
@@ -123,6 +126,7 @@ sh $utilscript/setup.sh
 # Run setpdy and initialize PDY variables
 sh $utilscript/setpdy.sh
 . ${DATA}/PDY
+export DATE=$PDY
 
 #############################################
 # COMIN and COMOUT
@@ -133,7 +137,6 @@ export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 export cyc MEMBER
 export CYC=${cyc}
-export DATE=$PDY
 
 case $cyc in 06|18 )
   echo "Begin  JNAM_NAM2DGEX for cyc" $CYC 

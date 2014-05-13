@@ -1,5 +1,4 @@
 #!/bin/ksh
-set -x 
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
@@ -41,6 +40,8 @@ INCR=03            # Forecast hour increment
 export NET=$mdl 
 export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
+WALLCLK="2:00"
+case $RUNTYP in dgex_cs|dgex_ak)WALLCLK="3:00";;esac
 
 #================END User Sets=======================================
 
@@ -63,8 +64,12 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export NET=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export RUN=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export DATA=/${DATA_IN}/${job}"        >>$wkdir/dng_para_config${RUNTYP}
-  cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
-#TEST-GFS  cat $cfgdir/smgfs_para_config >>$wkdir/dng_para_config${RUNTYP}
+# case $RUNTYP in 
+#  dgex_ak)
+#  cat $cfgdir/dgex_para_config >>$wkdir/dng_para_config${RUNTYP};;    #FOR TESTING WITH JUN's FILES
+#   *)  cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP};;
+#esac
+   cat $cfgdir/smart_para_config >>$wkdir/dng_para_config${RUNTYP}
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
   . ${wkdir}/dng_para_config${RUNTYP} 
 
@@ -73,7 +78,7 @@ while [ $ffhr -le $ENDHRS ];do
   echo "#BSUB -oo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -eo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -n 1"                >>${wkdir}/bjobcards-dev${RUNTYP}
-  echo "#BSUB -W 2:00"             >>${wkdir}/bjobcards-dev${RUNTYP}
+  echo "#BSUB -W ${WALLCLK}"       >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -P RTMA"             >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -q dev"              >>${wkdir}/bjobcards-dev${RUNTYP}
   echo "#BSUB -R "span[ptile=1]""    >>${wkdir}/bjobcards-dev${RUNTYP}
@@ -84,7 +89,7 @@ while [ $ffhr -le $ENDHRS ];do
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`
-  echo  SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
+  echo  $MDL SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
 
   bsub < J${MDL}_SMINIT.${RUNTYP}
 

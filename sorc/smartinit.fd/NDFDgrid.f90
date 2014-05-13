@@ -333,7 +333,9 @@
 120     continue
 
 !       Adjust winds to topography
+        print *,'UNEW BEFORE ',MINVAL(UNEW),MAXVAL(UNEW)
         call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+        print *,'UNEW AFTER ',MINVAL(UNEW),MAXVAL(UNEW)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
