@@ -227,7 +227,7 @@ if [ $ffhr -gt ${fhrstr} ]; then
       else
         sleep 60
         ((waitsref=waitsref+60))
-         echo `date +%T` "WAITING For SREF Prob File"  CYC= $gefscyc  GRID= $sgrb
+         echo `date +%T` "WAITING For SREF Prob File"  CYC= $gefscyc  GRID= $sgrb $waitsref
         if [ $waitsref -gt $waitend ];then 
            echo GEFSCYC $gefscyc GRID $sgrib
            echo "SREF PROB FILE NOT AVAILABLE...RUN WITHOUT"

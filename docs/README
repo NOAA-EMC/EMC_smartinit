@@ -472,4 +472,19 @@ IMPLEMENTED ON MAY 6, 2014
     but is correct for terrain following input
 Produces a larger impact 
 
+05/09/2014
+* GEFS2SREF jobs/scripts/sorc
+  - Fixed thru 99 hours
+  - filename and input hours cut off at 2 digits to sref_ens_gen
+  - Fixed sref 03/09 cycle runs...-Z2 digit needed
+  - After 126 hours...do not subtract precip diffs
+  - Changed 3 hr average calculation for intermediate sref gefs files
+     using wgrib2 to change header eg:  -set_ave "3-9 hour acc fcst"
+  - Turned off gefs2sref132.ecf --> will use jun's combined gefs2sref system
+* ush/dgex_sminit.sh
+  - Addex check for input SREF/GEFS prob file before running dgex
 
+05/13/2014
+* VADJUST.f90
+  - Set PHI values around validpt and domain edge boundaries
+  - Set HTOPO if not validpt or at domain edge
