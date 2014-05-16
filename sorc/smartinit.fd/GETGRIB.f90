@@ -134,11 +134,21 @@
            LUGS6=11;LUGS6i=12
            LUGP3=15;  LUGP3i=16
            LUGS3=17;  LUGS3i=18
+         elseif (trim(CORE) .EQ. 'GFS' .and. LHR6) THEN
+           LUGP3=15; LUGP3i=16
+           LUGS3=17; LUGS3i=18
+           LUGP6=19; LUGP6i=20
+           LUGS6=21; LUGS6i=22
+           IF (trim(CORE) .EQ. 'GFS' .and. LHR12) THEN
+             LUGP12=23; LUGP12i=24
+           ENDIF
          else
            LUGP6=15;LUGP6i=16
            LUGS6=17;LUGS6i=18
          endif
-         LUGP12=19;LUGP12i=20
+         IF (trim(CORE).NE.'GFS') THEN
+           LUGP12=19;LUGP12i=20
+         ENDIF
          LHR9=.FALSE.   ! nests have 3 hour precip in std parent grid (01-28-13, JTM)
        else
          IF(LCYCON) THEN 
@@ -163,6 +173,7 @@
       endif  !lanl
 
       print *, 'IFHR',IFHR,'LHR3',LHR3,'LHR6',LHR6,'LHR12',LHR12
+      print *, 'LUGP12= ',LUGP12, 'LUGP12I= ',LUGP12I
       P06M=0.0;S06M=0.0; P12M=0.0
 
 !     SET MAX/MIN FILE UNIT NUMBERS
@@ -171,6 +182,7 @@
       IF(LHR12) THEN
        LUGT1=23
        IF (.not.LCYCON .or. lnest) LUGT1=21
+       IF (trim(CORE) .EQ. 'GFS') LUGT1=25
        LUGT2=LUGT1+1
        LUGT3=LUGT1+2
        LUGT4=LUGT1+3
@@ -190,6 +202,9 @@
       ELSE IF(LHR6.OR.LHR9) THEN
 !      However Off-Hour cycle runs do not have 6 hour buckets
          LUGT1=19; LUGT2=20; LUGT1I=21; LUGT2I=22
+         IF(trim(CORE) .EQ. 'GFS') THEN
+           LUGT1=23;LUGT2=24; LUGT1I=25; LUGT2I=26
+         ENDIF
        print *,'======================================================='
        print *, 'Read previous 2 hrs of  MAX,MIN TEMP', IFHR, lugt1,lugt2
        print *, 'Read  3 hr precip from unit',lugp3,lugs3

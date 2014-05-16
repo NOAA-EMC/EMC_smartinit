@@ -355,6 +355,8 @@
 
       KPDS(5)=61
       print *, 'writing precip', KPDS(5),KPDS(14),KPDS(15),LUGB5,MAXVAL(APCPOUT)
+      print *, 'writing precip sum or diff of apcp2(1000) and apcp1(1000)',apcp2(1000),apcp1(1000)
+      print *, 'writing precip apcpout(1000)',APCPOUT(1000)
       WRITE(FNAME(6:7),FMT='(I2)')LUGB5
       CALL BAOPEN(LUGB5,FNAME,IRETGB)
       CALL PUTGB(LUGB5,NUMVAL,KPDS,KGDS,MASK,APCPOUT,IRET)
