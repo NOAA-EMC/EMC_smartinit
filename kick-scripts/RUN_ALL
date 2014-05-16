@@ -40,7 +40,7 @@ INCR=03            # Forecast hour increment
 export NET=$mdl 
 export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
-WALLCLK="2:00"
+WALLCLK="3:00"  #TEST
 case $RUNTYP in dgex_cs|dgex_ak)WALLCLK="3:00";;esac
 
 #================END User Sets=======================================
@@ -89,7 +89,7 @@ while [ $ffhr -le $ENDHRS ];do
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`
-  echo  $MDL SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
+  echo  `date +%T` $MDL SMINIT JOB SUBMITTED:  $RUNTYP CYCLE $cyc FFHR $ffhr
 
   bsub < J${MDL}_SMINIT.${RUNTYP}
 

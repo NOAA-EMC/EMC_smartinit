@@ -2,7 +2,7 @@
 #BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.guamnmmb-00
 #BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.guamnmmb-00
 #BSUB -n 1
-#BSUB -W 2:00
+#BSUB -W 3:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]

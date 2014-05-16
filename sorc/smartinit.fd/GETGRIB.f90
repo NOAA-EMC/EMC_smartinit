@@ -81,7 +81,9 @@
 
       FHR=GDIN%FHR;IFHR=FHR;CYC=GDIN%CYC;LNEST=GDIN%LNEST;INHRFRQ=GDIN%INHRFRQ
       REGION=GDIN%REGION;IFHRSTR=GDIN%IFHRSTR
-      print *, 'REGION=', GDIN%REGION, GDIN%IFHRSTR
+      CORE=GDIN%CORE        !arw or nmmb for hiresw runs or dgex
+      LHIRESW=GDIN%LHIRESW  !For hiresw runs
+      print *, 'CORE',CORE, 'REGION=', GDIN%REGION, GDIN%IFHRSTR
       IF (IFHR.EQ.IFHRSTR) THEN
         LANL=.TRUE.
       ELSE
@@ -103,8 +105,6 @@
 !    MAX/MIN 12 hrs   prev 11 hrs        prev 11 hrs
 !----------------------------------------------------------------
 
-      CORE=GDIN%CORE  !arw or nmmb for hiresw runs
-      LHIRESW=GDIN%LHIRESW  !For hiresw runs
       IF (CYC.EQ.12.OR.CYC.EQ.00) LCYCON=.TRUE.
 
 !     Set full, sref and special precip file unit numbers
@@ -129,7 +129,7 @@
 !     Set precip unit numbers for nests
        IF (lnest) THEN
 !        DGEX std file has 3 or  6 hr precip only 
-         if (trim(REGION) .EQ. 'DGX'.and. LHR6) THEN
+         if (trim(CORE) .EQ. 'dgx'.and. LHR6) THEN
            LUGP6=11;LUGP6i=12
            LUGS6=11;LUGS6i=12
            LUGP3=15;  LUGP3i=16
@@ -193,7 +193,7 @@
        print *,'======================================================='
        print *, 'Read previous 2 hrs of  MAX,MIN TEMP', IFHR, lugt1,lugt2
        print *, 'Read  3 hr precip from unit',lugp3,lugs3
-       if(lhr6)  print *,'Read 6 hr precip from unit',lugp6,lugs6
+       if(lhr6) print *,'Read 6 hr precip from unit',lugp6,lugs6
        print *,'======================================================='
 
       ELSE IF(LHR3) THEN

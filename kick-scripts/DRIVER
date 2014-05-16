@@ -46,10 +46,10 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
 for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
-  export ENDHRS=12
+  export ENDHRS=84
   export mdl=nam
-  case  $RUNTYP in guamarw|guamnmmb) export mdl=hiresw;; 
-                       conusnest2p5) export ENDHRS=36;; 
+  case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=48;export mdl=hiresw;; 
+               aknest3|conusnest2p5) export ENDHRS=60;; 
                                dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
@@ -69,8 +69,9 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
 
 # Create and submit JNAM_SMINIT job
 
-  echo SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
+
+  echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
   mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
-  ${kickd}/RUN_ALL >/stmpp1/$USER/${modeld}.${model_ver}/${cyc}/smout-${RUNTYP} 2>&1 &
+  ${kickd}/RUN_ALL >/stmpp1/$USER/${modeld}.${model_ver}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done

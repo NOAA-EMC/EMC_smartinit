@@ -45,15 +45,6 @@
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
-# Define core (nmmb, arw, nems) needed for hiresw veg initialization
-icore=`echo $RUNTYP|awk '{ print( index($0,"nmmb") )}' `
-if [ $icore -eq 0 ];then 
-  icore=`echo $RUNTYP|awk '{ print( index($0,"arw") )}' `
-fi
-core=nems
-if [ $icore -gt 0 ];then
-  core=`echo $RUNTYP |cut -c $icore-`   
-fi
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
@@ -121,6 +112,16 @@ while [ $iline -le $linemax ];do
 done
 typeset -Z2 srefcyc gefscyc 
 text=".tm00"
+
+# Define core (nmmb, arw, nems) needed for hiresw veg initialization
+core=$rg
+icore=`echo $RUNTYP|awk '{ print( index($0,"nmmb") )}' `
+if [ $icore -eq 0 ];then 
+  icore=`echo $RUNTYP|awk '{ print( index($0,"arw") )}' `
+fi
+if [ $icore -gt 0 ];then
+  core=`echo $RUNTYP |cut -c $icore-`   
+fi
 if [ $mdl = "hiresw" ];then 
   inest=1
   text=;

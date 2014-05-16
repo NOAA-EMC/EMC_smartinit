@@ -7,8 +7,8 @@
 #BSUB -R span[ptile=11]
 #BSUB -R rusage[mem=2000]
 ###BSUB -R "affinity[core:distribute=balance]"
-#BSUB -n 43             
-#BSUB -W 1:30 
+#BSUB -n 45             
+#BSUB -W 2:30 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared
@@ -78,7 +78,7 @@ export iperstr=01
 export iperend=20
 
 export STRHOUR=00
-export ENDHOUR=126    
+export ENDHOUR=132    
 #  Beyond 126 hours, GEFS output file interval changes from 3 to 6       
 export INCHOUR=3
 

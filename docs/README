@@ -488,3 +488,8 @@ Produces a larger impact
 * VADJUST.f90
   - Set PHI values around validpt and domain edge boundaries
   - Set HTOPO if not validpt or at domain edge
+
+05/15/2014
+* smartinit.fd/GETGRIB.f90, ush/dgex_smartinit.sh
+  - Fixed reads for 3/6 hour precip
+  - Passing core to determine if dgex file
