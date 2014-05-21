@@ -46,10 +46,10 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 
 for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
-  export ENDHRS=84
+  export ENDHRS=12
   export mdl=nam
-  case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=48;export mdl=hiresw;; 
-               aknest3|conusnest2p5) export ENDHRS=60;; 
+  case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
+               aknest3|conusnest2p5) export ENDHRS=36;; 
                                dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  

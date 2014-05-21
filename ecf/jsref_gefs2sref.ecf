@@ -7,8 +7,8 @@
 #BSUB -R span[ptile=11]
 #BSUB -R rusage[mem=2000]
 ###BSUB -R "affinity[core:distribute=balance]"
-#BSUB -n 45             
-#BSUB -W 2:30 
+#BSUB -n 43             
+#BSUB -W 2:00 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared
@@ -59,7 +59,6 @@ else
   export cyc=${cyc:-18}
 fi
 
-
 export cycle=t${cyc}z
 
 cd ${nwdir}     #NCO to set
@@ -78,7 +77,7 @@ export iperstr=01
 export iperend=20
 
 export STRHOUR=00
-export ENDHOUR=132    
+export ENDHOUR=126    
 #  Beyond 126 hours, GEFS output file interval changes from 3 to 6       
 export INCHOUR=3
 
@@ -89,12 +88,12 @@ export LENGTH=`expr ${ENDHOUR} - $STRHOUR`
 #  To execute the SREF Post Proc. Step must line up to the number job  submissions
 #  Set number of tasks needed: (e.g.: 90/3 +1=31)
 if [ $ENDHOUR -gt 126 ];then
-  export TOTAL_COUNT=`expr $LENGTH / $INCR` 
-  export END_COUNT=`expr expr $($ENDHOUR - 132) / 6 `
-  export TOTAL_COUNT=`expr $TOTAL_COUNT + $END_COUNT + 1`
+  export TOTAL_COUNT=`expr $(expr $ENDHOUR - $STRHOUR) / $INCHOUR `
+  export TOTAL_COUNT=`expr $TOTAL_COUNT + 1`
 else
   export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 fi
+
 echo TOTAL_COUNT TASKS $TOTAL_COUNT
 
 # versions file for SREF model $model_ver

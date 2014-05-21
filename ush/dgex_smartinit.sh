@@ -39,8 +39,8 @@
 # guamnmmb     :  GEFS-GRID???   HRW-GRID=guamnmmb.t00z.wrfprs NDFD-GRD=199
 # guamarw      :  GEFS-GRID???   HRW-GRID=guamarw.t00z.wrfprs  NDFD-GRD=199
 
-# dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=184
-# dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
+# dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=197
+# dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=198
 #======================================================================
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
@@ -185,7 +185,7 @@ fi
 maskpre=${mdl}_smartmask${outreg}
 topopre=${mdl}_smarttopo${outreg}
 ext=grb
-case $RUNTYP in conus|conusnest) ext=dat;; esac
+case $RUNTYP in dgex_cs|conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
 
@@ -719,11 +719,9 @@ EOF5
 #========================================================
   hrlyfhr=12  # forecast hour to output hourly files to
   case $RUNTYP in
-   conus|conusnest) RGIN=CS;;
+   conus|conusnest|dgex_cs) RGIN=CS;;
       conusnest2p5) RGIN=CS2P;hrlyfhr=36;;
         ak_rtmages) RGIN=AKRT;;
-           dgex_cs) RGIN=CS2P;;
-           dgex_ak) RGIN=AK3;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 

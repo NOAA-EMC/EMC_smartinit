@@ -1,6 +1,6 @@
-#BSUB -J DNG12.aknest3-27
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.aknest3-27
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.aknest3-27
+#BSUB -J DNG06.aknest3-36
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/06/list/oDNG06.aknest3-36
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/06/list/oDNG06.aknest3-36
 #BSUB -n 1
 #BSUB -W 3:00
 #BSUB -P RTMA
