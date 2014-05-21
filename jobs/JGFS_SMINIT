@@ -6,7 +6,7 @@
 #BSUB -oo gfs_sminit.out.%J 
 #BSUB -eo gfs_sminit.out.%J
 #BSUB -J sminitguam_test      
-#BSUB -q dev
+#BSUB -q debug
 #BSUB -W 00:15 
 #BSUB -n 64 
 #BSUB -R span[ptile=8]
@@ -47,7 +47,7 @@ export MP_LABELIO=yes
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
-cyc=00
+cyc=06
 envir=prod
 model_ver=gfs
 RUNTYP=guamnest
@@ -122,7 +122,7 @@ export DATA=${DATA:-$DATA_IN/gfsdng_new.${pid}}
 mkdir -p $DATA
 cd $DATA
 
-export PDY=20140512
+export PDY=20140518
 export cycle=t${cyc}z
 
 ####################################
@@ -210,6 +210,7 @@ cp ${PARMdng}/SMINIT.CTL $DATA
 ##############################################
 export SHOUR=00
 export EHOUR=192
+export EHOUR=24
 export EHOUR_HRLY=12
 export FHINC_HRLY=01
 export FHINC=03
