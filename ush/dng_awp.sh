@@ -11,6 +11,7 @@
 #  outreg  :  output file region name (eg: conus,ak,pr,hi,conus2p5,ak3
 #=======================================================================
 outreg=$1    # mdlgrd used for guam to distinguish arw/nmm
+ihindex=0
 case $cyc in 
   00|12) cyctp=on;;
   06|18) cyctp=off;;
@@ -21,10 +22,11 @@ echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $
 
    
 # Create HAINES INDEX GRIB FILE
-${utilexec}/wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
+if [ $ihindex -eq 1 ];then
+ ${utilexec}/wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
   ${utilexec}/wgrib -i -grib  MESO${RGIN}${fhr}.tm00 -o hindex.t${cyc}z.smart${outreg}${fhr}.tm00
-
-$utilexec/cnvgrib -g12 -p40 hindex.t${cyc}z.smart${outreg}${fhr}.tm00  hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+ $utilexec/cnvgrib -g12 -p40 hindex.t${cyc}z.smart${outreg}${fhr}.tm00  hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+fi
 $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 
 # Processing grids for AWIPS
@@ -53,9 +55,11 @@ else
 fi
 
 mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
-mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00
 mv ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+if [ $ihindex -eq 1 ];then
+ mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00
+ mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+fi
 
 # Move grib2 awips file to pcom
 if [ $outreg = ak3 ];then

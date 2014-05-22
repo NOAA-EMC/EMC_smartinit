@@ -198,11 +198,11 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
       fi
     done
 #   GENS pgrb file interval change after 126 hours     jtm
-    if [ $HR -lt 126 ];then 
+#    if [ $HR -lt 126 ];then 
       interval=03 
-    else 
-      interval=06
-    fi
+#    else 
+#      interval=06
+#    fi
     HR=`expr $HR + $interval`
     if [ $HR -lt 10 ];then HR="0"$HR;fi
    done
@@ -283,7 +283,6 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
 
           $CNVGRIB -g21 r_gribawips.${PAIR[nf]}.f${HR}.grb2 \
             r_gribawips.${PAIR[nf]}.f${HR}
-          ((timestep=timestep+1))
         fi
       fi
 
@@ -379,11 +378,11 @@ while [ $HR -le $ENDHOUR ];do
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p75_$freq.f$HR
   rm -f $COMOUT/sref.t${gefscyc}z.pgrb${grid}.p90_$freq.f$HR
 # GENS pgrb file interval change after 126 hours     jtm
-  if [ $HR -lt 126 ];then 
+#  if [ $HR -lt 126 ];then 
     interval=03 
-   else 
-    interval=06
-  fi
+#   else 
+#    interval=06
+#  fi
   HR=`expr $HR + $interval`
   if [ $HR -lt 10 ];then HR="0"$HR;fi
 done

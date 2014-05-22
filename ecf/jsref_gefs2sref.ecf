@@ -8,7 +8,7 @@
 #BSUB -R rusage[mem=2000]
 ###BSUB -R "affinity[core:distribute=balance]"
 #BSUB -n 43             
-#BSUB -W 1:30 
+#BSUB -W 2:00 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared
@@ -89,12 +89,12 @@ export LENGTH=`expr ${ENDHOUR} - $STRHOUR`
 #  To execute the SREF Post Proc. Step must line up to the number job  submissions
 #  Set number of tasks needed: (e.g.: 90/3 +1=31)
 if [ $ENDHOUR -gt 126 ];then
-  export TOTAL_COUNT=`expr $LENGTH / $INCR` 
-  export END_COUNT=`expr expr $($ENDHOUR - 132) / 6 `
-  export TOTAL_COUNT=`expr $TOTAL_COUNT + $END_COUNT + 1`
+  export TOTAL_COUNT=`expr $(expr $ENDHOUR - $STRHOUR) / $INCHOUR `
+  export TOTAL_COUNT=`expr $TOTAL_COUNT + 1`
 else
   export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 fi
+
 echo TOTAL_COUNT TASKS $TOTAL_COUNT
 
 # versions file for SREF model $model_ver

@@ -62,7 +62,7 @@ cd $DATA
          ak) export RUNTYP=alaskanest;;
       esac
   fi
-
+  echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
   ${SMINIT_SSH:-$USHdng/smartinit.sh}
 
 set -x

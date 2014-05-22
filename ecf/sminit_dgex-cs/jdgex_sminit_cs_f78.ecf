@@ -1,6 +1,6 @@
-#BSUB -J %E%dgex_sminit_cs_fHH_%CYC%
-#BSUB -o /com/output/%ENVIR%/today/dgex_sminit_cs_fHH_%CYC%.o%J
-#BSUB -e /com/output/%ENVIR%/today/dgex_sminit_cs_fHH_%CYC%.o%J
+#BSUB -J %E%dgex_sminit_cs_f78_%CYC%
+#BSUB -o /com/output/%ENVIR%/today/dgex_sminit_cs_f78_%CYC%.o%J
+#BSUB -e /com/output/%ENVIR%/today/dgex_sminit_cs_f78_%CYC%.o%J
 #BSUB -L /bin/sh
 #BSUB -q prod_shared
 #BSUB -W 00:45
@@ -9,7 +9,7 @@
 #BSUB -n 1
 ##BSUB -R span[ptile=1]
 #BSUB -R affinity[core]
-#BSUB -R rusage[mem=5000]
+#BSUB -R rusage[mem=2000]
 
 
 %include <head.h>
@@ -17,10 +17,10 @@
 
 # EXPORT list here
 export envir=%ENVIR%
-export job=dgex_sminit_cs_fHH_%CYC%
+export job=dgex_sminit_cs_f78_%CYC%
 export cyc=%CYC%
-export ffhr=HH
-#RUNTYPE = dgex_ak for 00/12 UTC dgex cycle  ffhr=78  to 192 fhrs
+export ffhr=78
+#RUNTYPE = dgex_ak for 00/12 UTC dgex cycle  ffhr=84  to 192 fhrs
 #          dgex_cs for 06/18 UTC             ffhr=78  t0 192 fhrs
 export RUNTYP=%RUNTYP%   
 

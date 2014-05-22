@@ -1,18 +1,36 @@
 smartinit.v3.2.4
 Q3FY14 Downscaling Implementation
 
+- Hourly output for CONUS2p5 from 0-36 hours (wave modeling request)
+- Improved diagnostic wind model to account for terrain
+
 ===================================================================================
 1.  DGEX DOWN-SCALING (NET=DGEX, RUN=DGEX)
+
+NOTE:  DGEX smartinit depends on completion of SREFTOGEFS SREFPROB file thru 192 hours 
+       from SREF Network run
+       NAM downscaling SREFPROB file needed thru 84 hours.
+
+        Final SREF GENS product (mean, spread, prob) files on SREF GRID needed for NAM/dgex
+...  sref.yyyymmdd/ensprod_gefs/{CYC}
+  sref.t{CYC}z.pgrb{GRD}.{prbtyp}_3hrly.grib (or grib2)
+where
+  prbtyp=mean,max,min,mod,spread,prob,p10,p25,p50,p75 or p90
+  5 MB/file
+
 ===================================================================================
 
 1A. Additional SREF and DGEX post-processing
 
-Additional jobs are needed to extend SREF GEFS look-alike files from 90-192 forecast hours.
+Additional jobs are needed to extend SREF GEFS look-alike files from 90 to 192 forecast hours.
 This requires additional tasks for MPMD jobs described below
 
 The following prep jobs are triggered once the GEFS 21 member sig files thru 192 forecast hours are available.
 (by arount +2:30 hours after cycle time for 03,09,15,21 UTC SREF runs)
+
+#********************************************************************************************************
 NOTE: These gefs2sref jobs will be run as part of the SREF system upgrade for smartinit downscaling.
+#********************************************************************************************************
 
 
 All upgrades are also available on svn at https://svnemc.ncep.noaa.gov/projects/smartinit
