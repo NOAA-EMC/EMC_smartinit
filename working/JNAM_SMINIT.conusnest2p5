@@ -1,6 +1,6 @@
-#BSUB -J DNG12.conusnest2p5-24
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.conusnest2p5-24
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.conusnest2p5-24
+#BSUB -J DNG18.conusnest2p5-06
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.conusnest2p5-06
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/18/list/oDNG18.conusnest2p5-06
 #BSUB -n 1
 #BSUB -W 3:00
 #BSUB -P RTMA
