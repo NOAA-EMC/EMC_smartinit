@@ -9,7 +9,7 @@
 #BSUB -n 1
 ##BSUB -R span[ptile=1]
 #BSUB -R affinity[core]
-#BSUB -R rusage[mem=5000]
+#BSUB -R rusage[mem=2000]
 
 
 %include <head.h>
@@ -20,7 +20,7 @@ export envir=%ENVIR%
 export job=dgex_sminit_cs_f156_%CYC%
 export cyc=%CYC%
 export ffhr=156
-#RUNTYPE = dgex_ak for 00/12 UTC dgex cycle  ffhr=156  to 192 fhrs
+#RUNTYPE = dgex_ak for 00/12 UTC dgex cycle  ffhr=84  to 192 fhrs
 #          dgex_cs for 06/18 UTC             ffhr=78  t0 192 fhrs
 export RUNTYP=%RUNTYP%   
 

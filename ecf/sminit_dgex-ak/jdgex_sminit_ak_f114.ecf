@@ -9,7 +9,7 @@
 #BSUB -n 1
 ##BSUB -R span[ptile=1]
 #BSUB -R affinity[core]
-#BSUB -R rusage[mem=5000]
+#BSUB -R rusage[mem=2000]
 
 
 %include <head.h>

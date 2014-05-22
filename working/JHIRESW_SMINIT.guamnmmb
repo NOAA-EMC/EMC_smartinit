@@ -1,6 +1,6 @@
-#BSUB -J DNG00.guamnmmb-00
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/00/list/oDNG00.guamnmmb-00
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/00/list/oDNG00.guamnmmb-00
+#BSUB -J DNG12.guamnmmb-00
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.guamnmmb-00
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.guamnmmb-00
 #BSUB -n 1
 #BSUB -W 3:00
 #BSUB -P RTMA
