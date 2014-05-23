@@ -1,0 +1,540 @@
+#!/usr/bin/perl
+
+use AGRID;
+use Time::Local;
+
+$ellipsoid = 23; #WGS-84
+$stcnt = 0;
+$xorig = 422.403;
+$yorig = 4811.692;
+$dxy = 2.5;
+
+$ix = 257;
+$iy = 257;
+
+# reads model data in from an awips netcdf file and creates an input file 
+# for the WOCSS model
+
+my($file,$AGID,$hgt);
+
+#open awips netcdf file and set up AGRID id
+
+$PATH = "/home/gempak/wocss/wox/";
+$file="20030515_1200.eta.211";
+$year = substr($file,0,4)-1900;
+$mon = substr($file,4,2) - 1;
+$day = substr($file,6,2);
+$hr = substr($file,9,2);
+$min = substr($file,11,2);
+
+$modtype = substr(14,3);
+$grid = substr(18,3);
+
+$timesec = timegm(0,$min,$hr,$day,$mon,$year);
+
+print "$timesec\n";
+
+$AGID=&AGRID::setup($file,0);
+if ($AGID<0) { die &AGRID::geterrorstring; }
+
+# set up coordinates - done automatically from data in netcdf file
+
+if (&AGRID::setupcoord($AGID)) { die &AGRID::geterrorstring; }
+#
+# get additional grid info
+
+if (&AGRID::getnumi($AGID,\$numi)) { die &AGRID::geterrorstring; }
+if (&AGRID::getnumj($AGID,\$numj)) { die &AGRID::geterrorstring; }
+if (&AGRID::getnumrecords($AGID,\$numrec)) { die &AGRID::geterrorstring; }
+if (&AGRID::getfcsttime($AGID,1,\$delfcsttime)) { die &AGRID::geterrorstring; }
+
+print "$numi, $numj, $numrec, $delfcsttime\n";
+
+# loop through awips netcdf file and obtain pressure, wind, temperature 
+# and height data at all points in WOCSS domain up to 500 mb
+
+# from GFE setup we know i,j of lower left corner of gfe domain
+# in CONUS Grid 211 indices and grid extent
+# for Missoula this is 29,39 and 8 x 8 grid points
+
+# read in topo data to be used in in calculations
+
+open(TOPOIN,"<mso_2.5km.dat");
+
+$tcnt = 0;
+
+while(<TOPOIN>) {
+
+   chop;
+   @topoin = split(/\s+/,$_);
+   $tcnt++; 
+   for ($ii=1;$ii<=$#topoin;$ii++) {
+       $topo->[$tcnt][$ii] = $topoin[$ii];
+#       print "$ii, $tcnt, $topo->[$tcnt][$ii]\n";
+   }
+}
+close(TOPOIN);
+
+# open file list for wox
+
+open(WOXINFILES,">slcfiles");
+
+# create input files for wox / loop over all available timess in model
+
+for ($it=0;$it<=$numrec-1;$it++) {
+
+   undef(@outlines);
+
+   ($isec,$imin,$ihou,$iday,$imon,$iyea,$iwdy,$iyda,$iist) = gmtime($timesec+($it*$delfcsttime));
+
+   $modtime=sprintf("%4.4d%2.2d%2.2d_%2.2d%2.2d",$iyea+1900,$imon+1,$iday,$ihou,$imin);
+   $woxfile=sprintf("%2.2d%2.2d%2.2d%2.2dWXIN",$imon+1,$iday,$ihou,$imin);
+   
+   print "$woxfile\n";
+
+   print WOXINFILES "$woxfile\n";
+
+   open(WOXOUT,">$woxfile");
+
+# surface locations first
+
+   $sfccnt = 0;
+
+   $outline = "sta     UTM east UTM north   elev m.  press hP   T deg C   dir deg   spd m/s  latitude  longitud   T deg F  prss msl  altim in\n";
+   push (@outlines, $outline);
+
+   for ($ii=1;$ii<=$numi;$ii++) {
+      for ($jj=1;$jj<=$numj;$jj++) {
+
+# get lat/lon of grid point
+
+         if (&AGRID::jitoll($AGID,$jj,$ii,\$lat,\$lon)) { die &AGRID::geterrorstring; }
+
+#         print "$lat, $lon\n";
+         if ($lon < -180.) {$lon+=360.};
+
+# find coordinates in UTM for WOCSS
+
+         ($zone,$easting,$northing)=latlon_to_utm($ellipsoid,$lat,$lon);
+
+# get data at grid point
+
+         $xpos = int(1.5+($easting/1000.-$xorig)/$dxy);
+         $ypos = int(1.5+($northing/1000.-$yorig)/$dxy);
+
+#         print "$xpos, $ypos\n";
+
+         if ($xpos < 1 || $xpos > $ix || $ypos < 1 || $ypos > $iy) {next;}
+
+         print "$lat, $lon, $xpos, $ypos\n";
+
+
+         if (&AGRID::getstaticpoint($AGID,"staticTopo",$jj,$ii,\$elev)) { die &AGRID::geterrorstring; }
+
+         if (&AGRID::getpoint($AGID,"uw",$it,"FHAG 10",$jj,$ii,\$uvel)) { die &AGRID::geterrorstring; }
+         if (&AGRID::getpoint($AGID,"vw",$it,"FHAG 10",$jj,$ii,\$vvel)) { die &AGRID::geterrorstring; }
+         if (&AGRID::getpoint($AGID,"p",$it,"SFC",$jj,$ii,\$stnprs)) { die &AGRID::geterrorstring; }
+         if ($modtype eq "eta") {
+            if (&AGRID::getpoint($AGID,"emsp",$it,"MSL",$jj,$ii,\$pmsl)) { die &AGRID::geterrorstring; }
+	 } else {
+            if (&AGRID::getpoint($AGID,"pmsl",$it,"MSL",$jj,$ii,\$pmsl)) { die &AGRID::geterrorstring; }
+         } 
+         if (&AGRID::getvertpoint($AGID,"t",$it,$jj,$ii,\@temps)) { die &AGRID::geterrorstring; }
+         if (&AGRID::getvertpoint($AGID,"gh",$it,$jj,$ii,\@hgts)) { die &AGRID::geterrorstring; }
+
+         $newt = &temp_adj($elev,$topo->[$xpos][$ypos]);
+         $avgt = ($newt+$temps[0])/2.;
+         $newpres = &pres_reduc($stnprs,$avgt,$elev,$topo->[$xpos][$ypos]);
+         ($wmag,$wdir) = &wind_calc($uvel,$vvel,$lat,$lon);
+         $sfccnt++;
+         $outline = sprintf("MOD  %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %9.2f %9.2f %9.2f %9.2f %9.2f  -9999.00\n",$easting/1000.,$northing/1000.,$topo->[$xpos][$ypos],$newpres/100.,$newt-273.16,$wdir,$wmag,$lat,$lon,(($temps[0]-273.16)*1.8)+32,$pmsl/100.);
+         push (@outlines, $outline);
+      }
+   }
+
+# upper winds
+
+   $upwcnt = 0;
+
+   for ($ii=1;$ii<=$numi;$ii++) {
+      for ($jj=1;$jj<=$numj;$jj++) {
+
+# get lat/lon of grid point
+
+         if (&AGRID::jitoll($AGID,$jj,$ii,\$lat,\$lon)) { die &AGRID::geterrorstring; }
+
+# find coordinates in UTM for WOCSS
+
+         if ($lon < -180.) {$lon+=360.};
+         ($zone,$easting,$northing)=latlon_to_utm($ellipsoid,$lat,$lon);
+
+# get data at grid point
+
+         $xpos = int(1.5+($easting/1000.-$xorig)/$dxy);
+         $ypos = int(1.5+($northing/1000.-$yorig)/$dxy);
+
+         if ($xpos < 1 || $xpos > $ix || $ypos < 1 || $ypos > $iy) {next;}
+#      print "$ii,  $jj, $lat, $lon, $zone,  $easting   $northing\n";
+
+#      print "$xpos, $ypos, $topo->[$xpos][$ypos]\n";
+
+         if (&AGRID::getstaticpoint($AGID,"staticTopo",$jj,$ii,\$elev)) { die &AGRID::geterrorstring; }
+#      print "height of grid point is $elev\n";
+
+         $outline = sprintf("\n%11.2f %9.2f %9.2f %9.2f %9.2f\n",$easting/1000.,$northing/1000.,$topo->[$xpos][$ypos],$lat,$lon);
+         $stcnt++;
+         push (@outlines, $outline);
+
+         if (&AGRID::getvertpoint($AGID,"gh",$it,$jj,$ii,\@hgts)) { die &AGRID::geterrorstring; }
+         if (&AGRID::getvertpoint($AGID,"uw",$it,$jj,$ii,\@uvels)) { die &AGRID::geterrorstring; }
+         if (&AGRID::getvertpoint($AGID,"vw",$it,$jj,$ii,\@vvels)) { die &AGRID::geterrorstring; }
+
+         $icnt = 1;
+         $is = -1;
+         for ($ih=0;$ih<=$#hgts;$ih++) {
+	    if ($hgts[$ih] > $topo->[$xpos][$ypos] && $hgts[$ih] <= 5000.) {
+               $icnt++;
+               if ($is < 0) {$is = $ih;}
+            }
+#          print "$hgts[$ih] $elev $icnt\n";
+         }
+#      print "$is $icnt\n";
+
+         $upwcnt++;
+         ($wmag,$wdir) = &wind_calc($uvels[0],$vvels[0],$lat,$lon);
+         $outline = sprintf("%5d  MODEL\n",$icnt);
+         push (@outlines, $outline);
+         $outline = "   ht-m    dir.   spd-m/s\n";
+         push (@outlines, $outline);
+         $outline = sprintf("%7d %6d %7.1f\n",$topo->[$xpos][$ypos],$wdir,$wmag);
+         push (@outlines, $outline);
+         for ($ih=$is;$ih<=$#hgts;$ih++) {
+            ($wmag,$wdir) = &wind_calc($uvels[$ih+1],$vvels[$ih+1],$lat,$lon);
+            if($hgts[$ih] < 5000) {
+               $outline = sprintf("%7d %6d %7.1f\n",$hgts[$ih],$wdir,$wmag);
+               push (@outlines, $outline);
+	    }
+         }
+      }
+   }
+
+# upper temps
+
+   $utacnt = 0;
+
+   for ($ii=1;$ii<=$numi;$ii++) {
+      for ($jj=1;$jj<=$numj;$jj++) {
+
+
+# get lat/lon of grid point
+
+         if (&AGRID::jitoll($AGID,$jj,$ii,\$lat,\$lon)) { die &AGRID::geterrorstring; }
+
+# find coordinates in UTM for WOCSS
+
+         if ($lon < -180.) {$lon+=360.};
+         ($zone,$easting,$northing)=latlon_to_utm($ellipsoid,$lat,$lon);
+
+#      print "$ii,  $jj, $lat, $lon, $zone,  $easting   $northing\n";
+
+         $xpos = int(1.5+($easting/1000.-$xorig)/$dxy);
+         $ypos = int(1.5+($northing/1000.-$yorig)/$dxy);
+
+         if ($xpos < 1 || $xpos > $ix || $ypos < 1 || $ypos > $iy) {next;}
+#         print "$ii,  $jj, $lat, $lon, $zone,  $easting   $northing\n";
+
+#         print "$xpos, $ypos\n";
+
+# get data at grid point
+
+         if (&AGRID::getstaticpoint($AGID,"staticTopo",$jj,$ii,\$elev)) { die &AGRID::geterrorstring; }
+#      print "height of grid point is $elev\n";
+
+         $outline = sprintf("\n%11.2f %9.2f %9.2f %9.2f %9.2f\n",$easting/1000.,$northing/1000.,$topo->[$xpos][$ypos],$lat,$lon);
+         push (@outlines, $outline);
+
+         if (&AGRID::getpoint($AGID,"p",$it,"SFC",$jj,$ii,\$stnprs)) { die &AGRID::geterrorstring; }
+#      print "pressure of grid point is $stnprs\n";
+         if (&AGRID::getvertpoint($AGID,"gh",$it,$jj,$ii,\@hgts)) { die &AGRID::geterrorstring; }
+         if (&AGRID::getvertpoint($AGID,"t",$it,$jj,$ii,\@temps)) { die &AGRID::geterrorstring; }
+
+         $icnt = 1;
+         $is = -1;
+         for ($ih=0;$ih<=$#hgts;$ih++) {
+	    if ($hgts[$ih] > $topo->[$xpos][$ypos] && $hgts[$ih] <= 5000.) {
+               $icnt++;
+               if ($is < 0) {$is = $ih;}
+            }
+ #         print "$hgts[$ih] $elev $icnt\n";
+         }
+#      print "$is $icnt\n";
+
+         $utacnt++;
+
+         $outline = sprintf("%5d    2  MODEL\n",$icnt);
+         push (@outlines, $outline);
+         $outline = "    ht-m  temp.-C pr-mb\n";
+         push (@outlines, $outline);
+
+         $newt = &temp_adj($elev,$topo->[$xpos][$ypos]);
+         $avgt = ($newt+$temps[0])/2.;
+         $newpres = &pres_reduc($stnprs,$avgt,$elev,$topo->[$xpos][$ypos]);
+
+         $outline = sprintf("%7d %6.1f %11.2f\n",$topo->[$xpos][$ypos],$newt-273.16,$newpres/100.);
+         push (@outlines, $outline);
+         for ($ih=$is;$ih<=$#hgts;$ih++) {
+            $press = 1000. + (($ih)*-50.);
+            if($hgts[$ih] < 5000) {
+               $outline = sprintf("%7d %6.1f %11.2f\n",$hgts[$ih],$temps[$ih+1]-273.16,$press);
+               push (@outlines, $outline);
+	    }
+         }
+      }
+   }
+
+# write header info and data to file
+  
+   $line1 = sprintf("%2.2d%2.2d%2d%2d %4.4d\n",$ihou,$imin,$imon+1,$iday,$iyea+1900);    
+   $line2 = sprintf("   %3d %3d %3d\n",$sfccnt,$upwcnt,$utacnt);
+
+   print WOXOUT $line1;
+   print WOXOUT $line2;
+   print WOXOUT @outlines;
+   close(WOXOUT);
+}
+
+if (&AGRID::destroy($AGID)) { die &AGRID::geterrorstring; }
+
+close(WOXINFILES);
+
+print "stncnt= $sfccnt, $upwcnt, $utacnt\n";
+
+#############################################################################
+
+sub wind_calc {
+
+   local($ugrid,$vgrid,$lat,$lon)=@_;
+
+   use Math::Trig;
+   use AGRID;
+
+   if (&AGRID::getrealuv($AGID,$lat,$lon,$ugrid,$vgrid,\$uvel,\$vvel)) { die &AGRID::geterrorstring; }
+
+   $wmag = ($uvel**2.+$vvel**2.)**0.5;
+   if ($wmag > 100.) {$wmag = 0.;}
+
+   if ($vvel == 0.) {
+       if ($uvel < 0.) {$wdir = 90.;}
+       if ($uvel > 0.) {$wdir = 270.;}
+       if ($uvel == 0.) {$wdir = 0.;}
+   } else { 
+       $wtan = $uvel/$vvel;
+       if ($vvel > 0.) {
+	  $wdir = (atan($wtan) * 57.29577951) + 180.;
+       } else {
+	  $wdir = (atan($wtan) * 57.29577951) + 360.;
+       }
+       if ($wdir >= 360.) {$wdir = $wdir - 360.;}
+   }
+#   print "$ugrid,$vgrid,$uvel,$vvel,$wmag,$wdir\n";
+
+   return($wmag,$wdir);
+}
+
+#############################################################################
+
+sub temp_adj {
+
+   local($elev,$topo)=@_;
+
+#   print "$elev,  $topo\n";
+
+    print "$temps[0], $temps[1], $temps[2], $temps[3], $temps[4], $temps[5]\n";
+#   print "$stnprs\n";
+
+   $icnt = -1;
+   $ncnt = -1;
+   for ($ih=0;$ih<=$#hgts;$ih++) {
+      if ($hgts[$ih] < $elev) {
+         $icnt++;
+      }
+      if ($hgts[$ih] < $topo) {
+         $ncnt++;
+      }
+      if ($hgts[$ih] > 3500.) {
+	 last;
+      }
+#      print "$hgts[$ih] $temps[$ih+1] $elev $icnt $ncnt\n";
+   }
+   $ncnt = $icnt;
+   if ($elev > $topo) {
+
+      $lapse_rate1 = ($temps[$icnt+2]-$temps[0])/($hgts[$icnt+1]-$elev);
+#      print "XX $lapse_rate1, $temps[0], $temps[$icnt+2], $elev, $hgts[$icnt+1]\n";
+
+      $lapse_rate2 = ($temps[$ncnt+3]-$temps[$ncnt+2])/($hgts[$ncnt+2]-$hgts[$ncnt+1]);
+#      print "YY $lapse_rate2, $temps[$ncnt+2], $temps[$ncnt+3], $hgts[$ncnt+1], $hgts[$ncnt+2]\n";
+
+      $delt1 = ($hgts[$icnt+1]-$elev)*$lapse_rate1;
+      $diff1 = $hgts[$icnt+1]-$elev;
+#      print "delt1= $delt1, $diff1\n";
+      $delt2 = ($hgts[$ncnt+1]-($topo+($hgts[$icnt+1]-$elev)))*$lapse_rate2;
+      $diff2 = $hgts[$ncnt+1]-($topo+($hgts[$icnt+1]-$elev));
+#      print "delt2= $delt2, $diff2, $hgts[$ncnt+1]\n";
+
+      $newt = $temps[$ncnt+2] - $delt2 - $delt1;
+#      print "newt= $newt, $temps[0]\n";
+
+   } elsif ($elev < $topo) {
+
+      $lapse_rate1 = ($temps[$icnt+2]-$temps[0])/($hgts[$icnt+1]-$elev);
+#      print "XX $lapse_rate1, $temps[0], $temps[$icnt+2], $elev, $hgts[$icnt+1]\n";
+      $lapse_rate2 = ($temps[$ncnt+3]-$temps[$ncnt+2])/($hgts[$ncnt+2]-$hgts[$ncnt+1]);
+#      print "YY $lapse_rate2, $temps[$ncnt+2], $temps[$ncnt+3], $hgts[$ncnt+1], $hgts[$ncnt+2]\n";
+
+      $delt1 = (($hgts[$icnt+1])-$elev)*$lapse_rate1;
+      $diff1 = $hgts[$icnt+1]-$elev;
+#      print "delt1= $delt1, $diff1\n";
+      $delt2 = ($hgts[$ncnt+2]-($topo+($hgts[$icnt+1]-$elev)))*$lapse_rate2;
+      $diff2 = $hgts[$ncnt+2]-($topo+($hgts[$icnt+1]-$elev));
+#      print "delt2= $delt2, $diff2, $hgts[$ncnt+1]\n";
+
+      $newt = $temps[$ncnt+3] - $delt2 - $delt1;
+#      print "newt= $newt, $temps[0]\n";
+
+   } else {
+      $newt = $temps[0];
+   }
+#   print "$elev, $topo, $tmp0, $hgt1, $newt\n";
+
+   return($newt);
+}
+
+#############################################################################
+
+sub pres_reduc {
+
+   local($stnprs,$tmp,$elev,$topo)=@_;
+
+   $R = 287.;
+   $g = 9.81;
+
+   $newpres = $stnprs*(exp($g*($elev-$topo)/($R*$tmp)));   
+
+#   print "$elev, $topo, $stnprs, $newpres\n";
+
+   return($newpres);
+}
+
+#############################################################################
+
+sub latlon_to_utm {
+
+use Math::Trig;
+
+my $pi = 3.14159265;
+my $quarterpi = $pi / 4;
+my $deg2rad = $pi / 180;
+my $rad2deg = 180 / $pi;
+
+    # Expects Ellipsoid Number, Latitude, Longitude 
+    # (Latitude and Longitude in decimal degrees)
+    # Returns UTM Zone, UTM Easting, UTM Northing
+    my (@args)=@_;
+    my $latitude=$args[1];
+    my $longitude=$args[2];
+    if (($ellipsoid <1) or ($ellipsoid >23)) {
+	die "Ellipsoid value (".$ellipsoid.") invalid.";
+    }
+    if  (($longitude < -180) or ($longitude > 180)) {
+	die "Longitude value (".$longitude.") invalid.";
+    }
+    my $radius=6378137;
+    my $eccentricity=0.00669438;
+    my $k0=0.9996;
+    my $long2=(($longitude + 180) - int (($longitude + 180)/360 ) *360 - 180);
+    my $zone=(int(($long2 + 180)/6) + 1);
+
+# fix UTM to zone 11 for Missoula
+
+    $zone = 11;
+    my $lat_radian=($latitude * $deg2rad);
+    my $long_radian=($long2 * $deg2rad);
+    if (($latitude >= 56.0) and ($latitude < 64.0) and ($long2 >= 3.0) and ($long2 < 12.0)) {
+	$zone = 32;
+    }
+    if(( $latitude >= 72.0) and ($latitude < 84.0)) { 
+	if(($long2 >= 0.0) and ($long2 <  9.0)) {
+	    $zone = 31;
+	} elsif(($long2 >= 9.0) and ($long2 < 21.0)) {
+	    $zone = 33;
+	} elsif(($long2 >= 21.0) and ($long2 < 33.0)) {
+	    $zone = 35;
+	} elsif(($long2 >= 33.0) and ($long2 < 42.0)) {
+	    $zone = 37;
+	}
+    }    
+    my $longorigin = (($zone - 1)*6 - 180 + 3);
+    my $longoriginradian = $longorigin * $deg2rad;
+    my $eccentprime=($eccentricity/(1-$eccentricity));
+    
+    my $N = ($radius/sqrt(1-$eccentricity * sin($lat_radian) * sin($lat_radian)));
+    my $T = (tan($lat_radian) * tan($lat_radian));
+    my $C = ($eccentprime*cos($lat_radian)*cos($lat_radian));
+    my $A = (cos($lat_radian)*($long_radian-$longoriginradian));
+    my $M = ($radius * ((1 - $eccentricity/4 - 3 * $eccentricity * $eccentricity/64 - 5 * $eccentricity * $eccentricity * $eccentricity/256) * $lat_radian - (3 * $eccentricity/8 + 3 * $eccentricity * $eccentricity/32 + 45 * $eccentricity * $eccentricity * $eccentricity/1024) * sin(2 * $lat_radian) + (15 * $eccentricity * $eccentricity/256 + 45 * $eccentricity * $eccentricity * $eccentricity/1024) * sin(4 * $lat_radian) - (35 * $eccentricity * $eccentricity * $eccentricity/3072) * sin(6 * $lat_radian)));
+    my $utm_easting=($k0*$N*($A+(1-$T+$C)*$A*$A*$A/6 + (5-18*$T+$T*$T+72*$C-58*$eccentprime)*$A*$A*$A*$A*$A/120) + 500000.0);
+    my $utm_northing=($k0*($M+$N*tan($lat_radian)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24 + (61-58*$T+$T*$T+600*$C-330*$eccentprime)*$A*$A*$A*$A*$A*$A/720)));
+    if($latitude < 0) {
+	$utm_northing += 10000000.0; 
+    }
+    my $utm_letter;
+    if ((84 >= $latitude) and ($latitude >= 72)) {
+	$utm_letter = 'X';
+    } elsif ((72 > $latitude) && ($latitude >= 64)) {
+	$utm_letter = 'W';
+    } elsif ((64 > $latitude) && ($latitude >= 56)) {
+	$utm_letter = 'V';
+    } elsif ((56 > $latitude) && ($latitude >= 48)) {
+	$utm_letter = 'U';
+    } elsif ((48 > $latitude) && ($latitude >= 40)) {
+	$utm_letter = 'T';
+    } elsif ((40 > $latitude) && ($latitude >= 32)) {
+	$utm_letter = 'S';
+    } elsif ((32 > $latitude) && ($latitude >= 24)) {
+	$utm_letter = 'R';
+    } elsif ((24 > $latitude) && ($latitude >= 16)) {
+	$utm_letter = 'Q';
+    } elsif ((16 > $latitude) && ($latitude >= 8)) {
+	$utm_letter = 'P';
+    } elsif (( 8 > $latitude) && ($latitude >= 0)) {
+	$utm_letter = 'N';
+    } elsif (( 0 > $latitude) && ($latitude >= -8)) {
+	$utm_letter = 'M';
+    } elsif ((-8> $latitude) && ($latitude >= -16)) {
+	$utm_letter = 'L';
+    } elsif ((-16 > $latitude) && ($latitude >= -24)) {
+	$utm_letter = 'K';
+    } elsif ((-24 > $latitude) && ($latitude >= -32)) {
+	$utm_letter = 'J';
+    } elsif ((-32 > $latitude) && ($latitude >= -40)) {
+	$utm_letter = 'H';
+    } elsif ((-40 > $latitude) && ($latitude >= -48)) {
+	$utm_letter = 'G';
+    } elsif ((-48 > $latitude) && ($latitude >= -56)) {
+	$utm_letter = 'F';
+    } elsif ((-56 > $latitude) && ($latitude >= -64)) {
+	$utm_letter = 'E';
+    } elsif ((-64 > $latitude) && ($latitude >= -72)) {
+	$utm_letter = 'D';
+    } elsif ((-72 > $latitude) && ($latitude >= -80)) {
+	$utm_letter = 'C';
+    } else {
+	die "Latitude (".$latitude.") out of UTM range.";
+    }
+    $zone.=$utm_letter;
+    return $zone,$utm_easting,$utm_northing;
+
+return;
+
+}

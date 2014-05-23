@@ -1,0 +1,10 @@
+c
+	logical JGOOD(NSITES)
+	character*5 chstid(NSITES)     
+c	 
+	COMMON /STALOC/ XG(NSITES),YG(NSITES),ZG(NSITES),WTDOP(NXGRD,
+     $         NYGRD,NWSITE),WTEMP(NXGRD,NYGRD,NTSITE),JGOOD,
+     $         jprylx(NWNDPT),jpryly(NWNDPT),XDOP(NWSITE),
+     $         YDOP(NWSITE),ZDOP(NWSITE),XTMP(NTSITE),YTMP(NTSITE),
+     $         ZTMP(NTSITE),ZSIGL(NWSITE,NZGRD),chstid
+	 

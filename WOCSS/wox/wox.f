@@ -1,0 +1,4294 @@
+c
+c********************************************************************
+        PROGRAM  wox
+C*********************************************************************
+C
+c       winds on critical streamline surfaces (wocss) program finds 
+c       topographically induced winds by making the originally analyzed 
+c       winds nondivergent within flow surfaces that are defined using 
+c       a concept analagous to the critical streamline when the 
+c       atmosphere is stably stratified. flow surfaces can intersect 
+c       theterrain resulting in zero winds in these 'underground cells.' 
+c       adjustment toward nondivergence in bal5 causes flow around the 
+c       obstacles.  geosig reads in wind soundings and surface data.  
+c       direct vector alterations are used in subroutine bal5. wind 
+c       components at specified points can be held constant or adjusted 
+c       at a fraction of the adjustments in other cells in bal5.
+c
+c       the model has been described in:
+c                Ludwig, F. L., J. M. Livingston, and R. M. Endlich, 
+c                1991:  'Use of Mass Conservation and Dividing 
+c                Streamline Concepts for Efficient Objective Analysis 
+c                of Winds in Complex Terrain,' 
+c                  J. Appl. Meteorol., Vol. 30, pp. 1490-1499.
+c
+C       this version has removed several options found in some earlier 
+c       versions.  only one grid is used, no nesting.   at least one 
+c       sounding is required; the geostrophic wind provision is no 
+c       longer available.  the low altitude grid points to be used
+c       for defining critical streamline winds are now input.  
+c
+c       new provisions include a parameter input file so that 
+c       adjustment factors, flow surface compression and other factors 
+c       can be changed without recompiling.  the number of labeled 
+c       commons has also been substatially reduced.
+c
+c       january 2002   
+c                    F. LUDWIG
+c                    Environmental Fluid Mechanics Lab
+c                    Dept. of Civil Engineering
+c                    Stanford University
+c                    Stanford, CA 94305-4020
+c
+c			based in large part on earlier work with:
+c			R. ENDLICH, A. BECKER, D. SINTON, K. NITZ, 
+c                     J. LIVINGSTON, B. MORLEY and C. BHUMRALKAR
+c
+C*********************************************************************
+c  ADJMAX           the fraction of the usual iterative adjustment 
+c                   toward nondivergence that is made at grid points 
+c                    near observations in subroutine bal5.
+c  AVTHK            height agl of top surface over lowest terrain.
+c  CMPRES           maximum 'compression' of surfaces -- 0 means that  
+c                   lower sfcs must parallel those above, 1 means that  
+c                   the low sfc can touch the next level -- defines  
+c                   influence of upper stable layers on less stable  
+c                   lower ones.
+c  DBuG,dbug2       logical flags to trigger printing of statements in  
+c                   program
+c  D2MIN            the minimum didtance allowed in the inverse  
+c                   weighting denominator.
+c  DPOTMIN	    the minimum allowed potent temp lapse rate  
+c                   (deg/m) -- limits instability and hence rise of  
+c                   flow sfcs.
+c  DS               grid size in meters 
+c  DSCRS            grid size (km)
+c  DTWT             distance weight power --weight=1/(distance**DTWT)
+c  DZMAX(jt,jz)     maximum rise for jzth flow sfc as determined from  
+c                   t-sonde jt 
+c  GRDHI            height msl of highest terrain on grid.
+c  GRDLO            height msl of lowest terrain on grid.
+c  MDATE            day of month
+c  KGRIDX           x index of reference point           
+c  KGRIDY           y index of reference point
+c  LOWIX(jl)        x indices of lowest pts 
+c  LOWIY(jl)        y indices of lowest pts 
+c  NCOL             number of columns (x index) in grid             
+c  NCOLM1           NCOL-1
+c  NEND             number of hours to calculate before quitting in a  
+c                   sequence of data)
+c  NLVL             number of vertical flow surfaces
+c  NROW             number of rows (y index) in grid
+c  NROWM1           NROW-1
+c  NSITES   	    maximum number of sites (including upper air) to 
+c                   be used.
+c  NSNDHT   	    maximum number sounding (wind or temp) levels to  
+c                   be used.
+c  NTSITE   	    maximum number t-sondes to be used.
+c  NUMDOP           number of upper wind sites
+c  NUMNWS           number of surface wind sites
+c  NUMTMP           number of temeprature sounding sites
+c  NUMTOT           total number of observing wind sites
+c  NWSITE   	    maximum number wind soundings to be used.
+c  NXGRD    	    dimension for grids in W-E direction.
+c  NYGRD    	    dimension for grids in S-N direction.
+c  NZGRD    	    dimension for flow surfaces.
+c  PWR		    power to which separation is raised for inverse  
+c                   distance wts.
+c  RHS(jx,jy,jz)    height (m) above terrain of jzth flow sfc above  
+c                   pt jx,jy
+c  RHSLO(jt,jz)     height (m) of jzth flow sfc above the lowest  
+c                   terrain near t-sonde jt  
+c  SFCHT(jx,jy)     terrain height (m msl) at pt jx,jy
+c  SFCLOW           terrain height (m msl) of lowest pt in the domain
+c  SIGMA(jz)        fraction (over lowest terrain) of the height of the top surface 
+c                   for sfc jz
+c  SLFAC            controls the degree to which the 1st guess surfaces  
+c                   follow the terrain -- 0 gives flat sfcs & 1 gives  
+c                   terrain-following sfcs.
+c  SPDCNV           conversion factor -- input units to m/s
+c  U(jx,jy,jz)      westerly component (m/s) at (jx,jy,jz)
+c  UCOMP(job)       observed westerly component (m/s) at site job
+c  USIG(jws,jz)     u component at flow sfc jz on wind sounding jws
+c  UTMAPX           utm easting coordinate (km) of reference pt  
+c                   (KGRIDX,KGRIDY).
+c  UTMAPY           utm northing coordinate (km) of reference pt  
+c                   (KGRIDX,KGRIDY).
+c  V(jx,jy,jz)      southerly component (m/s) at (jx,jy,jz)
+c  VCOMP(job)        observed southerly component (m/s) at site job
+c  VSIG(jws,jz)     v component at flow sfc jz on wind sounding jws
+c  W(jx,jy,jz)      upward component (m/s) at (jx,jy,jz)
+c  XG(jsite)        coordinate (grid units) of observation site jsite.
+c  XORIG            utm easting coordinate (km) of the grid origin. 
+c  YG(jsite)        coordinate (grid units) of observation site jsite.
+c  YORIG            utm northing coordinate (km) of the grid origin.
+c                       (NOTE: xorig,yorig are at 1,1)
+c  ZRISE            difference between sfchi -sfclow.
+c  ZZERO            roughness length (m) for log profile estimates.    
+c
+	include 'ngrids.param'
+c
+	include 'anchor.incl'
+	include 'flower.incl'
+	include 'limits.incl'
+	include 'staloc.incl'
+C
+	integer*4 nread,key
+	character*12 chfnam
+	character*8 chmmddtttt
+        character*16 woxfile,woxfilep
+c
+        DATA key /16/
+
+C  SET INITIAL LOW HTS FOR DIFFERENT TSONDE/LEVEL COMBOS & MAXIMUM  
+c  COMPRESSION OF SEPARATION BETWEEN FLOW SURFACES
+
+        DATA RHSLO /NARRAY*0.0/
+
+        call getarg(1,woxfile)
+        call getarg(2,woxfilep)
+
+        print *,woxfile
+c        print *,woxfilep
+
+	open (56,file=woxfile(5:12)//'_wox_log.out',form='formatted',
+     +           status='unknown')
+c
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c  MAKE SURE TO SET PATH DEFINITION APPROPRIATE TO YOUR JOB
+C  STRING LENGTH FOR chpath IS DEFINED IN INCLUDE FILE, ngrids.param'
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c
+ccc	chpath='Macintosh_HD:JAZ04:slchalfkm:'
+	chmesh='h'
+ccc	write (*,*) chpath,' ',chmesh,' km grid'
+c
+c       set path & Open input parameter file
+c
+        call runrd (nit,kfyl1,kfyl2,woxfile(5:16))
+	nread=0
+c
+c  open files for keeping track of what happened when & test output.
+c
+	open(33,file=woxfile(5:12)//'_wox.out',form='formatted', 
+     +          status='unknown')
+c
+	write (16,*) 'starting'
+	write (*,*) 'starting'
+c
+C    OPEN FILE 11 (TOPOGRAPHY)
+C
+	write (*,*)'opening mso_2.5km.dat'
+       	OPEN (11,FILE='mso_2.5km.dat',STATUS='old',
+     $           form='formatted')
+C
+C  READ TERRAIN HEIGHTS FOR ALL GRIDS USING TOPO
+C
+	CALL TOPO
+        DS=DSCRS*1.0E3
+        NCOLM1=NCOL-1
+        NROWM1=NROW-1
+c
+	close (11)
+	write (16,*) 'closed',chpath,'mso_2.5km.dat'
+c	write (16,*) 'opening ',chpath,'slcfiles'
+C
+c       open(11,file='slcfiles',status='old',form='formatted')
+c
+	nread=0
+c
+c44	read (11,6003,end=8586) chfnam
+        chfnam = woxfile(5:16)
+	chmmddtttt=woxfile(5:12)
+	write (16,*) chmmddtttt
+c
+c	write (16,*) 'opening ',chfnam
+c	write (*,*) 'opening ',woxfile,' ',chfnam,' ',chmmddtttt
+	open (12,file=woxfile,status='old',form='formatted')
+c
+	 write (16,*) 'opened ',woxfile
+
+c test test
+
+c
+C* READ AND ANALYZE WIND DATA USING WXANAL
+C* MAKE INITIAL WIND ANALYSIS ON MESH
+C
+	read (12,6001,end=8686) ihour,imin,imo,mdate,iyear
+c
+	nread=nread+1
+	if (nread .gt. nend)  go to 8586
+c
+	khr=ihour
+ 	kmon=imo
+	kday=mdate
+	lastmo=imo
+	minutz=julmin(iyear,imo,mdate,ihour,imin)
+c
+c
+c  geosig reads meteorological inputs & calls routines for
+c  interpolation and defining surface shapes.
+c
+	CALL geosig
+C
+C CALL SUBROUTINE TO MAKE WINDS NONDIVERGENT
+C
+	CALL BAL5(NIT)
+C
+C  CALL SUBROUTINE TO INTERPOLATE reduced divergence winds TO 
+C  ANEMOMETER HEIGHT & write winds for selected grid points.
+C
+	write(16,*) 'calling getrich & tstwnd'
+c
+c  before getting winds on flat surfaces, get richardson number
+c  related information
+c
+c  get potential temp & pressure on flow surfaces between sfc and top
+c
+	call BETPAR
+c
+c  calculate bulk richardson number and brunt-vaisala period
+c
+	call getrich
+c
+c  get parameter values on flat surfaces by interpolatio in z.
+c
+        CALL tstwnd(chfnam)
+c
+c  write output files
+c
+	call putout (infile,chfnam,minutz,nread)
+c
+c **** added for netcdf output ****
+
+        call write_netcdf(infile,minutz,nread,woxfile,woxfilep) 
+
+c *********************************
+c	go to 44
+c
+8586    write(16,*) 'reached maximum number specified ',
+     $                 nread-1
+8686	continue
+c
+        write (16,*) 'closing file '
+c
+	if (nread .gt. nend)  go to 8786
+	close (56)	
+c
+8786	if (nread .gt. nend) nread=nend
+	if (dowvsz) call putout (infile,chfnam,minutz,-nread)
+	if (dbug) call flwsfc(chfnam)
+	write (16,*) 'finished '		
+	write (*,*) 'finished '
+c
+6001	format (4i2,1x,i4)	
+6003	format (a16)
+c
+	STOP
+c
+	END
+c
+c******************************************************************
+	subroutine getrich
+c******************************************************************
+c
+c  gets necessary wind shear and potential temperature gradients at
+c  each grid point from differences and interpolation on each surface.
+c  from these the richardson number is estimated.  values of potent.
+c  temp. and pressure are also estimated
+c
+c	fludwig 3/02
+c
+	include 'ngrids.param'
+c
+	include 'anchor.incl'
+	include 'flower.incl'
+	include 'limits.incl'
+        include 'staloc.incl'
+	include 'tsonds.incl'
+c
+	parameter (GRAV=9.8)
+c
+c  factor to get shear at z10 for a log profile with roughness z0 
+c
+	denom1=z10*alog(z10/z0)
+c
+c  we now have top and battom everywhere values for altimeter setting
+c  and potential temperature.  now fill in between values.
+c
+	do 180 ix=1,NXGRD
+	   xhere=float(ix)
+	   do 160 iy=1,NYGRD
+	      yhere=float(iy)
+c
+c  1st layer is at 10 m above sfc -- use log profile between z0 & 10m
+c  to get speed gradient.  
+c
+	       DSPDZ2(ix,iy,1)=(u(ix,iy,1)/denom1)**2+
+     $                                   (v(ix,iy,1)/denom1)**2
+c
+c  assumes dspdz2 at top layer is constant from layer below.
+c
+	       DSPDZ2(ix,iy,NLVL)=
+     $              ((u(ix,iy,NLVL)-u(ix,iy,NLVL-1))/
+     $                    (rhs(ix,iy,NLVL)-rhs(ix,iy,NLVL-1)))**2 +
+     $              ((v(ix,iy,NLVL)-v(ix,iy,NLVL-1))/
+     $                     (rhs(ix,iy,NLVL)-rhs(ix,iy,NLVL-1)))**2
+     	      do 140 iz=2,nlvl-1
+	         if (rhs(ix,iy,iz) .gt. z10) then
+	            if(iz-1 .eq. 1 .or. rhs(ix,iy,iz-1) .le. z10) then
+		       dht=rhs(ix,iy,iz+1)-z10
+		       duspd=u(ix,iy,iz+1)-u(ix,iy,1)
+		       dvspd=v(ix,iy,iz+1)-v(ix,iy,1)
+		       dpotz=TMPKEL(ix,iy,iz+1)-TMPKEL(ix,iy,1)
+		    else 
+		       dht=rhs(ix,iy,iz+1)-rhs(ix,iy,iz-1)
+		       duspd=u(ix,iy,iz+1)-u(ix,iy,iz-1)
+		       dvspd=v(ix,iy,iz+1)-v(ix,iy,iz-1)
+		       dpotz=TMPKEL(ix,iy,iz+1)-TMPKEL(ix,iy,iz-1)
+		    end if
+		    DSPDZ2(ix,iy,iz)=(duspd/dht)**2+(dvspd/dht)**2
+		    DTHDZL(ix,iy,iz)=dpotz/dht
+	         else
+		    DSPDZ2(ix,iy,iz)=-9999.
+		    DTHDZL(ix,iy,iz)=-9999.
+	         end if
+140	      continue
+160	   continue	   
+180	continue
+c
+c  we can now get richardson number & Brunt Vaisala period (1/N)
+c
+	do 380 ix=1,NXGRD
+	   do 370  iy=1,NYGRD
+	      RICHNO(ix,iy,1)=GRAV*DTHDZL(ix,iy,1)/
+     $                          (tmpkel(ix,iy,1)*DSPDZ2(ix,iy,1))
+              if (DTHDZL(ix,iy,1).gt.0.0) then
+	         BVPERD(ix,iy,1)=sqrt(tmpkel(ix,iy,1)/
+     $                          (GRAV*DTHDZL(ix,iy,1)))  
+	      else
+	         BVPERD(ix,iy,1)=-9999.0
+	      end if
+	      do 365 iz=2,NLVL
+	         RICHNO(ix,iy,iz)=GRAV*DTHDZL(ix,iy,iz)/
+     $                          (tmpkel(ix,iy,iz)*DSPDZ2(ix,iy,iz))
+     	         if (DTHDZL(ix,iy,iz).gt.0.0) then
+	            BVPERD(ix,iy,iz)=sqrt(tmpkel(ix,iy,iz)/
+     $                          (GRAV*DTHDZL(ix,iy,iz)))  
+		 else
+	            BVPERD(ix,iy,iz)=-9999.0
+		 end if   
+365	      continue
+370	   continue
+380	continue
+c
+	return
+c
+	end
+c
+c********************************************************************
+	subroutine putout(infile,chfnam,minjul,ncall)
+c********************************************************************
+c
+c  writes output files in cm/sec binary integer form (dobin=.true.), 
+c  one file for each level or ascii form (dobin=.false) -- also integer 
+c  cm/sec.  if ascii, grid points may be skipped.  for nskip=1, all
+c  values are written, nskip =2, every second row and column etc.
+c
+c  as of 2/02, the output code was revised to be in a separate 
+c  subroutine and to include the option of providing files that give 
+c  wind profiles at up to 10 separate locations.
+c
+c	fludwig, 2/02
+c
+	include 'ngrids.param'
+c
+	include 'anchor.incl'
+	include 'flower.incl'
+	include 'limits.incl'
+	include 'staloc.incl'
+	include 'tsonds.incl'
+c
+        character*2  chpro(NHORIZ)
+	character*3  chdir,chspd,chric
+	character*12 chfnam
+	integer*4 ncall,minutz(111)
+	integer*4 iutmp1(NXGRD,NYGRD),ivtmp1(NXGRD,NYGRD)
+	integer*4 iptmp1(NXGRD,NYGRD),ittmp1(NXGRD,NYGRD)
+	logical dotopo
+c
+	save
+c
+	data chpro,chdir,chspd,chric /'01','02','03','04','05','06',
+     $            '07','08','09','10','11','12','13','14','15','16',
+     $            '17','18','19','20','21','22','23','24','25','26',
+     $            '27', '28','29','30','dir','spd',' Ri'/
+	data dotopo /.true./
+c
+	if (ncall.ge.0) then
+	   minutz(ncall)=minjul
+c	   
+	   if (dobin) then
+c
+c  binary output files -- each component in separate file
+c
+c
+c  horizontal components (cm/s)
+c
+	      open(35,file=chfnam(1:8)//'_u.out', form='unformatted', 
+     +                status='unknown')
+	      write(35) iugraf  
+	      close (35)
+c
+	      open(35,file=chfnam(1:8)//'_v.out', form='unformatted', 
+     +                status='unknown')
+	      write(35) ivgraf
+	      close (35)	
+c
+c  vertical component (cm/s)
+c
+	      if (dowcmp) then
+	         open(35,file=chfnam(1:8)//'_w.out',form='unformatted', 
+     +                   status='unknown')
+	         write(35) iwgraf 
+		 close (35) 
+	      end if	
+c
+c  10*(potential temperature) K
+c
+	      if (dothet) then
+	         open(35,file=chfnam(1:8)//'_PT.out',form='unformatted', 
+     +                   status='unknown')
+	         write(35) iptgrf
+		 close (35) 
+	      end if 		
+c
+c  pressure (mB, hP)
+c
+	      if (dopres) then
+	         open(35,file=chfnam(1:8)//'_pr.out',form='unformatted', 
+     +                   status='unknown')
+	         write(35) iprgrf
+		 close (35)
+	      end if 		
+c
+c  1000*(Bulk Richardson Number)
+c
+	      if (doBRi) then
+	         open(35,file=chfnam(1:8)//'_Ri.out',form='unformatted', 
+     +                   status='unknown')
+	         write(35) irngrf
+		 close (35)
+	      end if
+c
+	      if (doBVpd) then
+	         open(35,file=chfnam(1:8)//'_BV.out',form='unformatted', 
+     +                   status='unknown')
+	         write(35) ibvgrf
+		 close (35)
+	      end if
+	   else
+c
+c  ascii output files
+c
+	      if (.not.dowvsz) then
+c
+c
+c  getting field of observed u,v press and theta -- 0 where no obs
+c
+		 call SETINT(0,iutmp1,NXGRD,NYGRD)
+		 call SETINT(0,ivtmp1,NXGRD,NYGRD)
+		 call SETINT(0,iptmp1,NXGRD,NYGRD)
+		 call SETINT(0,ittmp1,NXGRD,NYGRD)
+c
+c  fill in obs where available
+c
+		 do 115 iob=1,NUMNWS
+		    if (nint(ucomp(iob)) .ne. -9999) then
+		       kx=nint(xg(iob))
+		       ky=nint(yg(iob))
+		       if (kx.gt.0 .and. kx.le. NXGRD 
+     $                      .and. ky.gt.0 .and. ky.le. NYGRD) then
+		          iutmp1(kx,ky)=nint(100.0*ucomp(iob))
+		          ivtmp1(kx,ky)=nint(100.0*vcomp(iob))
+		       end if
+		    end if
+		    if (nint(tempC(iob)).ne.-9999) then
+		       kx=nint(xg(iob))
+		       ky=nint(yg(iob))
+		       if (kx.gt.0 .and. kx.le. NXGRD 
+     $                      .and. ky.gt.0 .and. ky.le. NYGRD) then
+		          if (nint(altim(iob)) .ne. -9999) then
+			     ppp=cvt2p(altim(iob),sfcht(kx,ky))
+		          else
+			     ppp=float(iprgrf(kx,ky,1))
+			  end if
+		          ttt=tempc(iob)
+		          ittmp1(kx,ky)=nint(10.0*TPOT (ppp,ttt))
+		       end if
+		    end if
+		    if (nint(altim(iob)).ne.-9999) then
+		       kx=nint(xg(iob))
+		       ky=nint(yg(iob))
+		       if (kx.gt.0 .and. kx.le. NXGRD
+     $                      .and. ky.gt.0 .and. ky.le. NYGRD) then
+		          iptmp1(kx,ky)=
+     $                         nint(cvt2p(altim(iob),sfcht(kx,ky)))
+		       end if
+		    end if
+115		 continue
+c
+	         if (doobs) then
+	            open (50,file=chfnam(1:8)//'_ufobs-allz.out',
+     $                       form='formatted', status='unknown')
+	            open (51,file=chfnam(1:8)//'_vfobs-allz.out', 
+     $                       form='formatted', status='unknown')
+                    open(40,file=chfnam(1:8)//'_PTobs-allz.out',
+     $                       form='formatted', status='unknown')  
+                    open(41,file=chfnam(1:8)//'_probs-allz.out',
+     $                       form='formatted', status='unknown') 
+	            do 68 iy=NASCY0,NASCY0-1+NRYTY,NSKIP
+		       write(50,6008) (iutmp1(ix,iy),	       
+     $                         ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+                       write(51,6008) (ivtmp1(ix,iy),	       
+     $                         ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+                       write(40,6008) (ittmp1(ix,iy),	       
+     $                                ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+                       write(41,6008) (iptmp1(ix,iy),	       
+     $                                ix=NASCX0,NASCX0-1+NRYTX,NSKIP) 
+68	            continue
+		 end if
+c
+	         close (40)
+	         close (41)
+	         close (50)
+	         close (51)
+c
+c  write topography and gridded observations for this output set.  northenmost
+c  rows written first for plotting puposes with transform.
+c
+	         if (dotopo) then
+	            open(31,file=chfnam(1:8)//'_locltopo.out',
+     $                      status='unknown') 
+	            do 168 iy=NASCY0-1+NRYTY,NASCY0,-NSKIP
+	               write(31,6008) (nint (sfcht(ix,iy)),
+     $                                ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+168	            continue
+	            close (31)
+	            dotopo=.false.
+	         end if
+c
+c  if not writing ascii wind profile files, write components for
+c  each level at each time.  write topography and gridded observations 
+c  for this output set.  northenmost rows written first for plotting 
+c  puposes with transform.
+c
+c
+	         open (46,file=chfnam(1:8)//'_uf-allz.out',
+     $                    form='formatted', status='unknown')
+	         open (47,file=chfnam(1:8)//'_vf-allz.out',
+     $                    form='formatted', status='unknown')
+	         if (dowcmp) open(35,file=chfnam(1:8)//'_wf-allz.out',
+     $                    form='formatted', status='unknown')
+                                       
+	         if (dothet) then
+                    open (36,file=chfnam(1:8)//'_PT-allz.out',
+     $                       form='formatted', status='unknown')
+	         end if
+c
+	         if (dopres) then
+                    open(37,file=chfnam(1:8)//'_pr-allz.out',
+     $                      form='formatted', status='unknown')
+	         end if
+c
+                 if (doBRi)  open(38,file=chfnam(1:8)//'_Rif-allz.out',
+     $	                 form='formatted',status='unknown')
+	         if (doBVpd) open(39,file=chfnam(1:8)//'_BV-allz.out',
+     $	                 form='formatted',status='unknown')
+	         do 195 iz=1,NFLAT
+c
+	            do 185 iy=NASCY0-1+NRYTY,NASCY0,-NSKIP
+		       write(46,6008) (iugraf(ix,iy,iz),
+     $                       ix=NASCX0,NASCX0-1+NRYTX,NSKIP)                          
+		       write(47,6008) (ivgraf(ix,iy,iz),
+     $                       ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+c
+		       if (dowcmp) write(35,6008) (iwgraf(ix,iy,iz), 
+     $                       ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+c
+		       if (dothet) write(36,6008) (iptgrf(ix,iy,iz),
+     $                         ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+c
+		       if (dopres) write(37,6008) (iprgrf(ix,iy,iz),		          
+     $                          ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+c
+		       if (doBRi) write(38,6008) (irngrf(ix,iy,iz),
+     $                          ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+c
+		       if (doBVpd) write(39,6008) (ibvgrf(ix,iy,iz),
+     $                          ix=NASCX0,NASCX0-1+NRYTX,NSKIP)
+c
+185	            continue
+195	         continue
+	         close (46)
+	         close (47)
+	         if (dowcmp) close (35)
+	         if (dothet) close (36)
+	         if (dopres) close (37)
+	         if (doBRi)  close (38)
+	         if (doBVpd) close (39)
+c
+	      else
+c
+c  fill arrays for profile  files
+c
+	         do 150 ip=1,npfyls
+		    ipx=jprylx(ip)
+		    ipy=jpryly(ip)
+		    do 140 ll=1,NFLAT
+		       iuprf(ip,ll,ncall)=iugraf(ipx,ipy,ll)
+		       ivprf(ip,ll,ncall)=ivgraf(ipx,ipy,ll)
+		       Riprf(ip,ll,ncall)=100.*RICHNO(ipx,ipy,ll)                       
+140		    continue
+150	         continue
+c	         
+	      end if
+c	         
+	   end if
+	else
+c
+c   if doing wind profiles, we are done calculating and storing, now 
+c   write
+c
+	   do 175 ip=1,npfyls	
+	      open(46,file=chfnam(1:8)//'_wndprof.out',
+     $                form='formatted', status='unknown')
+c
+c  write wind profiles (row) vs time (col)
+c
+     	      write (46,6004) (chdir,chpro(ii),chspd,
+     $                    chpro(ii),chRic,chpro(ii),ii=1,-ncall)
+     	      do 170 iz=1,NFLAT
+	         write (46,6006) zchooz(iz),
+     $	            (dd(float(iuprf(ip,iz,it)),float(ivprf(ip,iz,it))),
+     $               0.01*sp(float(iuprf(ip,iz,it)),
+     $                            float(ivprf(ip,iz,it))),
+     $                              1000.*Riprf(ip,iz,it),it=1,-ncall)
+170	      continue
+175	   continue
+	   close (46)
+c
+c  write wind time series (col) vs height (row)
+c
+	   do 275 ip=1,npfyls
+	      open(47,file=chfnam(1:8)//'_wndtser.out',
+     $                form='formatted', status='unknown')
+     	      write (47,6005) (chdir,chpro(ii),
+     $                   chspd,chpro(ii),chRic,chpro(ii),ii=1,NFLAT)
+	      
+     	      do 270 it=1,-ncall
+	         write (47,6007) minutz(it),
+     $	           (dd(float(iuprf(ip,iz,it)),float(ivprf(ip,iz,it))),
+     $              0.01*sp(float(iuprf(ip,iz,it)),
+     $                          float(ivprf(ip,iz,it))),
+     $                              1000.*Riprf(ip,iz,it),iz=1,NFLAT)
+270	      continue
+275	   continue
+	   close (47)
+	end if
+c
+	write(*,*) ' finished ',chfnam
+c
+	close (12)
+c
+6004	format (1x,'  msl ',55(1x,a3,a2,1x,a3,a2,1x,a3,a2))
+6005	format (1x,'   min  ',55(1x,a3,a2,1x,a3,a2,1x,a3,a2))
+6006	format (1x,f6.0,55(f6.0,2f6.1))
+6007	format (1x,i8,55(f6.0,2f6.1))
+6008	format (1x,257i6)
+c
+	return
+c
+	end
+c
+c*********************************************************************
+        subroutine runrd(niter,kfyl1,kfyl2,chfnam)
+c*********************************************************************
+c
+c  allen becker added this to read values of most parameters from file 
+c  'rundat.dat'.  This replaces the old block data file.  
+c   
+c     fludwig revised 5/97
+c
+        include 'ngrids.param'
+c
+        include 'anchor.incl'
+        include 'flower.incl'
+        include 'limits.incl'
+        include 'staloc.incl'
+c
+        character*12 chfnam
+c
+c
+c  open run descriptors.
+c
+        open (22,file='namelist.dat',status='unknown',form='formatted')
+        read (22,*)
+        read (22,6002) infile
+c
+c
+	open(16,file=chfnam(1:8)//'_outfyl.dat',form='formatted',
+     $          status='unknown')
+ccc    	write (*,*) chpath//'runstf'//chmesh//'.dat'
+c
+	read (22,*) DBUG,dbug2
+	read (22,*) doBIN,doflat
+c
+	write (16,*) DBUG,dbug2,dobin,doflat
+	chpvex(14:15)='r2'
+c
+c  read number of vertical flow surfaces 
+c
+        read (22,*) nlvl
+	if (nlvl.gt.NZGRD .or. nlvl .lt. 1) then
+	   write (*,*) 'bad number of levels', nlvl, NZGRD
+	   pause
+	   stop
+	end if
+c
+c  read flow levels (fraction of top level)
+c
+        read(22,*) (sigma(k),k=1,nlvl)
+	write(16,*) nlvl,' flow levels at:'
+	write(16,6011) (sigma(k),k=1,nlvl)
+c
+        read (22,*) nflat
+	if (nflat.gt.NHORIZ .or. nflat .lt. 1) then
+	   write (*,*) 'bad number of levels', nhoriz, nflat
+	   pause
+	   stop
+	end if
+c
+c  read flow levels in m above low point
+c
+        read(22,*) (zchooz(k),k=1,nflat)
+        write (16,*) 'output lvls ',(zchooz(k),k=1,nflat)
+c
+c  read factor for converting to m/s
+c
+	read (22,*) spdcnv
+	write(16,*) 'speed conversion = ',spdcnv
+c
+c  read no. cols,rows for grid
+c
+        read (22,*) nrow,ncol
+	if (nrow .gt. NYGRD .or. ncol .gt. NXGRD) then
+	   write (*,*) 'bad x,y dimensions are ',ncol,nrow
+	   write (*,*) 'they should not be > ', NXGRD,NYGRD
+	   pause
+	   stop
+	end if
+	write(16,*) 'x & y grid dimensions are ',ncol,nrow
+c
+c  read grid pt interval for ascii output -- is all
+c  grid pts, 2, evry other one etc.
+c
+        read (22,*) nskip
+        read (22,*) NRYTX, NRYTY
+        read (22,*) NASCX0, NASCY0
+c
+c  check to make sure we don't try to write  outside boundaries.
+c
+	if (NASCX0-1+NRYTX .gt. ncol) then
+	   write (*,*) 'write grid runs over calc. grid -- x direct.'
+	   NRYTX=ncol-NASCX0+1
+	   write (*,*) 'no of output columns set to ',NRYTX
+	end if
+	if (NASCY0-1+NRYTY .gt. ncol) then
+	   write (*,*) 'write grid runs over calc. grid -- y direct.'
+	   NRYTY=nrow-NASCY0+1
+	   write (*,*) 'no of output rows set to ',NRYTY
+	end if
+c
+c  read grid intervals in km
+c
+        read (22,*) dscrs
+	write(16,*) 'grid spacing (km) = ',dscrs
+c
+c  read utm coordinate of reference point (1,1)--(x,y) 
+c
+        read (22,*) utmapx,utmapy
+	write(16,*)  'anchor point utms = ',utmapx,utmapy
+c
+c  read anchor point grid indices (ix,jy) 
+c
+        read (22,*) kgridx,kgridy
+	write(16,*) 'anchor point indices = ',kgridx,kgridy
+	xorig=utmapx-dscrs*float(kgridx)
+	yorig=utmapy-dscrs*float(kgridy)
+c
+c  constants used to define surface shapes subroutine resig
+c  redefines surface shapes using critical streamline methodology.
+c
+        read (22,*) avthk
+	write(16,*)  'ht of top surface over lowest pt = ',avthk
+        read (22,*) slfac
+	write(16,*) '1st guess terrain-following factor = ',slfac
+        read (22,*) cmpres
+	write(16,*) 'sfc compression factor = ',cmpres
+        read (22,*) dpotmin
+	write(16,*) 'minimum allowable potent. temp lapse (deg/m) ',
+     $               dpotmin
+c
+c  	constants used for interpolation -- d2min is the minimum 
+c       distance allowed in the inverse weighting denominator.  ht2dis 
+c       defines the relative import of changes in elevation versus 
+c       horizontal distance in the inverse distance weighting.  when 
+c       set to zero, vertical terrain effect is not included.
+c
+c       read roughness length (zzero) and anemometer height (z10)
+c
+        read (22,*) zzero,z10
+	z0=zzero
+	zchooz(1)=z10
+	write(16,*) nflat-1,' horizontal levels at:'
+	write(16,6006) (zchooz(k),k=2,nflat)
+	write (16,*) 'roughness length & anemometer ht = ',zzero,z10
+        read (22,*) d2min
+        read (22,*) dtwt
+	write (16,*) 'min inverse dist denominator & ',
+     $              'relative import z to r= ', d2min,ht2dis
+c
+c       niter is the upper limit on iterations toward nondivergence in 
+c       bal5 adjmax is the fraction of the usual iterative adjustment 
+c       toward nondivergence that is made at grid points near 
+c       observations in subroutine bal5.
+c
+        read (22,*) niter
+	write(16,*) 'number of iterations in bal5 = ',niter
+        read (22,*) adjmax
+	write(16,*)  'max adjustment near obs = ',adjmax
+c
+c  read indices of low points to be used in critical streamline 
+c  calculations for each temperature sounding.
+c
+	do 97 lows=1,5 
+	   read (22,*) lowix(lows),lowiy(lows)
+97	continue
+	write(16,*)  'representative low pts.: '
+	do 98 lo=1,5  
+	   write(16,*) lowix(lo),lowiy(lo)
+98	continue
+        read (22,*) nend
+c
+c  extra variables to output -- vertical motion (w), theta
+c
+	read(22,*) dowcmp
+	read(22,*) dothet
+	read(22,*) dopres
+	read(22,*) doBRi
+	read(22,*) doBVpd
+	read(22,*) doobs
+c
+c  profiles & time series instead of arrays?
+c
+        read (22,*) dowvsz
+        read (22,*) npfyls
+	write(16,*) npfyls,' wind profile outputs'
+	if (npfyls.gt.5 .and. dowvsz) then
+	   write(*,*) npfyls,' is too many wind profile outputs!'
+	   stop
+	end if
+	if (.not. dowvsz) then
+	   npfyls=0
+	else
+	   if (nend.gt.111) then
+	      write (*,*) 'too many cases for profile plots.  ',
+     $             'Must be 111 or fewer.'
+     	      stop
+	   end if
+	   do 107 it=1,npfyls
+	      read (22,*)  ptutmx,ptutmy
+	      jprylx(it)=1+nint((ptutmx-XORIG)/DSCRS)
+	      jpryly(it)=1+nint((ptutmy-yORIG)/DSCRS)
+107	   continue
+	end if
+	write(16,*) ' write ',npfyls,' wind profiles '
+c
+6002	format (a13)
+6006	format (1x, 20f10.2)
+6011	format (1x, 'sigmas: ',20f8.4)
+c
+	return
+c
+        end
+c
+c**********************************************************************
+          SUBROUTINE BAL5(NITER)
+c**********************************************************************
+C
+C  THIS IS A MODIFIED VERSION OF ROY ENDLICH'S OCTOBER 1984 CODE. THE
+C  OPTIONS FOR VORTICITY CONSERVATION & NONZERO DIVERGENCE HAVE BEEN
+C  REMOVED. THE CODE WAS ALSO MODIFIED TO USE MORE
+C  IF-THEN-ELSE STRUCTURE BY LUDWIG DECEMBER 1987.
+C
+C  THIS ROUTINE BALANCES DIVERGENCE TOWARD ZERO. DIV IS SCALED TO UNITS
+C  OF 10**-6/SECOND. THE METHOD USES DIRECT VECTOR ALTERATIONS.
+C  THIS FORM IS FOR A SQUARE GRID AND OMITS TRIGONOMETRIC FUNCTIONS.
+C  THE FLUX FORMULATION IS USED SO THAT WIND COMPONENTS ARE WEIGHTED BY
+C  THE THICKNESS OF THE LAYER WHEN THE FINITE DIFFERENCE SCHEME IS USED
+C  TO REDUCE THE DIVERGENCE. INDICES IN ARRAYS (I,J,K) ARE I=COLUMN,
+C  J=ROW, K=LEVEL; PT (1,1,1) IS AT SW CORNER AT GROUND. FOR 
+c  COMPUTATION BOXES, INDICES REFER TO SW CORNER OF BOX.
+C______________________________________________________________________
+c
+c  Modified march 1996 so that below ground and near-station points are 
+c  treated separately.  adjustments at grid points near observation 
+c  sites are adjusted by less (the factor adjmax) than other points.  
+c  below ground are left unadjusted as before.
+c
+c	f. l. ludwig 3/96
+C______________________________________________________________________
+C
+C  modififed so the adjustments over overridden at the end of each 
+c  iteration all points are adjusted, then those near observations or 
+c  surrounded by 3 or 4 subsurface point are set back to original, or 
+c  near-original values before starting next iteration.  added section 
+c  to get vertical motion estimates from slope of flow surface and 
+c  horizontal components (function dubyou)
+c
+c	fludwig 3/2000
+C_____________________________________________________________________
+c
+	include 'ngrids.param'
+C
+        include 'flower.incl'
+        include 'limits.incl'
+        include 'staloc.incl'
+c
+       	LOGICAL doadj,IFXPT(NXGRD,NYGRD),isdop
+        REAL DI(NXGRD,NYGRD),U1(NXGRD,NYGRD),V1(NXGRD,NYGRD)
+	REAL UN(NXGRD,NYGRD),VN(NXGRD,NYGRD),THK(NXGRD,NYGRD)
+	REAL Ustart(NXGRD,NYGRD),Vstart(NXGRD,NYGRD)
+        DATA doadj, ENFRAC /.FALSE.,0.5/
+c
+        GS=DS*1.0E-05
+C
+C  USE GRID SPACING IN 100'S OF KM.  DS IS IN M. FOR PROPER SCALING.
+C
+        GSI=10.0/GS
+c
+        DO 800 L=2,NLVL
+C
+c  get components for this level
+c
+	  DO 35 J=1,NROW
+             DO 33 I=1,NCOL
+               UN(I,J)=U(I,J,L)
+               VN(I,J)=V(I,J,L)
+33	     continue
+35         CONTINUE
+C
+C  IDENTIFY PTS NOT TO BE CHANGED
+C
+           CALL FIXWND (IFXPT,L)
+C
+           CALL SETMAT(0.0,DI,NCOL,NROW)
+C
+C COMPUTE LAYER THICKNESS AND MULTIPLY WIND COMPONENTS
+C
+           DO 40 J=1,NROW
+             DO 40 I=1,NCOL
+                LA=L +1
+                IF (LA.GT.NLVL) LA=NLVL
+                HTA=RHS(I,J,LA)
+                LB=L-1
+                IF (LB.LT.1) LB=1
+                HTB=RHS(I,J,LB)
+                IF (HTB.LT.-1.0) HTB=-1.0
+                THK(I,J)=0.5*(HTA-HTB)*0.01
+C
+C  FOR NEG (OR VERY SMALL) RHS.
+C
+                IF (THK(I,J).LE.0.01) THK(I,J)=0.01
+c                IF (THK(I,J).LE.0.1) THK(I,J)=0.1
+C
+C  UNITS OF THICKNESS ARE HUNDREDS OF M FOR CONVENIENCE. 
+C  SET INITIAL WINDS BEFORE ALTERATIONS.
+C
+                U1(I,J)=UN(I,J)
+                V1(I,J)=VN(I,J)
+C
+C  WEIGHT WINDS WITH THICKNESS OF LAYER.
+C
+                UN(I,J)=U1(I,J)*THK(I,J)
+                VN(I,J)=V1(I,J)*THK(I,J)
+ 40         CONTINUE
+C
+C  COMPUTE DIVERGENCE (DI=DUE+DVN) FROM FLUX DIFFERENCES BETWEEN
+C  V COMPONENTS AT NORTH (VNO) & SOUTH (VSO) SIDES OF BOX & U
+C  COMPONENTS AT EAST (UE) & WEST (UW) SIDES OF BOX. DDIJ IS ZERO
+C  TO PRODUCE NONDIVERGENT WINDS; OTHER VALUES COULD BE USED TO
+C  ACCOMODATE AN AREA-WIDE GENERAL DIVERGENCE. RA=RELAXATION FACTOR.
+C
+	     DDIJ=0.0
+             RA=0.7
+             DO 240 LG=1,NITER
+c
+c  save values at start of iteration so the values at 
+c  near-oservation and other fixed points can be changed back at 
+c  end of ech iterative step -- added 3/2000 by fludwig
+c
+	       do 70 j=1,NROW
+		 do 60 i=1,NCOL
+		   ustart(i,j)=UN(i,j)
+		   vstart(i,j)=VN(i,j)
+60		continue
+70	      continue
+c
+              DO 150 J=1,NROWM1
+                DO 140 I=1,NCOLM1
+                   UE=0.5*(UN(I+1,J)+UN(I+1,J+1))
+                   UW=0.5*(UN(I,J)  +UN(I,J+1))
+                   VSO=0.5*(VN(I+1,J)+VN(I,J))
+                   VNO=0.5*(VN(I,J+1)+VN(I+1,J+1))
+                   DUE=GSI*(UE-UW)
+                   DVN=GSI*(VNO-VSO)
+                   DI(I,J)=DUE+DVN
+                   CUIJ=0.05*GS*(DDIJ-DI(I,J))*RA
+                   CVIJ=0.05*GS*(DDIJ-DI(I,J))*RA
+C
+C  LIMIT CHANGES TO LESS THAN 1 FOR NUMERICAL STABILITY.
+C
+                   IF (CUIJ .LT.-1.0) CUIJ=-1.0
+                   IF (CUIJ .GT. 1.0) CUIJ=1.0
+                   IF (CVIJ .LT.-1.0) CVIJ=-1.0
+                   IF (CVIJ .GT. 1.0) CVIJ=1.0
+C
+                   UN(I+1,J)=UN(I+1,J)+CUIJ
+                   UN(I+1,J+1)=UN(I+1,J+1) +CUIJ
+                   UN(I,J)=UN(I,J) -CUIJ
+                   UN(I,J+1)=UN(I,J+1) -CUIJ
+                   VN(I+1,J)=VN(I+1,J)-CVIJ
+                   VN(I,J)=VN(I,J)-CVIJ
+                   VN(I,J+1)=VN(I,J+1)+CVIJ
+                   VN(I+1,J+1)=VN(I+1,J+1)+CVIJ
+140		 continue
+C
+150           CONTINUE
+c
+c  go back and substitute original values, corrected for maximum
+c  specified adjustment at fixed points.  insert zeros for subsurface 
+c  points.  increase adjustments for higher levels.
+c
+c     added by fludwig 3/2000
+c
+	     do 170 j=1,NROW
+	       do 160 i=1,NCOL
+c
+		 if (ifxpt(i,j)) then
+c
+c  for upper wind site use minimum adjustment at all levels
+c
+		     isdop=.false.
+		     do 153 jd=1,NUMDOP
+			if (i.eq. nint(xdop(jd)) .and. 
+     $                        j.eq. nint(ydop(jd))) isdop=.true.
+153		     continue
+c
+		    if (L.eq.levbot(i,j) .or. isdop) then
+	               UN(i,j)=ustart(i,j)+
+     $                             adjmax*(UN(i,j)-ustart(i,j))
+	               VN(i,j)=vstart(i,j)+
+     $                             adjmax*(VN(i,j)-vstart(i,j))
+c
+		    else if (L.gt.levbot(i,j)) then
+c
+c  increase adjustment allowed with height at other fixed points
+c
+		       adjless=adjmax+(1.0-adjmax)*
+     $                     (rhs(i,j,L)-rhs(i,j,levbot(i,j)))/
+     $                     (rhs(i,j,NLVL)-rhs(i,j,levbot(i,j)))
+c
+                       UN(i,j)=ustart(i,j)+
+     $                          adjless*(UN(i,j)-ustart(i,j))
+                       VN(i,j)=vstart(i,j)+
+     $                          adjless*(VN(i,j)-vstart(i,j))
+		    end if
+		  end if
+160	        continue
+170	     continue
+c
+c  end of iteration loop
+c
+240	  CONTINUE
+C
+          SUM1=0.0
+          SUM2=0.0
+          Q1=0.0
+          DO 350 J=1,NROW
+             DO 340 I=1,NCOL
+C
+C  INCLUDE ONLY POINTS THAT ARE ABOVE THE SURFACE and 
+c  are not nearest to an observation site.
+C
+                IF (RHS(I,J,L).GT.0.0 ) then
+                    UN(I,J)=UN(I,J)/THK(I,J)
+                    VN(I,J)=VN(I,J)/THK(I,J)
+                    U1(I,J)=U1(I,J)-UN(I,J)
+                    V1(I,J)=V1(I,J)-VN(I,J)
+                    Q1=Q1+1.0
+                    SUM1=SUM1+U1(I,J)
+                    SUM2=SUM2+V1(I,J)
+                END IF
+340	     continue
+350	  continue
+c
+	  SUM1=SUM1/Q1
+	  SUM2=SUM2/Q1
+C
+C  NORMALIZE ORIGINAL AVERAGE VALUES FOR ABOVE GROUND POINTS
+c  that are not nearest observation sites.
+C
+	  DO 450 J=1,NROW
+            DO 445 I=1,NCOL
+                 IF (RHS(I,J,L) .GT.0.0) THEN
+                    UN(I,J)=UN(I,J)+SUM1
+                    VN(I,J)=VN(I,J)+SUM2
+                 ELSE
+                    UN(I,J)=0.0
+                    VN(I,J)=0.0
+                 END IF
+445	    continue
+450	  continue
+C
+C  CHANGE BACK TO 3D ARRAYS 
+C
+          DO 590 J=1,NROW
+            DO 580 I=1,NCOL
+                 U(I,J,L)=UN(I,J)
+                 V(I,J,L)=VN(I,J)
+                 W(I,J,L)=dubyou(UN(I,J),VN(I,J),I,J,L)
+580         CONTINUE
+590	  continue
+c
+c  end flow level loop
+c
+800     CONTINUE
+c
+        RETURN
+c
+        END
+c
+c*******************************************************************
+        SUBROUTINE FIXWND (IFXPT,LVL)
+C******************************************************************
+C
+C  THIS ROUTINE IDENTIFIES PTS NEAR OBSERVATION SITES SO THAT
+C  WIND ADJUSTMENTS CAN BE RESTRAINED IN SUBROUTINE BAL5.
+C
+c___________________________________________________________________
+c
+c  modified so that all levels above an upper wind site are identified,
+c  but only the first above ground level for surface wind sites.
+c
+c		f. l. ludwig, 3/96
+c___________________________________________________________________
+c
+c  further modified so that above ground points on a surface are 
+c  flagged for restrained adjustment if they have 3 or more of the 4 
+c  surrounding points are below ground.
+c
+c		fludwig 3/2000
+c___________________________________________________________________
+C
+          include 'ngrids.param'       
+C
+          include 'flower.incl'
+          include 'limits.incl'
+          include 'staloc.incl'
+c
+        LOGICAL IFXPT(NXGRD,NYGRD)
+	save
+c
+c  intialize ifxpt values to false
+c
+	do 22 ix=1,NXGRD
+	   do 20 iy=1,NYGRD
+		ifxpt(ix,iy)=.false.
+20	   continue
+22	continue
+c
+c  check all grid points to see if they should be adjusted
+c  if the point itself, or 3 or 4 of the surrounding points 
+c  are subterrainian, restrict adjustments, i.e. set ifxpt to .true.  
+C
+	do 50 ix=2,ncol-1
+	   do 48 iy=2,nrow-1
+	      if (rhs(ix,iy,lvl).le. 0.0) then
+		 ifxpt(ix,iy)=.true.
+	      else
+		 nsubter=0
+		 do  44 jx=ix-1,ix+1,2
+		    do  40 jy=iy-1,iy+1,2
+ 		        if (rhs(jx,jy,lvl).le. 0.0) 
+     $                             nsubter=nsubter+1
+40		    continue
+44		continue
+ 		if (nsubter .ge. 3)  then
+                   ifxpt(ix,iy)=.true.
+		else
+                   ifxpt(ix,iy)=.false.
+		end if
+	     end if
+48	  continue
+50	continue
+		      
+c
+c  set flag for limited adjustment at points around obs site
+c
+	DO 200 I=1,NSITES
+          if (I .le. numnws ) then
+c
+c  check to see if this site had an observation
+c
+	      if (JGOOD(I)) then
+                  ix=NINT(XG(I))
+                  iy=NINT(YG(I))
+                  if (ix.gt.0 .and. ix.le.ncol   
+     $                 .and. iy.gt.0 .and.    
+     $                          iy .le.nrow) then
+c
+c  check to see if this is first level above surface for 
+c  surface observations.  
+c
+		     if (rhs(ix,iy,lvl) .gt. 0.0 .or. lvl.eq.1) 
+     $                               IFXPT(iX,iY)=.true.
+		  end if
+	       end if
+	    end if
+c
+200	CONTINUE
+c
+        RETURN
+        END
+c
+c*********************************************************************
+        SUBROUTINE BETWIN
+C*********************************************************************
+C
+C  THIS SUBROUTINE ESTIMATES WINDS BETWEEN THE TOP AND BOTTOM LEVELS. 
+c  THE DEVIATION OF OBSERVED WINDS FROM A LOG PROFILE IS FIRST 
+c  DETERMINED.  THEN THE DEVIATIONS AT EACH LEVEL ARE INTERPOLATED BY 
+c  AN INVERSE DISTANCE TO A POWER WEIGHTING SCHEME.  THE 
+c  INTERPOLATED DEVIATIONS ARE USED TO CORRECT  THE CALCULATED LOG 
+c  PROFILES AT THE GRID POINTS.
+C               --F  LUDWIG  12/87
+C
+	include 'ngrids.param'
+c
+	include 'anchor.incl'
+	include 'flower.incl'
+	include 'limits.incl'
+	include 'staloc.incl'
+	include 'tsonds.incl'
+C
+        real DDOPU(NWSITE,NZGRD),DDOPV(NWSITE,NZGRD)
+        real dutmp(NSITES),dvtmp(NSITES),xvar(NSITES),yvar(NSITES)
+c
+	integer lbot(NWSITE)
+c
+	logical oksond(NWSITE,NZGRD)
+c
+        IF (NLVL .LE. 3) THEN
+           write(*,*) ' ONLY ',NLVL-1,' FLOW SURFACES'
+           RETURN
+        END IF
+C
+C  GET LOG PROFILES AT OBSERVATION POINTS AND DEVIATIONS FROM THEM. 
+c  Z0=ROUGHNESS HT.
+C
+	IF (NUMDOP .GT. 0) THEN
+	   DO 50 JDOP = 1,NUMDOP
+c
+c  find lowest flow surface for this sonde
+c
+	      do 22 il=2,nlvl
+	         if (ZSIGL(jdop,il) .ge. z0) then
+                    H0=ZSIGL(jdop,il)
+		    lbot(jdop)=il
+		    go to 24
+		 end if
+22	      continue
+c
+c  interpolate between lowest and highest levels above the
+c  surface for getting deviations.
+c
+24	      uu = USIG(JDOP,lbot(jdop))
+	      vv = VSIG(JDOP,lbot(jdop))
+	      h0 = ZSIGL(Jdop,lbot(jdop))
+              UTOP = USIG(JDOP,NLVL)
+              VTOP = VSIG(JDOP,NLVL)
+              ZTOP = ZSIGL(Jdop,NLVL)
+              DDOPU(JDOP,NLVL)=0.0
+              DDOPV(JDOP,NLVL)=0.0
+	      oksond(JDOP,NLVL)=.true.
+	      oksond(JDOP,lbot(jdop))=.true.
+              DO 38 LL = 2,NLVL-1
+                 IF (LL .Gt. lbot(jdop)) THEN
+                    ZZ = ZSIGL(jdop,LL)
+                    CALL LGNTRP(UU,H0,ZTOP,ZZ,U0,UTOP)
+                    CALL LGNTRP(VV,H0,ZTOP,ZZ,V0,VTOP)
+c
+c  get deviations from log interpolated value for this level
+c
+                    DDOPU(JDOP,LL) = USIG(JDOP,LL)-UU
+                    DDOPV(JDOP,LL) = VSIG(JDOP,LL)-VV
+	            oksond(JDOP,LL)=.true.
+                 ELSE
+                    DDOPU(JDOP,LL)=0.0
+                    DDOPV(JDOP,LL)=0.0
+	            if (LL.ne.lbot(jdop)) oksond(JDOP,LL)=.false.
+                 END IF
+38            CONTINUE
+50         CONTINUE	   
+	END IF
+C
+C  GET LOG PROFILES AT EACH GRID POINT-- FROM 1ST ABOVE-GROUND LEVEL.
+c  then add deviation from log as determined from horizontal 
+c  interpolation between soundings
+C
+	nevent=0
+        DO 100 IX = 1,NCOL
+	   xhere=float(ix)
+           DO 90 IY = 1,NROW
+	      yhere=float(iy)
+              UTOP = U(IX,IY,NLVL)
+              VTOP = V(IX,IY,NLVL)
+              ZTOP = RHS(IX,IY,NLVL)
+              H0 = 10.0
+              U0 = U(IX,IY,1)
+              V0 = V(IX,IY,1)
+	      DO 80 LL=levbot(IX,IY),NLVL-1
+c
+c  get components from log linear interpolation between top and bottom
+c
+                 ZZ=RHS(IX,IY,LL)
+                 CALL LGNTRP(U(IX,IY,LL),H0,ZTOP,ZZ,U0,UTOP)
+                 CALL LGNTRP(V(IX,IY,LL),H0,ZTOP,ZZ,V0,VTOP)
+c
+c  get correction for this grid point and flow level
+c
+	         n4use=0
+	         DO 78 JDOP = 1,NUMDOP
+c
+		    if (oksond(JDOP,LL)) then
+	               n4use=n4use+1
+		       dutmp(n4use)=ddopu(jdop,LL)
+		       dvtmp(n4use)=ddopv(jdop,LL)
+		       xvar(n4use)=xdop(jdop)
+		       yvar(n4use)=ydop(jdop)
+		     end if
+78	          CONTINUE
+c
+c  if this grid pt. is below the bottom flow sfc for all soundings, we 
+c  set the deviation to 0 and use the interpolated value
+c
+	          if (n4use.le.0) then
+		     nevent=nevent+1
+		     du=0.0
+	             dv=0.0
+		  else
+	             call rinvmod(du,xhere,yhere,xvar,yvar,
+     $                             n4use,dutmp)
+	             call rinvmod(dv,xhere,yhere,xvar,yvar,
+     $                             n4use,dvtmp)
+		  end if
+c
+c  check for interpolated sond data and use it to correct  the
+c  log profile.i if no obs on this flow sfc, use the values already
+c  interpolated.
+c
+                  U(IX,IY,LL)=DU+U(IX,IY,LL)
+                  V(IX,IY,LL)=DV+V(IX,IY,LL)
+c              
+80             CONTINUE
+90	   CONTINUE
+100	CONTINUE
+c
+c  introduce influece of observed surface winds on lowest layer aloft 
+c  by interpolating between anemometer ht. and 2nd lowest sfc.to 
+c  obtain wind on the lowest above ground surface.   if only the top
+c  sfc is above ground, extrapolate up from sfc.   
+c
+	do 200 ix=1,ncol
+	   do 190 iy=1,nrow
+c
+	      if (levbot(IX,IY).lt.nlvl) then
+	         u0=U(IX,IY,1)
+	         v0=V(IX,IY,1)
+	         H0=z10
+		 utop=U(IX,IY,levbot(IX,IY)+1)
+		 vtop=V(IX,IY,levbot(IX,IY)+1)
+		 ztop=rhs(ix,iy,levbot(IX,IY)+1)
+		 zz=rhs(ix,iy,levbot(IX,IY))
+                 CALL LGNTRP(uu,H0,ZTOP,ZZ,U0,UTOP)
+                 CALL LGNTRP(vv,H0,ZTOP,ZZ,V0,VTOP)
+		 U(IX,IY,levbot(IX,IY))=uu
+		 V(IX,IY,levbot(IX,IY))=vv
+	      else
+		 U0=0.0
+		 V0=0.0
+		 H0=z0
+		 utop=U(IX,IY,1)
+		 vtop=V(IX,IY,1)
+		 ztop=z10
+		 zz=rhs(ix,iy,nlvl)
+                 CALL LGNTRP(uu,H0,ZTOP,ZZ,U0,UTOP)
+                 CALL LGNTRP(vv,H0,ZTOP,ZZ,V0,VTOP)
+		 U(IX,IY,levbot(IX,IY))=uu
+		 V(IX,IY,levbot(IX,IY))=vv
+	      end if
+190	   continue
+200	continue
+c
+        RETURN
+c
+        END
+C
+C********************************************************************
+        SUBROUTINE DOPSIG(ICALL)
+C********************************************************************
+C
+C  ASSIGN WND STA WIND PROFILES TO FLOW SURFACES.MISSING WINDS ARE 
+c  DENOTED BY -9999. IF SOUNDING IS NOT COMPLETE THE LAST REPORTED WIND 
+c  IS USED AT THE HIGHEST ALTITUDES. AFTER FLOW SURFACES ARE REDEFINED 
+c  (RESIG), DOPSIG IS RECALLED (ICALL >1) AND THE SOUNDINGS ARE 
+c  REINTERPOLATED TO THE SURFACES. TOPWIND AND BETWIN ARE RECALLED TO 
+c  PROVIDE THE WINDS THAT ARE TO BE BALANCED. THE ORIGINAL VERSION OF 
+c  THIS SUBROUTINE WAS WRITTEN BY R.M. ENDLICH, SRI INTN'L, MENLO PARK 
+c  CA 94025. 
+c  IT WAS LARGELY REWRITTEN  BY LUDWIG IN NOV,1987. THIS VERSION 
+c  INCLUDES CHANGES MADE IN APRIL, 1989.
+C
+c  further modified may 1989 to provide for a second call where winds 
+c  are reinterpolated to the newly defined flow surfaces; data reading
+c  and other parts of the routine are skipped -- f. ludwig
+c
+c
+        include 'ngrids.param'
+C
+	include 'anchor.incl'
+        include 'flower.incl'
+        include 'limits.incl'
+        include 'staloc.incl'
+        include 'tsonds.incl'
+c
+	real DPHT(NSNDHT,NWSITE), DPUC(NSNDHT,NWSITE)
+	real DPVC(NSNDHT,NWSITE),RHS1(NZGRD),sythyt(NWSITE)
+	integer levhi(NWSITE)
+c
+      	DATA UVO/0.0/
+	save
+C
+C  VARIABLES ARE:
+C    DPUC=U COMPONENT OF WND STA WIND IN MPS
+C    DPVC=V COMPONENT OF WND STA WIND IN MPS
+C    nwhts=NUMBER OF POINTS IN VERTICAL WIND PROFILE
+C    NLVL=NUMBER OF FLOW LEVELS
+C    RHS=HT OF FLOW SURFACES ABOVE TERRAIN (M)
+C    XG,YG=STA. DIST IN X,Y IN GRID UNITS FROM 0,0 (SW CORNER)
+C    Z0, UVO = ROUGHNESS HT AND ZERO-LEVEL WIND FOR INTERPOLATING
+c    sythyt(is)=sfc elevation for site is
+c    levhi(is)=highest flow surface for which wind was observed at site is
+c
+C    on 1st call at each time, read in wind profiles.
+c
+	if (icall .eq. 1) then
+	   DO 45 it=1,NUMDOP
+c
+c  zero values on flow surfaces before calculating
+c
+	      do 11 ilev=1,NLVL
+	         USIG(it,ilev)=0.0
+	         VSIG(it,ilev)=0.0
+11	      continue
+c
+c  skip blank line then read coordinates of site
+c
+              READ (12,*)
+              READ (12,*)  dopx,dopy,dopz
+	      sythyt(it)=dopz
+c              print *,it,dopx,dopy,dopz
+C
+C  locate grid point nearest the sounding (note origin at 1,1).
+C
+	      xdop(it)=1.0+(dopx-XORIG)/DSCRS
+	      ydop(it)=1.0+(dopy-YORIG)/DSCRS
+	      zdop(it)=dopz
+              IX=MAX(1,NINT(xdop(IT)))
+              JY=MAX(1,NINT(ydop(IT)))
+              IX=MIN(IX,NCOL)
+              JY=MIN(JY,NROW)
+	      zfix=sfcht(ix,jy)-sythyt(it)
+              READ (12,*) nwhts(it)
+c
+c  skip column heading line
+c
+              READ (12,*)
+	      DO 15 LL=1,nwhts(it)
+                 READ (12,*) ZZHT,ZZWD,ZZWS
+c   
+                 IF (LL .LT. NSNDHT) THEN
+                    DPHT(LL,it)=ZZHT-sythyt(it)
+                    DPWD(LL)=ZZWD
+                    DPWS(LL)=ZZWS
+	         ELSE
+                    DPHT(NSNDHT,it)=ZZHT-sythyt(it)
+                    DPWD(NSNDHT)=ZZWD
+                    DPWS(NSNDHT)=ZZWS
+                 END IF
+15	      CONTINUE
+	      IF (nwhts(it) .GT. NSNDHT) nwhts(it)=NSNDHT
+C
+C  CONVERT WIND MEASUREMENT HEIGHTS IN METERS (MSL) TO METERS (AGL)
+c  adjust for fact that sounding location not at grid pt.
+C
+	      DO 25 LL=1,NLVL
+                 RHS1(LL)=RHS(IX,JY,LL)
+		 ZSIGL(it,ll)=rhs1(ll)
+25	      CONTINUE
+c
+C
+C  CHANGE DIRECTION AND SPEED (MPS) TO U AND V; CHECK FOR MISSING DATA 
+c  OR BELOW GROUND HEIGHTS (AFTER CONVERSION FROM MSL) ON 1ST CALL.
+C
+	      NEWLL=0
+              DO 40 LL=1,nwhts(it)
+                 IF (DPWD(LL).GT.-9998.9) THEN
+                    IF (DPHT(LL,it) .GT. Z0) THEN
+                       NEWLL=NEWLL+1
+                       DPUC(NEWLL,it)=
+     $                          -DPWS(LL)*SIN(DPWD(LL)/57.295)
+                       DPVC(NEWLL,it)=
+     $                          -DPWS(LL)*COS(DPWD(LL)/57.295)
+                       DPHT(NEWLL,it)=DPHT(LL,it)
+                    END IF
+                 END IF
+40	      CONTINUE
+              nwhts(it)=NEWLL
+45	   CONTINUE
+	end if
+C
+C  INTERPOLATE TO ORIGINAL, OR NEWLY DEFINED, FLOW SURFACE HEIGHTS
+c  at levels where data are available
+C	
+	DO 150 it=1,NUMDOP
+           IX=MAX(1,NINT(xdop(it)))
+           JY=MAX(1,NINT(ydop(it)))
+           IX=MIN(IX,NCOL)
+           JY=MIN(JY,NROW)
+c
+c  find highest flow surface reached by this sounding. also check
+c  for highest sfc reached by any snding
+c
+	   levhi(it)=0
+           DO 100 kL=1,NLVL
+              zlevkl=RHS(IX,JY,kL)
+              RHS1(kL)=zlevkl
+	      ZSIGL(it,kl)=zlevkl
+	      do 96 iz=1,nwhts(it)
+	         if (dpht(iz,it).gt.zlevkl) levhi(it)=kl
+96	      continue
+100	   continue
+c
+c  assigning observed winds to flow surface heights up to top 
+c  of sonde
+c
+	   DO 140 kL=1,levhi(it)
+	      ZF=RHS1(kL)
+c
+	      IF (ZF .LE. Z0) THEN
+C
+C  ZERO WIND WHEN FLOW SFC BELOW roughness height.
+C
+                 USIG(it,kL)=0.0
+                 VSIG(it,kL)=0.0
+	      ELSE IF (ZF.GT.Z0 .AND. ZF.LE. DPHT(1,it)) THEN
+C
+C  FLOW SFC BELOW 1ST OBSERVATION HT -- log interp to flow sfc.
+C
+	         CALL LGNTRP(USIG(it,kL),Z0,DPHT(1,it),
+     $                                  ZF,UVO,DPUC(1,it))
+                 CALL LGNTRP(VSIG(it,kL),Z0,DPHT(1,it),
+     $                                  ZF,UVO,DPVC(1,it))
+	      ELSE
+c
+c  flow surface above lowest ob -- find which obs it is between
+c  and log interpolate.
+c
+	         do 135 jht=1,nwhts(it)-1
+	            ZW1=DPHT(JHT,it)
+                    ZW2=DPHT(JHT+1,it)
+                    IF (ZF.GT.ZW1 .AND. ZF.LE.ZW2) THEN
+C
+C FLOW SFC BETWEEN OBSERVATION HTS
+C
+                       CALL LGNTRP(USIG(it,kL),ZW1,ZW2,ZF,
+     $                           DPUC(JHT,it),DPUC(JHT+1,it))
+                       CALL LGNTRP(VSIG(it,kL),ZW1,ZW2,ZF,
+     $                             DPVC(JHT,it),DPVC(JHT+1,it))
+     	               go to 140
+     	            end if
+135		 continue
+c
+	      END IF
+140	   continue
+150	continue
+c
+c  find highest level reached by any sonde
+c
+	levtop=0
+	do 160 jsond=1,numdop
+	   levtop=max(levtop,levhi(jsond))
+160	continue
+C
+C  all observed data interpolated vertically to flow surfaces.  now,
+C  interpolate horizontally up to top observation where required
+c
+	do 200 jsond=1,numdop
+           xx=xdop(jsond)
+	   yy=ydop(jsond)
+	   do 180 il=levhi(jsond)+1,levtop
+c
+c  this one is missing interpolate from others available at this level
+c
+	      sumu=0.0
+	      sumv=0.0
+	      sumwt=0.0
+	      do 175 jd=1,numdop
+c
+c  skip when looking at same sounding being interpolated for.
+c
+	         if (jd.ne.jsond) then
+		    if (levhi(jd).ge.il) then
+		       weight=WNDWT(xx,yy,xdop(jd),ydop(jd))
+		       sumwt=sumwt+weight
+		       sumu=sumu+weight*USIG(jd,il)
+		       sumv=sumv+weight*VSIG(jd,il)
+		    end if
+		 end if
+175	      continue
+c
+	      if (sumwt.gt.0.0) then
+	         USIG(jsond,il)=sumu/sumwt
+	         VSIG(jsond,il)=sumv/sumwt
+	      else
+		 write(*,*) 'check dopsig near 180'
+		 stop
+	      end if
+180	   continue
+200  	CONTINUE
+c
+c  if no sounding goes as high as uppermost level, extrapolate
+c  uppermost valuesto top of domain.
+c
+	if (levtop.lt.nlvl) then
+	   do 225 jsond=1,numdop
+	      do 220 il=levtop+1,nlvl
+	         USIG(jsond,il)=USIG(jsond,levtop)
+	         VSIG(jsond,il)=VSIG(jsond,levtop)
+220	      continue
+225	   continue
+	end if
+c
+c  all missing upper wind data have been estimated.
+c
+        RETURN
+C
+        END
+c
+C*******************************************************************
+        SUBROUTINE FLOWHT
+C******************************************************************
+C
+C  THIS SUBROUTINE DETERMINES THE WEIGHTED AVERAGE FLOW SURFACE HEIGHTS
+C  BASED ON THE VALUES THAT WOULD BE OBTAINED FROM THE INDIVIDUAL
+C  TEMPERATURE PROFILES--F LUDWIG, JANUARY 1988
+C
+          include 'ngrids.param'
+c
+          include 'anchor.incl'
+          include 'flower.incl'
+          include 'limits.incl'
+          include 'staloc.incl'
+          include 'tsonds.incl'
+C
+	real ryzvar(NSITES),xvar(NSITES),yvar(NSITES)
+	integer nryz
+c
+C  DZMAX(IT,IZ) = MAXIMUM RISE FOR IZth FLOW SFC AS DETERMINED FROM
+c
+        DO 220 IX = 1,NCOL
+           XX = FLOAT(IX)
+           DO 200 IY = 1,NROW
+	      YY=float(iy)
+              HERE=SFCHT(IX,IY)
+              DO 175 L = 1,NLVL
+		 if (numtmp .gt. 1) then
+C
+C  IF THE SITE HAD VALID DATA (NTHTS >0)) THEN GET WEIGHTED AVERAGE RISE
+C  AFTER GETTING RELATION FOR LOCAL TOPOGRAPHY HEIGHT VERSUS MAXIMUM 
+c  RISE FROM FUNCTION SLOPER.
+C
+	            nryz=0
+                    DO 150 it = 1,NUMTMP
+                       IF (NTHTS(it) .GT. 0 .and. 
+     $                                 dzmax(it,l).gt.-9998.) THEN
+                          ZRATIO=SLOPER(HERE,SFCLOW,zrise)
+			  nryz=nryz+1
+			  xvar(nryz)=xtmp(it)
+			  yvar(nryz)=ytmp(it)
+                          ZRATIO=SLOPER(HERE,SFCLOW,zrise)
+                          ryzvar(nryz)= ZRATIO*DZMAX(it,L)
+                       END IF
+150                 CONTINUE
+                    IF (nryz .GT. 0) THEN
+		       call rinvmod(rhere,xx,yy,xvar,yvar,nryz,ryzvar)
+                       RHS(IX,IY,L) = 
+     $                    rhere+avthk*sigma(L)+SFCLOW-HERE
+	            else
+c
+c  if no sounding reaches this high then use same rise as next 
+c  lower level -- if no sounding at all use a rise = to 3/4 the 
+c  terrain rise.
+c
+	               if (L.gt.1) then
+		          rhere=RHS(IX,IY,L-1)-
+     $                          (avthk*sigma(L-1)+SFCLOW-HERE)
+                          RHS(IX,IY,L)= 
+     $                         rhere+avthk*sigma(L)+SFCLOW-HERE
+		       else
+                          RHS(IX,IY,L)= 
+     $                       avthk*sigma(L)-0.25*(HERE-SFCLOW)
+		       end if
+		    end if
+                 ELSE if (numtmp .lt.1) then
+C
+C  IF NO SOUNDING USE SFC THAT RISES 3/4 AS FAST AS THE  TERRAIN.
+C
+	            write(*,*) 'be wary -- no sounding'
+                    RHS(IX,IY,L)= avthk*sigma(L)-0.25*(HERE-SFCLOW)
+		 ELSE if (numtmp.eq.1) then
+		    if (dzmax(1,L) .gt. -9998.) then
+C
+C  IF one SOUNDING reaches this level, USE it
+c
+		       rhere=SLOPER(HERE,SFCLOW,zrise)*DZMAX(1,L)
+                       RHS(IX,IY,L)=rhere+avthk*sigma(L)+SFCLOW-HERE
+		    else 
+		      if (L.gt.1 .and. DZMAX(1,L-1).gt.-9998.) then
+c
+c  if only one sounding and it doesn't reach this level, use highest
+c  available dzmax for upper levels
+c
+	                 dzmax(1,L)=dzmax(1,L-1)
+		         rhere=SLOPER(HERE,SFCLOW,zrise)*DZMAX(1,L)
+                         RHS(IX,IY,L)=rhere+avthk*sigma(L)+SFCLOW-HERE
+		      else
+C
+C  IF NO sonde this level or the one below USE SFC THAT RISES 3/4 
+c  AS FAST AS THE  TERRAIN.
+C
+                         RHS(IX,IY,L)=avthk*sigma(L)-
+     $	                                  0.25*(HERE-SFCLOW)
+		      end if                    
+		    end if                    
+		 end if
+c
+c  setting flow surface that clears terrain to clear it by at least
+c  20 m.
+c
+		 if (rhs(ix,iy,l).ge.z0 .and. 
+     $                rhs(ix,iy,l) .lt. 20.0) rhs(ix,iy,l)=20.0
+175           CONTINUE
+	      do 178 l=2,nlvl
+	         levbot(ix,iy)=l
+	         if (rhs(ix,iy,l).gt.z0) go to 200
+178	      continue
+200	   CONTINUE
+220	CONTINUE
+C
+        RETURN
+        END
+c
+c*********************************************************************
+        subroutine geosig
+c*********************************************************************
+c
+c  prepare sfc station reports of wind direction, wind speed
+c  (m/s), sea level pressure (mb), and temperature (deg celsius)
+c  for input to wind analysis if no upper winds.
+c  compute geos wind from pressure at three stations and
+c  correct it for thermal wind component (if desired).
+c
+c  by r m  endlich, sri intn'l, menlo park ca 94025 dec '84.
+c  variables.geostrophic wind calculations were put in the subroutine
+c  geostr and a  different method of wind interpolation was introduced 
+c  january 1988 by f. ludwig.
+c
+c  further modified may 1989 to reinterpolate to flow surfaces with
+c  second calls to dopsig, topwnd, sfctrp and betwin --f. ludwig
+c
+c  further modified november 1989 to interpolate sfc temperatures and 
+c  upper level potent temp lapse rates to flow surfaces
+c    -- f. ludwig
+c
+c  further modified march 1997 to read a long sequence of inputs from
+c  the same file (unit 12), not winds and upper temperatures from 
+c  separate files
+c
+c  further modified 12/01 to read different format as used with 
+c  VTMX SLC data
+c
+c
+c             -- f. ludwig  12/2001
+c
+c  variables:
+c    numnws = number of sfc reports
+c    wd = wind direction (deg cw from n-- meteorol convent.)
+c    sp = wind speed (m/s)
+c    stlt = station latitude in degs and hundredths
+c    stln = station longitude in degs and hundredths
+c    press = station sea level pressure in mb
+c    temp = station temp in deg celsius
+c    spdcnv=conversion factor to convert speeds to m/s, if in other 
+c           units
+c    deg2r= factor to convert degrees to radians
+c
+          include 'ngrids.param'
+C
+        parameter (PI=3.1415927,DEG2R=PI/180.0)
+C
+          include 'anchor.incl'
+          include 'flower.incl'
+          include 'limits.incl'
+          include 'staloc.incl'
+c
+       INTEGER ncallz
+c
+       	save
+c
+	data ncallz /0/
+c
+c  read surface station data: station id, station coordinates (utm)
+c  pressure, temperature, wind direction, wind speed (mps) 
+c
+	write (56,*) 'starting geosig'
+c
+c  read number of sfc obs,number of upper wind sites & number 
+c  of temp, profiles.  check for array sizes
+c
+	read (12,*) numnws, numdop, numtmp
+	write (56,*) numnws, numdop, numtmp
+	if (numnws.gt.NSITES .or. numnws.lt.1) then
+           write (*,*) 'bad number of sfc obs'
+           write (*,*) numnws, NSITES
+	   stop
+     	end if
+	if (numdop.gt.NWSITE .or. numdop.lt.1) then
+           write (*,*) 'bad number of wind profiles'
+           write (*,*) numdop,NWSITE
+	   stop
+	end if
+	if (numtmp.gt.NTSITE .or. numtmp.lt.1) then
+           write (*,*) 'bad number of temperature profiles'
+           write (*,*) numtmp,NTSITE
+	   stop
+	end if
+c
+c  skip column headings for surface data
+c
+	read (12,*)
+c
+c  read surface station data -- New format for SLC VTMX 12/01
+c
+	do 75 it=1,numnws
+           read (12,6004) chstid(it),xs,ys,zg(it),press,tempC(it),
+     $                      wd,ws,ylat,xlong,tempF,pmsl,altim(it)
+c
+c  convert press elevation info to altimeter setting, this fixes those
+c  automated sites where relative humidity is given in the altimeter 
+c  setting data field.
+c
+	   if (press.gt.0.0) then
+	      if (dbug) write(56,6004) chid7,press,zg(it),altim(it)
+	      altim(it)=altset(zg(it),press)
+	      if (dbug) write(56,6004) chstid(it),press,zg(it),
+     $                                 altim(it)
+	   else
+	      altim(it)=-9999.0
+	   end if
+c
+	       if (mod(it,20).eq.1) write(16,6004) chstid(it),xs,ys,
+     $                zg(it),press,tempC(it),wd,ws,altim(it)
+c
+c  converting utm coordinates (km) and elev. (m) to grid coordinates
+c  (km).   note that origin is at point 1,1
+c
+	      xg(it)=1.0+(xs-xorig)/dscrs
+              yg(it)=1.0+(ys-yorig)/dscrs
+	      ixg=nint(xg(it))
+	      iyg=nint(yg(it))
+c
+c converting units & getting components
+c
+	       if (ws .ge. -9998.9) then
+	 	    jgood(it)=.true.
+              	    ws=ws*SPDCNV
+                    ucomp(it)=-ws*sin(wd*DEG2R)
+                    vcomp(it)=-ws*cos(wd*DEG2R)
+               else
+	 	    jgood(it)=.false.
+                    ucomp(it)=-9999.0
+                    vcomp(it)=-9999.0
+               end if
+75      continue
+c
+	write (56,*) 'have finished reading surface stations '
+c
+	ncallz=ncallz+1
+c
+c  interpolate to lowest above ground grid points, using sfc data.
+c
+	nsfc=1
+        call sfctrp(nsfc)
+c
+c get top winds by interpolation between upper soundings if available
+c
+        icall=1
+        call dopsig (icall)
+        call topwnd
+c
+c  read temp profile & get lapse rates at flow levels
+c
+        call strat
+c
+        call betwin
+c
+c  reshape the flow surfaces using the 1st estimate winds &
+c  temperature profiles.
+c
+        call resig
+c
+c  go back and reinterpolate to new surfaces
+c
+c  -- the following code added may 1989 to give better values 
+c     for 1st guess field, f. ludwig
+c
+        icall=2
+c
+        call dopsig(icall)
+        call topwnd
+	nsfc=2
+        call sfctrp(nsfc)
+        call betwin
+c
+        DO 350 J=1, NROW
+           DO 325 I=1, NCOL
+              DO 300 LV=2,NLVL
+C
+C  WHEN RHS NEGATIVE (BELOW TERRAIN) MAKE WINDS 0.
+C
+                 IF (RHS(I,J,LV).le.z0) THEN
+                    U(I,J,LV)=0.0
+                    V(I,J,LV)=0.0
+                 END IF
+300 	      CONTINUE
+325 	   CONTINUE
+350 	CONTINUE
+c	   
+6004	format (a5,12f10.2)
+c
+	return
+c
+        end
+c
+c*********************************************************************
+        SUBROUTINE BETPAR
+C*********************************************************************
+C
+C  THIS SUBROUTINE ESTIMATES variable values BETWEEN THE TOP AND 
+c  BOTTOM LEVELS.   THE DEVIATION OF OBSERVED value var FROM A Linear
+c  PROFILE IS FIRST DETERMINED.  THEN THE DEVIATIONS AT EACH LEVEL 
+c  ARE INTERPOLATED BY AN INVERSE DISTANCE TO A POWER (PWR) WEIGHTING 
+c  SCHEME.  THE INTERPOLATED DEVIATIONS ARE USED TO CORRECT  THE 
+c  CALCULATED PROFILES AT THE GRID POINTS.
+c
+C               --F  LUDWIG  6/2002
+C
+	include 'ngrids.param'
+c       
+        PARAMETER (PWR=-2.0)
+C
+	include 'anchor.incl'
+	include 'flower.incl'
+	include 'limits.incl'
+	include 'staloc.incl'
+	include 'tsonds.incl'
+C
+	real varbl(NSITES),xx(NSITES),yy(NSITES),atemp(NXGRD,NYGRD)
+C
+	logical bysond(NXGRD,NYGRD)
+c
+c
+c  intialize ifxpt values to false
+c
+	do 22 ix=1,NXGRD
+	   do 20 iy=1,NYGRD
+		bysond(ix,iy)=.false.
+20	   continue
+22	continue
+c
+	IF (NUMTMP .LE. 0 .or. NLVL .LE. 3) THEN
+           write(*,*) ' ONLY ',NLVL-1,' FLOW SURFACES'
+           write(*,*) ' ONLY ',NUMTMP,' T-sondes'
+           write(*,*) 'cannot work '
+           stop
+        END IF
+c
+c  get altimeter setting, and potential temperature fields
+c  start with temperature fields, bottom, top and between.
+c
+	call vrsmoo (altim,atemp,numnws)
+	do 120 ix=1,ncol
+	  do 120 iy=1,nrow
+	    setalt(ix,iy,1)=atemp(ix,iy)
+	    pp=cvt2p(setalt(ix,iy,1),sfcht(ix,iy)+z10)
+	    prmb(ix,iy,1)=pp
+120	continue
+c
+	call vrsmoo (tempC,atemp,numnws)
+	do 122 ix=1,ncol
+	  do 122 iy=1,nrow
+	    tmpkel(ix,iy,1)=TPOT(pp,atemp(ix,iy))
+122	continue
+c
+c  filling in upper level values by inverse distance squared 
+c  interpolation between soundings.
+c
+	do 124 it=1,numtmp
+	   xx(it)=XTMP(it)
+	   yy(it)=yTMP(it)
+	   bysond(nint(xx(it)),nint(yy(it)))=.true.
+124	continue
+c
+c  get 1st estimates of potential temp and altimeter setting aloft 
+c  from horizontal interpolation between soundings, then adjust for
+c  sfc effects later.
+c
+	do 242 ix=1,ncol
+	   x0=float(ix)
+	   do 238 iy=1,nrow
+	      y0=float(Iy)
+	      do 235 iz=2,nlvl
+c
+	         if (rhs(ix,iy,iz).gt.z0) then
+	            do 127 it=1,numtmp
+	               varbl(it)=PTSIGL(it,iz)
+127	            continue
+	            num2use=numtmp
+	            call rinvmod(trpval,x0,y0,xx,yy,num2use,varbl)
+	            tmpkel(ix,iy,iz)=trpval
+c
+	            do 131 it=1,numtmp
+	               varbl(it)=ALTSIG(it,iz)
+131	            continue
+	            call rinvmod(trpval,x0,y0,xx,yy,num2use,varbl)
+	            setalt(ix,iy,iz)=trpval
+	            prmb(ix,iy,iz)=
+     $                    cvt2p(trpval,sfcht(ix,iy)+rhs(ix,iy,nlvl))
+c
+c  when not a sond location, get weighted average with sfc value.  
+c  sfc weight drops off with height as  -- 
+c
+c    val(z)=(1-((z-z10)/(ztop-z10))**0.5))*val(z10)+
+c                                ((z-z10)/(ztop-z10))**0.5)*val(ztop)
+c 
+	            if (.not. bysond(ix,iy) ) then
+		       if (rhs(ix,iy,iz).le.z10) then
+	                  tmpkel(ix,iy,iz)=tmpkel(ix,iy,1)
+			  setalt(ix,iy,iz)=setalt(ix,iy,1)
+		       else
+		          zz1=rhs(ix,iy,nlvl)-z10
+		          zz=rhs(ix,iy,iz)-z10
+		          wt0=((zz1-zz)/zz1)**0.5
+		          wt1=1.0-wt0
+			  tmpkel(ix,iy,iz)=wt0*tmpkel(ix,iy,1)+
+     $                                         wt1*tmpkel(ix,iy,iz)
+			  setalt(ix,iy,iz)=wt0*setalt(ix,iy,1)+
+     $                                         wt1*setalt(ix,iy,iz)
+		       end if
+		    end if
+	            prmb(ix,iy,iz)=cvt2p(setalt(ix,iy,iz),
+     $                            sfcht(ix,iy)+rhs(ix,iy,nlvl))
+	         else
+c
+c  points below ground are set to zero
+c
+		    setalt(ix,iy,iz)=0.0
+	            prmb(ix,iy,iz)=0.0
+	            tmpkel(ix,iy,iz)=0.0
+	         end if
+c
+235	      continue
+238	   continue
+242	continue
+c
+        RETURN
+c
+        END
+C
+C*********************************************************************
+        SUBROUTINE RESIG
+C*********************************************************************
+C
+C  REDEFINES THE HEIGHTS OF THE FLOW SURFACES BASED ON WIND SPEED OVER
+C  THE LOWEST TERRRAIN HEIGHTS & LAPSE RATES AT THE VARIOUS FLOW LEVELS
+C  --THE UNDERLYING CONCEPT IS SIMILAR TO THAT OF THE 'CRITICAL STREAM-
+C  LINE'. WEIGHTED AVERAGES ARE USED TO CALCULATE FLOW SURFACE HEIGHTS 
+c  AT EACH GRID POINT, GIVING GREATEST WEIGHT TO VALUES APPROPRIATE TO 
+c  THE NEAREST SOUNDINGS. 
+c
+c    --LUDWIG, JANUARY 1988.
+C
+          include 'ngrids.param'
+C
+          include 'anchor.incl'
+          include 'flower.incl'
+          include 'limits.incl'
+          include 'staloc.incl'
+          include 'tsonds.incl'
+C
+       real COMPDZ
+C
+C  MAKE SURE STUFF IS HERE WHEN YOU COME BACK
+C
+        SAVE
+C
+C  OVERS(DPTDZ,DZTOP) IS A STATEMENT FUNCTION THAT CAN BE USED TO 
+c  DEFINE MAXIMUM RISE OF A FLOW SURFACE IN TERMS OF THE POTENTIAL 
+c  TEMPERATURE LAPSE RATE (DPTDZ) RATE AND THE MAXIMUM DIFFERENCE IN 
+c  TERRAIN ELEVATION (DZMAX). THE VERSION INCLUDED HERE ASSUMES  THAT 
+c  FLOW FOLLOWS UNDER-LYING TERRAIN FOR NEUTRAL OR UNSTABLE CONDITIONS 
+c  & THAT THERE IS NO OVERSHOOT OR UNDERSHOOT.
+C  
+C
+        OVERS(DPTDZ,DZTOP)=DZTOP
+c
+           DO 200 IT = 1,NUMTMP
+C
+C  CHECK THAT THERE WAS DATA FROM T-SONDE STATION (NTHTS >0)
+C
+              IF (nthts(IT).GT.0) THEN
+c
+c  find nearest low reference point and the winds above it
+c
+		 idis2=(nint(xtmp(it))-lowix(1))**2+
+     $                        (nint(ytmp(it))-lowiy(1))**2
+		 jnear(it)=1
+	         do 30 jl=2,5
+		   if ((nint(xtmp(it))-lowix(jl))**2+
+     $                 (nint(ytmp(it))-lowiy(jl))**2 .lt. idis2) then
+                      idis2=(nint(xtmp(it))-lowix(jl))**2+
+     $                           (nint(ytmp(it))-lowiy(jl))**2
+                      jnear(it)=jl
+                   end if
+30		 continue
+		 lx=lowix(jnear(it))
+		 ly=lowiy(jnear(it))
+                 DO 100 L=1,NLVL
+                    RHSLO(IT,L)=RHS(LX,LY,L)
+                    SPD=SQRT(U(LX,LY,L)**2+V(LX,LY,L)**2)
+C
+C  PUT LOWER LIMIT ON POTENTIAL TEMPERATURE LAPSE RATE AND CALCULATE
+C  MAXIMUM RISE CORRESPONDING TO THE WIND SPEED & LAPSE FOR THIS 
+c  T-SONDE.
+C
+                    DTHETA=PTLAPS(IT,L)
+		    if (dtheta .gt.-998.) then
+                       IF (DTHETA.LE.DPOTMIN) DTHETA=DPOTMIN
+                       DZMAX(IT,L)=SPD/SQRT(9.8*DTHETA/TSIGL(IT,L))
+C
+C   FLOW AMPLITUDES ARE LIMITED using A STATEMENT FUNCTION (OVERS)
+C   OF THE POT TMP LAPSE & TERR. AMPLITUDE.
+C
+                       IF (DZMAX(IT,L).GT. OVERS(DTHETA,zrise))
+     $                            DZMAX(IT,L)=OVERS(DTHETA,zrise)
+		    else
+		       DZMAX(IT,L)=-9999.
+		    end if
+ 100             CONTINUE
+C
+C  DEFINE MINIMUM ALLOWABLE FLOW SURFACE SEPARATIONS FOR EACH T-SONDE'S
+C  DOMAIN OF INFLUENCE. MINIMUM SEPARATION DEFINED AS A FRACTION 
+c  (CMPRES) OF THEIR SEPARATION OVER THE TERRAIN LOW POINT FOR THE 
+c  T-SONDE. DO NOT LET SEPARATION BETWEEN SURFACES COMPRESS BY MORE 
+c  THAN CMPRES FACTOR OR BE GREATER THAN DEFINED BY OVERS(DPTDZ,DZMAX).
+C
+                 DO 150 L=NLVL-1,1,-1
+		    if (DZMAX(IT,L).GT.-9998.) then
+                       COMPDZ=CMPRES*(RHSLO(IT,L+1)-RHSLO(IT,L))
+                       IF (DZMAX(IT,L).GT.(DZMAX(IT,L+1)+COMPDZ))
+     $                         DZMAX(IT,L)=DZMAX(IT,L+1) +COMPDZ
+		    else
+		       DZMAX(IT,L)=-9999.
+		    end if
+ 150             CONTINUE
+C
+C  MAKE ONE MORE PASS TO ENSURE THAT UPPER SURFACES DO NOT RISE
+C  MORE RAPIDLY THAN THE SURFACE OR TERRAIN BELOW, WHICHEVER IS HIGHER.
+C
+                DO 155 L=2,NLVL
+		   if (DZMAX(IT,L).GT.-9998.) then
+		      if (L.eq.2) then
+                         IF (DZMAX(IT,L).GT.OVERS(DTHETA,zrise))
+     $                             DZMAX(IT,L)=OVERS(DTHETA,zrise)
+		      else
+			 diff=zrise-rhs(lx,ly,L)
+                         TOTRYZ=DZMAX(IT,L-1)
+                         IF (TOTRYZ .LT. DIFF) TOTRYZ=DIFF
+                         IF(DZMAX(IT,L).GT.TOTRYZ)
+     $                              DZMAX(IT,L)=TOTRYZ
+		      end if
+		   else
+		      DZMAX(IT,L)=-9999.
+		   end if
+ 155            CONTINUE
+C
+	   else
+	      write (*,*) 'no levels in resig for sond ',it
+	      stop
+           END IF
+C
+200     CONTINUE
+c
+c  NOW CALL FLOWHT TO DETERMINE THE WEIGHTED AVERAGE HTS FOR EACH FLOW 
+c  SURFACE ABOVE EACH GRID POINT & REDEFINE LOW FLOW SFC HEIGHTS ON 
+c  GRID
+C
+c
+        CALL FLOWHT
+C
+        RETURN
+        END
+C
+C********************************************************************
+        SUBROUTINE SFCTRP(ncall)
+C********************************************************************
+C
+C  THIS SUBROUTINE GETS FIRST ESTIMATE OF selected met variables
+c  AT LOWEST GRID POINTS. uses inverse distance-squared when false.
+c
+c   this version fludwig 3/2002
+C
+        include 'ngrids.param'
+c
+        include 'anchor.incl'
+        include 'flower.incl'
+        include 'limits.incl'
+        include 'staloc.incl'
+c
+	real uob(NSITES),vob(NSITES),xval(NSITES),yval(NSITES)
+c
+	save
+c
+        DATA ZERO /0.0/
+c
+C  FIRST, GET A VALUE FOR EACH X,Y GRID POINT.
+c
+c  interpolate to get values at 10 m u(ix,iy,1) & v(ix,iy,1)
+c  above each grid point on 1st call
+c
+	if (ncall .le.1) then
+c
+c*********bug fix when multiple cases run*****1/2002********
+c  flow surface heights must be reset to terrain-following on 1st
+c  call to avoid negative values left over from preceding calculations
+c
+	   ZRISE=SFCHI-SFCLOW
+	   RELHT=AVTHK
+c
+c  GET HEIGHT of each 1st guess surface RELATIVE TO TERRAIN FOR EACH 
+c  GRID PT. CHANGE IN HT RELATIVE TO THE LOWEST HT (MSL) IS ASSUMED 
+c  PROPORTIONAL TO SIGMA FOR THAT SFC.
+c
+	   DO 67 jy=1,NROW
+	      DO 66 ix=1,NCOL
+                 DO 65 kz=1,NLVL
+		    if (kz.eq.1) then
+	               RHS(ix,jy,kz) = z10
+		    else
+	               RHS(ix,jy,kz) =sigma(kz)*avthk- 
+     $                   (sfcht(ix,jy)-sfclow)*(1.0-slfac)
+		    end if
+C
+     	            if (RHS(ix,jy,kz) .le. 0.0) then
+		       write(*,*) 'bad terrain-following in sfctrp'
+		      
+		       stop
+		    end if
+65               CONTINUE
+66            CONTINUE
+67	   CONTINUE
+c
+c*********end bug fix when multiple cases run*************
+c
+c  interpolating wind components between surface observations.
+c
+	   numtru=0
+	   do 80 iob=1,numnws
+	      if (ucomp(iob).gt.-9998.9) then
+	         numtru=numtru+1
+	         uob(numtru)=ucomp(iob)
+	         vob(numtru)=vcomp(iob)
+	         xval(numtru)=xg(iob)
+	         yval(numtru)=yg(iob)
+	      end if	
+80	   continue
+c
+c  now assign interpolated values to level 1
+c
+	   do 124 iy=1,nrow
+	      y2=float(iy)
+	      do 122 ix=1,ncol
+	         x2=float(ix)
+	         call rinvmod(trpval,x2,y2,xval,yval,numtru,uob)
+		 u(ix,iy,1)=trpval
+	         call rinvmod(trpval,x2,y2,xval,yval,numtru,vob)
+		 v(ix,iy,1)=trpval
+	         levbot(ix,iy)=2
+c
+c  on 1st call extrapolate or interpolate to next surface
+c
+                  CALL LGNTRP(U(IX,IY,2),Z0,Z10,
+     $                    RHS(IX,IY,2),ZERO,u(ix,iy,1))
+                  CALL LGNTRP(V(IX,IY,2),Z0,Z10,
+     $                    RHS(IX,IY,2),ZERO,v(ix,iy,1))
+122	      continue
+c	      write (*,*) iy, (nint(100.0*u(jx,iy,1)),jx=20,40)
+c	      write (*,*) (nint(100.0*v(jx,iy,1)),jx=20,40)
+124	   continue
+c
+	else
+c
+c  on second call use values from 1st call to 
+c  determine components at 1st above ground level
+c
+	   DO 150 IY=1,NROW
+              DO 148 IX=1,NCOL
+C
+C  NOW set subsfc values to zero and INTER(EXTRA)POLATE TO 
+c  LOWEST ABOVE-GROUND FLOW SURFACE.
+C
+	         if (levbot(ix,iy).gt.2) then
+                    DO 145 L=2,levbot(ix,iy)-1
+C
+                       U(IX,IY,L)=0.0
+                       V(IX,IY,L)=0.0
+145                 CONTINUE
+		 end if
+c
+                 UU =u(IX,IY,1)
+                 VV =v(IX,IY,1)
+                 CALL LGNTRP(U(IX,IY,levbot(ix,iy)),Z0,Z10,
+     $                             RHS(IX,IY,levbot(ix,iy)),ZERO,UU)
+                 CALL LGNTRP(V(IX,IY,levbot(ix,iy)),Z0,Z10,
+     $                             RHS(IX,IY,levbot(ix,iy)),ZERO,VV)
+148	      continue
+150	   CONTINUE
+	end if
+c
+        RETURN
+C
+        END
+c
+********************************************************************
+	subroutine vrsmoo(val,valtrp,number)
+C*******************************************************************
+c  
+c  this program interpolates to find values (valtrp) at grid points
+c  from observed values (val)
+c
+c		fludwig, oct 97
+c  this version uses simple inverse distance squared weighting so that
+c  those parameters like altimeter setting and potential temperature
+c  which are not expected to have very sharp horizontal gradients will
+c  be smoothed.  pressure observations seemed sufficiently unreliable
+c  that smoothing was deemed desirable.
+c
+c       fludwig,  6/2002
+c
+c
+c  xg,yg,val	coordinates (grid units) & value at observing sites
+c  val		observed variable values
+c  xval,yval	coordinates normalized for MQ interpolation
+c  valtrp	interpolated values at grid points
+c  number	number of observations
+c  
+        include 'ngrids.param'
+c
+        include 'limits.incl'
+        include 'staloc.incl'
+c
+	real val(NSITES),valtrp(NXGRD,NYGRD)
+	save
+c
+	write (16,*) 'starting vrsmoo'
+c
+c begin loop s through grid points
+c
+	do 370 ix=1,ncol
+	   x2=float(ix)
+	   do 365 iy=1,nrow
+	      y2=float(iy)
+	      numtru=0
+	      sum=0.0
+	      sumwt=0.0
+	      do 355 is=1,number
+c
+c check that data are good
+c
+                 if (val(is).gt.-9998.9) then
+		    weight=WNDWT(x2,y2,xg(is),yg(is))
+		    sumwt=sumwt+weight
+		    sum=sum+weight*val(is)
+		 end if
+355	      continue
+	      if (sumwt .gt. 0.0 ) then
+	         valtrp(ix,iy)=sum/sumwt
+	      else
+	      	 write (*,*) ' no good pressure or temp obs in vrsmoo'
+		 write (*,*) 'return to quit'
+		 pause
+		 stop
+	      end if
+365	   continue
+370	continue
+c
+	return
+c
+	end
+c
+********************************************************************
+	subroutine vrsdis(val,valtrp,number)
+C*******************************************************************
+c  
+c  this program interpolates to find values (valtrp) at grid points
+c  from observed values (val)
+c
+c		fludwig, oct 97
+C
+c
+c  modified to use input value when within 0.5*sqrt(2) grid units
+c  or inverse distance polynomial fit based on nearest observations
+c  otherwise  --- rinvmod (trpval,x0,y0,xx,yy,nobs,varbl)
+c 
+c
+c       fludwig,  7/2002
+c
+c
+c  xg,yg,val	coordinates (grid units) & value at observing sites
+c  valtrp	interpolated values at grid points
+c  number	number of observations
+c  
+        include 'ngrids.param'
+c
+        include 'limits.incl'
+        include 'staloc.incl'
+c
+	real val(NSITES),valtrp(NXGRD,NYGRD)
+	real varbl(NSITES),xval(NSITES),yval(NSITES)
+c
+	save
+c
+	write (16,*) 'starting vrsdis'
+c
+c check that data are good
+c	
+	write (*,*) number,(nint(100.0*val(iob)),iob=1,number)
+c
+	if (number.le.0) then
+	   write(*,*) 'bad observed data'
+	   pause
+	   stop
+	else
+c
+c begin loop s through grid points
+c
+	   do 370 iy=1,nrow
+	      y2=float(iy)
+	      do 365 ix=1,ncol
+	         x2=float(ix)
+	         call rinvmod(trpval,x2,y2,xval,yval,numtru,varbl)
+		 valtrp(ix,iy)=trpval
+365	      continue
+	      write (*,*) iy,(nint(100.0*valtrp(jx,iy)),jx=20,40)
+370	   continue
+	end if
+c
+	return
+c
+	end
+C
+C**********************************************************************
+        REAL FUNCTION SLOPER(HERE,SFCMIN,HIRISE)
+C**********************************************************************
+C
+C  DETERMINES RATIO OF HEIGHT ABOVE LOWEST TOPOGRAPHY TO MAXIMUM
+C  HEIGHT ABOVE LOWEST POINT. OTHER RELATIONSHIPS CAN BE SUBSTITUTED
+C  TO GIVE DIFFERENT FLOW SURFACE HEIGHTS.  -- LUDWIG 11/87
+C
+        IF ((HIRISE-SFCMIN) .EQ. 0.0 .OR. HIRISE .EQ. 0.0) THEN
+C
+C  FLAT TERRAIN always gives flat sfcs
+C
+           SLOPER =0.0
+        ELSE
+C
+C  sfc rise at this pt proportional to terrain increment as a fraction 
+c  of maximum terrain elevation differences.
+C
+           SLOPER = (HERE-SFCMIN)/HIRISE
+        END IF
+C
+        RETURN
+        END
+c
+c**********************************************************************
+         SUBROUTINE STRAT
+C**********************************************************************
+C
+C  READS Temperature  SOUNDING INFORMATION,CALCULATES LAPSE RATES & 
+c  OTHER PARAMETERS FOR VARIOUS FLOW LEVELS. 
+c   MODIFIED BY LUDWIG, JAN 2002.
+C
+          include 'ngrids.param'
+C
+          include 'anchor.incl'
+          include 'flower.incl'
+          include 'limits.incl'
+          include 'staloc.incl'
+          include 'tsonds.incl'
+c
+	real RHS1(NTSITE,NZGRD),sythyt(NTSITE),pmids(NSNDHT,NTSITE)
+	integer lowzee(NTSITE,NZGRD),nxtzee(NTSITE,NZGRD)
+	integer levhi(NTSITE),levtop
+c
+        IF(numtmp.le.0) THEN
+	   write (*,*) 'no temp sonde data -- cannot run'
+	   stop
+	end if
+	if (dbug) write (56,*) 'in strat ',numtmp,numnws,numdop
+c
+	levtop=0
+c
+	DO 100 JTSOND=1,NUMTMP
+C
+C  FILL ARRAYS WITH MSG DATA IDENTIFIER
+C
+	   DO 8 I=1,NSNDHT
+              ZSND(I,JTSOND)=-9999.
+              TSND(I,JTSOND)=-9999.
+              PSND(I,JTSOND)=-9999.
+	      altmtr(i,jtsond)=-9999.
+              ZMIDS(I,JTSOND)=-9999.
+              pMIDS(I,JTSOND)=-9999.
+              DPTDZS(I,JTSOND)=-9999.
+              POTEMP(I,JTSOND)=-9999.
+8	   CONTINUE
+           II=JTSOND
+c
+c  read  station no., no. of heights (nhites) in sounding & data input 
+c  type (ityp) data are read as follows for ityp= :
+c       1--height(m--msl),temperature(c), potential temperature
+c          lapse rate(k/m) -- this option not available here
+c       2--height(m--msl), temp(c) & pressure(mb)
+c       3--height(in ft. msl), temp(c), pressure (mb)
+c
+c  skip blank line
+c
+           read(12,*) 
+           read(12,*) xs,ys,sythyt(jtsond)
+c           print *,jtsond,xs,ys,sythyt(jtsond)
+	   xtmp(jtsond)=1.0+(xs-xorig)/dscrs
+           ytmp(jtsond)=1.0+(ys-yorig)/dscrs
+           read(12,*) nthts(jtsond),ityp
+c
+c  skip column headers
+c
+           read(12,*) 
+c
+           nhites=nthts(jtsond)
+c          if (id .ne. JTSOND) write(16,*) 'check t-sonde data order'
+	   if (nhites .gt.0) then
+c
+	      I=0
+c
+	      do 10 j=1,nhites
+                 read(12,*,end=186) z,t,p
+                 IF(nint(Z) .LE.-9999 .OR. nint(T).LE.-9999 
+     $                .OR. nint(P) .LE.-9999 .or.   
+     $                    z-sythyt(jtsond).lt. -1.0) GO TO 10    
+                 I=I+1
+	         IF (ITYP.GE.2) THEN
+C
+C  CONVERT FEET TO METERS & T TO POT TMP, IF REQUIRED (ITYP=3)
+c  CONVERT TO HEIGHT ABOVE SFC-- 
+C
+	            IF (ITYP .EQ. 3 ) Z=0.3048*Z
+	            IF (I .LE. NSNDHT) THEN
+                       ZSND(i,JTSOND)=Z-sythyt(jtsond)
+                       potemp(i,JTSOND)=TPOT(P,T)
+                       TSND(i,JTSOND)=t+273.13
+                       PSND(i,JTSOND)=P
+		       ALTmtr(i,JTSOND)=altset(z,p)
+		       if (ALTmtr(i,JTSOND).lt. 28.) write(*,*)
+     $                    i,jtsond,z,p,altset(z,p)
+	            ELSE
+                       ZSND(NSNDHT,JTSOND)=Z-sythyt(jtsond)
+                       potemp(NSNDHT,JTSOND)=TPOT(P,T)
+                       TSND(NSNDHT,JTSOND)=T+273.13
+                       PSND(NSNDHT,JTSOND)=P
+		       ALTmtr(i,JTSOND)=altset(z,p)
+		       if (ALTmtr(i,JTSOND).lt. 28.) write(*,*)
+     $                    i,jtsond,z,p,altset(z,p)
+	            END IF
+	         ELSE IF (ITYP.EQ.1) THEN
+c
+c  removed lapse rate input option for SLC VTMX application
+c    fludwig 2/02
+c
+		    write (*,*) 'temp soundings must provide height ',
+     $                  '(m, typ2 or ft, typ3), temp (deg C) & ',
+     $                  'press (mB/hP)'
+     	            stop
+                 END IF
+c
+10	      CONTINUE
+c
+c  empty sounding
+c	   
+	   else
+	      write (*,*) 'temperature sonde ', jtsond, ' has no obs.'
+	      stop
+	   end if
+186	   NHITES=I
+	   nthts(jtsond)=i
+	   if (dbug) write (56,*) jtsond,nthts(jtsond),
+     $                        zsnd(nthts(jtsond),jtsond)
+c
+c  sounding read; find heights of flow surfaces
+c  first, find nearest low reference point 
+c
+	   idis2=(nint(xtmp(jtsond))-lowix(1))**2+
+     $                    (nint(ytmp(jtsond))-lowiy(1))**2
+	   jnear(jtsond)=1
+	   do 17 jd=2,5
+	      id2here=(nint(xtmp(jtsond))-lowix(jd))**2+
+     $                     (nint(ytmp(jtsond))-lowiy(jd))**2
+	      if (id2here .lt. idis2) then
+                 idis2=id2here
+                 jnear(jtsond)=jd
+              end if
+17	   continue
+c
+	   lllx=lowix(jnear(jtsond))
+	   llly=lowiy(jnear(jtsond))
+c
+c  check to see if top observation is above this surface.  record 
+c  highest levels reached for individual sondes and all sondes.
+c 
+	   stoplev=zsnd(nthts(jtsond),jtsond)
+	   if (dbug) write (56,*) jtsond,nthts(jtsond),stoplev,
+     $                       zsnd(nthts(jtsond),jtsond)
+	   do 25 kl=1,nlvl
+              zlevkl=RHS(LLLX,LLLY,kl)
+	      RHS1(jtsond,kl)=zlevkl
+c
+c  finding highest flow surface reached by this sonde
+c	      
+	      if (stoplev .ge. zlevkl) then
+	         levhi(jtsond)=kl
+		 if (kl .gt. levtop) levtop=kl
+	      end if
+25	   continue
+	   if (dbug) write(56,*) ' Tsond ',jtsond,' top lvl ',
+     $                      levhi(jtsond),levtop,RHS1(jtsond,nlvl),
+     $                       zsnd(nthts(jtsond),jtsond),numtmp
+c	   
+c  getting indices of obs that are nearest midpoints above & below
+c  the flow surfaces.
+c
+	   lowzee(JTSOND,1)=1
+	   do 45 kl=1,levhi(jtsond)
+	      zlevkl=RHS1(jtsond,kl)
+	      if (kl.lt.nlvl) then
+                 zbar=0.5*(zlevkl+RHS1(jtsond,kl+1))
+	      else if (kl.eq.nlvl) then
+                 zbar=zlevkl+0.5*(zlevkl-RHS1(jtsond,kl-1))
+	      end if
+	      close1=2000000.
+	      do 40 iz=1,nthts(jtsond)-1
+		 if (abs(zbar-zsnd(iz,jtsond)).lt.close1) then
+		    close1=abs(zsnd(iz,jtsond)-zbar)
+		    nxtzee(JTSOND,kl)=iz
+		    if (nxtzee(JTSOND,kl).eq.
+     $                  lowzee(JTSOND,kl)) nxtzee(JTSOND,kl)=iz+1
+c
+c  lower point for next surface will be same as upper point for this 
+c  one
+c
+		    if (kl .lt. nlvl) then
+		       lowzee(JTSOND,kl+1)=iz
+		    end if
+	         end if
+40	      continue
+45	   continue
+c
+c  checking to see that flow sfcs are between bounds when possible.
+c
+	   do 70 kl=2,levhi(jtsond)
+	      if (zsnd(lowzee(JTSOND,kl),jtsond) .ge.  
+     $            RHS1(jtsond,kl) .and. lowzee(JTSOND,kl) .gt. 1) then
+c
+c  pick 1st place you come to below the proper midpoint
+c
+	         do 60 iz=lowzee(JTSOND,kl),1,-1
+	            zbar=0.5*(RHS1(jtsond,kl-1)+RHS1(jtsond,kl))
+	            if (zsnd(iz,jtsond) .lt. zbar) then
+		       lowzee(JTSOND,kl)=iz
+		       go to 70
+		    end if
+60	         continue
+	      end if
+70	   continue
+c
+c  finally, check to see if top pt is high enough (above midpt to
+c  next surface) to extrapolate to one more level
+c
+ 	   if (levhi(jtsond).lt.nlvl) then
+ 	      zbar=0.5*(RHS1(jtsond,levhi(jtsond))+
+     $                        RHS1(jtsond,levhi(jtsond)+1))
+	      if (zsnd(nthts(jtsond),jtsond) .ge. zbar) then
+	         levhi(jtsond)=1+levhi(jtsond)
+		 if (levhi(jtsond).gt.levtop) levtop=levhi(jtsond)
+	         lowzee(JTSOND,levhi(jtsond))=
+     $                   (lowzee(JTSOND,levhi(jtsond)-1) + 
+     $                    nxtzee(JTSOND,levhi(jtsond)-1))/2 
+	         nxtzee(JTSOND,levhi(jtsond))=nthts(jtsond)
+	      end if
+	   end if
+	   if (dbug) write (56,*) jtsond,kl,stoplev,zlevkl,	      
+     $                               levhi(jtsond),levtop
+100	continue
+c
+c  all good data read; convert where necessary & find heights nearest 
+c  the points to use for estimating gradientsat flow surface heights 
+c  have been found.  now, get potential temp lapse rates to top of 
+c  each sounding and estimate lapse rates on the flow sfcs.
+c
+	do 170 jtsond=1,numtmp
+	   do 160 kl=levhi(jtsond),1,-1
+c
+c  use obs up to the highest ob. interpolate std atmos hts 
+c  corresponding to observed pressures -- then get pressure 
+c  corrsponding to the interpolated ht.  other variables are obtained 
+c  by simple interp, or finite diff esimate.
+c
+	      if (kl.gt.1) then
+                 zz0=ZSND(lowzee(JTSOND,kl),jtsond)+sythyt(jtsond)
+                 Z1=ZSND(nxtzee(JTSOND,kl),jtsond)+sythyt(jtsond)
+	         zlvl=RHS1(jtsond,kl)+sythyt(jtsond)
+		 aaa1=altmtr(nxtzee(JTSOND,kl),JTSOND)
+		 aaa0=altmtr(lowzee(JTSOND,kl),JTSOND)
+	         tt0=tsnd(lowzee(JTSOND,kl),JTSOND)
+	         tt1=tsnd(nxtzee(JTSOND,kl),JTSOND)
+	         PT0=potemp(lowzee(JTSOND,kl),JTSOND)
+	         PT1=potemp(nxtzee(JTSOND,kl),JTSOND)
+	         PTLAPS(JTSOND,kl)=(PT1-PT0)/(Z1-zz0)
+		 ALTSIG(JTSOND,kl)=XLINTR(aaa0,aaa1,zlvl,zz0,z1)
+		 PSIGL(JTSOND,kl)=cvt2p(ALTSIG(JTSOND,kl),zlvl)
+	         PTSIGL(JTSOND,kl)=XLINTR(pt0,pt1,zlvl,zz0,z1)
+	         TSIGL(JTSOND,kl)=
+     $	                   PT2T(PSIGL(JTSOND,kl),PtSIGL(JTSOND,kl))
+c
+	      else if (kl.eq.1) then
+c
+c  extrapolate to 10 m level
+c
+	         z1=ZSND(2,JTSOND)+sythyt(jtsond)
+	         zz0=ZSND(1,JTSOND)+sythyt(jtsond)
+	         zlvl=sythyt(jtsond)
+	         PTLAPS(JTSOND,kl)=
+     $               (potemp(2,JTSOND)-potemp(1,JTSOND))/(Z1-zz0)
+		 if (abs(zlvl-zz0).lt.0.1) then
+		    ALTSIG(JTSOND,kl)=altmtr(1,JTSOND)
+	            PTSIGL(JTSOND,kl)=potemp(1,JTSOND)
+		    TSIGL(JTSOND,kl)=TSND(1,JTSOND)
+		    PSIGL(JTSOND,kl)=cvt2p(ALTSIG(JTSOND,kl),zlvl)
+		 else if (abs(zlvl-z1) .lt. 0.1) then
+		    ALTSIG(JTSOND,kl)=altmtr(2,JTSOND)
+	            PTSIGL(JTSOND,kl)=potemp(2,JTSOND)
+		    PSIGL(JTSOND,kl)=cvt2p(ALTSIG(JTSOND,kl),zlvl)
+		    TSIGL(JTSOND,kl)=
+     $	                   PT2T(PSIGL(JTSOND,kl),PtSIGL(JTSOND,kl))
+		 else
+                    pt1=potemp(2,JTSOND)  
+                    pt0=potemp(1,JTSOND)
+                    tt1=TSND(2,JTSOND)
+                    tt0=TSND(1,JTSOND)
+		    aaa1=altmtr(2,JTSOND)
+		    aaa0=altmtr(1,JTSOND)
+		    ALTSIG(JTSOND,kl)=XLINTR(aaa0,aaa1,zlvl,zz0,z1)
+		    PTSIGL(JTSOND,kl)=XLINTR(pt0,pt1,zlvl,zz0,z1)
+		    PSIGL(JTSOND,kl)=cvt2p(ALTSIG(JTSOND,kl),zlvl)
+	            TSIGL(JTSOND,kl)=
+     $		             PT2T(PSIGL(JTSOND,kl),PtSIGL(JTSOND,kl))
+		 end if
+              end if
+c
+160	   continue
+170	CONTINUE
+c
+c  now get the values above those observed at each site, but below
+c  the highest level observed anywhere.
+c
+	do 250 jtsond=1,numtmp
+	   if (levhi(jtsond)+1.le.levtop) then
+	      if (dbug) write(56,*) 'above top of sond ',jtsond
+	      do 240 kl=levhi(jtsond)+1,levtop
+c
+c  inverse distance horiz interp from the highest ob here to 
+c  highest ob anywhere
+c
+                 xx=xtmp(jtsond)
+	         yy=ytmp(jtsond)
+		 sumpt=0.0
+	         sumdpt=0.0
+	         sumwt=0.0
+		 sumalt=0.0
+	         do 210 jd=1,numtmp
+c
+c  skip when looking at same sounding being interpolated for.
+c
+	            if (jd.ne.jtsond .and. levhi(jd).ge.kl) then
+		       weight=WNDWT(xx,yy,xtmp(jd),ytmp(jd))
+		       sumwt=sumwt+weight
+		       sumdpt=sumdpt+weight*PTLAPS(jd,kl)
+		       sumpt=sumt+weight*PTSIGL(jd,kl)
+c
+c  use interpolated altimeter setting to get estimate to be used
+c  for pressure.
+c
+		       sumalt=sumalt+weight*altsig(jd,kl)
+		    end if
+210	         continue
+c
+	         if (sumwt.gt.0.0) then
+	            PTLAPS(JTSOND,kl)=sumdpt/sumwt
+		    altsig(JTSOND,kl)=sumalt/sumwt
+	            PTSIGL(JTSOND,kl)=sumpt/sumwt
+		    PSIGL(JTSOND,kl)=cvt2p(altsig(JTSOND,kl),
+     $                             RHS1(jtsond,kl)+sythyt(jtsond))
+		    TSIGL(JTSOND,kl)=PT2T(PSIGL(JTSOND,kl),
+     $                                        pTSIGL(JTSOND,kl))
+c
+c  check for superadiabatic lapse rate
+c
+	            if (ptsigl(JTSOND,kl).lt.ptsigl(JTSOND,kl-1)) then
+		       ptsigl(JTSOND,kl)=ptsigl(JTSOND,kl-1)
+		       tsigl(JTSOND,kl)=
+     $                      PT2T(PSIGL(JTSOND,kl),ptsigl(JTSOND,kl))
+		    end if
+c     	            
+	         else
+		    write(*,*) 'check strat near 210'
+		    stop
+	         end if
+		 if (dbug) write (56,*) jtsond,kl,ptsigl(JTSOND,kl),
+     $            tsigl(JTSOND,kl),ptlaps(JTSOND,kl),psigl(JTSOND,kl)
+c
+240	      continue
+	   end if
+c
+250	CONTINUE
+c
+c  for levels above the highest ob, use last value of lapse 
+c  based on obs and extrpolate temperature.
+c
+	if (levtop.lt.NLVL) then
+	   do 275 jtsond=1,numtmp
+	      if (dbug) write(56,*) 
+     $           'above topmost -- doing sond ',jtsond,levtop
+c
+c  if no sonde reaches lowest level, use a moderately stable lapse
+c  rate of 0.005 degK/m and sfc altimeter setting
+c
+     	      if (levtop.lt.2) then
+	         PTLAPS(JTSOND,1)=0.005
+		 levtop=1
+	      else
+	         padjust=altsig(jtsond,levtop)
+	      end if
+c
+	      do 265 kl=levtop+1,NLVL
+		 ALTSIG(jtsond,kl)=ALTSIG(jtsond,levtop)
+	         psigl(JTSOND,kl)=cvt2p(altsig(jtsond,levtop),
+     $                           RHS1(jtsond,kl)+sythyt(jtsond))
+	         PTLAPS(JTSOND,kl)=PTLAPS(JTSOND,levtop)
+c
+c  check for superadiabatic lapse rate
+c
+		 if (PTLAPS(JTSOND,kl).lt.0.0) PTLAPS(JTSOND,kl)=0.0
+c
+c  estimate pressure at last level from stand atmos height
+c  use it to estimate ptential temp at this level by extrapol
+c  from previous level.
+c
+		 PTSIGL(JTSOND,kl)=PTSIGL(JTSOND,levtop) + 		 
+     $              ((RHS1(jtsond,kl)-RHS1(jtsond,levtop))*
+     $                    PTLAPS(JTSOND,levtop))
+c
+c now convert potent temp back to temp
+c
+     	         TSIGL(JTSOND,kl)=
+     $                 PT2T(psigl(JTSOND,kl),PTSIGL(JTSOND,kl))
+	         if (dbug) write(56,*) jtsond,kl,ptsigl(JTSOND,kl),
+     $           tsigl(JTSOND,kl),ptlaps(JTSOND,kl),psigl(JTSOND,kl)
+265	      continue
+275	   continue
+	   if (dbug) write (56,*) 'short T-sonds '
+	end if
+c
+	if (dbug) then
+	   do 678 jts=1,numtmp
+	      write (56,*) jts, levhi(jts),levtop
+	      write (56,*)  'alt  ', (altsig(jts,mm),mm=1,nlvl)
+	      write (56,*)  'lap  ', (1000.*PTLAPS(jts,mm),mm=1,nlvl)
+ 	      write (56,*)  'tmp  ', (TSIGL(jts,mm),mm=1,nlvl)
+ 	      write (56,*)  'ptmp ', (PTSIGL(jts,mm),mm=1,nlvl)
+678	   continue
+	end if
+c
+        RETURN
+C
+        END
+c
+c*********************************************************************
+        SUBROUTINE TOPWND
+c*********************************************************************
+C
+C  INTERPOLATES WINDS AT TOPMOST LEVEL BETWEEN OBSERVATION PTS--WHEN
+c  ONLY ONE WIND AVAILABLE IT'S USED EVERYWHERE. LUDWIG, NOVEMBER,1987.
+C
+	include 'ngrids.param'
+       
+C
+       	include 'flower.incl'
+     	include 'limits.incl'
+	include 'staloc.incl'
+C
+        DIMENSION UU(NWSITE),VV(NWSITE)
+c
+C  USE THE ONE WIND AVAILABLE EVERYWHERE
+C
+        IF (NUMDOP.EQ.1) THEN
+          UU(1)=USIG(1,NLVL)
+          VV(1)=VSIG(1,NLVL)
+          DO 25 I = 1,NCOL
+            DO 25 J = 1,NROW
+              U(I,J,NLVL)=UU(1)
+              V(I,J,NLVL)=VV(1)
+25        CONTINUE
+        ELSE
+          DO 30 I=1,NUMDOP
+            UU(I)=USIG(I,NLVL)
+            VV(I)=VSIG(I,NLVL)
+30        CONTINUE
+c
+          DO 65 J = 1,NROW
+	    xx=float(j)
+	    DO 60 I = 1,NCOL
+	      yy=float(i)
+	      sumdop=0.0
+              U(I,J,NLVL)=0.0
+              V(I,J,NLVL)=0.0
+              DO 50 IK=1,NUMDOP
+c
+c  following statement changed [ from IT=IDOP(JK) ] by fll 5/24/2000
+c  bug found by doug miller of the naval postgraduate school.  it
+c  appears to affect only results obtained when more than one
+c  sounding is available.
+c
+                   IT=IK
+		   dwate=WNDWT(XX,YY,xdop(IT),ydop(IT))
+		   sumdop=sumdop+dwate
+                   U(I,J,NLVL)=U(I,J,NLVL)+dwate*UU(IT)
+                   V(I,J,NLVL)=V(I,J,NLVL)+dwate*VV(IT)
+50		continue
+		if (sumdop.gt.0.0) then
+                   U(I,J,NLVL)=U(I,J,NLVL)/sumdop
+                   V(I,J,NLVL)=V(I,J,NLVL)/sumdop
+		else
+		   write(*,*) 'no top winds'
+		   stop
+		end if
+60          CONTINUE
+c
+65	  CONTINUE
+        ENDIF
+c
+        RETURN
+C
+        END
+c
+C*********************************************************************
+        SUBROUTINE tstwnd(chfnam)
+C*********************************************************************
+C
+C  uses levwnd to INTERPOLATE MASS ADJUSTED FIELD TO ANEMOMETER 
+c  HEIGHT (Z10, FOR INDEX=1)  & nflat FLAT PLANES (FOR Z INDICES 2-6) 
+c  SET AT THE HEIGHTS  ZCHOOZ ABOVE THE LOWEST TERRAIN GRID POINT IN 
+c  THE COARSE GRID, and to CONVERT INTERPOLATED WINDS BACK TO 
+c  METEOROLOGICAL SPEEDS AND ANGLES, THAT CAN BE PLOTTED IF DESIRED.  
+c  
+c   LUDWIG--feb 2000
+c
+          include 'ngrids.param'
+        
+C
+      	parameter(rad2d=180./3.14159,zero=0.0,nmax=200)
+	parameter (valmis=-9999.0)
+c
+	include 'anchor.incl'
+	include 'flower.incl'
+	include 'limits.incl'
+        include 'staloc.incl'
+c
+	integer ncalls
+        character*8 chmmddt
+	character*12 chfnam
+c
+c  interpolates mass adjusted field to anemometer height (z10, for 
+c  index=1) this subroutine also converts interpolated winds back to 
+c  meteorological speeds and angles, that can be plotted if desired.  
+c      ludwig--january 1988
+c
+c  revised from levwnd march 1997 to just get sfc level winds at 
+c  specified grid points so that they can be compared with the 
+c  observations that were not used in calculating the winds.
+c
+c  make sure everything is still here on subsequent calls
+c
+	data ncalls /0/
+c
+	save
+c		
+	call levwnd(chfnam)
+c
+c  for checking, we will compare observations with nearest grid values
+c  for stations on grid
+c
+	kase=0
+	if (ncalls .eq.0) then
+	   ncalls=1
+	   write (33,6001)
+	end if
+	do 75 it=1,numnws
+c
+c  getting nearest grid point for each obs
+c
+	   klx=nint(xg(it))
+           kly=nint(yg(it))
+c
+c  skip if outside calculation grid, or observation was missing
+c
+	   if (klx.gt.0 .and. kly.gt.0 .and.
+     $		klx.le.ncol .and. kly.le.nrow .and.
+     $                  nint(ucomp(it)) .ne. -9999) then
+     	      kase=kase+1
+	      difdst=dscrs*sqrt((float(klx)-xg(it))**2+
+     $                    (float(kly)-yg(it))**2)
+	      ztst=sfcht(klx,kly)
+c
+c converting components back to spd & direction for obs 
+c
+              wsob=sp(ucomp(it),vcomp(it))
+              wdob=dd(ucomp(it),vcomp(it))
+c
+c  getting calculated winds at z10 ht  
+c
+	      ulxly=0.01*float(iugraf(klx,kly,1))
+	      vlxly=0.01*float(ivgraf(klx,kly,1))
+              wstst=sp(ulxly,vlxly)
+              wdtst=dd(ulxly,vlxly)
+c
+c  if observed wind was calm direction difference is undefined
+c
+	      if (wsob .gt. 0.0) then
+	         deldir=degdif(wdob,wdtst)
+	      else
+	         deldir=-999.
+	      end if
+              chmmddt = chfnam(5:12)
+	      write(33,6002)it,chstid(it),wsob,wstst,wdob,wdtst,
+     $            wsob-wstst,deldir,difdst,xg(it),yg(it),chmmddtttt
+	   end if
+75   	continue
+c
+6001	format ('  num  ID        sdpob    spdwox  dirob    dirwox ',
+     $       '    spdif   dirdif   distdif  xkm    ykm     date')
+6002	format(1x,i4,1x,a5,2x,6f9.2,3f7.2,4x,a8)
+c
+      	return
+c
+      	end
+c
+C*********************************************************************
+         real function degdif(a1,a2)
+C*********************************************************************
+C
+c  gets the difference between two angles (a1-a2, degrees)
+c
+c     fludwig, 7/2002
+c
+	degdif=a2-a1
+	if (degdif .lt. -180.0) degdif=degdif+360.0
+	if (degdif .gt.  180.0) degdif=degdif-360.0
+c
+	return
+c
+	end
+c
+C*********************************************************************
+         SUBROUTINE TOPO
+C*********************************************************************
+C
+C   READ  AND  COMPUTE TOPOGRAPHY AT GRID POINTS.  Get
+C   FIRST GUESS FLOW SURFACES.  RESIG will BE USED LATER TO DEFINE THEM
+C   IN TERMS OF THE CRITICAL STREAMLINE PARAMETERS. 
+C
+          include 'ngrids.param'       
+C
+          include 'anchor.incl'
+          include 'flower.incl'
+          include 'limits.incl'
+C
+c  MAKE SURE THAT  THINGS READ ON 1ST PASS ARE THERE ON LATER CALLS
+c
+        SAVE
+c
+C  READ TERRAIN HEIGHT VALUES AT GRID POINTS IN METERS, ALL GRIDS
+C
+          SFCLOW=1.E6
+          SFCHI=-1.E6
+C
+C  IN DATA FILE, northern ROW IS FIRST.
+C  READ HEIGHTS AT GRID POINTS & set initial boundary layer ht.
+c  use terrainfollowing 1st; will reset in resig later.
+c
+7    	CONTINUE
+	write(16,*) 'nrow = ', nrow
+c
+	DO 28 jinvy=1,nrow
+	   jy=1+nrow-jinvy
+c
+c************ different read formats******************************
+c  original wocss terrain read
+c           read (11,6001) (sfcht(i,jy),i=1,ncol)
+c*****************************************************************
+c  5 km salt lake area terrain data read
+c 		if (chmesh.eq.'5') then
+c                    print *,jinvy,ncol
+ 	            read (11,6005) (sfcht(ix,jy),ix=1,ncol)
+c
+c		else if (chmesh.eq.'2') then
+c
+c*****************************************************************
+c  2 km salt lake area terrain data read
+c
+c	   	   read (11,6004) (sfcht(ix,jy),ix=1,ncol)
+c
+c*****************************************************************
+c  1 km salt lake area terrain data read 
+c
+c		else if (chmesh.eq.'1') then
+
+c	   	   read (11,6004) (sfcht(ix,jy),ix=1,ncol)
+c
+c*****************************************************************
+c  half km salt lake area terrain data read 
+c
+c		else if (chmesh.eq.'h') then
+
+c	   	   read (11,6003) (sfcht(ix,jy),ix=1,ncol)
+c
+c
+c		else
+c
+c  non standard grid size
+c
+c		  write (*,*) chmesh,
+c     $             ' km is not an available grid spacing'
+c		  write (*,*) 'carriage return to stop.'
+c		  pause
+c		  stop
+c
+c		end if
+c
+c  get elevation at origin
+c
+		  zorig=sfcht(1,1)
+          DO 18 ix=1,ncol
+            IF(sfcht(ix,jy).LT.SFCLOW) SFCLOW=sfcht(ix,jy)
+            IF(sfcht(ix,jy).GT. SFCHI) SFCHI =sfcht(ix,jy)
+18	  CONTINUE
+28	CONTINUE
+c
+        ZRISE=SFCHI-SFCLOW
+        RELHT=AVTHK
+C
+C GET HEIGHT of each 1st guess surface RELATIVE TO TERRAIN FOR EACH 
+c GRID PT.  CHANGE IN HT RELATIVE TO THE LOWEST HT (MSL) IS ASSUMED 
+c PROPORTIONAL TO SIGMA FOR THAT SFC.
+C
+	DO 67 jy=1,NROW
+           DO 67 ix=1,NCOL
+              DO 65 kz=1,NLVL
+C
+		 RHS(ix,jy,kz) =sigma(kz)*avthk- 
+     $                   (sfcht(ix,jy)-sfclow)*(1.0-slfac)
+65         CONTINUE
+67	CONTINUE
+C
+	write(*,*) 'low & high pts ',sfclow,sfchi
+c
+6001    format(f3.0,107f4.0)
+6002    format (1x, 45f5.0)
+6003    format (1x, 161f5.0)
+6004    format (1x, 56f5.0,/3x,55f5.0)
+ 6005   format (1x,257f5.0)
+c
+      	RETURN
+C
+      	END
+c
+C*********************************************************************
+        SUBROUTINE flwsfc(chfnam)
+C*********************************************************************
+C
+C  for debugging -- writes MASS ADJUSTED FIELD  for each flow surface
+c
+        include 'ngrids.param'
+        
+C
+      	parameter(rad2d=180./3.14159,zero=0.0,nmax=200)
+	parameter (valmis=-9999.)
+c
+        include 'anchor.incl'
+        include 'flower.incl'
+        include 'limits.incl'
+        include 'staloc.incl'
+c
+	integer ispeed(NXGRD),idirct(NXGRD)
+	character*12 chfnam
+c
+c  make sure everything is still here on subsequent calls
+c
+        save
+	data ncalls /0/
+c
+	ncalls=ncalls+1
+c
+c  on first call open file for writing results
+c	 	
+	if (ncalls.eq.1) then
+	   open(52,file=chfnam(1:8)//'_heights.out',status='unknown',
+     $             form='formatted')
+	   open(53,file=chfnam(1:8)//'_speeds.out',status='unknown',
+     $             form='formatted')
+	   open(54,file=chfnam(1:8)//'_dirctns.out',status='unknown',
+     $             form='formatted')
+	 end if
+c
+	do 190 ilev=2,NLVL
+	   write(52,*) 'LEVEL ',ilev,' dzmax ',dzmax(1,ilev)
+	   write(53,*) 'LEVEL ',ilev,' dzmax ',dzmax(1,ilev)
+	   write(54,*) 'LEVEL ',ilev,' dzmax ',dzmax(1,ilev)
+	   do 170 iy=3*NROW/4,NROW/4,-1
+		Write(52,6001) ilev,iy,(nint(rhs(ix,iy,ilev)),
+     $                                 ix=ncol/4,3*ncol/4)
+		do 165 kx=ncol/4,(3*ncol)/4
+		   uuu=u(kx,iy,ilev)
+		   vvv=v(kx,iy,ilev)
+		   ispeed(kx)=nint(sp(uuu,vvv))
+		   if (uuu.eq.0.0 .and. vvv.eq.0.0) then
+		      idirct(kx)=0
+		   else
+		      idirct(kx)=nint(dd(uuu,vvv))
+		   end if
+165		continue
+		Write(53,6001) ilev,iy,(ispeed(ix),
+     $                         ix=ncol/4,(3*ncol)/4)
+		Write(54,6001) ilev,iy,(idirct(ix),
+     $                         ix=ncol/4,(3*ncol)/4)
+170	   continue
+190	continue
+c
+6001	format (1x,30i5)
+c
+      	return
+      	end
+c
+C*********************************************************************
+        SUBROUTINE LEVWND(chfnam)
+C*********************************************************************
+C
+C  INTERPOLATES MASS ADJUSTED FIELD TO ANEMOMETER HEIGHT 
+c  (Z10, FOR Z INDEX=1)
+C  & TO NHORIZ-1 FLAT PLANES (FOR Z INDICES 2-NHORIZ) SET AT THE 
+c  HEIGHTS ZCHOOZ ABOVE THE LOWEST TERRRAIN GRID POINT IN THE COARSE 
+c  GRID, AS DEFINEDTHE VARIABLE ARRAY SIGMA.  THIS SUBROUTINE ALSO 
+c  CONVERTS INTERPOLATED WINDS BACK TO METEOROLOGICAL SPEEDS
+C  AND ANGLES THAT CAN BE PLOTTED IF DESIRED.  LUDWIG--JANUARY 1988
+C
+c  modified april 2002 to interpolate other variables (richardson no.,
+c  pot. temp. lapse rate, pressure, pot. temp, brunt vaisala period) 
+c  to flat surfaces as well.  also simplified logic.
+c
+c	fludwig 4/02
+c
+        PARAMETER (RAD2D=180./3.14159)
+C
+        include 'ngrids.param'
+c
+        include 'anchor.incl'
+        include 'flower.incl'
+        include 'limits.incl'
+        include 'tsonds.incl'
+c
+        LOGICAL IFXPT(NXGRD,NYGRD),dotrpo,didfnd
+
+        character*12 chfnam
+C
+C  MAKE SURE EVERYTHING IS STILL HERE ON SUBSEQUENT CALLS
+C
+        SAVE
+        write (*,*) 'starting levwnd'
+c
+  	open(52,file='ptest.out',form='formatted',
+     $          status='unknown')
+55	continue
+	close (52)
+	k1=1
+	z0=zzero
+	z10=10.0
+	nbada=0
+c
+        CALL FIXWND (IFXPT,1)
+c
+	DO 400 IX=1,NCOL
+           DO 390 IY=1,NROW
+c
+c  1st level represents a terrain following surface, z10 m above sfc
+c  everywhere.  in order to reflect both the observations used to
+c  get first estimates of anemometer level winds and the adjusted 
+c  winds on the first above ground flow surface, we use for the lower
+c  end of the interpolation, half the initial level 1 wind estimate at
+c  the ht where a log profile would have the winds be 50% of their 
+c  magnitude at z=z10.  values at the 1st level above ground are used
+c  for the upper end of the interpolation.  for pts near obs, the 
+c  weighting of anemometer ht values is increased by using z for
+c  90% of anemometer ht vlaue.
+c
+	       zagl=z10
+	       if (ifxpt(ix,iy)) then
+                  BOTTOM=z0*((z10/z0)**0.9)
+                  U0=0.9*U(IX,IY,1)
+                  V0=0.9*V(IX,IY,1)
+                  W0=0.9*W(IX,IY,1)
+	       else
+                  BOTTOM=z0*((z10/z0)**0.5)
+                  U0=0.5*U(IX,IY,1)
+                  V0=0.5*V(IX,IY,1)
+                  W0=0.5*W(IX,IY,1)
+	       end if
+c
+c  now get values to use for top end of interpolation.
+c
+               TOP=RHS(IX,IY,levbot(ix,iy))
+               U1=U(IX,IY,levbot(ix,iy))
+               V1=V(IX,IY,levbot(ix,iy))
+               W1=W(IX,IY,levbot(ix,iy))
+c
+c  we now have values above and below the anemometer height -- 
+c  interpolate
+c
+              CALL LGNTRP(uuuf,BOTTOM,TOP,ZAGL,U0,U1)
+ 	      U(IX,IY,1)=uuuf
+              CALL LGNTRP(vvvf,BOTTOM,TOP,ZAGL,V0,V1)
+ 	      V(IX,IY,1)=vvvf
+              CALL LGNTRP(wwwf,BOTTOM,TOP,ZAGL,W0,W1)
+ 	      W(IX,IY,1)=wwwf
+              iUGRAF(IX,IY,1)=nint(100.0*U(IX,IY,1))
+              iVGRAF(IX,IY,1)=nint(100.0*V(IX,IY,1))
+              iWGRAF(IX,IY,1)=nint(100.0*W(IX,IY,1))
+	      IRNGRF(IX,IY,1)=nint(100.0*RICHNO(IX,IY,1))
+	      IBVGRF(IX,IY,1)=nint(BVPERD(IX,IY,1))
+	      IPTGRF(IX,IY,1)=nint(10.0*tmpkel(IX,IY,1))
+	      IPRGRF(IX,IY,1)=nint(10.0*prmb(ix,iy,1))
+C
+C  done with anemometer height values, now INTERPOLATE TO HORIZONTAL 
+c  PLANES (iz>.
+C 
+	      DO 300 IZ=2,NFLAT
+C  
+C  GET HEIGHT OF HORIZONTAL PLANE ABOVE LOCAL GROUND LEVEL (ZAGL), then
+c  find 1st flow surface above this flat surface, meanwhile filling
+c  below sfc levels with missing data values.  if all surfaces are 
+c  lower than terrain at this grid point set all levels to missing 
+c  values and proceed to next grid pt.
+C
+                 if (doflat) then
+		    ZAGL=ZCHOOZ(IZ)-SFCHT(IX,IY)
+		    zmsl=ZCHOOZ(IZ)
+		 else
+		    ZAGL=ZCHOOZ(IZ)
+		    zmsl=ZCHOOZ(IZ)+SFCHT(IX,IY)
+		 end if
+c
+	         if (ZAGL.le.z0) then
+		    dotrpo=.false.
+c
+c  this surface below ground;  set values to zero or missing
+c		
+                    iUGRAF(IX,IY,IZ)=0
+                    iVGRAF(IX,IY,IZ)=0
+                    iWGRAF(IX,IY,IZ)=0
+	            IRNGRF(IX,IY,IZ)=-9999
+	            IBVGRF(IX,IY,IZ)=-9999
+	            IPTGRF(IX,IY,IZ)=0
+	            IPRGRF(IX,IY,IZ)=0
+c
+	         else IF (ZAGL .GE. RHS(IX,IY,NLVL)) THEN
+		    dotrpo=.false.
+c
+c  interpolation surface above highest flow surface.  use values
+c  based on those on highest surface. assume a lapse rate of 
+c
+                    iUGRAF(IX,IY,IZ)=nint(100.0*U(IX,IY,NLVL))
+                    iVGRAF(IX,IY,IZ)=nint(100.0*V(IX,IY,NLVL))
+                    iWGRAF(IX,IY,IZ)=nint(100.0*W(IX,IY,NLVL))
+		    IRNGRF(IX,IY,IZ)=nint(100.0*RICHNO(IX,IY,NLVL))
+		    if (BVPERD(IX,IY,NLVL).gt. 0.0) then
+		       IBVGRF(IX,IY,IZ)=nint(BVPERD(IX,IY,NLVL))
+		    else
+		       IBVGRF(IX,IY,IZ)=-9999.0
+		    end if
+		    ttt=tmpkel(IX,IY,NLVL)+dthdzl(ix,iy,nlvl)*
+     $                                     (zagl-RHS(IX,IY,NLVL))
+		    IPTGRF(IX,IY,IZ)=nint(10.0*ttt)
+		    atop=setalt(IX,IY,nlvl)
+		    IPRGRF(IX,IY,IZ)=nint(10.0*cvt2p(atop,zmsl))
+                    print *,IPRGRF(IX,IY,IZ),atop,zmsl
+                    print *,ZAGL,RHS(IX,IY,NLVL)
+		    if (IPRGRF(IX,IY,IZ).eq.-99990) then
+		       write(*,*) '1. bad altim or ht ',atop,zmsl,ix,iy,iz
+		       stop
+		    end if
+c
+		 else if (zagl.le. z10) THEN
+		    dotrpo=.true.
+c
+c  interpolation surface is below anemometer height.  use log profile 
+c  wind values from anemometer level.  use anemometer level values for 
+c  other parameters.
+c 
+		    ibr=4
+		    BOTTOM=Z0
+		    U0=0.0
+		    V0=0.0
+		    W0=0.0
+		    T0=tmpkel(IX,IY,1)
+		    RR0=RICHNO(IX,IY,1)
+		    alt0=setalt(IX,IY,1)
+		    if (BVPERD(IX,IY,1).gt.0.0) then
+		       BVP0=BVPERD(IX,IY,1)
+		    else
+		       BVP0=-9999.0
+		    end if
+c
+c  now get values to use for top end of interpolation.  assume no 
+c  change and use same values for the variables other than wind.
+c 
+		    TOP=z10
+		    U1=U(IX,IY,1)
+		    V1=V(IX,IY,1)
+		    W1=W(IX,IY,1)
+		    T1=tmpkel(IX,IY,1)
+		    RR1=RICHNO(IX,IY,1)
+		    alt1=setalt(IX,IY,1)
+		    if (BVPERD(IX,IY,1).gt. 0.0) then
+		       BVP0=BVPERD(IX,IY,1)
+		    else
+		       BVP0=-9999.0
+		    end if
+c
+	         else if (zagl .lt.  RHS(IX,IY,levbot(ix,iy))
+     $                                     .and. zagl.gt.z10) THEN
+		    dotrpo=.true.
+c
+c  this interpolation sfc must be between anemometer and the
+c  lowest above-ground flow surface.
+c
+		    ibr=2
+c
+c  get values to use for bottom end of interpolation.
+c
+		    BOTTOM=z10
+                    U0=U(IX,IY,1)
+                    V0=V(IX,IY,1)
+                    W0=W(IX,IY,1)
+		    T0=tmpkel(IX,IY,1)
+		    RR0=RICHNO(IX,IY,1)
+		    alt0=setalt(IX,IY,1)
+		    if (BVPERD(IX,IY,1).gt. 0.0) then
+		       BVP0=BVPERD(IX,IY,1)
+		    else
+		       BVP0=-9999.0
+		    end if
+c
+c  now get values to use for top end of interpolation.
+c
+                    TOP=RHS(IX,IY,levbot(ix,iy))
+                    U1=U(IX,IY,levbot(ix,iy))
+                    V1=V(IX,IY,levbot(ix,iy))
+                    W1=W(IX,IY,levbot(ix,iy))
+		    T1=tmpkel(IX,IY,levbot(ix,iy))
+		    RR1=RICHNO(IX,IY,levbot(ix,iy))
+		    alt1=setalt(IX,IY,levbot(ix,iy))
+		    if (BVPERD(IX,IY,levbot(ix,iy)).gt. 0.0) then
+		       BVP1=BVPERD(IX,IY,levbot(ix,iy))
+		    else
+		       BVP1=-9999.0
+		    end if
+c
+		 else if (zagl .gt. z10 .and. 
+     $                           zagl .lt. RHS(IX,IY,NLVL)) THEN
+		    dotrpo=.true.
+c
+c  getting values when interpolation sfc is between the lowest and 
+c  the highest flow sfcs
+c
+		    DO 130 LL=levbot(ix,iy),NLVL-1
+		       didfnd=.false.
+		       if (ZAGL.ge.RHS(IX,IY,LL) .AND.
+     $                                 ZAGL.Lt.RHS(IX,IY,LL+1)) THEN
+c
+c  for interpolation sfc between 2 flow sfcs
+c
+		          ibr=3
+                          BOTTOM=RHS(IX,IY,LL)
+                          U0=U(ix,iy,LL)
+                          V0=V(ix,iy,LL)
+                          W0=W(ix,iy,LL)
+			  T0=tmpkel(IX,IY,LL)
+			  alt0=setalt(IX,IY,LL)
+			  RR0=RICHNO(IX,IY,LL)
+		          if (BVPERD(IX,IY,LL).gt.0.0) then
+			     BVP0=BVPERD(IX,IY,LL)
+		          else
+		             BVP0=-9999.0
+		          end if
+c
+c  now get values to use for top end of interpolation.
+c
+                          TOP=RHS(IX,IY,LL+1)
+                          U1=U(IX,IY,LL+1)
+                          V1=V(IX,IY,LL+1)
+                          W1=W(IX,IY,LL+1)
+			  T1=tmpkel(IX,IY,LL+1)
+			  RR1=RICHNO(IX,IY,LL+1)
+			  alt1=setalt(IX,IY,LL+1)
+		          if (BVPERD(IX,IY,LL+1) .gt. 0.0) then
+			     BVP1=BVPERD(IX,IY,LL+1)
+		          else
+		             BVP1=-9999.0
+		          end if
+c
+c we found where it is, we can go on to the next step
+c
+			  didfnd=.true.
+	               end if
+		       if (didfnd) go to 135
+130	            CONTINUE
+135	            continue
+c
+		 end if
+c
+c  if we have not already defined the values, then we need 
+c  to interplate, using values defined above.
+c
+		 if (dotrpo) then
+c
+                    CALL LGNTRP(uuuf,BOTTOM,TOP,ZAGL,U0,U1)
+                    CALL LGNTRP(vvvf,BOTTOM,TOP,ZAGL,V0,V1)
+                    CALL LGNTRP(wwwf,BOTTOM,TOP,ZAGL,W0,W1)
+	            iUGRAF(IX,IY,IZ)=nint(100.0*uuuf)
+	            iVGRAF(IX,IY,IZ)=nint(100.0*vvvf)
+	            iWGRAF(IX,IY,IZ)=nint(100.0*wwwf)
+c
+c  variables are scaled to integers for writing files.  units are
+c  cm/sec for wind components, (deg K)/10 for potential temp., mB (hP) 
+c  for pressure, seconds for Brunt Vaisala period, and 1000* bulk 
+c  Richardson No.
+c
+		    aaset=XLINTR(alt0,alt1,ZAGL,bottom,TOP)
+		    if (nint(10.0*cvt2p(aaset,zmsl))
+     $                                   .eq.-99990 .and. dbug ) then
+     	               write(56,*) '2. bad altim or ht ',aaset,zmsl
+		       write(56,*) 
+     $	                        alt0,alt1,ZAGL,bottom,TOP,ix,iy,iz,ibr
+		    end if
+		    IPRGRF(IX,IY,IZ)=nint(10.0*
+     $                              cvt2p(aaset,zmsl))
+		    IRNGRF(IX,IY,IZ)=nint(100.0*
+     $                              XLINTR(RR0,RR1,ZAGL,bottom,TOP))
+	            iPTGRF(IX,IY,IZ)=nint(10.0*
+     $                              XLINTR(T0,T1,ZAGL,bottom,TOP))
+     	            if (BV0 .gt. 0.0 .and. BV1.gt. 0.0) then
+	                IBVGRF(IX,IY,IZ)=
+     $                            nint(XLINTR(BV0,BV1,ZAGL,bottom,TOP))
+		    else
+	               IBVGRF(IX,IY,IZ)=-9999
+		     end if
+		 end if
+c
+300	      continue
+c
+390	   CONTINUE
+400	CONTINUE
+C
+C  CONVERT COMPONENTS IN HORIZONTAL or terrain following 
+c  PLANES TO METEOROLOGICAL WINDS speed & direction 
+c
+	DO 500 LEV=1,nflat
+      	   DO 490 IX=1,NCOL
+	      DO 480 IY=1,NROW
+C
+c   convert integer cm/s back to real m/s
+c
+                 UG=0.01*float(iUGRAF(IX,IY,LEV))
+                 VG=0.01*float(iVGRAF(IX,IY,LEV))
+C
+                 IF (UG.EQ.ZERO.AND.VG.EQ.ZERO) THEN
+                    SPDMET(IX,IY,LEV)=ZERO
+                    DIRMET(IX,IY,LEV)=ZERO
+                 ELSE
+                    SPDMET(IX,IY,LEV)=sp(UG,VG)
+                    DIRMET(IX,IY,LEV)=dd(UG,VG)
+                 END IF
+480	      CONTINUE
+490	   CONTINUE
+500	CONTINUE	   
+c
+	RETURN	   
+c
+	END	   
+c
+c*********************************************************************
+	subroutine rinvmod(trpval,x0,y0,xx,yy,nobs,varbl)
+c*********************************************************************
+c 
+c
+c  modified inverse distance interpolation;  uses only nearby
+c  observations.  the weighting function is wndwt (x0,y0,x1,y1).
+c  interpolates to the point x0,y0 from values of the variable (varbl)
+c  at points xx, yy.  if a single observed value is within the minimum
+c  distance specified in wndwt, it is used.  assumes that grid units 
+c  are used.
+c
+c		fludwig, 5/2002
+c
+        include 'ngrids.param'
+c
+        include 'limits.incl'
+c
+	parameter (NPTS=26)
+c
+	real varbl(NSITES),xx(NSITES),yy(NSITES)
+c
+	d2min=0.1
+c
+c  if only one obs, use that value everywhere.
+c
+	if (nobs.eq.1) then
+	   trpval=varbl(1)
+	   return
+	else if (nobs.eq.0) then
+	  write (*,*) 'something wrong -- nobs= ',nobs
+	  stop
+	end if
+c
+c  check for too many input values
+c
+	if (nobs.gt.NSITES) then
+	   write(*,*) 'too many obs in rm2mod; using 1st ',NSITES
+	   ntry=NSITES
+	else
+	   ntry=nobs
+	end if
+c
+c  define ever increasing radius until enough obs available for
+c  interpolation.  maximum set to be twicw the maximum radius of the 
+c  domain (rmax).  searched area increases by rstep until at least 2
+c  observations found.  rstep is 1/20 max number of grid units.
+c  first step is a radius of sqrt(2) grid units. if any value found 
+c  this  close, it is used.
+c
+	rmax=sqrt(float(NXGRD**2+NYGRD**2))
+	rstep=rmax/20.0
+c
+c  3 choices examined for rmin:
+c       1.  radius (0.5) of circle tangent to the 4 sides of a 
+c           grid square
+c       2.  radius (0.707) of circle through the 4 corners of a 
+c           grid square
+c	3.  radius (.604) midway between 0.5 & sqrt(1/2)
+c       4.  in square of 0.5 unit side with corner at grid square
+c
+c  approach 3 seems to get most of observations, while averaging 
+c  more than one ob on fewer occasions.
+c
+	rmin=0.604
+c
+	sum=0.0
+	sumwt=0.0
+	ncase=0
+	r2past=0.0
+	do 200 nr=0,20
+	   rad=rmin+float(nr)*rstep
+	   r2test=rad**2
+	   do 150 iob=1,ntry
+	      if (nint(varbl(iob)).ne.-9999) then
+	         r2=(x0-xx(iob))**2+(y0-yy(iob))**2
+c
+c  if observation is within a grid square around this point, use it.
+c  otherwise, get values for inverse distance weighted polynomial fit.
+c
+ 	         if (nr.eq.0 .and. r2.le.r2test) then
+c
+		    wt=wndwt(xx(iob),yy(iob),x0,y0)
+		    sum=sum+wt*varbl(iob)
+		    sumwt=sumwt+wt
+	         else if (r2.le.r2test .and. r2.gt.r2past) then
+c
+		    wt=wndwt(xx(iob),yy(iob),x0,y0)
+		    sum=sum+wt*varbl(iob)
+		    sumwt=sumwt+wt
+		    ncase=ncase+1
+		 end if
+	      end if
+150	   continue
+c
+c  te following uses nearby obs with little or no interpolation.
+c
+	   if (nr.eq.0 .and. sumwt .gt. 0.0) then
+	      trpval=sum/sumwt
+	      return
+c
+c  if we have accumulated at least 6 pts -- interpolate 
+c
+	   else if (ncase .ge. 6) then
+c
+	      trpval=sum/sumwt
+	      return
+	   end if
+	   r2past=r2test
+200	continue
+c
+c  we never got 12 pts, so we use the inverse distance weighted 
+c  estimate.
+c
+	if (sumwt.gt.0.0) then
+	   trpval=sum/sumwt
+	   return
+	else
+	   write (*,*) 'something wrong -- ncase= ', ncase
+	   stop
+	end if
+c
+	end
+c
+c*********************************************************************
+	subroutine rinvmold(trpval,x0,y0,xx,yy,nobs,varbl)
+c*********************************************************************
+c                  
+c  modified inverse distance interpolation;  uses only nearby
+c  observations.  the weighting function is wndwt (x0,y0,x1,y1).
+c  interpolates to the point x0,y0 from values of the variable (varbl)
+c  at points xx, yy.  if a single observed value is within the minimum
+c  distance specified in wndwt, the field around that pt is adjusted 
+c  elsewhere to match the value at the pt.
+c
+c		fludwig, 7/2002
+c
+        include 'ngrids.param'
+c
+        include 'limits.incl'
+c
+	parameter (NPTS=NSITES)
+c
+	real varbl(NSITES),xx(NSITES),yy(NSITES)
+c
+c  if only one obs, use that value everywhere.
+c
+	if (nobs.gt.1 .and. nobs.le. NSITES) then
+	   sum=0.0
+	   sumwt=0.0
+	   ncase=0
+	   do 200 iob=1,nobs
+	      wt=wndwt(xx(iob),yy(iob),x0,y0)
+	      sum=sum+wt*varbl(iob)
+	      sumwt=sumwt+wt
+200	   continue
+ 	   trpval=sum/sumwt
+           if (nint(x0).eq.7 .and. 
+     $            nint(y0).ge.40 .and. nint(y0).le.44) then
+	      write(16,*) x0,y0,nobs,wt,sum,sumwt,trpval
+	      write(16,*) 'xx ',(xx(ii),ii=1,nobs)
+	      write(16,*) 'yy ',(yy(ii),ii=1,nobs)
+	   end if
+	   return
+	else if (nobs.eq.1) then
+	   trpval=varbl(1)
+	   return
+	else if (nobs.gt.NSITES) then
+	   write(*,*) 'too many obs in rm2mod '
+	   stop
+	else if (nobs.eq.0) then
+	  write (*,*) 'something wrong -- nobs= ',nobs
+	  stop
+	end if
+c
+	end
+c
+c**********************************************
+	real function sp(uu,vv)
+c**********************************************
+c
+c  function to get speed from components
+c
+	sp=sqrt(uu*uu+vv*vv)
+c
+	return
+	end
+c
+c**********************************************
+	real function dd(uu,vv)
+c**********************************************
+c
+c  function to get direction (degrees) from components
+c
+	parameter (rad2d=180./3.14159)
+c
+	if (sp(uu,vv).gt.0.0) then
+	   dd=amod(540.+ rad2d*atan2(uu,vv),360.)
+	else
+	   dd=0.0
+	end if
+c
+	return
+	end
+c
+c***************************************************************
+	real function XLINTR(X0,X1,Z,zz0,Z1)
+c***************************************************************
+c
+c  FUNCTION FOR linear interpolation of x to pt z between zz0
+c  and z1, where its values are x0 and x1
+c
+        if (z.eq.zz0) then
+	   XLINTR=X0
+	else if (z.eq.z1) then
+	   XLINTR=X1
+	else
+	   XLINTR=X0+(X1-X0)*(Z-zz0)/(Z1-zz0)
+	end if
+c
+	return
+c
+	end
+c
+c**************************************************
+	real function TPOT (pp,tt)
+c**************************************************
+c
+c  potential temperature (degrees K) from pressure (pp, hP or mB) 
+c  and temperature (tt, degrees celsius).
+c
+c
+	tpot=(TT+273.13)*((1000./PP)**0.288)
+c
+	return
+c
+	end
+c
+c**************************************************
+	real  function PT2T (pp,tt)
+c**************************************************
+c
+c  temperature (degrees K) from pressure (pp, hP or mB) 
+c  and potential temperature (tt, degrees K).
+c
+c
+	pt2t=TT*((PP/1000.)**0.288)
+c
+	return
+c
+	end
+c
+c*************************************************************
+	real function altset(z,p)
+c*************************************************************
+c 
+c  gets local altimeter setting (in Hg.) from station pressure (not 
+c  reduced to sea level) and the station elevation in meters.
+c  
+c  from a formula provided by Michael Splitt of the U. of Utah.
+c
+c	fludwig, 4/01
+c
+	parameter (BADAT=-9999.0,P0=1013.3,FACT=44308.0)
+	parameter (XPON=0.19028,CV2MB=1013.25/29.921)
+c
+c     altim is the altimeter in inches of Hg
+c     elev is the station elevation in meters
+c
+c     altimeter in inches, convert to mb (hP) as follows:
+c
+	real z,altmb,p
+c
+c  convert Hectopascal to inches 
+c
+	altmb=p/(1.0-(0.0065*z/288.0))**5.256
+        altset=altmb/CV2MB
+c 
+c  discard extreme values, i.e. sealevel pressures outside the 
+c  approximate range 965 to 1063 hP (mB)
+c
+	if (altset.gt.31.4 .or. altset.lt.28.5 ) altset=BADAT
+c
+	return
+c
+	end	   
+c
+c**************************************************
+	real function cvt2p(altim,elev)
+c**************************************************
+c 
+c  gets local station pressure (not reduced to sea level)
+c  using the local altimeter setting in inches of Hg and the
+c  station elevation in meters.
+c  
+c  from a formula provided by Michael Splitt of the U. of Utah.
+c
+c	fludwig, 4/01
+c
+	parameter (BADAT=-9999.0,P0=1013.3,FACT=44308.0)
+	parameter (XPON=0.19028,CV2MB=1013.25/29.921)
+c
+c     altim is the altimeter in inches of Hg
+c     elev is the station elevation in meters
+c
+c     altimeter in inches, convert to mb (hP) as follows:
+c
+	real altim,elev,altmb
+c
+c  convert inches to Hectopascal
+c
+        altmb=altim*CV2MB
+	cvt2p=altmb*(1.0-(0.0065*elev/288.0))**5.256
+c
+c  check elevation against standard atmosphere -- see:
+c
+c       Holmboe, Forsythe & Gustin, 1945: "Dynamic Meteorology,"
+c       J. Wiley & sons, New York, p 120.
+c
+c  reject if difference exceeds 450 m -- the equivalent of 
+c  having sea level pressure between about 978 & 1058 mb)
+c
+	zstd=FACT*(1.0-(cvt2p/P0)**XPON)
+	if (abs(zstd-elev) .gt. 450.0) cvt2p=BADAT
+c
+	return
+c
+	end
+c
+c****************************************************************
+	integer function julmin (kyear,imo,mdate,ihour,imin) 
+c****************************************************************
+c
+c  gets minute since 0000 on 1 January corresponding to year 
+c  kyear (from 1901 to 2099) and julian day jd.  
+c
+c	fludwig 3/02
+c
+	integer lastd (12),kyear,imo,mdate,ihour,imin
+c
+	data lastd /0,31,59,90,120,151,181,
+     $              212,243,273,304,334/
+c
+c  correct for leap year effect -- good until 2100
+c
+	jadj=lastd(imo)
+	if (mod(kyear,4) .eq.0. and. imo.gt.2) then
+	  jadj=jadj+1
+	end if
+c
+	idajul=jadj+mdate-1
+	julmin=1440*idajul+60*ihour+imin
+
+	return
+	end
+c
+C**********************************************************************
+        SUBROUTINE LGNTRP(Y,X0,X1,X,Y0,Y1)
+C**********************************************************************
+C
+C DOES LOG-LINEAR INTERPOLATION OF Y VS. LOG X.
+C
+        IF (X1.EQ.X0 .or. x.eq.x0) THEN
+	   y=y0   
+        ELSE if (x.eq.x1) then
+	   y=y1
+        ELSE
+           RATIO = ALOG10(X/X0)/ALOG10(X1/X0)
+           Y = Y0 + RATIO * (Y1-Y0)
+        END IF
+C
+        RETURN
+        END
+C
+c**********************************************************************
+        REAL FUNCTION WNDWT(X,Y,XOBS,YOBS)
+c**********************************************************************
+c
+C   this version determines the squared distance between
+c   the 2 pts (X,Y) & (XOBS,YOBS).  
+c
+c		f. l. ludwig,  10/97
+c
+       include 'ngrids.param'
+c
+       include 'limits.incl'
+c
+	xdif=xobs-x
+	ydif=yobs-y
+        dist=sqrt(xdif**2 + ydif**2)
+c
+        IF (dist.LT.D2MIN) dist=D2MIN
+c
+        WNDWT=1.0/(dist**dtwt)
+c
+        RETURN
+        END
+c
+c*********************************************************************
+        SUBROUTINE SETINT(IVALUE,IARRAY,NUM1,NUM2)
+c*********************************************************************
+c
+C       INITIALIZES ALL ELEMENTS OF ARRAY TO VALUE. (THIS SUBPROGRAM
+C       IS IDENTICAL TO 'SETMAT,' EXCEPT WITH INTEGER ARGUMENTS)
+C       REVISED 11/87
+C
+       include 'ngrids.param'
+C
+        DIMENSION IARRAY(NXGRD,NYGRD)
+        DO 10 I=1,NUM1
+        DO 10 J=1,NUM2
+           IARRAY(I,J)=IVALUE
+   10   CONTINUE
+        RETURN
+        END
+C
+C*******************************************************************
+        SUBROUTINE SETMAT(VALUE,ARRAY,NUM1,NUM2)
+c*******************************************************************
+C
+C       INITIALIZES ALL ELEMENTS OF ARRAY TO VALUE.(THIS SUBPROGRAM IS
+C       IDETICAL TO 'SETINT,' EXCEPT WITH REAL ARGUMENTS.
+C       REVISED 11/87
+C
+        include 'ngrids.param'
+C
+        DIMENSION ARRAY(NXGRD,NYGRD)
+        DO 10 I=1,NUM1
+        DO 10 J=1,NUM2
+           ARRAY(I,J)=VALUE
+   10   CONTINUE
+        RETURN
+        END
+c
+c********************************************************************
+  	real function dubyou(ut,vt,i,j,k)
+c********************************************************************
+c
+c  getting vertical motion w from horizontal motion & flow sfc slope. 
+c		F LUDWIG 11/89
+c
+c  revised as a function 3/2000
+c
+          include 'ngrids.param'
+C
+          include 'anchor.incl'
+          include 'flower.incl'
+          include 'limits.incl'
+c
+	save
+C
+C  GETTING FLOW SURFACE SLOPE
+C
+	if (k.gt.1) then
+	   IF (RHS(I,J,K).GT.0.0) THEN
+c
+c  check to see if we are at east or west edge, then get flow surface 
+c  heights to east & west of this pt.  hts above sfc (rhs)
+c  are added to sfcht to get msl ht.  surface height is used for
+c  1st level (k=1) which represents anemometer height winds.
+c
+c
+	      if (i.gt.1 .and. i.lt.ncol) then
+	         dgridx=2000.0*dscrs
+	         ZP10=MAX(RHS(I+1,J,K),0.0)
+	         ZM10=MAX(RHS(I-1,J,K),0.0)
+	         ZP10=0.0
+	         ZM10=0.0
+	         HSIGE=SFCHT(I+1,J)+ZP10
+	         HSIGW=SFCHT(I-1,J)+ZM10
+c
+c  use adjacent pts if at edge
+c
+	      else if (i.eq.1) then
+	         dgridx=1000.0*dscrs
+		 ZP10=MAX(RHS(I+1,J,K),0.0)
+		 ZM10=MAX(RHS(I,J,K),0.0)
+		 HSIGE=SFCHT(I+1,J)+ZP10
+		 HSIGW=SFCHT(I,J)+ZM10
+	      else if (i.eq.ncol) then
+	         dgridx=1000.0*dscrs
+		 ZP10=MAX(RHS(I,J,K),0.0)
+		 ZM10=MAX(RHS(I-1,J,K),0.0)
+		 HSIGE=SFCHT(I,J)+ZP10
+		 HSIGW=SFCHT(I-1,J)+ZM10
+	      end if
+c
+c  now do the same for  north south
+c
+	      if (j.gt.1 .and. j.lt.nrow) then
+	         dgridy=2000.0*dscrs
+	         Z0P1=MAX(RHS(I,J+1,K),0.0)
+	         Z0M1=MAX(RHS(I,J-1,K),0.0)
+	         HSIGN=SFCHT(I,J+1)+Z0P1
+	         HSIGS=SFCHT(I,J-1)+Z0M1
+c
+c  use adjacent pts if at edge
+c
+	      else if (j.eq.1) then
+	         dgridy=1000.0*dscrs
+		 Z0P1=MAX(RHS(I,J+1,K),0.0)
+		 Z0M1=MAX(RHS(I,J,K),0.0)
+		 HSIGN=SFCHT(I,J+1)+Z0P1
+		 HSIGS=SFCHT(I,J)+Z0M1
+	      else if (j.eq.nrow) then
+	         dgridy=1000.0*dscrs
+	         Z0P1=MAX(RHS(I,J,K),0.0)
+	         Z0M1=MAX(RHS(I,J-1,K),0.0)
+	         HSIGN=SFCHT(I,J)+Z0P1
+	         HSIGS=SFCHT(I,J-1)+Z0M1
+	      end if
+c
+c  now get W-E & S-N slopes
+c
+	      DHDX=(HSIGE-HSIGW)/dgridx
+	      DHDY=(HSIGN-HSIGS)/dgridy
+c
+c  vertical motion is inner product of horiz wind & ht gradient
+c  at above ground pts.
+c
+	      dubyou=UT*DHDX+VT*DHDY
+c
+	   else
+c
+c  vertical motion is zero for below ground pts
+c
+	      dubyou=0.0
+c
+	   end if
+c
+c  use sfc hts to get vertical motion in 1st (anemometer ht) layer
+c
+	else
+	   if (i.gt.1 .and. i.lt.ncol) then
+	      dgridx=2000.0*dscrs
+	      HSIGE=SFCHT(I+1,J)
+	      HSIGW=SFCHT(I-1,J)
+c
+c  use adjacent pts if at edge
+c
+	   else if (i.eq.1) then
+	      dgridx=1000.0*dscrs
+	      HSIGE=SFCHT(I+1,J)
+	      HSIGW=SFCHT(I,J)
+	   else if (i.eq.ncol) then
+	      dgridx=1000.0*dscrs
+	      HSIGE=SFCHT(I,J)
+	      HSIGW=SFCHT(I-1,J)
+	   end if
+c
+c  now do the same for  north south
+c
+	   if (j.gt.1 .and. j.lt.nrow) then
+	      dgridy=2000.0*dscrs
+	      HSIGN=SFCHT(I,J+1)
+	      HSIGS=SFCHT(I,J-1)
+c
+c  use adjacent pts if at edge
+c
+	   else if (j.eq.1) then
+	      dgridy=1000.0*dscrs
+	      HSIGN=SFCHT(I,J+1)+Z0P1
+	      HSIGS=SFCHT(I,J)+Z0M1
+	   else if (j.eq.nrow) then
+	      dgridy=1000.0*dscrs
+	      HSIGN=SFCHT(I,J)+Z0P1
+	      HSIGS=SFCHT(I,J-1)+Z0M1
+	   end if
+c
+c  now get W-E & S-N slopes
+c
+	   DHDX=(HSIGE-HSIGW)/dgridx
+	   DHDY=(HSIGN-HSIGS)/dgridy
+c
+c  vertical motion is inner product of horiz wind & ht gradient
+c  of sfc hts.
+c
+	   dubyou=UT*DHDX+VT*DHDY
+c
+	end if
+c
+	return
+c
+	end
+C

@@ -1,0 +1,1 @@
+f77 -o mm5tonc -O4 -Olimit 2000 -fpe0 -convert big_endian -align dcommons -align records mm5tonc.f -L/usr/local/lib/ -lnetcdf

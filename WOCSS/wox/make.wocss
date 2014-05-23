@@ -1,0 +1,2 @@
+/usr/bin/g77 -c -O -Wno-globals wox.f write_netcdf.f -I/usr/local/netcdf/include
+/usr/bin/g77 -O -Wno-globals -o wox wox.o write_netcdf.o -L/usr/local/netcdf/lib -lnetcdf 

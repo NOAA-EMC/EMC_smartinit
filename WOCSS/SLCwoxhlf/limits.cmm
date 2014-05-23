@@ -1,0 +1,1 @@
+c        COMMON /CVOS/ RCM,RMF,IV,DSCRS,kgridx,kgridy,D2MIN,     $				  HT2DIS,ADJMAX,dtwtc          COMMON /LIMITS/ NCOL,NROW,NLVL,NCOLM1,NROWM1,     $            NFLAT,LOWIX(5),LOWIY(5)c          COMMON /NUMOBS/ NUMDOP,NUMNWS,NUMTOT,NUMTMP

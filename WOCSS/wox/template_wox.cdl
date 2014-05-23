@@ -1,0 +1,138 @@
+netcdf template {
+dimensions:
+	record = UNLIMITED ; // (0 currently)
+	n_valtimes = 1 ;
+	data_variables = 6 ;
+	charsPerLevel = 10 ;
+	namelen = 132 ;
+	x = 257 ;
+	y = 257 ;
+	nz = 1 ;
+	z_sfc = 1 ;
+	nav = 1 ;
+variables:
+	float uw(record, nz, y, x) ;
+		uw:long_name = "u-component of wind" ;
+		uw:units = "meters/second" ;
+		uw:valid_range = -200.f, 200.f ;
+		uw:_FillValue = -99999.f ;
+		uw:navigation_var = "nav" ;
+		uw:_n3D = 1 ;
+	char uwLevels(nz, charsPerLevel) ;
+	char uwInventory(record, nz) ;
+	float vw(record, nz, y, x) ;
+		vw:long_name = "v-component of wind" ;
+		vw:units = "meters/second" ;
+		vw:valid_range = -200.f, 200.f ;
+		vw:_FillValue = -99999.f ;
+		vw:navigation_var = "nav" ;
+		vw:_n3D = 1 ;
+	char vwLevels(nz, charsPerLevel) ;
+	char vwInventory(record, nz) ;
+	float t(record, nz, y, x) ;
+		t:_FillValue = -99999.f ;
+		t:long_name = " temperature" ;
+		t:units = "Kelvin" ;
+		t:valid_range = 100.f, 400.f ;
+		t:navigation_var = "nav" ;
+		t:_n3D = 1 ;
+	char tLevels(nz, charsPerLevel) ;
+	char tInventory(record, nz) ;
+	float p(record, z_sfc, y, x) ;
+		p:_FillValue = -99999.f ;
+		p:long_name = "Pressure" ;
+		p:units = "Pa" ;
+		p:valid_range = 0.f, 110000.f ;
+		p:navigation_var = "nav" ;
+		p:_n3D = 1 ;
+	char pLevels(z_sfc, charsPerLevel) ;
+	char pInventory(record, z_sfc) ;
+	float topo(record, z_sfc, y, x) ;
+		topo:_FillValue = -99999.f ;
+		topo:long_name = "terrain height MSL" ;
+		topo:units = "meters" ;
+		topo:valid_range = 0.f, 20000.f ;
+		topo:navigation_var = "nav" ;
+		topo:_n3D = 1 ;
+	char topoLevels(nz, charsPerLevel) ;
+	char topoInventory(record, nz) ;
+	double valtime(record) ;
+		valtime:long_name = "valid time" ;
+		valtime:units = "seconds since (1970-1-1 00:00:00.0)" ;
+	double reftime(record) ;
+		reftime:long_name = "reference time" ;
+		reftime:units = "seconds since (1970-1-1 00:00:00.0)" ;
+	int valtimeMINUSreftime(n_valtimes) ;
+		valtimeMINUSreftime:long_name = "forecast time" ;
+		valtimeMINUSreftime:units = "seconds" ;
+	char model(namelen) ;
+	int x ;
+	int y ;
+	int nz ;
+	int z_sfc ;
+	float ll_lat ;
+	float ll_lon ;
+	float ur_lat ;
+	float ur_lon ;
+	float ctr_lat ;
+	float ctr_lon ;
+	float angle1 ;
+	float angle2 ;
+	char proj ;
+
+// global attributes:
+		:projIndex = 3 ;
+		:projName = "LAMBERT_CONFORMAL" ;
+		:centralLat = 25.f ;
+		:centralLon = -95.f ;
+		:lat00 = 43.45412f ;
+		:lon00 = -117.95914f ;
+		:latNxNy = 49.58667f ;
+		:lonNxNy = -111.30915f ;
+                :latDxDy = 40.60606f ;
+                :lonDxDy = -100.5548f ;
+
+data:
+
+ uwLevels =
+  "SFC" ;
+
+ vwLevels =
+  "SFC" ;
+
+ tLevels =
+  "SFC" ;
+
+ pLevels =
+  "SFC" ;
+
+ topoLevels =
+  "SFC" ;
+
+ valtimeMINUSreftime = 0 ;
+
+ model = "WOCSS" ;
+
+ x = 257 ;
+
+ y = 257 ;
+
+ nz = 1 ;
+
+ z_sfc = 1 ;
+
+ ll_lat = 43.45412 ;
+
+ ll_lon = -117.95914 ;
+
+ ur_lat = 49.58667 ;
+
+ ur_lon = -111.30915 ;
+
+ ctr_lat = 25. ;
+
+ ctr_lon = -95. ;
+
+ proj = "3" ;
+
+}
