@@ -1,30 +1,15 @@
 #!/bin/ksh 
-# Author:        Geoff Manikin       Org: NP22         Date: 2007-08-06
+# Author:        DaNa Carlis       Org: NP22         Date: 2014-03-01
 #
 # Script history log:
 #======================================================================
-#  Set Defaults fcst hours,cycle,model,region in config_nam_nwpara called in parent job
-
 # RUNTYP: OUTPUT REGION TO DOWNSCALE TO  (IN SMINIT.CTL FILE)
 #=================================================================
-# conus        : Downscale NAM 12 over CONUS  
-#              :  SREF-GRD=212  NAM-GRD=bgrd  NDFD-GRD=197
-# pr           :  SREF-GRD=212  NAM-GRD=bgrd  NDFD-GRD=195
-# hi           :  SREF-GRD=243  NAM-GRD=bgrd  NDFD-GRD=196
-# ak           :  SREF-GRD=216  NAM-GRD=bgrd  NDFD-GRD=198
-# ak_rtmages   :  " " forecast hours 0-12
-# conusnest    :  SREF-GRD=212   NAM-GRD=conusnest.bsmart      NDFD-GRD=197
-# conusnest2p5 :  SREF-GRD=212   NAM-GRID=conusnest.bsmart     NDFD-GRD=184/187
-# priconest    :  SREF=GRD=212   NAM-GRD= prinest.bsmart       NDFD-GRD=195
-# hawaiinest   :  SREF-GRID=243  NAM-GRID=hawaiinest.bsmart    NDFD-GRD=196  
-# alaskanest   :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=198  
-# aknest3      :  SREF-GRID=216  NAM-GRID=alaskanest.bsmart    NDFD-GRD=91
-
-# guamnmmb     :  GEFS-GRID???   HRW-GRID=guamnmmb.t00z.wrfprs NDFD-GRD=199
-# guamarw      :  GEFS-GRID???   HRW-GRID=guamarw.t00z.wrfprs  NDFD-GRD=199
-
-# dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=184
-# dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
+# guamnest     :  GEFS-GRID=???  GFS-GRD=gfs.tCCz.smartinitin    NDFD-GRD=199
+# prgfs        :  GEFS-GRID=???  GFS-GRD=gfs.tCCz.smartinitin    NDFD-GRD=195
+# akgfs        :  GEFS-GRID=???  GFS-GRD=gfs.tCCz.smartinitin    NDFD-GRD=198
+# higfs        :  GEFS-GRID=???  GFS-GRD=gfs.tCCz.smartinitin    NDFD-GRD=196
+# conusgfs     :  GEFS-GRID=???  GFS-GRD=gfs.tCCz.smartinitin    NDFD-GRD=197
 #======================================================================
 
 set -x
@@ -45,21 +30,6 @@ tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
 
 #=====================================================================
-# Set special filename extensions for mdl,sref,master,wgt,output files
-# mdl input file         : mdlgrd,natgrd
-# eg: nam.t12z.conusnest.bsmart.tm00
-
-# prdgen master ctl file : RUNTYPE
-# eg: nam_smartmasteraknest3.ctl     
-
-# prdgen wgt ctl file    : mdlgrd, ogrd
-# eg: nam_wgt_187_conusnest
-
-# smartinit in/out file  : rg / outreg
-# eg: MESOAK.NDFD
-# eg: nam.t12z.smartconus2p5.f03
-#=====================================================================
-
 # READ IN GRID INFO
 linemax=`cat SMINIT.CTL |wc -l`
 echo SMINIT  $linemax
@@ -104,13 +74,14 @@ while [ $iline -le $linemax ];do
     fi
   fi
 done
-#case $rg in dgx) inest=1;;esac  #set to read in 6hr precip for dgex files
-
-#set -x
 
 prdgfl=meso${rg}.NDFD  # output prdgen grid name (eg: mesocon.NDFD,mesoak...)
 case $RUNTYP in
- guamnest ) prdgfl=$mdl.t${cyc}z.smartinitin.guam;;
+ guamnest ) prdgfl=$mdl.t${cyc}z.smartinitin$mdlgrd;;
+    higfs ) prdgfl=$mdl.t${cyc}z.smartinitin$mdlgrd;;
+    akgfs ) prdgfl=$mdl.t${cyc}z.smartinitin$mdlgrd;;
+    prgfs ) prdgfl=$mdl.t${cyc}z.smartinitin$mdlgrd;;
+ conusgfs ) prdgfl=$mdl.t${cyc}z.smartinitin$mdlgrd;;
     conus ) prdgfl=meso.NDFD;;    
   aknest3 ) prdgfl=mesoak.NDFD;;  # CHANGE should be mesoak3.NDFD (meso{rg}
 esac
@@ -123,32 +94,15 @@ esac
 # Set forecast hours to compute 12 hour max/min Temps and 12 hr accum precip
 # 12 hour max/mins must be computed at 00 and 12 UTC
 
-# FOR NESTS,parent script, exnam, sets forecast range (60 or 54h)
 case $cyc in
   00|12) set -A A6HR 12 24 36 48 60 72 84 96 108 120 132 144 156 168 180 192;;
   * )    set -A A6HR 18 30 42 54 66 78 90 102 114 126 138 150 162 174 186;;
 esac
-# srefcyc and gefscyc set in parent job (JNAM_SMINIT)
-#typeset -Z2 srefcyc gefscyc pcphrl
 
 #======================================================================
 #  Configure input met grib, land-sea mask and topo file names
 #======================================================================
 
-#  Set indices to determine input met file name 
-#       eg: MDL.tCYCz.MDLGRD.NATGRD${FHR}.tm00
-#       eg: nam.t12z.bgrd3d24.tm00
-#       eg: nam.t12z.conusnest.bsmart24.tm00
-
-#-------------------------------------------------------------------------
-#   For all grids, set the following in NAM_SMINIT.CTL:
-#   sgrb : Input SREF grid grib number (eg: 212, 216, 243)
-#   grid : output grid to copygb sref precip and nam precip buckets to 
-#          one exception for non-nests where nam precip buckets are 
-#          interpolated to smartinit output (ogrd)
-#   ogrd : output grib number for prdgen and smartinit codes 
-#          (eg: 197,196,195,198,184)
-#--------------------------------------------------------------------------
 if [ $gtyp -ne $ogrd ];then
 case $RUNTYP in
   ak|ak_rtmages|aknest3) grid="255 $grid  0 64 0 25000 25000";;
@@ -198,7 +152,6 @@ for fhr in $hours; do
   let fhr3=fhr-3
   let fhr6=fhr-6
   let fhr9=fhr-9
-# typeset -Z2 fhr1 fhr2 fhr3 fhr6 fhr9 fhr ffhr 
 echo FHR=$fhr FHR1=$fhr1 FHR2=$fhr2 FHR3=$fhr3 FHR6=$fhr6 FHR9=$fhr9  
 if [ $fhr -gt 00 ];then 
  if [ $fhr -lt 10 -a $check3 -ne 0 ];then fhr="0"${fhr};fi
@@ -211,10 +164,8 @@ fi
 if [ $fhr -lt 10 ] ;then
   typeset -Z2 fhr1 fhr2 fhr3 fhr6 fhr9 fhr ffhr
 fi
-# Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
       initin) 
-#     Check that  00 hr analysis is from NDAS or GDAS (08/2013)
           if [ $mdl = "gfs" ]; then
             export OUTTYP=3
             export PARMGLOBAL=$ROOTdng/parm
@@ -229,33 +180,30 @@ fi
             export IDRT=0
             export LONB=1440
             export LATB=721
-            export grid='255 0 1440 721 90000 0 128 -90000 359750 250 250 0'
-            $utilexec/copygb -g "$grid" -x $COMIN/$mdl.t${cyc}z.sfluxgrbf$fhr $FLXINP
-            export POSTGPEXEC=/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v6/src/ncep_post
-	    export POSTGPSH=/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v6/ush/global_nceppost.sh 
+	    #Convert guassian grid flux file to lat/lon degree grid 
+            export fgrid='255 0 1440 721 90000 0 128 -90000 359750 250 250 0'
+            $utilexec/copygb -g "$fgrid" -x $COMIN/$mdl.t${cyc}z.sfluxgrbf$fhr $FLXINP
+            export POSTGPEXEC=${POSTGPEXEC:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v6/src/ncep_post}
+	    export POSTGPSH=${POSTGPSH:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v6/ush/global_nceppost.sh}
 	    $POSTGPSH > post${fhr}.out
-            grid="255 1 193 193 12350 143687 128 16794 148280 20000 0 64 2500 2500"
-            $utilexec/copygb -g "$grid" -x tmpfile4 $mdl.t${cyc}z.smartinitin.guam.${fhr}
-            $utilexec/grbindex $mdl.t${cyc}z.smartinitin.guam.${fhr} $mdl.t${cyc}z.smartinitin.guam.${fhr}.idx
+            $utilexec/copygb -g "$grid" -x tmpfile4 $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}
+            $utilexec/grbindex $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr} $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}.idx
           fi
           inhrfrq=1
     esac
   if [ $fhr -gt ${fhrstr} ];then
 
 #-------------------------------------------------------------
-#   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
+#   OFF-CYC & Nests: Create 3/12 hour buckets, 6 hr buckets available
 #   ON-CYC :
 #     3hr precip available at only 3,15, 27,39... forcast fhours
 #     other hours, create 3 hr precip
-#     6hr precip: Create only at 00/12 UTC valid times 
-#           eg: fhr=12,24,36
 #     Create 12 hour precip at 00/12 UTC valid times
 #-------------------------------------------------------------
     if [ $check6 -eq 0 -o $check12 -eq 0 ];then #True at 6,12,18
        mk3p=3
        ppgm=make
     fi
-#   hr3bkt flag determines when to run smartprecip to create 3 hr buckets
     let hr3bkt=$((fhr-3))%12
     echo hr3bkt=$hr3bkt 
 
@@ -264,7 +212,7 @@ fi
 # Create 3-hr buckets at 6,12,18,24,...
 #-------------------------------------------------------------
 #-------------------------------------------------------------
-# ON-CYCLE:  At 12-hr times:  Need 6 hour buckets as well
+# ON-CYCLE:  At 12-hr times:  Need 3 hour buckets as well
 # Except for 6 hr times (18,30,42...) : Already have 6 hour buckets
 # In addition, For 00/12 UTC valid times: Need to make 12 hour accumulations
 #-------------------------------------------------------------
@@ -310,8 +258,8 @@ fi
     export pgm=smartprecip; #. prep_step
     ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
     ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
-    ln -sf "$mdl.t${cyc}z.smartinitin.guam.${fhr}"      fort.15
-    ln -sf "$mdl.t${cyc}z.smartinitin.guam.${fhr}.idx"  fort.16
+    ln -sf "$mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}"      fort.15
+    ln -sf "$mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}.idx"  fort.16
     ln -sf "${freq}precip.${fhr}"  fort.50
     ln -sf "${freq}cprecip.${fhr}" fort.51
     ln -sf "${freq}snow.${fhr}"    fort.52
@@ -319,12 +267,12 @@ fi
     if [ $MKPCP -eq $mk12p ];then
       ln -sf "WRFPRS${fhr6}.tm00"      fort.13    
       ln -sf "WRFPRS${fhr6}i.tm00"     fort.14
-      ln -sf "$mdl.t${cyc}z.smartinitin.guam.${fhr}"       fort.15
-      ln -sf "$mdl.t${cyc}z.smartinitin.guam.${fhr}.idx"   fort.16
+      ln -sf "$mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}"       fort.15
+      ln -sf "$mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}.idx"   fort.16
     fi  # mk12p
 
 #===============================================================
-# GFS DNG now uses nam_smartprecip : Create Precip Buckets for smartinit 
+# GFS DNG now uses same smartprecip code as the NAM: Create Precip Buckets for smartinit 
 #===============================================================
     echo RUN SMARTPRECIP FOR GFS DNG TO MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr2 to $pfhr1 $pfhr3
     $EXECdng/smartprecip <<EOF > ${ppgm}precip${fhr}.out
@@ -338,11 +286,11 @@ EOF
      $utilexec/grbindex ${freq}snow ${freq}snowi
       if [ $mk3p -eq 3 ]; then
 #GFS already has 6 hour bucket at these forecasts so just extract precip and snow   
-       $utilexec/wgrib -s gfs.t${cyc}z.smartinitin.guam.${fhr} | egrep "(:APCP:)" \
-       | $utilexec/wgrib -i -grib -o 6precip gfs.t${cyc}z.smartinitin.guam.${fhr}
+       $utilexec/wgrib -s gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr} | egrep "(:APCP:)" \
+       | $utilexec/wgrib -i -grib -o 6precip gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr}
        $utilexec/grbindex 6precip 6precipi 
-       $utilexec/wgrib -s gfs.t${cyc}z.smartinitin.guam.${fhr} | egrep "(:WEASD:)" \
-       | $utilexec/wgrib -i -grib -o 6snow gfs.t${cyc}z.smartinitin.guam.${fhr}
+       $utilexec/wgrib -s gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr} | egrep "(:WEASD:)" \
+       | $utilexec/wgrib -i -grib -o 6snow gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr}
        $utilexec/grbindex 6snow 6snowi
       fi
     fi #MKPCP>0
@@ -369,7 +317,6 @@ EOF
 #   DECLARE INPUTS and RUN SMARTINIT 
 #=================================================================
 
-# CHANGE : for non-conus look in FIXdng for topo,land files
   cp $FIXdng/topo/${topofl} TOPONDFD
   cp $FIXdng/mask/${maskfl} LANDNDFD
   ln -sf TOPONDFD     fort.46
@@ -500,7 +447,11 @@ EOF
         ak_rtmages) RGIN=AKRT;;
            dgex_cs) RGIN=CS2P;;
            dgex_ak) RGIN=AK3;;
-           guamnest) RGIN=GM;;
+          guamnest) RGIN=GM;;
+             higfs) RGIN=HI;;
+             akgfs) RGIN=AK;;
+             prgfs) RGIN=PR;;
+          conusgfs) RGIN=CS;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 
@@ -508,15 +459,13 @@ EOF
   ${EXECdng}/smartinit $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
   export err=$?; #err_chk
 
-# Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
-#  if [ $fhr -le $hrlyfhr ];then
-    case $RUNTYP in
-     ak_rtmages) 
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
-       mksmart=0;;
-     hawaiinest|priconest|conusnest2p5|aknest3|guamnest)
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00;;
-   esac
+  case $RUNTYP in
+    ak_rtmages) 
+      cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
+      mksmart=0;;
+    hawaiinest|priconest|conusnest2p5|aknest3|guamnest|higfs|prgfs|akgfs|conusgfs)
+      cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00;;
+  esac
 #  fi
 
   if [ $mksmart -eq 1 ];then
