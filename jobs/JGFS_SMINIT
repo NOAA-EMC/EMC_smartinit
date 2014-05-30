@@ -1,18 +1,4 @@
 #!/bin/ksh
-####NCO set -xa   #NCO preferred setting
-#BSUB -L /bin/sh
-#BSUB -P GFS-MTN
-#BSUB -network type=sn_all:mode=US
-#BSUB -oo gfs_sminit.out.%J 
-#BSUB -eo gfs_sminit.out.%J
-#BSUB -J sminitguam_test      
-#BSUB -q debug
-#BSUB -W 00:15 
-#BSUB -n 64 
-#BSUB -R span[ptile=8]
-#BSUB -R affinity[core(2)]
-#BSUB -x
-#BSUB -a poe
 set -xa
 export OMP_NUM_THREADS=2
 export MP_EUIDEVELOP=min
@@ -47,7 +33,7 @@ export MP_LABELIO=yes
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
-cyc=06
+cyc=00
 envir=prod
 model_ver=gfs
 RUNTYP=guamnest
@@ -64,8 +50,7 @@ echo model_ver is ${model_ver:?}
 #######################################################
 export RUN_ENVIR=${RUN_ENVIR:-prod}
 
-#export SENDECF=${SENDECF:-YES}
-export SENDECF=${SENDECF:-NO}
+export SENDECF=${SENDECF:-YES}
 
 if [ $envir = "prod" ]
 then
@@ -114,15 +99,12 @@ date
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-#export DATA_IN=${DATA_IN:-/tmpnwprd}
-export DATA_IN=${DATA_IN:-/ptmpp1/$USER}
-#export DATA=${DATA:-$DATA_IN/${job}.${pid}}
-export DATA=${DATA:-$DATA_IN/gfsdng_new.${pid}}
+export DATA_IN=${DATA_IN:-/tmpnwprd}
+export DATA=${DATA:-$DATA_IN/${job}.${pid}}
 #NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
-export PDY=20140518
 export cycle=t${cyc}z
 
 ####################################
@@ -155,9 +137,9 @@ export SENDDBN_GB2=${SENDDBN_GB2:-NO}
 # dng = downscaled gridding
 ####################################
 export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
-#export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
-#export HOMEdng=${HOMEdng:-/nw${envir}/nam_smartinit.v3.2.2}  # NCO preferred
-export HOMEdng=${HOMEdng:-/global/save/Dana.Carlis/svn/smartinit/branches/EXP-gfs}  
+export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
+export HOMEdng=${HOMEdng:-/nw${envir}/nam_smartinit.v3.2.2}  # NCO preferred
+#export HOMEdng=${HOMEdng:-/global/save/Dana.Carlis/svn/smartinit/branches/EXP-gfs}  
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
@@ -176,7 +158,7 @@ export gespath=${gespath:-/nwges/prod}
 ###############################################################
 # Run setup to initialize working directory and utility scripts
 ###############################################################
-#sh $utilscript/setup.sh
+sh $utilscript/setup.sh
 
 ###########################################
 # Run setpdy and initialize PDY variables
@@ -194,13 +176,11 @@ sh $utilscript/setpdy.sh
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-#export COM_IN=${COM_IN:-/com/${NET}/${envir}}
-export COM_IN=${COM_IN:-/global/noscrub/Russ.Treadon/com/${NET}/para}
-#export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
+export COM_IN=${COM_IN:-/com/${NET}/${envir}}
+export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
-#export COMOUT=$COM_OUT/${RUN}.${PDY}
-export COMOUT=$DATA
+export COMOUT=$COM_OUT/${RUN}.${PDY}
 
 mkdir -p $COMOUT
 cp ${PARMdng}/SMINIT.CTL $DATA
@@ -210,7 +190,6 @@ cp ${PARMdng}/SMINIT.CTL $DATA
 ##############################################
 export SHOUR=00
 export EHOUR=192
-export EHOUR=24
 export EHOUR_HRLY=12
 export FHINC_HRLY=01
 export FHINC=03
@@ -223,8 +202,7 @@ export FHINC=03
 # SLEEP_INT  - Amount of time to wait between
 #              checking for input files
 ###############################################
-#export SLEEP_TIME=300
-export SLEEP_TIME=30
+export SLEEP_TIME=300
 export SLEEP_INT=10
 
 ####################################
