@@ -274,6 +274,7 @@ INTERFACE
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
     if (lnest) then   
       GDIN%KMAX=40
+      if (trim(CORE).eq.'GFS') GDIN%KMAX=64
     else
       GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
       if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
@@ -622,16 +623,21 @@ INTERFACE
         print *, 'Compute SKYCVR',FHR
         ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
         ALLOCATE (SKY(IM,JM),STAT=kret)
-         if(lnest.and. .not.lhiresw) then
-           SKY=SPVAL
-           where(validpt)
-             TEMP1=AMAX1(LCLD,MCLD)
-             SKY=AMAX1(TEMP1,HCLD)
-           endwhere
-         else
+        if(lnest.and. .not.lhiresw) then
+          SKY=SPVAL
+          where(validpt)
+            TEMP1=AMAX1(LCLD,MCLD)
+            SKY=AMAX1(TEMP1,HCLD)
+          endwhere
+        else
           CALL SKYCVR(SKY,CFR,GDIN)
           CALL BOUND (SKY,0.,100.)
         endif
+        IF(trim(CORE) .EQ. 'GFS' ) THEN
+          print *, 'Computing skycvr for GFS DNG'
+          CALL SKYCVR(SKY,CFR,GDIN)
+          CALL BOUND (SKY,0.,100.)
+        ENDIF
         DEALLOCATE (TEMP1,TEMP2,STAT=kret)
 
         IF (MOD(FHR,3).EQ.0 .AND. trim(CORE) .EQ. 'GFS' ) THEN

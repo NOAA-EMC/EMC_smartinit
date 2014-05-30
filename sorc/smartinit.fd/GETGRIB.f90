@@ -243,6 +243,7 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
+      print *,'imax,jmax,kmax,numlev,itot,core,lhiresw'
       print *,gdin%imax,jmax,kmax,numlev,itot,core,lhiresw
 
       if (lfull) then
@@ -466,7 +467,7 @@
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 225
       JPDS(6) = 001
-      if (lhiresw) JPDS(5)=81  
+      if (lhiresw.or.trim(CORE).eq.'GFS') JPDS(5)=81  
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
 
       if (lfull.or.lanl) then
@@ -479,6 +480,7 @@
 ! Best Liftex Index 
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 132 
+      if(trim(CORE) .eq. 'GFS') JPDS(5) = 24 
       JPDS(6) = 116 
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,BLI,IRET,ISTAT)
       endif
@@ -672,7 +674,7 @@
       if (llimited) return
 
 !   get the vertical profile of cloud fraction for non-nests
-      if (.not. lnest) then
+      if (.not. lnest .or. trim(CORE) .eq. 'GFS') then
       J=0
       DO LL=1,KMAX  
        JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=071; JPDS(6)=KLTYP
@@ -721,14 +723,16 @@
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
 
 ! composite reflectivity
-      JPDS(5) = 212
-      JPDS(6) = 200
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
+      if (trim(CORE).NE. 'GFS') then
+        JPDS(5) = 212
+        JPDS(6) = 200
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
+      endif
 
       if (lanl) return
 
 !     nests already have computed cld fracs...
-      if (lnest) then
+      if (lnest .and. trim(CORE).ne.'GFS') then
         J=0;JPDS=-1
         JPDS(3)=IGDNUM
         JPDS(5) = 71
