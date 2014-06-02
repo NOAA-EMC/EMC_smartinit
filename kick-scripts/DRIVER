@@ -49,8 +49,9 @@ for RUNTYP in conus ak hi pr ak_rtmages aknest3 conusnest2p5 $domhrw;do
   export ENDHRS=12
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
-               aknest3|conusnest2p5) export ENDHRS=36;; 
-                               dgex) export fhrstr=87; export ENDHRS=192;; 
+                    aknest3) export ENDHRS=12;; 
+               conusnest2p5) export ENDHRS=36;; 
+                       dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
   export NET=$mdl

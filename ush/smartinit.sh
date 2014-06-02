@@ -280,7 +280,7 @@ if [ $rg = dgx ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
 #===========================================================
-set -x
+####set -x
 for fhr in $hours; do
   rm -f *out${fhr}
   mk3p=0;mk6p=0;mk12p=0
@@ -690,7 +690,8 @@ EOF5
        cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
        mksmart=0;;
      hawaiinest|priconest|conusnest2p5|aknest3)
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00;;
+       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+       if [ $RUNTYP = conusnest2p5 ];then mksmart=1;fi;;  #make grib2 files for wave group
    esac
   fi
 
