@@ -690,7 +690,8 @@ EOF5
        cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
        mksmart=0;;
      hawaiinest|priconest|conusnest2p5|aknest3)
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00;;
+       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+       if [ $RUNTYP = conusnest2p5 ];then mksmart=1;fi;;
    esac
   fi
 
