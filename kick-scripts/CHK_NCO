@@ -15,7 +15,7 @@ export RUNTYP=${1:-conus}
 GRID=smart        #smart, bgrd3d, bsmart
 mdl=nam
 
-yymmdd=20140424
+yymmdd=20140603
 export cyc=00       
 
 export ffhr=00     # Starting forecast hour

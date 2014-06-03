@@ -1,8 +1,8 @@
-#BSUB -J 
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/06/list/o
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/06/list/o
+#BSUB -J DNG06.dgex_cs-192
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/06/list/oDNG06.dgex_cs-192
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/06/list/oDNG06.dgex_cs-192
 #BSUB -n 1
-#BSUB -W 3:00
+#BSUB -W 1:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]

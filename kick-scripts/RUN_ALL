@@ -35,7 +35,7 @@ export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 export NET=$mdl 
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
-export WALLCLK="2:00"  #TEST
+export WALLCLK="1:00"  #TEST
 
 runreg=$RUNTYP
 case $RUNTYP in 
