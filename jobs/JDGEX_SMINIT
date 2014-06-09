@@ -1,5 +1,5 @@
 #!/bin/ksh
-####NCO set -xa   #NCO preferred setting
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -94,8 +94,8 @@ date
 ####################################
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
-export DATA=${DATA:-$DATA_IN/${job}.${pid}}
-#NCO export DATA=$DATA_IN/${job}.${pid}
+#EMC export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -210,7 +210,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-####NCO SET env  
+env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"
