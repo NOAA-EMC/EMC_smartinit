@@ -503,4 +503,14 @@ Produces a larger impact
 
 05/29/14
 * smartinit.sh : Added grib2 output for hourly conus2p5 files
-* RUN_ALL : 
+* RUN_ALL :   set up for simultaneous 3 hr forecast hr runs
+
+06/05/14 
+* changes nam_smarprecip to smartprecip like GFS scripts
+
+06/09/12
+* JNAM_SMINIT, smartinit.sh : Fixed GDAS coldstart option
+   set pcdate, pcfhr, pcyc in job
+   Run cold start option for bsmart (nest) files as well as bgrd3d (parent) files
+
+

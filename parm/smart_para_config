@@ -31,6 +31,9 @@ export EXECnam=/nwprod/exec    # Location of nam_prdgen
 export EXECdgex=/nwprod/exec   # Location of dgex_prdgen
 export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 
+#TEST WITH Dana's GFS changes
+###export EXECdng=/meso/save/$USER/smartinit/branches/EXP-gfs/exec
+
 export COMROOT=/com
 export COM_IN=${COMROOT}/${mdl}/prod
 # for dgex downscling thru 192 forecast hours, use locally created gefs files

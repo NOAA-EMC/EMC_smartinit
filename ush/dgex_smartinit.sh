@@ -360,7 +360,7 @@ for fhr in $hours; do
 #   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
     if [ ${rg} = dgx ];then inhrfrq=3;fi
 
-# nam_sminit_mkprcp.sh ######################################
+# sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
 #   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
 #   ON-CYC :
@@ -508,7 +508,7 @@ for fhr in $hours; do
       fi  # mk12p
 
 #===============================================================
-# nam_smartprecip : Create Precip Buckets for smartinit 
+# smartprecip : Create Precip Buckets for smartinit 
 #  if pfhr1 > pfhr2: create 3hr precip=prcp:fhr - prcp-3 -->  All 3hr buckets
 #  This option also used for dgex to create 3hr precip at 6 hr times, check6=0
 #  if pfhr1 < pfhr2: create 6hr precip=prcp-3 +prcp:fhr  -->  All 3 hr buckets
@@ -517,7 +517,7 @@ for fhr in $hours; do
 #  if pfhr4 > 0    : create 12h precip=prcp-9 + prcp-6 + prcp-3 +prcp:fhr, All 3hr buckets
 #===============================================================
       echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3 $pfhr4
-      $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${freq}.out${fhr}
+      $EXECdng/smartprecip <<EOF > ${ppgm}precip${freq}.out${fhr}
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk
