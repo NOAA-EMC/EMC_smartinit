@@ -160,8 +160,12 @@ sh $utilscript/setpdy.sh
 ####export PDY=20140501   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
-sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold start export GUESS=GDAS   #TEST
+sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+export pcfhr=06
+export pcdate=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 1-8`
+export pcyc=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 9-10`
+
 
 ##############################################
 # Define COM directories

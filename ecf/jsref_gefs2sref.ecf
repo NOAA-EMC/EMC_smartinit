@@ -59,7 +59,6 @@ else
   export cyc=${cyc:-18}
 fi
 
-
 export cycle=t${cyc}z
 
 cd ${nwdir}     #NCO to set

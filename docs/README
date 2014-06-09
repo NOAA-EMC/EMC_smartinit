@@ -488,3 +488,29 @@ Produces a larger impact
 * VADJUST.f90
   - Set PHI values around validpt and domain edge boundaries
   - Set HTOPO if not validpt or at domain edge
+
+05/15/2014
+* smartinit.fd/GETGRIB.f90, ush/dgex_smartinit.sh
+  - Fixed reads for 3/6 hour precip
+  - Passing core to determine if dgex file
+
+05/20/2014
+* smartinit --> Tested Jun's gefs2sref output to 192 hours for POPs
+
+******************************************************************
+05/27/14: V3.2.5 DELIVERED TO NCO 
+******************************************************************
+
+05/29/14
+* smartinit.sh : Added grib2 output for hourly conus2p5 files
+* RUN_ALL :   set up for simultaneous 3 hr forecast hr runs
+
+06/05/14 
+* changes nam_smarprecip to smartprecip like GFS scripts
+
+06/09/12
+* JNAM_SMINIT, smartinit.sh : Fixed GDAS coldstart option
+   set pcdate, pcfhr, pcyc in job
+   Run cold start option for bsmart (nest) files as well as bgrd3d (parent) files
+
+

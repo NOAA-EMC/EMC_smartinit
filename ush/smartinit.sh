@@ -195,10 +195,16 @@ case $RUNTYP in conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
 
+
+
+GUESS=GDAS  ##### TEST  ###################
+
+
 echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
+echo INPUT NAM GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
 echo "============================================================"
@@ -280,7 +286,7 @@ if [ $rg = dgx ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
 #===========================================================
-set -x
+####set -x
 for fhr in $hours; do
   rm -f *out${fhr}
   mk3p=0;mk6p=0;mk12p=0
@@ -304,11 +310,12 @@ for fhr in $hours; do
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
       bgrd3d) 
-#     Check that  00 hr analysis is from NDAS or GDAS (08/2013)
+#     Check that 00 hr analysis is from NDAS or GDAS (08/2013)
         if [ $fhr -eq 00 -a $GUESS = GDAS ];then
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
-          echo USING PREVIOUS $pcdate $ ${cyc}Z CYCLE $mdl $pcfhr FORECAST;echo
+          echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+            echo MDLIN $mdlin
           ln -fs ${mdlin}${pcfhr}.tm00 fort.11
           ln -fs WRFPRS${fhr}.tm00 fort.51
           echo ${PDY}${cyc} | ${utilexec}/overdate.grib
@@ -326,14 +333,25 @@ for fhr in $hours; do
       wrfprs)  
         mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
         cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00;;
+
            *) 
         if [ $rg = dgx ];then 
-          if [ $fhr -eq 78 ];then COMIN=/meso/noscrub/${USER}/com/dgex/para/dgex.${PDY};fi #TEST
           mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
-          mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
-          cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+#         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
+          if [ $fhr -eq 00 -a $GUESS = GDAS ];then
+            echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
+            echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
+            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            echo MDLIN $mdlin;echo
+            ln -fs ${mdlin}${pcfhr}.tm00 fort.11
+            ln -fs WRFPRS${fhr}.tm00 fort.51
+            echo ${PDY}${cyc} | ${utilexec}/overdate.grib
+          else
+            mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
+            cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+          fi
         fi;;
     esac
 
@@ -341,10 +359,11 @@ for fhr in $hours; do
   inhrfrq=1
 
   if [ $fhr -gt ${fhrstr} ];then
-#   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
+#   Check if hourly or 3 hourly input files needed to determine 
+#   maxmin read frequency
     if [ ${rg} = dgx ];then inhrfrq=3;fi
 
-# nam_sminit_mkprcp.sh ######################################
+# sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
 #   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
 #   ON-CYC :
@@ -432,7 +451,7 @@ for fhr in $hours; do
       $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
-      export pgm=nam_smartprecip; . prep_step
+      export pgm=smartprecip; . prep_step
       ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
       ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
       ln -sf "WRFPRS${fhr}.tm00"     fort.15
@@ -467,10 +486,10 @@ for fhr in $hours; do
       fi  # mk12p
 
 #===============================================================
-# nam_smartprecip : Create Precip Buckets for smartinit 
+# smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
       echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-      $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${fhr}.out
+      $EXECdng/smartprecip <<EOF > ${ppgm}precip${fhr}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk
@@ -690,7 +709,8 @@ EOF5
        cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
        mksmart=0;;
      hawaiinest|priconest|conusnest2p5|aknest3)
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00;;
+       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+       if [ $RUNTYP = conusnest2p5 ];then mksmart=1;fi;;  #make grib2 files for wave group
    esac
   fi
 

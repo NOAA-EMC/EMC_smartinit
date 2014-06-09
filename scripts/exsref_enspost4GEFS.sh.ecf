@@ -265,7 +265,7 @@ while [ $nf -le $TOTMBR ];do         #loop for all members
 #       using T-3 and T+3 pgrb file 
       if [ $HR -gt 126 ];then 
         int126=6
-        if [ `expr $HR % $int126` -ne 0 -a $HR -lt $ENDHOUR ];then
+        if [ `expr $HR % $int126` -ne 0 -a $HR -le $ENDHOUR ];then
           ((HRLST=HR-interval))
           ((HRNXT=HR+interval))
           ((HRAV1=HRLST-interval))
@@ -323,7 +323,7 @@ cat <<paramEOF >input
  &end
 paramEOF
 
-echo "FILENAME INPUT for sref_ens_gen"
+echo "FILENAME INPUT for sref_ens_gen"  $timestep
 cat filename
 ###############################################
 # Part III: decode, calculate and write to grib

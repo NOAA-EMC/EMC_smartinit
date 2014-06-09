@@ -11,15 +11,15 @@ typeset -Z2 cyc ffhr
 # RUNTYP for GRID bsmart: conusnest, alaskanest,hawaiinest,priconest
 # RUNTYP for GRID bgrd3d:
 #===============================================================
-export RUNTYP=${1:-conus}
+export RUNTYP=${1:-conus2p5}
 GRID=smart        #smart, bgrd3d, bsmart
 mdl=nam
 
-yymmdd=20140424
-export cyc=00       
+yymmdd=20140609
+export cyc=12       
 
 export ffhr=00     # Starting forecast hour
-export ENDHRS=12   # Ending forecast hour
+export ENDHRS=00   # Ending forecast hour
 INCR=03            # Forecast hour increment
 fhrstr=$ffhr       # hr to start comparisons
 
@@ -29,9 +29,8 @@ if [ $cyc -eq 06 -o $cyc -eq 18 ];then let ioff=6;fi
 #===============================================================
 # location of smartinit files
 #===============================================================
-ncodir=/ptmpp1/Jeff.McQueen/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
-# devdir=/ptmpp1/${USER}/smart${RUNTYP}/${mdl}.${yymmdd}     #EMC PARA 
-devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}     #EMC PARA 
+ncodir=/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
+devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}   #EMC PARA 
 
 #===============================================================
 # GRIB1 FILE PREFIX NAME FORMAT (eg: nam.t12z.bgrd3d42.tm00)
