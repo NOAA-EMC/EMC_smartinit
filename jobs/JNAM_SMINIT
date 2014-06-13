@@ -1,5 +1,5 @@
 #!/bin/ksh
-####NCO set -xa   #NCO preferred setting
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -150,18 +150,19 @@ export gespath=${gespath:-/nwges/prod}
 ###############################################################
 # Run setup to initialize working directory and utility scripts
 ###############################################################
-sh $utilscript/setup.sh
+.  $utilscript/setup.sh
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-sh $utilscript/setpdy.sh  
+.  $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
 ####export PDY=20140501   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST
-sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+.  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+echo GUESS=$GUESS
 export pcfhr=06
 export pcdate=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 1-8`
 export pcyc=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 9-10`

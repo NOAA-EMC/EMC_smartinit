@@ -508,9 +508,12 @@ Produces a larger impact
 06/05/14 
 * changes nam_smarprecip to smartprecip like GFS scripts
 
-06/09/12
+06/09/14
 * JNAM_SMINIT, smartinit.sh : Fixed GDAS coldstart option
    set pcdate, pcfhr, pcyc in job
    Run cold start option for bsmart (nest) files as well as bgrd3d (parent) files
 
-
+06/13/14
+* at 18z, changed to point COM_IN to /com/nam/para
+* JNAM_SMINIT : Fixed GUESS set option for running envir script.
+Need to use . rather than sh script-name.sh

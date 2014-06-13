@@ -15,11 +15,11 @@ export RUNTYP=${1:-conus2p5}
 GRID=smart        #smart, bgrd3d, bsmart
 mdl=nam
 
-yymmdd=20140609
-export cyc=12       
+yymmdd=20140612
+export cyc=06       
 
 export ffhr=00     # Starting forecast hour
-export ENDHRS=00   # Ending forecast hour
+export ENDHRS=12   # Ending forecast hour
 INCR=03            # Forecast hour increment
 fhrstr=$ffhr       # hr to start comparisons
 
@@ -30,7 +30,8 @@ if [ $cyc -eq 06 -o $cyc -eq 18 ];then let ioff=6;fi
 # location of smartinit files
 #===============================================================
 ncodir=/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
-devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}   #EMC PARA 
+devdir=/com/${mdl}/para/${mdl}.${yymmdd}  #CCS
+#  devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}   #EMC PARA 
 
 #===============================================================
 # GRIB1 FILE PREFIX NAME FORMAT (eg: nam.t12z.bgrd3d42.tm00)
@@ -65,8 +66,8 @@ while [ $ffhr -le $ENDHRS ];do
   ln -fs ${ncodir}/${smpre}${ffhr}.tm00 nco_file   
   ln -fs ${devdir}/${smpre}${ffhr}.tm00 dev_file  
 
-  if [ ! -s nco_file ];then echo " nco_file ${ncodir} ${smpre}$ffhr.tm00 ${RUNTYP} not found";exit;fi
-  if [ ! -s dev_file ];then echo " dev_file ${devdir} ${smpre}$ffhr.tm00 ${RUNTYP}not found";exit;fi
+  if [ ! -s nco_file ];then echo " nco_file ${ncodir} ${smpre}$ffhr.tm00 ${RUNTYP} NOT FOUND";exit;fi
+  if [ ! -s dev_file ];then echo " dev_file ${devdir} ${smpre}$ffhr.tm00 ${RUNTYP} NOT FOUND";exit;fi
   ls -ltr nco_file
   ls -ltr dev_file
   let fhr=$ffhr

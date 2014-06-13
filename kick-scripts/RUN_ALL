@@ -29,7 +29,7 @@ export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
 
-INCR=03            # Forecast hour increment
+export INCR=03            # Forecast hour increment
 
 export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 export NET=$mdl 
@@ -52,6 +52,7 @@ export ffhr=$fhrstr
 export DATA_IN=/stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
+
 while [ $ffhr -le $ENDHRS ];do
   cd ${wkdir}
   if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi

@@ -195,16 +195,14 @@ case $RUNTYP in conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
 
-
-
-GUESS=GDAS  ##### TEST  ###################
-
+### GUESS=GDAS  ##### TEST  ###################
 
 echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT NAM GUESS : $GUESS   NATIVE GRID: $natgrd
+echo INPUT MDL DIR : $COM_IN
+echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
 echo "============================================================"
