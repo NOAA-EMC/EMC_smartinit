@@ -497,6 +497,8 @@ Produces a larger impact
 05/20/2014
 * smartinit --> Tested Jun's gefs2sref output to 192 hours for POPs
 
+05/22/14 : Did a complete end-to-end test for NAM and DGEX
+
 ******************************************************************
 05/27/14: V3.2.5 DELIVERED TO NCO 
 ******************************************************************
@@ -508,6 +510,8 @@ Produces a larger impact
 06/05/14 
 * changes nam_smarprecip to smartprecip like GFS scripts
 
+06/06/14 : Did a complete end-to-end test thru 84 hours for NAM
+
 06/09/14
 * JNAM_SMINIT, smartinit.sh : Fixed GDAS coldstart option
    set pcdate, pcfhr, pcyc in job
@@ -516,4 +520,8 @@ Produces a larger impact
 06/13/14
 * at 18z, changed to point COM_IN to /com/nam/para
 * JNAM_SMINIT : Fixed GUESS set option for running envir script.
-Need to use . rather than sh script-name.sh
+    - Needed to use . rather than sh script-name.sh
+
+06/16/14 12Z : Began real-time EMC NAM DNG PARA end-to-end thru 84/192 hr test
+with NCO NAM para outputs.
+

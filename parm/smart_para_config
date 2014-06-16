@@ -35,8 +35,9 @@ export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 ###export EXECdng=/meso/save/$USER/smartinit/branches/EXP-gfs/exec
 
 export COMROOT=/com
-export COMROOT="/meso/noscrub/Eric.Rogers/com"
-export gespath=/meso/noscrub/Eric.Rogers/nwges/para
+####export COMROOT="/meso/noscrub/Eric.Rogers/com"
+####export gespath=/meso/noscrub/Eric.Rogers/nwges/para
+
 ####PROD export COM_IN=${COMROOT}/${mdl}/prod
 export COM_IN=${COMROOT}/${mdl}/para
 
@@ -44,7 +45,6 @@ export COM_IN=${COMROOT}/${mdl}/para
 export COM_SREF=${COMROOT}/sref/prod
 #TEST until dgex bsmart files are available from production run
 if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then 
-###  export COMROOT="/meso/noscrub/Eric.Rogers/com"
   export COM_SREF=/ptmpp1/Jeff.McQueen/com/sref/para
 #TEST  export COM_SREF=/ptmpp1/Jun.Du/com/sref/prod
 fi

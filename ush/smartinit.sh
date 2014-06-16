@@ -1,4 +1,5 @@
 #!/bin/ksh 
+set -x
 #
 # Author:        Geoff Manikin       Org: NP22         Date: 2007-08-06
 #
@@ -313,7 +314,8 @@ for fhr in $hours; do
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
-            echo MDLIN $mdlin
+          echo MDLIN $mdlin
+          rm -f WRFPRS${fhr}.tm00
           ln -fs ${mdlin}${pcfhr}.tm00 fort.11
           ln -fs WRFPRS${fhr}.tm00 fort.51
           echo ${PDY}${cyc} | ${utilexec}/overdate.grib
@@ -342,7 +344,8 @@ for fhr in $hours; do
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
             mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
-            echo MDLIN $mdlin;echo
+            echo MDLIN $mdlin
+            rm -f WRFPRS${fhr}.tm00
             ln -fs ${mdlin}${pcfhr}.tm00 fort.11
             ln -fs WRFPRS${fhr}.tm00 fort.51
             echo ${PDY}${cyc} | ${utilexec}/overdate.grib

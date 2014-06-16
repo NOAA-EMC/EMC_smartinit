@@ -1,6 +1,6 @@
-#BSUB -J DNG12.aknest3-00
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.aknest3-00
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.aknest3-00
+#BSUB -J DNG18.aknest3-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/18/list/oDNG18.aknest3-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/18/list/oDNG18.aknest3-12
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA
@@ -104,7 +104,6 @@ date
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd}
 export DATA=${DATA:-$DATA_IN/${job}.${pid}}
-#NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -159,12 +158,12 @@ export gespath=${gespath:-/nwges/prod}
 ###############################################################
 # Run setup to initialize working directory and utility scripts
 ###############################################################
-sh $utilscript/setup.sh
+.  $utilscript/setup.sh
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-sh $utilscript/setpdy.sh  
+.  $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
 ####export PDY=20140501   #TEST
 

@@ -26,6 +26,8 @@ export kickd=${rootd}/kick-scripts
 
 cd $kickd
 
+cp -p $rootd/parm/smart_para-CTL $rootd/parm/smart_para_config
+
 # Determine cycle
 let HH=`date +%H`
 if [ $HH -ge 01 -a $HH -le 07 ];then export cyc=00;
@@ -46,11 +48,12 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 domains="conusnest2p5 hi ak pr conus aknest3 ak_rtmages"
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=12
+  export ENDHRS=84
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
-                    aknest3) export ENDHRS=12;; 
-               conusnest2p5) export ENDHRS=36;; 
+                    ak_rtmages) ENDHRS=12;;
+                    aknest3) export ENDHRS=84;; 
+               conusnest2p5) export ENDHRS=84;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
