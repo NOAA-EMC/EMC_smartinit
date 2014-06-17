@@ -522,6 +522,10 @@ Produces a larger impact
 * JNAM_SMINIT : Fixed GUESS set option for running envir script.
     - Needed to use . rather than sh script-name.sh
 
-06/16/14 12Z : Began real-time EMC NAM DNG PARA end-to-end thru 84/192 hr test
+06/16/14 12Z : 
+* Began real-time EMC NAM DNG PARA end-to-end thru 84/192 hr test
 with NCO NAM para outputs.
+* ush: turned off GDAS set in NCO ush/smartinit.sh
+       Fixed SREFPROB cp to cp the SREF 3hrly prob file rather than GEFS
+
 

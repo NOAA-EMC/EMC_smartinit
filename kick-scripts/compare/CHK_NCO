@@ -38,7 +38,7 @@ esac
 #===============================================================
 # location of smartinit files
 #===============================================================
-ncodir=/com/${mdl}/para/${mdl}.${yymmdd}  #NCO 
+ncodir=/com/${mdl}/test/${mdl}.${yymmdd}  #NCO 
 ###devdir=/com/${mdl}/para/${mdl}.${yymmdd} #NCO PARA 
 devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}   #EMC PARA 
 

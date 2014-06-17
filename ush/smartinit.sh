@@ -224,7 +224,7 @@ let pcphr3=pcphr-3
 if [ $ffhr -gt ${fhrstr} ]; then
 
 # Get the sref precip fields that we need
-  if [ ! -s SREFPROB -o $rg = gm -o $rg = dgx ]; then
+  if [ $rg = gm -o $rg = dgx ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
