@@ -36,6 +36,7 @@ export NET=$mdl
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
 export WALLCLK="1:00"  #TEST
+if [ $RUNTYP = conusnest2p5 ];then export WALLCLK="2:00";fi  #TEST
 
 runreg=$RUNTYP
 case $RUNTYP in 
@@ -71,6 +72,7 @@ while [ $ffhr -le $ENDHRS ];do
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
 
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
+  #TEST export PDY=20140627  ###TEST
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`

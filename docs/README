@@ -528,4 +528,14 @@ with NCO NAM para outputs.
 * ush: turned off GDAS set in NCO ush/smartinit.sh
        Fixed SREFPROB cp to cp the SREF 3hrly prob file rather than GEFS
 
+06/26/14 18Z
+* MAIN.f90 : turned on outputting of previous 2 hours temperatures even at 10/11 22/23 Z 
+to reduce confusion with smart files.
+In future, Geoff prefers stripping out previous 2 hours temps from all files
 
+* Turned on grid 187 dng for conus2p5
+
+06/27/14 12Z
+* MAIN.f90: fixed hr label for T-1 (THOLD3) and T-2 (THOLD2) output fields
+* ush/smartinit.sh : added option to run copygb instead of prdgen
+                     but using nearest neighbor (i2) option

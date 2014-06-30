@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa   #NCO preferred setting
+#NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -156,7 +156,7 @@ export gespath=${gespath:-/nwges/${envir}}
 ###########################################
 .  $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-####export PDY=20140501   #TEST
+###export PDY=20140627   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST

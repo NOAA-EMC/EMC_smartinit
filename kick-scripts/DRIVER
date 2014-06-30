@@ -26,7 +26,7 @@ export kickd=${rootd}/kick-scripts
 
 cd $kickd
 
-cp -p $rootd/parm/smart_para-CTL $rootd/parm/smart_para_config
+# cp -p $rootd/parm/smart_para-CTL $rootd/parm/smart_para_config
 
 # Determine cycle
 let HH=`date +%H`
@@ -52,8 +52,8 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                     ak_rtmages) ENDHRS=12;;
-                    aknest3) export ENDHRS=84;; 
-               conusnest2p5) export ENDHRS=84;; 
+                    aknest3) export ENDHRS=60;; 
+               conusnest2p5) export ENDHRS=60;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  

@@ -530,29 +530,29 @@
       ENDIF
 
 !  READ min/max temperature values for previous 2 hours
-      print *, 'Reading max/min for previous 2 hours',LUGT1,LUGT2,IGDNUMT
+      print *, 'Reading temperature for previous 2 hours',LUGT1,LUGT2,IGDNUMT
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
 
 ! Get min/max temperature values for full 12-hr period for F12,24...

@@ -1,6 +1,6 @@
-#BSUB -J DNG12.pr-18
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.pr-18
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.pr-18
+#BSUB -J DNG12.pr-84
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.pr-84
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.pr-84
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA
@@ -8,7 +8,7 @@
 #BSUB -R span[ptile=1]
 #BSUB -R rusage[mem=4800]
 #!/bin/ksh
-set -xa   #NCO preferred setting
+#NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -165,7 +165,7 @@ export gespath=${gespath:-/nwges/${envir}}
 ###########################################
 .  $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-####export PDY=20140501   #TEST
+###export PDY=20140627   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST

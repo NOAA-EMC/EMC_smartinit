@@ -34,13 +34,15 @@ export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 #TEST WITH Dana's GFS changes
 ###export EXECdng=/meso/save/$USER/smartinit/branches/EXP-gfs/exec
 
-#TEST WITH Eric's NAM PARA     
-####export COMROOT="/meso/noscrub/Eric.Rogers/com"
-####export gespath=/meso/noscrub/Eric.Rogers/nwges/para
-
 export COMROOT=/com
-export gespath=/nwges/para              #TEST************************
-export COM_IN=${COMROOT}/${mdl}/para    #TEST**********************
+export gespath=/nwges/prod          
+xport COM_IN=${COMROOT}/${mdl}/para 
+
+#TEST WITH Eric's NAM PARA     
+export COMROOT="/meso/noscrub/Eric.Rogers/com"
+#export gespath=/meso/noscrub/Eric.Rogers/nwges/para
+export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
+
 
 # for dgex downscling thru 192 forecast hours, use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod   
