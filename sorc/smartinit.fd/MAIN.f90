@@ -871,8 +871,8 @@ INTERFACE
             IF(ivarb.eq.1) then
               ID(8)=11;ID(9)=1
               where (VALIDPT) 
-                TEMP1=THOLD(:,:,2)
-                TEMP2=THOLD(:,:,3)
+                TEMP1=THOLD(:,:,3)   ! 1 hour old Temp
+                TEMP2=THOLD(:,:,2)   ! 2 hour old Temp
 ! JTM 01-27-2013
 ! Added check for single points when temperature=0 at validpt 
 ! This should not happen but has been found on some nests
@@ -882,17 +882,17 @@ INTERFACE
             else
               ID(8)=17;ID(9)=1
               where (VALIDPT) 
-                TEMP1=DHOLD(:,:,2)
-                TEMP2=DHOLD(:,:,3)
+                TEMP1=DHOLD(:,:,3)
+                TEMP2=DHOLD(:,:,2)
 !               where (temp1.le.10) TEMP1=SPVAL
 !               where (temp2.le.10) TEMP2=SPVAL
               end where
             endif
             GDIN%FHR=GDIN%FHR-1  ! change current hr to prev. hr for GRIBIT 
-            print *,'OUTPUT MAX-MIN for FHR',GDIN%FHR
+            print *,'OUTPUT Temperature for FHR',GDIN%FHR
             CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
             GDIN%FHR=GDIN%FHR-1  ! change current hr to FHR-2
-            print *,'OUTPUT MAX-MIN for FHR',GDIN%FHR
+            print *,'OUTPUT Temperature for FHR',GDIN%FHR
             CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
             GDIN%FHR=IFHRIN;FHR=IFHRIN;IFHR=IFHRIN
           ENDDO 

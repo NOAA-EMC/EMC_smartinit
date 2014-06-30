@@ -13,8 +13,8 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.2.5
-export code_ver=v3.2.5
+export model_ver=v3.2.7
+export code_ver=v3.2.7
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 export RUN_ENVIR=emc
@@ -25,6 +25,8 @@ export kickd=${rootd}/kick-scripts
 #TEST ln -fs ${rootd}/ush/nam_smartinit.sh-cfg ${rootd}/ush/nam_smartinit.sh
 
 cd $kickd
+
+# cp -p $rootd/parm/smart_para-CTL $rootd/parm/smart_para_config
 
 # Determine cycle
 let HH=`date +%H`
@@ -46,11 +48,12 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 domains="conusnest2p5 hi ak pr conus aknest3 ak_rtmages"
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=12
+  export ENDHRS=84
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
-                    aknest3) export ENDHRS=12;; 
-               conusnest2p5) export ENDHRS=36;; 
+                    ak_rtmages) ENDHRS=12;;
+                    aknest3) export ENDHRS=60;; 
+               conusnest2p5) export ENDHRS=60;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
@@ -73,6 +76,7 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
   mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
+  mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list
   ${kickd}/RUN_ALL >/stmpp1/$USER/${modeld}.${model_ver}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done

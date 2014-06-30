@@ -497,6 +497,8 @@ Produces a larger impact
 05/20/2014
 * smartinit --> Tested Jun's gefs2sref output to 192 hours for POPs
 
+05/22/14 : Did a complete end-to-end test for NAM and DGEX
+
 ******************************************************************
 05/27/14: V3.2.5 DELIVERED TO NCO 
 ******************************************************************
@@ -508,9 +510,32 @@ Produces a larger impact
 06/05/14 
 * changes nam_smarprecip to smartprecip like GFS scripts
 
-06/09/12
+06/06/14 : Did a complete end-to-end test thru 84 hours for NAM
+
+06/09/14
 * JNAM_SMINIT, smartinit.sh : Fixed GDAS coldstart option
    set pcdate, pcfhr, pcyc in job
    Run cold start option for bsmart (nest) files as well as bgrd3d (parent) files
 
+06/13/14
+* at 18z, changed to point COM_IN to /com/nam/para
+* JNAM_SMINIT : Fixed GUESS set option for running envir script.
+    - Needed to use . rather than sh script-name.sh
 
+06/16/14 12Z : 
+* Began real-time EMC NAM DNG PARA end-to-end thru 84/192 hr test
+with NCO NAM para outputs.
+* ush: turned off GDAS set in NCO ush/smartinit.sh
+       Fixed SREFPROB cp to cp the SREF 3hrly prob file rather than GEFS
+
+06/26/14 18Z
+* MAIN.f90 : turned on outputting of previous 2 hours temperatures even at 10/11 22/23 Z 
+to reduce confusion with smart files.
+In future, Geoff prefers stripping out previous 2 hours temps from all files
+
+* Turned on grid 187 dng for conus2p5
+
+06/27/14 12Z
+* MAIN.f90: fixed hr label for T-1 (THOLD3) and T-2 (THOLD2) output fields
+* ush/smartinit.sh : added option to run copygb instead of prdgen
+                     but using nearest neighbor (i2) option

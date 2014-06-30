@@ -13,23 +13,33 @@ typeset -Z2 cyc ffhr
 #===============================================================
 export RUNTYP=${1:-conus2p5}
 GRID=smart        #smart, bgrd3d, bsmart
-mdl=nam
+mdl=nam           # nam, dgex, hiresw, gfs...
 
-yymmdd=20140609
+yymmdd=20140616
 export cyc=12       
 
 export ffhr=00     # Starting forecast hour
-export ENDHRS=00   # Ending forecast hour
+export ENDHRS=84   # Ending forecast hour
 INCR=03            # Forecast hour increment
 fhrstr=$ffhr       # hr to start comparisons
 
 ioff=0
 if [ $cyc -eq 06 -o $cyc -eq 18 ];then let ioff=6;fi
 
+case $mdl in dgex )
+  export ffhr=87
+  export ENDHRS=120
+  case $cyc in 
+    00|12) export RUNTYP=alaska;;
+    06|18) export RUNTYP=conus;;
+  esac;;
+esac
+
 #===============================================================
 # location of smartinit files
 #===============================================================
-ncodir=/com/${mdl}/prod/${mdl}.${yymmdd}  #CCS
+ncodir=/com/${mdl}/test/${mdl}.${yymmdd}  #NCO 
+###devdir=/com/${mdl}/para/${mdl}.${yymmdd} #NCO PARA 
 devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}   #EMC PARA 
 
 #===============================================================
@@ -65,8 +75,8 @@ while [ $ffhr -le $ENDHRS ];do
   ln -fs ${ncodir}/${smpre}${ffhr}.tm00 nco_file   
   ln -fs ${devdir}/${smpre}${ffhr}.tm00 dev_file  
 
-  if [ ! -s nco_file ];then echo " nco_file ${ncodir} ${smpre}$ffhr.tm00 ${RUNTYP} not found";exit;fi
-  if [ ! -s dev_file ];then echo " dev_file ${devdir} ${smpre}$ffhr.tm00 ${RUNTYP}not found";exit;fi
+  if [ ! -s nco_file ];then echo " NCO_file ${ncodir} ${smpre}$ffhr.tm00 ${RUNTYP} NOT FOUND";exit;fi
+  if [ ! -s dev_file ];then echo " DEV_file ${devdir} ${smpre}$ffhr.tm00 ${RUNTYP} NOT FOUND";exit;fi
   ls -ltr nco_file
   ls -ltr dev_file
   let fhr=$ffhr
@@ -197,5 +207,5 @@ while [ $ffhr -le $ENDHRS ];do
   if [ $ffhr -lt 10 ];then ffhr="0"$ffhr;fi
 done
 
-rm -f nco-prcp* nco-temp* nco-f* 
-rm -f dev-prcp* dev-temp* dev-f*
+#rm -f nco-prcp* nco-temp* nco-f* 
+#rm -f dev-prcp* dev-temp* dev-f*

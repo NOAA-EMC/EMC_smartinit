@@ -113,6 +113,7 @@ while [ $iline -le $linemax ];do
 done
 typeset -Z2 srefcyc gefscyc pcphrl
 text=".tm00"
+#EXT natgrd=`echo $natgrd |cut -d. -f2`
 
 # Define core (nmmb, arw, nems) needed for hiresw veg initialization
 core=$rg
@@ -195,16 +196,14 @@ case $RUNTYP in conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
 
-
-
-GUESS=GDAS  ##### TEST  ###################
-
+### GUESS=GDAS  ##### TEST  ###################
 
 echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT NAM GUESS : $GUESS   NATIVE GRID: $natgrd
+echo INPUT MDL DIR : $COM_IN
+echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
 echo "============================================================"
@@ -225,7 +224,7 @@ let pcphr3=pcphr-3
 if [ $ffhr -gt ${fhrstr} ]; then
 
 # Get the sref precip fields that we need
-  if [ ! -s SREFPROB -o $rg = gm -o $rg = dgx ]; then
+  if [ $rg = gm -o $rg = dgx ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
@@ -315,7 +314,8 @@ for fhr in $hours; do
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
-            echo MDLIN $mdlin
+          echo MDLIN $mdlin
+          rm -f WRFPRS${fhr}.tm00
           ln -fs ${mdlin}${pcfhr}.tm00 fort.11
           ln -fs WRFPRS${fhr}.tm00 fort.51
           echo ${PDY}${cyc} | ${utilexec}/overdate.grib
@@ -336,7 +336,7 @@ for fhr in $hours; do
 
            *) 
         if [ $rg = dgx ];then 
-          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z${natgrd}
+          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z.${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
 #         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
@@ -344,7 +344,8 @@ for fhr in $hours; do
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
             mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
-            echo MDLIN $mdlin;echo
+            echo MDLIN $mdlin
+            rm -f WRFPRS${fhr}.tm00
             ln -fs ${mdlin}${pcfhr}.tm00 fort.11
             ln -fs WRFPRS${fhr}.tm00 fort.51
             echo ${PDY}${cyc} | ${utilexec}/overdate.grib
@@ -417,6 +418,12 @@ for fhr in $hours; do
       if [ $rg = dgx ];then mk6p=0;fi
     fi;;
   esac 
+
+# Set output interpolation grid definition for copygb
+  cpgbgrd=$grid
+  if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
+#EXT  case $RUNTYP in aknest3|conusnest2p5) cpgbgrd=$grid;;esac 
+  case $RUNTYP in aknest3) cpgbgrd=$grid;;esac 
 
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
   for MKPCP in $mk3p $mk6p $mk12p;do
@@ -495,9 +502,6 @@ EOF
       export err=$?;  err_chk
 
 #     Interp precip to smartinit GRID
-      cpgbgrd=$grid
-      if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
-      if [ $RUNTYP = aknest3 ];then cpgbgrd=$grid;fi
       $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}precip.${fhr} ${freq}precip
       $utilexec/grbindex ${freq}precip ${freq}precipi
       $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
@@ -533,9 +537,15 @@ EOF5
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
 
+# Test copygb option instead of prdgen for undefined conus extended 2.5 km grid
+# Using i=0 bi-linear interpolation
+#TEST  if [ $RUNTYP = conusnest2p5 ];then
+#TEST    $utilexec/copygb -g "$cpgbgrd" -i0  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
+#TEST  else
 # POINT TO NETwork prdgen (/nwprod/exec) 
-  ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
-  export err=$?;  err_chk
+    ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
+    export err=$?;  err_chk
+#TEST  fi
 
   cp /com/date/t${cyc}z DATE
   if [ -s $prdgfl ];then  

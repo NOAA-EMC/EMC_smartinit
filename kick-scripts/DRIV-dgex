@@ -13,8 +13,8 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.2.5
-export code_ver=v3.2.5
+export model_ver=v3.2.7
+export code_ver=v3.2.7
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 export RUN_ENVIR=emc
@@ -77,6 +77,7 @@ for RUNTYP in $dgexrun;do
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
   mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
+  mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list
   ${kickd}/RUN_ALL >/stmpp1/$USER/${modeld}.${model_ver}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done
