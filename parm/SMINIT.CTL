@@ -21,3 +21,4 @@ higfs       hi   hi         .hawaii    243      initin   196      1 321 225 1806
 akgfs       ak3   ak3       .alaska    216      initin    97      5 1649 1105 40530 181429 8 210000 2976 2976
 prgfs       pr   pr         .prico     212      initin   195      1 177 129 16829  -68196 128 19747  -63972 20000
 conusgfs    con  conus2p5   .conus     212      initin   184      3 2145 1377 20192 238446 8 265000 2540 2540
+conusgfs2    con  conus2p5   .conus     212      initin   184      3 2345 1597 19229 233723 8 265000 2540 2540
