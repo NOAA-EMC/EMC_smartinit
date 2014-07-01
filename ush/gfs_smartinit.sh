@@ -183,8 +183,8 @@ fi
 	    #Convert guassian grid flux file to lat/lon degree grid 
             export fgrid='255 0 1440 721 90000 0 128 -90000 359750 250 250 0'
             $utilexec/copygb -g "$fgrid" -x $COMIN/$mdl.t${cyc}z.sfluxgrbf$fhr $FLXINP
-            export POSTGPEXEC=${POSTGPEXEC:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v6/src/ncep_post}
-	    export POSTGPSH=${POSTGPSH:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v6/ush/global_nceppost.sh}
+            export POSTGPEXEC=${POSTGPEXEC:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v7/src/ncep_post}
+	    export POSTGPSH=${POSTGPSH:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v7/ush/global_nceppost.sh}
 	    $POSTGPSH > post${fhr}.out
             $utilexec/copygb -g "$grid" -x tmpfile4 $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}
             $utilexec/grbindex $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr} $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}.idx
@@ -451,7 +451,7 @@ EOF
              higfs) RGIN=HI;;
              akgfs) RGIN=AK;;
              prgfs) RGIN=PR;;
-          conusgfs) RGIN=CS;;
+          conusgfs) RGIN=CS2P;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 
