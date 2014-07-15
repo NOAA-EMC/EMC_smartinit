@@ -1,12 +1,12 @@
-#BSUB -J DNG12.conusnest2p5-60
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.conusnest2p5-60
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.conusnest2p5-60
+#BSUB -J DNG12.conusnest2p5-03
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.8/12/list/oDNG12.conusnest2p5-03
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.8/12/list/oDNG12.conusnest2p5-03
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]
-#BSUB -R rusage[mem=4800]
+#BSUB -R rusage[mem=6000]
 #!/bin/ksh
 #NCO set -xa   #NCO preferred setting
 
@@ -163,8 +163,8 @@ export gespath=${gespath:-/nwges/${envir}}
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-.  $utilscript/setpdy.sh  
-. ${DATA}/PDY    # set local dir for crontab
+.  $utilscript/setpdy.sh >setpdy.out 
+. ${DATA}/PDY  >PDY.out  # set local dir for crontab
 ###export PDY=20140627   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
@@ -225,7 +225,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-####NCO SET env  
+####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"

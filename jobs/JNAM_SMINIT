@@ -154,8 +154,8 @@ export gespath=${gespath:-/nwges/${envir}}
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-.  $utilscript/setpdy.sh  
-. ${DATA}/PDY    # set local dir for crontab
+.  $utilscript/setpdy.sh >setpdy.out 
+. ${DATA}/PDY  >PDY.out  # set local dir for crontab
 ###export PDY=20140627   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
@@ -216,7 +216,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-####NCO SET env  
+####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"

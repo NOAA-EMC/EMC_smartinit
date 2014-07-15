@@ -422,8 +422,8 @@ for fhr in $hours; do
 # Set output interpolation grid definition for copygb
   cpgbgrd=$grid
   if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
-#EXT  case $RUNTYP in aknest3|conusnest2p5) cpgbgrd=$grid;;esac 
-  case $RUNTYP in aknest3) cpgbgrd=$grid;;esac 
+  case $RUNTYP in aknest3|conusnest2p5) cpgbgrd=$grid;;esac 
+#ORG   case $RUNTYP in aknest3) cpgbgrd=$grid;;esac 
 
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
   for MKPCP in $mk3p $mk6p $mk12p;do
@@ -539,13 +539,13 @@ EOF5
 
 # Test copygb option instead of prdgen for undefined conus extended 2.5 km grid
 # Using i=0 bi-linear interpolation
-#TEST  if [ $RUNTYP = conusnest2p5 ];then
-#TEST    $utilexec/copygb -g "$cpgbgrd" -i0  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
-#TEST  else
-# POINT TO NETwork prdgen (/nwprod/exec) 
+  if [ $RUNTYP = conusnest2p5 ];then
+    $utilexec/copygb -g "$cpgbgrd"  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
+  else
+#POINT TO NETwork prdgen (/nwprod/exec) 
     ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
     export err=$?;  err_chk
-#TEST  fi
+  fi
 
   cp /com/date/t${cyc}z DATE
   if [ -s $prdgfl ];then  

@@ -6,16 +6,17 @@ GETGRIB.f90 MAIN.f90 BOUND.f90 GRIBIT.f90 GET_BITS.f90  MAKESTRING.f90 NDFDgrid.
 OBJS1= aset3d.o aset2d.o grddef.o constants.o asetdown.o rdgrib.o 
 OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VADJUST.o
 
-FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format	
+## FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format -O -debug all -fp-model strict
+FC =   ifort -convert big_endian -g -traceback 
 
 LIBS = -L/usr/local/lib   \
-	-L/nwprod/lib  -lip_4 -lw3nco_4 -lw3emc_4 -lbacio_4
+    -L/nwprod/lib  -lip_4 -lw3nco_4 -lw3emc_4 -lbacio_4
 NCEP_LIB_DIR = 
 
 # FFLAGS = -O -fp-model strict -list 
 # LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused  
 
-FFLAGS = -O -list # -fp-model strict -list 
+FFLAGS = -O2   ## -debug all  ## -fp-model strict -list 
 LDFLAGS =-FR -assume byterecl # -check all -debug all -warn nounused  
 
 CMD =	../../exec/smartinit
