@@ -460,4 +460,82 @@ kick-scripts/ftpmet.sh
 * ush/smartinit.sh, dgex_smartinit.sh
   - Corrected grid variable configuration for copygb CONUS Lambert Conformal grids
   - Restructured grid config based on gtyp varb (1=merc,3=LC, 5=PS)
+IMPLEMENTED ON MAY 6, 2014
 
+05/02/2014
+* sorc/smartinit.fd/VADJUST.f90
+  - Restricted u,v adjustment if less than 10 m/s and
+  - all 8 surrounding points are valid.
+  - also removed validpt check when solving Poisson equation for velocity potential
+  - also set PHI = 0.1 over not validpts
+  - reduced W from terrain = phi2=0.01...this reduced impact
+    but is correct for terrain following input
+Produces a larger impact 
+
+05/09/2014
+* GEFS2SREF jobs/scripts/sorc
+  - Fixed thru 99 hours
+  - filename and input hours cut off at 2 digits to sref_ens_gen
+  - Fixed sref 03/09 cycle runs...-Z2 digit needed
+  - After 126 hours...do not subtract precip diffs
+  - Changed 3 hr average calculation for intermediate sref gefs files
+     using wgrib2 to change header eg:  -set_ave "3-9 hour acc fcst"
+  - Turned off gefs2sref132.ecf --> will use jun's combined gefs2sref system
+* ush/dgex_sminit.sh
+  - Addex check for input SREF/GEFS prob file before running dgex
+
+05/13/2014
+* VADJUST.f90
+  - Set PHI values around validpt and domain edge boundaries
+  - Set HTOPO if not validpt or at domain edge
+
+05/15/2014
+* smartinit.fd/GETGRIB.f90, ush/dgex_smartinit.sh
+  - Fixed reads for 3/6 hour precip
+  - Passing core to determine if dgex file
+
+05/20/2014
+* smartinit --> Tested Jun's gefs2sref output to 192 hours for POPs
+
+05/22/14 : Did a complete end-to-end test for NAM and DGEX
+
+******************************************************************
+05/27/14: V3.2.5 DELIVERED TO NCO 
+******************************************************************
+
+05/29/14
+* smartinit.sh : Added grib2 output for hourly conus2p5 files
+* RUN_ALL :   set up for simultaneous 3 hr forecast hr runs
+
+06/05/14 
+* changes nam_smarprecip to smartprecip like GFS scripts
+
+06/06/14 : Did a complete end-to-end test thru 84 hours for NAM
+
+06/09/14
+* JNAM_SMINIT, smartinit.sh : Fixed GDAS coldstart option
+   set pcdate, pcfhr, pcyc in job
+   Run cold start option for bsmart (nest) files as well as bgrd3d (parent) files
+
+06/13/14
+* at 18z, changed to point COM_IN to /com/nam/para
+* JNAM_SMINIT : Fixed GUESS set option for running envir script.
+    - Needed to use . rather than sh script-name.sh
+
+06/16/14 12Z : 
+* Began real-time EMC NAM DNG PARA end-to-end thru 84/192 hr test
+with NCO NAM para outputs.
+* ush: turned off GDAS set in NCO ush/smartinit.sh
+       Fixed SREFPROB cp to cp the SREF 3hrly prob file rather than GEFS
+
+06/26/14 18Z
+* MAIN.f90 : turned on outputting of previous 2 hours temperatures even at 10/11 22/23 Z 
+to reduce confusion with smart files.
+In future, Geoff prefers stripping out previous 2 hours temps from all files
+
+* Turned on grid 187 dng for conus2p5
+
+06/27/14 12Z
+* MAIN.f90: fixed hr label for T-1 (THOLD3) and T-2 (THOLD2) output fields
+* ush/smartinit.sh : added option to run copygb instead of prdgen
+                     but using nearest neighbor (i2) option

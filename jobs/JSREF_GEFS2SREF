@@ -8,7 +8,7 @@ export RUN_ENVIR=para
 # 12/02/2013, Jeff McQueen: Incorporated into DNG smartinit processing
 #
 ############################################
-set -xa
+#NCO set -xa
 
 export OMP_NUM_THREADS=1
 export MP_EUIDEVICE=sn_all
@@ -119,6 +119,8 @@ msg="JOB $job HAS BEGUN"
 # Run setpdy and initialize PDY variables
 sh $utilscript/setpdy.sh
 . ${DATA}/PDY
+export DATE=${DATE:-$PDY}
+export PDY=$DATE
 
 typeset -Z2 gefscyc
 if [ $cyc -eq 03 ];then
@@ -158,7 +160,6 @@ mkdir -p $COMIN $COMOUT
 #export INCR=${INCHOUR}
 #export CYC=${cyc}
 #export LENGTH=${ENDHOUR}
-export DATE=$PDY
 #export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 
 #NCO env
@@ -181,11 +182,12 @@ while [ $HR -le $ENDHOUR ];do
   mkdir -m 775 $DATA/gefs2sref/$HR
   echo "$HOMEsref/scripts/exsref_gefs2sref.sh.ecf $HR > $DATA/gefs2sref/${HR}.out" >>$DATA/gefs2sref/poescript
   HR=`expr $HR + $INCHOUR`
-#TEST set in ecf script  if [ HR -ge 126 ];then export INCHOUR=06;fi
   if [ $HR -lt 10 ];then HR="0"${HR};fi 
 done
 
 echo "SUBMIT gefs2sref poe script" STR $STRHOUR  END $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
+cat $DATA/gefs2sref/poescript
+
 chmod 775 $DATA/gefs2sref/poescript
 export MP_PGMMODEL=mpmd
 export MP_CMDFILE=$DATA/gefs2sref/poescript
@@ -199,7 +201,7 @@ mpirun.lsf -cmdfile $DATA/gefs2sref/poescript -pgmmodel mpmd -ilevel 3 -labelio 
 #     Once available then run post4GEFS.sh.ecf below for all  00-192 fhrs
 #     to create final ensprod files
 #================================================================================
-if [ $ENDHOUR -gt 126 ];then
+#TEST for endhr=126 if [ $ENDHOUR -gt 126 ];then
   export STRHOUR=00  # Compute prob products for all forecast hours
   echo "SUBMIT enspost script" STR $STRHOUR  END $ENDHOUR  LENGTH $LENGTH  TOTAL_COUNT $TOTAL_COUNT
 
@@ -223,7 +225,7 @@ if [ $ENDHOUR -gt 126 ];then
   cat $DATA/243_3hrly.out >>$pgmout
   cat $DATA/216_3hrly.out >>$pgmout
   cat $pgmout
-fi
+#TEST for endhr le 126fi
   
 msg="JOB $job HAS COMPLETED NORMALLY."
 ./postmsg "$jlogfile" "$msg"

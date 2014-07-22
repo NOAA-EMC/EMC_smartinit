@@ -48,7 +48,7 @@
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
          DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
-    integer itmax,ii,jj,kk,idir,it
+    integer itmax,ii,jj,kk,idir,it,ispdfc
     END SUBROUTINE vadjust
  END INTERFACE
 
@@ -57,6 +57,8 @@
       print *, '***********************************'
       print *, 'Into NDFDgrid'
       print *, '***********************************'
+
+      ispdfc=0   ! Turn off/on friction adjustment for terrain
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
       iprt=int(im/2);jprt=int(jm/2)
@@ -319,12 +321,13 @@
 ! -- 0.7 factor is a wag at surface effects on wind speed
 !     when interpolating from the free atmosphere to
 !     the NDFD topo.
-
-!          speedc = 0.7*sqrt(uc*uc+vc*vc)
-!          speed = sqrt(uc)**2 + vc)**2)
-!          ratio = max(1.,speedc/(max(0.001,speed)) )
-         unew(i,j) = uc
-         vnew(i,j) = vc
+         if (ispdfc .eq. 1) then
+           speedc = 0.7*sqrt(uc*uc+vc*vc)
+           speed = sqrt(uc**2 + vc**2)
+           ratio = max(1.,speedc/(max(0.001,speed)) )
+           unew(i,j) = uc
+           vnew(i,j) = vc
+         endif
 
 !============================================
         END IF
@@ -333,7 +336,9 @@
 120     continue
 
 !       Adjust winds to topography
+        print *,'UNEW BEFORE ',MINVAL(UNEW),MAXVAL(UNEW)
         call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+        print *,'UNEW AFTER ',MINVAL(UNEW),MAXVAL(UNEW)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds

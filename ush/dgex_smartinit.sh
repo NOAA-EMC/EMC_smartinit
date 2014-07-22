@@ -39,21 +39,12 @@
 # guamnmmb     :  GEFS-GRID???   HRW-GRID=guamnmmb.t00z.wrfprs NDFD-GRD=199
 # guamarw      :  GEFS-GRID???   HRW-GRID=guamarw.t00z.wrfprs  NDFD-GRD=199
 
-# dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=184
-# dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
+# dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=197
+# dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=198
 #======================================================================
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
-# Define core (nmmb, arw, nems) needed for hiresw veg initialization
-icore=`echo $RUNTYP|awk '{ print( index($0,"nmmb") )}' `
-if [ $icore -eq 0 ];then 
-  icore=`echo $RUNTYP|awk '{ print( index($0,"arw") )}' `
-fi
-core=nems
-if [ $icore -gt 0 ];then
-  core=`echo $RUNTYP |cut -c $icore-`   
-fi
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
@@ -119,8 +110,18 @@ while [ $iline -le $linemax ];do
     fi
   fi
 done
-typeset -Z2 srefcyc gefscyc pcphrl
+typeset -Z2 srefcyc gefscyc 
 text=".tm00"
+
+# Define core (nmmb, arw, nems) needed for hiresw veg initialization
+core=$rg
+icore=`echo $RUNTYP|awk '{ print( index($0,"nmmb") )}' `
+if [ $icore -eq 0 ];then 
+  icore=`echo $RUNTYP|awk '{ print( index($0,"arw") )}' `
+fi
+if [ $icore -gt 0 ];then
+  core=`echo $RUNTYP |cut -c $icore-`   
+fi
 if [ $mdl = "hiresw" ];then 
   inest=1
   text=;
@@ -170,31 +171,21 @@ fi
 #   ogrd : output grib number for prdgen and smartinit codes 
 #          (eg: 197,196,195,198,184)
 #--------------------------------------------------------------------------
-eco GTYP $gtyp OGRD $ogrd
+echo GTYP $gtyp OGRD $ogrd
 if [ $gtyp -ne $ogrd ];then
   case $gtyp in
 #   kpds        1   2-9  10 11 12 13    14
-      3) grid="255 $grid  0 64 0 25000 25000";;
-      5) grid="255 $grid  0 64 0 25000 25000";;
+      3) grid="255 $grid  0 64 25000 25000";;
+      5) grid="255 $grid  0 64 25000 25000";;
       1) grid="255 $grid  0 64 2500 2500";;
   esac
 fi
-o GTYP $gtyp OGRD $ogrd
-if [ $gtyp -ne $ogrd ];then
-  case $gtyp in
-#   kpds        1   2-9  10 11 12 13    14
-      3) grid="255 $grid  0 64 0 25000 25000";;
-      5) grid="255 $grid  0 64 0 25000 25000";;
-      1) grid="255 $grid  0 64 2500 2500";;
-  esac
-fi
-
 
 # Set NDFD output grid topo and land mask filenames
 maskpre=${mdl}_smartmask${outreg}
 topopre=${mdl}_smarttopo${outreg}
 ext=grb
-case $RUNTYP in conus|conusnest) ext=dat;; esac
+case $RUNTYP in dgex_cs|conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
 
@@ -210,6 +201,8 @@ echo
 #  Set Defaults pcp hours and frequencies
 let pcphr=ffhr+3
 let pcphrl=ffhr+3
+if [ $pcphrl -lt 10 ];then pcphrl="0"$pcphrl;fi
+if [ $pcphrl -lt 100 ];then pcphrl="0"$pcphrl;fi
 let pcphr12=pcphr-12
 let pcphr6=pcphr-6
 let pcphr3=pcphr-3
@@ -223,7 +216,26 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
 # Get the sref precip fields that we need
   if [ ! -s SREFPROB -o $rg = gm -o $rg = dgx ]; then
-    cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+    waitsref=0
+    waitend=1800
+    while [ $waitsref -le $waitend ];do
+      echo COMIN_GEFS $COMIN_GEFS
+      if [ -s $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly ];then 
+        echo "SREF PROB FILE FOUND  CYC=" $gefscyc  GRID= $sgrb
+        sleep 60
+        cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+        break
+      else
+        sleep 60
+        ((waitsref=waitsref+60))
+         echo `date +%T` "WAITING For SREF Prob File"  CYC= $gefscyc  GRID= $sgrb $waitsref
+        if [ $waitsref -gt $waitend ];then 
+           echo GEFSCYC $gefscyc GRID $sgrib
+           echo "SREF PROB FILE NOT AVAILABLE...RUN WITHOUT"
+           break
+        fi
+      fi
+    done
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   fi
@@ -233,6 +245,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
   if [ $ffhr -lt 6 ]; then pcphr6=;pcphr12=;fi
   if [ $ffhr -lt 12 ]; then pcphr12=;fi
   grbpre="2 0 0 0 0"
+
+####set -x
 
   for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 #   prob of pcp > 0.01
@@ -260,6 +274,7 @@ if [ $ffhr -gt ${fhrstr} ]; then
     let IP=IP+1
     mv dump srefpcp$IP
   done
+set +x
 
   cat srefpcp1 srefpcp2 srefpcp3 srefpcp4 srefpcp5 > srefallpcp
   if [ $ffhr -ge 6 ]; then
@@ -269,8 +284,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
     cat srefpcp11 srefpcp12 srefpcp13 srefpcp14 srefpcp15 >> srefallpcp
   fi
 
-  $utilexec/copygb -g "$grid" -x srefallpcp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
-  $utilexec/grbindex srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
+  $utilexec/copygb -g "$grid" -x srefallpcp srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl}
+  $utilexec/grbindex srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
 
 fi #fhr -ge 0
 
@@ -283,7 +298,6 @@ if [ $rg = dgx ];then hours="${ffhr}";fi   #DGEX only has output every 3 hrs
 #===========================================================
 #  CREATE Accum precip buckets if necessary 
 #===========================================================
-set -x
 for fhr in $hours; do
   rm -f *out${fhr}
   mk3p=0;mk6p=0;mk12p=0
@@ -346,7 +360,7 @@ for fhr in $hours; do
 #   Check if hourly or 3 hourly input files needed to determine maxmin read frequency
     if [ ${rg} = dgx ];then inhrfrq=3;fi
 
-# nam_sminit_mkprcp.sh ######################################
+# sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
 #   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
 #   ON-CYC :
@@ -494,7 +508,7 @@ for fhr in $hours; do
       fi  # mk12p
 
 #===============================================================
-# nam_smartprecip : Create Precip Buckets for smartinit 
+# smartprecip : Create Precip Buckets for smartinit 
 #  if pfhr1 > pfhr2: create 3hr precip=prcp:fhr - prcp-3 -->  All 3hr buckets
 #  This option also used for dgex to create 3hr precip at 6 hr times, check6=0
 #  if pfhr1 < pfhr2: create 6hr precip=prcp-3 +prcp:fhr  -->  All 3 hr buckets
@@ -503,7 +517,7 @@ for fhr in $hours; do
 #  if pfhr4 > 0    : create 12h precip=prcp-9 + prcp-6 + prcp-3 +prcp:fhr, All 3hr buckets
 #===============================================================
       echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3 $pfhr4
-      $EXECdng/nam_smartprecip <<EOF > ${ppgm}precip${freq}.out${fhr}
+      $EXECdng/smartprecip <<EOF > ${ppgm}precip${freq}.out${fhr}
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk
@@ -581,8 +595,8 @@ EOF5
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
-    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
-    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} SREFPCP
+    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl} SREFPCPi
     if [ -s MAXMIN${fhr1}.tm00 ];then
       cp MAXMIN${fhr2}.tm00 MAXMIN2
       cp MAXMIN${fhr1}.tm00 MAXMIN1
@@ -705,11 +719,9 @@ EOF5
 #========================================================
   hrlyfhr=12  # forecast hour to output hourly files to
   case $RUNTYP in
-   conus|conusnest) RGIN=CS;;
+   conus|conusnest|dgex_cs) RGIN=CS;;
       conusnest2p5) RGIN=CS2P;hrlyfhr=36;;
         ak_rtmages) RGIN=AKRT;;
-           dgex_cs) RGIN=CS2P;;
-           dgex_ak) RGIN=AK3;;
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 

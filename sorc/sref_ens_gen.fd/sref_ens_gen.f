@@ -131,7 +131,7 @@ C New added: Mix,min, 10,25,50 and 90% mean products
 
 C others 
        logical, allocatable, dimension(:) ::      lb                   !jf
-       character*19, allocatable, dimension(:) :: fhead
+       character*20, allocatable, dimension(:) :: fhead
        real,allocatable,dimension(:) ::           var                  !jf
        real,allocatable,dimension(:) ::           apoint               !iens
        real,allocatable,dimension(:,:,:)  :: ptype_mn,ptype_pr         !jf,maxmlvl,4 
@@ -160,7 +160,7 @@ C original
        character*2 pert2
        character*3 cyc,fhr,fhr_1   !jtm forecast hours >99
        character*3 hr,pert
-       character*19 fname,head
+       character*20 fname,head
 
 C for variable table:
         Integer numvar, nderiv
@@ -471,31 +471,24 @@ cccc        DO 3000 i00=1,timestep                       !1,2,3,..... order
 c  Second loop: for ensmeble members:----------------------------------------
         DO 2000 irun=1,iens                       ! perturbation members
 
-        if(itime.lt.100) then
-!  better to read(itime,*) hr
-          write(hr,'(i2.2)') itime    !itime is forecast fours
-        else
-          write(hr,'(i3.3)') itime
-        end if
-
-!  safer to try read(itime,*) fhr
-        if(itime.lt.100) then
          write(cyc,'(i2.2)') ihr       !ihr is cycle  
-         write(fhr,'(i2.2)') itime     !itime is forecast fours
-        else
-         write(cyc,'(i3.3)') ihr       !ihr is cycle  ???
-         write(fhr,'(i3.3)') itime     !fhr is forecast hour :  Changed to I3 for hrs >100 jtm
-        endif
+        if(itime.lt.100) then
+           write(hr,'(i2.2)') itime    !itime is forecast fours
+           write(fhr,'(i2.2)') itime     !itime is forecast fours
+         else
+           write(hr,'(i3.3)') itime
+           write(fhr,'(i3.3)') itime     !fhr is forecast hour :  Changed to I3 for hrs >100 jtm
+         end if
 
         fname=trim(fhead(irun)) // '.f' // trim(hr)
 
         iunit=10
         iout=50
-
+        print*,'ITIME=',itime,' CYC=',cyc,' HR=',hr,' FHR=',fhr,
+     +         ' MEMB=', irun
         print*,'Opening ',fname
         call baopenr(iunit,fname,ierr)
 
-        print*,itime,' cyc=',cyc,' fhr=',fhr, ' for member# ', irun
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c STEP (1): 
@@ -611,7 +604,7 @@ ccc     store accumulated variable-related info:  cccccccccccccccccccc
 !jtm &   itime.eq.54.or.itime.eq.60.or.itime.eq.66.or.itime.eq.72.or.
 !jtm &   itime.eq.78.or.itime.eq.84)
 !jtm  Changed to account for foreast hours >84
-      if(itime.gt.0.and.mod(itime,6).eq.0)
+      if(itime.gt.0.and.mod(itime,6).eq.0 .and. itime.le.126)
      &   precip(:,irun,i00)=precip(:,irun,i00)-precip(:,irun,i00-1) !Jun Du: to convert GEFS's 6hrly apcp to 3hrly
           endif
          end if 

@@ -137,6 +137,8 @@ sh $utilscript/setup.sh >setup.out
 # Run setpdy and initialize PDY variables
 sh $utilscript/setpdy.sh >setpdy.out
 . ${DATA}/PDY
+export DATE=${DATE:-$PDY}
+export PDY=$DATE
 
 #############################################
 # COMIN and COMOUT
@@ -157,7 +159,6 @@ export cyc MEMBER
 export CYC=${cyc}
 #export LENGTH=03     #jtm
 #export INCR=3
-export DATE=$PDY
 #export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 
 ########################################################

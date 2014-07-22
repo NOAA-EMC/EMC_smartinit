@@ -4,10 +4,11 @@
 #BSUB -L /bin/ksh 
 #BSUB -q dev
 #BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
-#BSUB -R "span[ptile=8]" 
-#BSUB -R "affinity[core(8):distribute=balance]"
+#BSUB -R span[ptile=11]
+#BSUB -R rusage[mem=2000]
+###BSUB -R "affinity[core:distribute=balance]"
 #BSUB -n 43             
-#BSUB -W 1:30 
+#BSUB -W 2:00 
 #BSUB -P meso
 #BSUB -a poe
 #BSUB -x    # not_shared
@@ -28,7 +29,7 @@ export MALLOC_MMAP_MAX_=1024
 # 12-17-2013  Jeff McQueen NCEP/EMC
 #=====================================================================================
 # %include "/ecf/ecfnets/scripts/head.h"
-#NCO set -x
+####set -x
 
 # jtm lib loads
 export stutil=/hwrf/noscrub/soft/modulefiles
@@ -43,11 +44,11 @@ nwdir=${nwdir:-/meso/save/$USER} # or nwprod set by NCO
 
 ${nwdir}/versions/smartinit.ver 
 export SMVER=${model_ver}
-export SMVER="v3.2.4"  # FOR TESTING ONLY 
+export SMVER="v3.2.5"  # FOR TESTING ONLY 
 nwdir=${nwdir}/smartinit.${SMVER}
 
 export utilscript=${utilscript:-/nwprod/util/ush}
-$utilscript/setup.sh
+#sh $utilscript/setup.sh
 
 # Determine cycle (NCO WILL SET)
 let HH=`date +%H`
@@ -57,6 +58,7 @@ elif [ $HH -le 21 ];then export cyc=${cyc:-12};
 else
   export cyc=${cyc:-18}
 fi
+
 export cycle=t${cyc}z
 
 cd ${nwdir}     #NCO to set
@@ -66,6 +68,7 @@ export DATE=$PDY
 
 if [ $HH -lt 05 ];then export DATE=$PDYm1;fi
 outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/para/sref.$DATE}  #NCO /com/sref/prod...
+mkdir -p $outd
 
 #====================================================================
 # Begin converting GEFS to SREF format files for POP downscaling
@@ -81,17 +84,16 @@ export INCHOUR=3
 export INCR=${INCHOUR}
 export CYC=${cyc}
 export LENGTH=`expr ${ENDHOUR} - $STRHOUR`
-export DATE=$PDY
 
 #  To execute the SREF Post Proc. Step must line up to the number job  submissions
 #  Set number of tasks needed: (e.g.: 90/3 +1=31)
 if [ $ENDHOUR -gt 126 ];then
-  export TOTAL_COUNT=`expr $LENGTH / $INCR` 
-  export END_COUNT=`expr expr $($ENDHOUR - 132) / 6 `
-  export TOTAL_COUNT=`expr $TOTAL_COUNT + $END_COUNT + 1`
+  export TOTAL_COUNT=`expr $(expr $ENDHOUR - $STRHOUR) / $INCHOUR `
+  export TOTAL_COUNT=`expr $TOTAL_COUNT + 1`
 else
   export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
 fi
+
 echo TOTAL_COUNT TASKS $TOTAL_COUNT
 
 # versions file for SREF model $model_ver
