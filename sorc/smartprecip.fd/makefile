@@ -12,7 +12,7 @@ NCEP_LIB_DIR =
 FFLAGS = -O -fp-model strict -list
 LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused 
 
-CMD =	../../exec/nam_smartprecip    
+CMD =	../../exec/smartprecip    
 PROFLIB =	-lprof
 
 all:		$(CMD)
