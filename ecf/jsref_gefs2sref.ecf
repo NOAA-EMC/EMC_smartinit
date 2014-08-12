@@ -1,0 +1,171 @@
+#BSUB -J jsref_gefs2sref
+#BSUB -o /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -e /ptmpp1/Jeff.McQueen/com/output/prod/today/sref_gefs2sref.o%J
+#BSUB -L /bin/ksh 
+#BSUB -q dev
+#BSUB -cwd /stmpp1/Jeff.McQueen/tmpnwprd
+#BSUB -R span[ptile=11]
+#BSUB -R rusage[mem=2000]
+###BSUB -R "affinity[core:distribute=balance]"
+#BSUB -n 43             
+#BSUB -W 2:00 
+#BSUB -P meso
+#BSUB -a poe
+#BSUB -x    # not_shared
+export OMP_NUM_THREADS=1
+export MALLOC_MMAP_MAX_=1024
+
+#=====================================================================================
+# This ecflow script combines all jsref_wrf_gefsprep_p##_CC.ecf 
+# and jsref_gefs2sref_CC.ecf scripts
+# jsref_wrf_gefsprep creates the global gens pgrb files.
+# These are input to JSREF_GEFS2SREF JOB to create gens lookalike files 
+# and products in SREF format.
+# The GENS product files are then used by NAM_SMARTINIT (DNG) 
+# to downscale probability of precip if SREF is missing or
+# for DGEX downscaling beyond 90 forecast hours
+
+# NOTE: NCO should set run  cyc below (00,06,12, 12) 
+# 12-17-2013  Jeff McQueen NCEP/EMC
+#=====================================================================================
+# %include "/ecf/ecfnets/scripts/head.h"
+####set -x
+
+# jtm lib loads
+export stutil=/hwrf/noscrub/soft/modulefiles
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+module use $stutil
+module load ruby emc-utils
+
+#  model_ver, envir and cyc should be set by NCO
+export envir=${envir:-para}
+nwdir=${nwdir:-/meso/save/$USER} # or nwprod set by NCO
+
+${nwdir}/versions/smartinit.ver 
+export SMVER=${model_ver}
+export SMVER="v3.2.5"  # FOR TESTING ONLY 
+nwdir=${nwdir}/smartinit.${SMVER}
+
+export utilscript=${utilscript:-/nwprod/util/ush}
+#sh $utilscript/setup.sh
+
+# Determine cycle (NCO WILL SET)
+let HH=`date +%H`
+if [ $HH -ge 05 -a $HH -le 10 ];then export cyc=${cyc:-00};
+elif [ $HH -le 16 ];then export cyc=${cyc:-06};
+elif [ $HH -le 21 ];then export cyc=${cyc:-12};
+else
+  export cyc=${cyc:-18}
+fi
+
+export cycle=t${cyc}z
+
+cd ${nwdir}     #NCO to set
+sh ${utilscript}/setpdy.sh 
+. ${nwdir}/PDY   #NCO to set
+export DATE=$PDY
+
+if [ $HH -lt 05 ];then export DATE=$PDYm1;fi
+outd=${outd:-/ptmpp1/Jeff.McQueen/com/sref/para/sref.$DATE}  #NCO /com/sref/prod...
+mkdir -p $outd
+
+#====================================================================
+# Begin converting GEFS to SREF format files for POP downscaling
+#====================================================================
+export iperstr=01
+export iperend=20
+
+export STRHOUR=00
+export ENDHOUR=126    
+#  Beyond 126 hours, GEFS output file interval changes from 3 to 6       
+export INCHOUR=3
+
+export INCR=${INCHOUR}
+export CYC=${cyc}
+export LENGTH=`expr ${ENDHOUR} - $STRHOUR`
+
+#  To execute the SREF Post Proc. Step must line up to the number job  submissions
+#  Set number of tasks needed: (e.g.: 90/3 +1=31)
+if [ $ENDHOUR -gt 126 ];then
+  export TOTAL_COUNT=`expr $(expr $ENDHOUR - $STRHOUR) / $INCHOUR `
+  export TOTAL_COUNT=`expr $TOTAL_COUNT + 1`
+else
+  export TOTAL_COUNT=`expr $LENGTH / $INCR + 1`
+fi
+
+echo TOTAL_COUNT TASKS $TOTAL_COUNT
+
+# versions file for SREF model $model_ver
+VERSION_FILE=/nw${envir}/versions/sref.ver
+if [ -f $VERSION_FILE ]; then
+  . $VERSION_FILE
+else
+  exit
+fi
+#=======================================================
+#1. Create SREF look-alike files from GEFS run
+#=======================================================
+if [ $iperstr -eq 1 ];then
+for MEMBER in c00 ctl;do
+  export MEMBER
+  export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
+  ${nwdir}/jobs/JSREF_WRF_GFSPREP
+done
+fi
+
+ipert=$iperstr
+while [ $ipert -le $iperend ];do
+  export MEMBER="p${ipert}"
+  export job=sref_wrf_gefsprep_${MEMBER}_${cyc}
+  echo "SUBMIT JSREF_WRF_GFSPREP for MEMBER" $MEMBER  CYC $cyc
+  ${nwdir}/jobs/JSREF_WRF_GFSPREP
+  ipert=`expr $ipert + 1`
+  if [ $ipert -lt 10 ];then ipert=0${ipert};fi
+done
+
+
+# wait for completion of gefs pgrb file creation  
+# (NCO should make separate ecflow script triggered once GENS input is ready 
+# for a particular forecast )
+if [ -s "$outd/global_pgrb/gens_p20.t${cyc}z.pgrbf${ENDHOUR}" ];then
+  echo ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc FOUND
+else
+  echo WAITING FOR ${outd}/global_pgrb gens p20 pgrb file $ENDHOUR for CYC $cyc file  
+  sleep 60
+fi
+
+#=======================================================
+# Create SREF look-alike products from GEFS run
+#=======================================================
+#set sref cycle
+srefcyc=`expr $cyc + 3`
+if [ $srefcyc -lt 10 ];then srefcyc="0"${srefcyc};fi 
+export cyc=$srefcyc
+
+export job=sref_gefs2sref
+echo "SUBMIT JSREF_GEFS2SREF for CYC" $cyc
+${nwdir}/jobs/JSREF_GEFS2SREF
+
+# if [ $? -ne 0 ]; then
+#  ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
+#  ecflow_client --abort
+#  exit
+# fi
+
+
+# %include "/ecf/ecfnets/scripts/tail.h"
+# %manual
+######################################################################
+#
+#
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+# %end

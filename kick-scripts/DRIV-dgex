@@ -1,0 +1,83 @@
+#!/bin/ksh
+export stutil=/hwrf/noscrub/soft/modulefiles
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+module use $stutil
+module load ruby emc-utils
+
+#==========================================
+# Submit several mdl_smartinit domain runs
+# calls RUN_ALL which submits each RUNTYP domain JNAM_SMINIT job
+# Viable RUNTYP=conus,conusnest2p5,ak,ak_rtmages,aknest3,hi,pr,guamnmmb, guamarw
+# Jeff McQueen
+#==========================================
+
+# set job directory needed if running from cron
+export model_ver=v3.2.7
+export code_ver=v3.2.7
+export modeld=smartinit
+export rootd=/meso/save/${USER}/${modeld}.${model_ver}
+export RUN_ENVIR=emc
+export envir=emc
+
+export jobd=${rootd}/jobs
+export kickd=${rootd}/kick-scripts
+
+cd $kickd
+
+# Determine cycle
+let HH=`date +%H`
+if [ $HH -ge 01 -a $HH -le 07 ];then export cyc=00;
+elif [ $HH -le 13 ];then export cyc=06;
+elif [ $HH -le 19 ];then export cyc=12;
+else 
+  export cyc=18
+fi 
+#TEST export cyc=06  #TEST
+domhrw=;
+case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
+
+case $cyc in
+ 00|12 ) dgexrun=dgex_ak;;
+ 06|18 ) dgexrun=dgex_cs;;
+esac
+
+export fhrstr=0
+echo DRIVER $modeld run CYC $cyc fhr $fhrstr 
+
+#07/13: change to run ak and alaskanest separately for good output listing
+#07/13: added guamnmmb,guamarw  configuration
+#07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
+
+for RUNTYP in $dgexrun;do
+  export mdl=dgex
+  case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
+                    aknest3) export ENDHRS=12;; 
+               conusnest2p5) export ENDHRS=36;; 
+                       dgex_ak) export fhrstr=84; export ENDHRS=192;; 
+                       dgex_cs) export fhrstr=78; export ENDHRS=192;; 
+  esac
+ 
+  export NET=$mdl
+  export RUN=$NET
+  export RUNTYP=$RUNTYP
+
+# Remove older directories
+  /nwprod/util/ush/setpdy.sh
+  dayrm=$( echo `/nwprod/util/exec/ndate -120` |cut -c 1-8 )
+
+  Y=$(echo $dayrm | cut  -c 1-4 )
+  M=$(echo $dayrm | cut  -c 5-6 )
+  D=$(echo $dayrm | cut  -c 7-8 )
+  wdayd=$Y$M$D
+  rm -rf /ptmpp1/${USER}/${mdl}.${wdayd}
+
+# Create and submit JNAM_SMINIT job
+
+
+  echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
+  mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
+  mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list
+  ${kickd}/RUN_ALL >/stmpp1/$USER/${modeld}.${model_ver}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
+  sleep 10
+done
