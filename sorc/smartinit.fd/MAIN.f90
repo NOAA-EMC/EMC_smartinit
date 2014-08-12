@@ -11,8 +11,8 @@
 ! SUBPROGRAM:    SMARTINIT    CREATES NDFD FILES 
 !   PRGRMMR: MANIKIN           ORG: W/NP22     DATE: 07-08-06
 
-! ABSTRACT:   THIS CODE TAKES NATIVE NAM FILES AND GENERATES
-!          5 KM OUTPUT CONTAINING NDFD ELEMENTS
+! ABSTRACT:   THIS CODE TAKES NATIVE NAM/GFS/HRW FILES AND GENERATES
+!          2.5 or 5 KM OUTPUT CONTAINING NDFD ELEMENTS
 
 ! PROGRAM HISTORY LOG:
 !   07-08-06  G MANIKIN  - COMPLETED ADAPTING CODE TO NAM 
@@ -138,28 +138,34 @@
     use aset2d
     use aset3d
     use rdgrib
-
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
     REAL, INTENT(INOUT) :: VEG_NAM_NDFD(:,:),TOPO_NDFD(:,:),VEG_NDFD(:,:)
+    LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
     TYPE (GINFO)        :: GDIN
 
     REAL, ALLOCATABLE   :: EXN(:,:)
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
-    REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:) 
-    REAL, ALLOCATABLE   :: SFCHTNEW(:,:)
-    LOGICAL, INTENT(INOUT)  :: VALIDPT(:,:)
-     real exn0,exn1, wsp
-     integer nmod(2)
-     integer i,j, ierr,k,ib,jb, ivar,ix,iy
-     integer ibuf, ia,ja,iw,jw,id,n_rough_yes,n_rough_no
-     integer m_rough_yes,m_rough_no
-     real zs,qv,qq,e,enl,dwpt,z6,t6,gam,tsfc,td
-     real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
-     real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
-     real tmean,dz,theta1,theta6
+    REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:)
+
+!    LOGICAL*1,   ALLOCATABLE   :: MASK(:)
+!    REAL,        ALLOCATABLE   :: GRID(:)
+    CHARACTER *4 CORE,REGION
+    INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+
+      real exn0,exn1, wsp
+      integer nmod(2)
+      integer i,j, ierr,k,ib,jb, ivar,ix,iy
+      integer ibuf, ia,ja,iw,jw,id,n_rough_yes,n_rough_no
+      integer m_rough_yes,m_rough_no
+      real zs,qv,qq,e,enl,dwpt,z6,t6,gam,tsfc,td
+      real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
+      real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
+      real tmean,dz,theta1,theta6,dx,dy
+      logical ladjland,lconus,lnest,lhiresw,lvegtype
+
 INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,GDIN)
+    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
 
     use constants
     use grddef
@@ -174,7 +180,7 @@ INTERFACE
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
          DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
-    integer itmax,ii,jj,kk,idir,it
+    integer itmax,ii,jj,kk,idir,it,ispdfc
     END SUBROUTINE vadjust
  END INTERFACE
 
@@ -863,7 +869,7 @@ INTERFACE
 !  write older T/Td data for max/min to grib file
       ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
       IF (FHR.NE.0. .AND. LHR3) THEN
-        IF (.NOT.LHR12) THEN
+!        IF (.NOT.LHR12) THEN   ! output T at all hours
           DO ivarb=1,2
             ID(1:25) = 0
             DEC=-2.0
@@ -896,7 +902,7 @@ INTERFACE
             CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
             GDIN%FHR=IFHRIN;FHR=IFHRIN;IFHR=IFHRIN
           ENDDO 
-        ENDIF
+!        ENDIF
       ENDIF
       DEALLOCATE (TEMP1,TEMP2,STAT=kret)
 

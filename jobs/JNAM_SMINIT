@@ -55,6 +55,7 @@ export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
 export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+export RM_TMPDIR=${RM_TMPDIR:-YES}
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -76,6 +77,8 @@ export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
+
+if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #NOT FOR NCO
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
@@ -154,8 +157,8 @@ export gespath=${gespath:-/nwges/${envir}}
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-.  $utilscript/setpdy.sh  
-. ${DATA}/PDY    # set local dir for crontab
+.  $utilscript/setpdy.sh >setpdy.out 
+. ${DATA}/PDY  >PDY.out  # set local dir for crontab
 ###export PDY=20140627   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
@@ -216,7 +219,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-####NCO SET env  
+####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"

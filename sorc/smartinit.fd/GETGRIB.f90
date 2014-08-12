@@ -228,7 +228,7 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
-      print *,gdin%imax,jmax,kmax,numlev,itot,core,lhiresw
+      print *,'GRIB GRID #', igdnum,imax,jmax,kmax,numval
 
       if (lfull) then
       print *, ' READING SREF HDRS',LUGB2,LUGI2
