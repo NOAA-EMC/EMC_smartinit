@@ -167,6 +167,7 @@ fi
     case $natgrd in 
       initin) 
           if [ $mdl = "gfs" ]; then
+            export GRIBVERSION=grib1
             export OUTTYP=3
             export PARMGLOBAL=$ROOTdng/parm
             export SIGINP=$COMIN/$mdl.t${cyc}z.sf$fhr

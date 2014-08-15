@@ -15,12 +15,12 @@
     REAL, ALLOCATABLE   :: EXN(:,:) 
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
     REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:)
-    REAL, ALLOCATABLE   :: SFCHTNEW(:,:)
 
 !    LOGICAL*1,   ALLOCATABLE   :: MASK(:)
 !    REAL,        ALLOCATABLE   :: GRID(:)
     CHARACTER *4 CORE,REGION
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+
       real exn0,exn1, wsp
       integer nmod(2)
       integer i,j, ierr,k,ib,jb, ivar,ix,iy
@@ -58,7 +58,7 @@
       print *, 'Into NDFDgrid'
       print *, '***********************************'
 
-      ispdfc=0   ! Turn off/on friction adjustment for terrain
+      ispdfc=1   ! Turn off/on friction adjustment for terrain
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
       iprt=int(im/2);jprt=int(jm/2)
@@ -70,24 +70,23 @@
       lconus=.false.
       lvegtype=.false.
       lnest=gdin%lnest
-      lhiresw=gdin%lhiresw
 
       ALLOCATE (EXN(IM,JM),ROUGH_MOD(IM,JM),STAT=kret)
       ALLOCATE (TTMP(IM,JM),DTMP(IM,JM),STAT=kret)
       ALLOCATE (UTMP(IM,JM),VTMP(IM,JM),STAT=kret)
-      ALLOCATE (SFCHTNEW(IM,JM),STAT=kret)
 
 !  read in 5 km topography
 !  changed name for consistency with non-conus region names
 !  changed to unit 48 for consistency with other domains
 !  CHANGE to read GRIB FILES for non-conus regions 
+
+      DX=5000.;DY=5000.  ! HARD WIRED for 5 km output grids (Conus,hi,pr)
       if (region .eq. 'CS' ) then
         lconus=.TRUE.;lvegtype=.true.
         print *, 'read in Binary topo and veg files '
         open (46, file='TOPONDFD', form='unformatted')
         read (46) topo_ndfd
         close (46)
-        DX=5000.;DY=5000.
      
 !  Read in 5 km vegetation for CONUS domain
         open (48, file='LANDNDFD', form='unformatted')
@@ -99,26 +98,38 @@
         veglim=0.5
         scale=100.
         ivgid=81 ! all grids including CS2P grid 187 Extended CONUS, 0=water
-        if (region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type, 16=water
+!       if (region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type, 16=water
 
         print* , ' set veglim,rghlim to:  ', veglim,rghlim, ivgid
         print*, ' gdin%region: ', gdin%region
-
         print *, 'READ IN NDFD GRIB  TOPO file'
         JGDS=-1
         CALL RDHDRS(46,47,IGDNUM,GDIN,NUMVAL)
+        print *, 'IGDNUM',IGDNUM,' NUMVAL',NUMVAL
         DEALLOCATE(GRID,MASK)
         ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
-        J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
+        print *,'GRID, MASK Allocated  STAT=',STAT,NUMVAL
+        J=-1;JPDS=-1;JGDS=-1
+        JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
+         
         CALL SETVAR(46,47,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,topo_ndfd,IRET,ISTAT)
 !        DX=JGDS(9)
 !        DY=JGDS(10)
+
         DX=2500.;DY=2500. ! hardwired for conus nests
-        print *,'DX DY ',DX,DY,im,jm,NUMVAL
+        if(region.eq.'AK3') then 
+          DX=3000.
+          DY=3000. 
+        elseif(region.eq.'AK') then 
+          DX=6000.
+          DY=6000. 
+        endif
+
+        print *,REGION,'  DX DY ',DX,DY,im,jm,NUMVAL
 
         print *, 'READ IN NDFD GRIB LAND COVER file'
         CALL RDHDRS(48,49,IGDNUM,GDIN,NUMVAL)
-        J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1
+        J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1;JPDS(7)=0;JGDS=-1
         CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
         print*, ' min, max of veg_ndfd: ', minval(veg_ndfd),maxval(veg_ndfd),NUMVAL
 
@@ -159,7 +170,6 @@
 ! -- Now let's start reducing to NDFD topo elevation.
 !C ****************************************************************
       where (zsfc .lt. 0.) zsfc=0.0
-      sfchtnew = topo_ndfd
       tnew=spval;qnew=spval
       dewnew=spval;unew=spval;vnew=spval
       pnew=spval  
@@ -176,25 +186,25 @@
         td_orig=d2(i,j)
 
 ! --- dewpoint depression
-         tddep = max(0.,t2(i,j) - td_orig )
-         qv= q(i,j,1)
-         QQ = QV/(1.+QV)
-         tp1=T(I,J,1)
+        tddep = max(0.,t2(i,j) - td_orig )
+        qv= q(i,j,1)
+        QQ = QV/(1.+QV)
+        tp1=T(I,J,1)
           
 ! --- Base Td on 2m q
-         qv = qq/(1.-qq)
+        qv = qq/(1.-qq)
 
 ! ---   get values at level 6 for lapse rate calculations
-         QQ = Q(I,J,6)/(1.+Q(i,j,6))
+        QQ = Q(I,J,6)/(1.+Q(i,j,6))
 
-         exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
-         T6=T(I,J,6)
-         Z1=HGHT(I,J,1)
-         Z6=HGHT(I,J,6)
-         GAM = (TP1-T6)/(Z6-Z1)
+        exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
+        T6=T(I,J,6)
+        Z1=HGHT(I,J,1)
+        Z6=HGHT(I,J,6)
+        GAM = (TP1-T6)/(Z6-Z1)
 
 !============================================
-         if (topo_ndfd(i,j).le.zs ) then
+        if (topo_ndfd(i,j).le.zs ) then
 !============================================
           GAM = MIN(GAMD,MAX(GAM,GAMi))
 
@@ -231,7 +241,7 @@
           vnew(i,j) = v10(i,j)
 
 !============================================
-         ELSE if (topo_ndfd(i,j).gt.zs) then
+        ELSE if (topo_ndfd(i,j).gt.zs) then
 !============================================
 ! ----  Now only if topo_NDFD is above the model elevation
 
@@ -301,43 +311,43 @@
 !---> Alaska, Choose q at 1st level for more realistic output 
 !     Also for CONUS....others ???
 !TEST      if (gdin%region .eq. 'AK' .or. lnest) qv=q(i,j,1)
-         qv=q(i,j,1)
+          qv=q(i,j,1)
 
-         e=pnew(i,j)/100.*qv/(0.62197+qv)
+          e=pnew(i,j)/100.*qv/(0.62197+qv)
 ! --- dew-point temperature at original sfc
-         ENL = ALOG(E)
-         DWPT = (243.5*ENL-440.8)/(19.48-ENL)
-         td = dwpt + 273.15
+          ENL = ALOG(E)
+          DWPT = (243.5*ENL-440.8)/(19.48-ENL)
+          td = dwpt + 273.15
 ! --- dewpoint temperature
-         dewnew(i,j) = min(td,tnew(i,j))
-         if (k .eq. 1) then
-           uc = u10(i,j)+frac * (uwnd(i,j,k)-u10(i,j))
-           vc = v10(i,j)+frac * (vwnd(i,j,k)-v10(i,j))
-         else
-           uc = uwnd(i,j,k-1)+frac * (uwnd(i,j,k)-uwnd(i,j,k-1))
-           vc = vwnd(i,j,k-1)+frac * (vwnd(i,j,k)-vwnd(i,j,k-1))
-         endif
+          dewnew(i,j) = min(td,tnew(i,j))
+          if (k .eq. 1) then
+            uc = u10(i,j)+frac * (uwnd(i,j,k)-u10(i,j))
+            vc = v10(i,j)+frac * (vwnd(i,j,k)-v10(i,j))
+          else
+            uc = uwnd(i,j,k-1)+frac * (uwnd(i,j,k)-uwnd(i,j,k-1))
+            vc = vwnd(i,j,k-1)+frac * (vwnd(i,j,k)-vwnd(i,j,k-1))
+          endif
 
 ! -- 0.7 factor is a wag at surface effects on wind speed
 !     when interpolating from the free atmosphere to
 !     the NDFD topo.
-         if (ispdfc .eq. 1) then
-           speedc = 0.7*sqrt(uc*uc+vc*vc)
-           speed = sqrt(uc**2 + vc**2)
-           ratio = max(1.,speedc/(max(0.001,speed)) )
-           unew(i,j) = uc
-           vnew(i,j) = vc
-         endif
+          if (ispdfc .eq. 1) then
+            speedc = 0.7*sqrt(uc*uc+vc*vc)
+            speed = sqrt(uc**2 + vc**2)
+            ratio = max(1.,speedc/(max(0.001,speed)) )
+            unew(i,j) = uc
+            vnew(i,j) = vc
+          endif
 
 !============================================
-        END IF
+        ENDIF
 !============================================
 
 120     continue
 
 !       Adjust winds to topography
         print *,'UNEW BEFORE ',MINVAL(UNEW),MAXVAL(UNEW)
-        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+!TESTING        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
         print *,'UNEW AFTER ',MINVAL(UNEW),MAXVAL(UNEW)
 
 !============================================
@@ -349,13 +359,13 @@
 
 !  create temporary holder for u,v,t,td so that the "real"
 !   values don't get shifted around in the adjustment
-         ttmp=tnew
-         dtmp=dewnew
-         utmp=unew
-         vtmp=vnew 
-         rough_mod = veg_nam_ndfd
+       ttmp=tnew
+       dtmp=dewnew
+       utmp=unew
+       vtmp=vnew 
+       rough_mod = veg_nam_ndfd
 
-        print*, ' min/max of rough_mod:  ', minval(rough_mod),maxval(rough_mod)
+       print*, ' min/max of rough_mod:  ', minval(rough_mod),maxval(rough_mod)
 
 
 ! ----------------------------------------------------
@@ -480,7 +490,3 @@
        endwhere
        return
        end
-
-
-
-       
