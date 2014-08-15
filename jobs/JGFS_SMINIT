@@ -1,4 +1,6 @@
 #!/bin/ksh
+export PS4='$SECONDS + '
+date
 set -xa
 export OMP_NUM_THREADS=2
 export MP_EUIDEVELOP=min
@@ -29,16 +31,19 @@ export MP_LABELIO=yes
 # 2007-08-23  Bradley Mabe  - Created script (copied actually) to call nam_smartinit on & off
 #                          initially of Alaskan precip & snowfall
 # 2013-08-27  Jeff McQueen  - Put in vertical structure     
-# 2014-03-01  DaNa Carlis   - Adapted for GFS to unify NAM and GFS DNG
+# 2014-03-01  DaNa Carlis   - Adapted for GFS to unify NAM and GFS DNG scripts and
+# source code
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
-export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
-model_ver=gfs
-RUNTYP=guamnest
-echo cyc is ${cyc:?}
-echo envir is ${envir:?}
-echo modeld is ${modeld:?}
-echo model_ver is ${model_ver:?}
+####################################
+# Specify version numbers
+####################################
+export post_ver=${post_ver:-v5.0.0}
+export smart_ver=${crtm_ver:-v4.0.0}
+
+export modeld=${modeld:-smartinit} 
+export model_ver=gfs
+export RUNTYP=guamnest
 
 ######################################################
 # The following two variable could be defined in the
@@ -90,16 +95,12 @@ else
  dng_para_config${RUNTYP}   #EMC User set
 fi
 
-export PS4='$SECONDS + '
-date
-
 ####################################
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd}
+export DATA_IN=${DATA_IN:-/tmpnwprd1}
 export DATA=${DATA:-$DATA_IN/${job}.${pid}}
-#NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -134,14 +135,17 @@ export SENDDBN_GB2=${SENDDBN_GB2:-NO}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
-export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
-
+export ROOTdng=${ROOTdng:-/nw${envir}} 
+export HOMEdng=${HOMEdng:-/nw${envir}/${model_ver}_${modeld}.${smart_ver}}  
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
-export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
- export FIXdng=${FIXdng:-${HOMEdng}/fix}
+export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
- export USHdng=${USHdng:-${HOMEdng}/ush}
+export USHdng=${USHdng:-${HOMEdng}/ush}
+export SCRdnd=${SCRdng:-${HOMEdng}/scripts}
+
+export HOMEPOST=${HOMEPOST:-/nw${envir}/ncep_post.$post_ver}
+export EXECPOST=${EXECPOST:-$HOMEPOST/exec}
+export USHPOST=${USHPOST:-$HOMEPOST/ush}
 
 ###################################
 # Set up the UTILITIES
@@ -161,22 +165,13 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-### export PDY=20140205   #TEST
-
-# Set GUESS, CYCLE parameters from NAM run 
-#sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
-#   For testing cold start export GUESS=GDAS   #TEST
 
 ##############################################
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
-export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}
-export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
-
-export COMIN=$COM_IN/${RUN}.${PDY}
-export COMOUT=$COM_OUT/${RUN}.${PDY}
+export COMIN=${COMIN:-/com/${NET}/${envir}/${RUN}.${PDY}}
+export COMOUT=${COMOUT:-/com/${NET}/${envir}/${RUN}.${PDY}}
 
 mkdir -p $COMOUT
 cp ${PARMdng}/SMINIT.CTL $DATA
@@ -273,7 +268,7 @@ msg="JOB $job HAS BEGUN"
 
 ########################################################
 # Execute the script.
-${GFS_SMINIT_GUAM:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
+${GFS_SMINIT_GUAM:-$SCRdng/ex${NET}_${modeld}.sh.ecf}
 ########################################################
 cat $pgmout
 
