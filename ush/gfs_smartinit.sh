@@ -179,16 +179,18 @@ fi
             export SFCINP=$COMIN/$mdl.t${cyc}z.bf$fhr
             export IGEN=89
             export IDRT=0
-            export LONB=1440
-            export LATB=721
+            export LONB=${LONB:-1440}
+            export LATB=${LATB:-721}
 	    #Convert guassian grid flux file to lat/lon degree grid 
             export fgrid='255 0 1440 721 90000 0 128 -90000 359750 250 250 0'
-            $utilexec/copygb -g "$fgrid" -x $COMIN/$mdl.t${cyc}z.sfluxgrbf$fhr $FLXINP
-            export POSTGPEXEC=${POSTGPEXEC:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v8/exec/ncep_post}
-	    export POSTGPSH=${POSTGPSH:-/global/save/emc.glopara/svn/post/tags/post_upgrade_gfs_2014_v8/ush/global_nceppost.sh}
+            $copygb -g "$fgrid" -x $COMIN/$mdl.t${cyc}z.sfluxgrbf$fhr $FLXINP
+            export POSTGPEXEC=${POSTGPEXEC:-$EXECPOST/ncep_post}
+	    export POSTGPSH=${POSTGPSH:-$USHPOST/global_nceppost.sh}
+	   
 	    $POSTGPSH > post${fhr}.out
-            $utilexec/copygb -g "$grid" -x tmpfile4 $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}
-            $utilexec/grbindex $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr} $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}.idx
+            
+	    $copygb -g "$grid" -x tmpfile4 $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}
+            $grbindex $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr} $mdl.t${cyc}z.smartinitin${mdlgrd}.${fhr}.idx
           fi
           inhrfrq=1
     esac
@@ -249,12 +251,12 @@ fi
   
      echo FHRFRQ=$FHRFRQ and freq=$freq
      grid199="10 6 0 0 0 0 0 0 193 193 12350000 143687000 48 20000000 16794000 148280000 64 0 2500000 2500000"
-     $utilexec/copygb2 -g "$grid199" -i0 -x -k '8 1 8 2 0 96 0 0 1' $COMIN/gfs.t${cyc}z.master.grb2f${FHRFRQ} ${FHRFRQ}apcpfile.$fhr
-     $utilexec/copygb2 -g "$grid199" -i0 -x -k '8 1 10 2 0 96 0 0 1' $COMIN/gfs.t${cyc}z.master.grb2f${FHRFRQ} ${FHRFRQ}acpcpfile.$fhr
-     $utilexec/copygb2 -g "$grid199" -i0 -x -k '0 1 13 2 0 96 0 0 1' $COMIN/gfs.t${cyc}z.master.grb2f${FHRFRQ} ${FHRFRQ}weasdfile.$fhr
+     $copygb2 -g "$grid199" -i0 -x -k '8 1 8 2 0 96 0 0 1' $COMIN/gfs.t${cyc}z.master.grb2f${FHRFRQ} ${FHRFRQ}apcpfile.$fhr
+     $copygb2 -g "$grid199" -i0 -x -k '8 1 10 2 0 96 0 0 1' $COMIN/gfs.t${cyc}z.master.grb2f${FHRFRQ} ${FHRFRQ}acpcpfile.$fhr
+     $copygb2 -g "$grid199" -i0 -x -k '0 1 13 2 0 96 0 0 1' $COMIN/gfs.t${cyc}z.master.grb2f${FHRFRQ} ${FHRFRQ}weasdfile.$fhr
      cat ${FHRFRQ}apcpfile.$fhr ${FHRFRQ}acpcpfile.$fhr ${FHRFRQ}weasdfile.$fhr > WRFPRS${FHRFRQ}.tm00.grb2
-     $utilexec/cnvgrib -g21 WRFPRS${FHRFRQ}.tm00.grb2 WRFPRS${FHRFRQ}.tm00
-     $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+     $cnvgrib -g21 WRFPRS${FHRFRQ}.tm00.grb2 WRFPRS${FHRFRQ}.tm00
+     $grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
     export pgm=smartprecip; #. prep_step
     ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
@@ -276,23 +278,23 @@ fi
 # GFS DNG now uses same smartprecip code as the NAM: Create Precip Buckets for smartinit 
 #===============================================================
     echo RUN SMARTPRECIP FOR GFS DNG TO MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr2 to $pfhr1 $pfhr3
-    $EXECdng/smartprecip <<EOF > ${ppgm}precip${fhr}.out
+    ${SMARTPRECIP:-$EXECdng/smartprecip} <<EOF > ${ppgm}precip${fhr}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
      export err=$?; #err_chk
 
      cp ${freq}precip.${fhr} ${freq}precip
-     $utilexec/grbindex ${freq}precip ${freq}precipi
+     $grbindex ${freq}precip ${freq}precipi
      cp ${freq}snow.${fhr} ${freq}snow
-     $utilexec/grbindex ${freq}snow ${freq}snowi
+     $grbindex ${freq}snow ${freq}snowi
       if [ $mk3p -eq 3 ]; then
 #GFS already has 6 hour bucket at these forecasts so just extract precip and snow   
-       $utilexec/wgrib -s gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr} | egrep "(:APCP:)" \
-       | $utilexec/wgrib -i -grib -o 6precip gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr}
-       $utilexec/grbindex 6precip 6precipi 
-       $utilexec/wgrib -s gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr} | egrep "(:WEASD:)" \
-       | $utilexec/wgrib -i -grib -o 6snow gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr}
-       $utilexec/grbindex 6snow 6snowi
+       $wgrib -s gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr} | egrep "(:APCP:)" \
+       | $wgrib -i -grib -o 6precip gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr}
+       $grbindex 6precip 6precipi 
+       $wgrib -s gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr} | egrep "(:WEASD:)" \
+       | $wgrib -i -grib -o 6snow gfs.t${cyc}z.smartinitin${mdlgrd}.${fhr}
+       $grbindex 6snow 6snowi
       fi
     fi #MKPCP>0
   done #MKPCP loop
@@ -312,7 +314,7 @@ EOF
     exit
   fi
 
-  $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+  $grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 
 #=================================================================
 #   DECLARE INPUTS and RUN SMARTINIT 
@@ -323,8 +325,8 @@ EOF
   ln -sf TOPONDFD     fort.46
   ln -sf LANDNDFD     fort.48
   if [ $ext = grb ];then
-    $utilexec/grbindex TOPONDFD TOPONDFDi
-    $utilexec/grbindex LANDNDFD LANDNDFDi
+    $grbindex TOPONDFD TOPONDFDi
+    $grbindex LANDNDFD LANDNDFDi
     ln -sf TOPONDFDi  fort.47
     ln -sf LANDNDFDi  fort.49
   fi
@@ -339,8 +341,8 @@ EOF
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi
-    $utilexec/grbindex MAXMIN1 MAXMIN1i
-    $utilexec/grbindex MAXMIN2 MAXMIN2i
+    $grbindex MAXMIN1 MAXMIN1i
+    $grbindex MAXMIN2 MAXMIN2i
   fi
   freq=3;fmx=25   #fmx =  maxmin unit number for 1st maxmin file
 
@@ -359,9 +361,9 @@ EOF
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
-    $utilexec/grbindex MAXMIN3 MAXMIN3i
-    $utilexec/grbindex MAXMIN4 MAXMIN4i
-    $utilexec/grbindex MAXMIN5 MAXMIN5i
+    $grbindex MAXMIN3 MAXMIN3i
+    $grbindex MAXMIN4 MAXMIN4i
+    $grbindex MAXMIN5 MAXMIN5i
 
     ln -sf "3precip"    fort.15
     ln -sf "3precipi"   fort.16
@@ -457,7 +459,7 @@ EOF
    esac
 
   export pgm=smartinit; # . prep_step
-  ${EXECdng}/smartinit $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
+  ${SMARTINIT:-$EXECdng/smartinit} $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
   export err=$?; #err_chk
 
   case $RUNTYP in
