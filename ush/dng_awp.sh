@@ -47,7 +47,7 @@ if [ $outreg = conus2p5 ];then
 elif [ $outreg = ak3 ];then
   awpparm=$utilparm/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
 elif [ $outreg = guam ];then
-  awpparm=$utilparm/grib2_${mdl}_smart${outreg}${cyctp}f${fhr}.${ogrd}
+  awpparm=$UTILdng/parm/grib2_${mdl}_smart${outreg}${cyctp}f${fhr}.${ogrd}
 else
   awpparm=$utilparm/grib2_awp${mdl}smart${outreg}${cyctp}f${fhr}.${ogrd}
 fi
