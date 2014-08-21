@@ -136,6 +136,7 @@ export UTILdng=${UTILdng:-${HOMEdng/util}}
 export HOMEPOST=${HOMEPOST:-/nw${envir}/ncep_post.$post_ver}
 export EXECPOST=${EXECPOST:-$HOMEPOST/exec}
 export USHPOST=${USHPOST:-$HOMEPOST/ush}
+export PARMPOST=${PARMPOST:-$HOMEPOST/parm}
 
 ###################################
 # Set up the UTILITIES
