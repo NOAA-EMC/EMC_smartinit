@@ -46,7 +46,8 @@ export ffhr=$SHOUR
        export err=1; #err_chk
      fi
    done
-   ${GFS_SMINIT_SSH:-$USHdng/gfs_smartinit.sh}
+
+   ${GFS_SMINIT_SH:-$USHdng/gfs_smartinit.sh}
 
    echo "$PDY$cyc$ffhr" > $COMOUT/${RUN}.t${cyc}z.control.smartguam
 
