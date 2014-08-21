@@ -2,17 +2,6 @@
 export PS4='$SECONDS + '
 date
 set -xa
-export OMP_NUM_THREADS=2
-export MP_EUIDEVELOP=min
-export KMP_STACKSIZE=2048m
-export MPICH_ALLTOALL_THROTTLE=0
-export MP_SINGLE_THREAD=yes
-export MP_EAGER_LIMIT=65536
-export MP_USE_BULK_XFER=no
-export MP_COLLECTIVE_OFFLOAD=no
-export MP_SHARED_MEMORY=yes
-export MP_MPILIB=mpich2
-export MP_LABELIO=yes
 ########################################
 # GFS SMARTINIT JOB   
 ########################################
@@ -142,6 +131,7 @@ export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
 export SCRdnd=${SCRdng:-${HOMEdng}/scripts}
+export UTILdng=${UTILdng:-${HOMEdng/util}}
 
 export HOMEPOST=${HOMEPOST:-/nw${envir}/ncep_post.$post_ver}
 export EXECPOST=${EXECPOST:-$HOMEPOST/exec}
@@ -154,6 +144,14 @@ export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
 export gespath=${gespath:-/nwges/prod}
+
+export copygb=${copygb:-/nwprod/util/exec/copygb}
+export copygb2=${copygb2:-/nwprod/util/exec/copygb2}
+export grbindex=${grbindex:-/nwprod/util/exec/grbindex}
+export grbindex2=${grbindex2:-/nwprod/util/exec/grbindex2}
+export cnvgrib=${cnvgrib:-/nwprod/util/exec/cnvgrib}
+export wgrib=${wgrib:-/nwprod/util/exec/wgrib}
+export wgrib2=${wgrib2:-/nwprod/util/exec/wgrib2}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
