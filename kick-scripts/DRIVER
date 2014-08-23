@@ -42,7 +42,6 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-PDY=20140821
 export cyc=00  #TEST
 domhrw=;
 case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
