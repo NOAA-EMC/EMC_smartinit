@@ -14,10 +14,15 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
+<<<<<<< .working
 #export model_ver=v3.2.7
 #export code_ver=v3.2.7
 export model_ver=v3.2.3
 export code_ver=v3.2.3
+=======
+export model_ver=v3.2.9
+export code_ver=v3.2.9
+>>>>>>> .merge-right.r44635
 export modeld=smartinit
 export rootd=/global/save/${USER}/svn/smartinit/branches/EXP-gfs
 export RUN_ENVIR=emc
