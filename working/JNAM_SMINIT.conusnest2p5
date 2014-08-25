@@ -1,18 +1,6 @@
-<<<<<<< .working
-#BSUB -J DNG12.conusnest2p5-36
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
-=======
-<<<<<<< .working
-#BSUB -J DNG00.conusnest2p5-57
-#BSUB -oo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.conusnest2p5-57
-#BSUB -eo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.conusnest2p5-57
-=======
-#BSUB -J DNG12.conusnest2p5-36
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
->>>>>>> .merge-right.r44635
->>>>>>> .merge-right.r44637
+#BSUB -J DNG18.conusnest2p5-06
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/18/list/oDNG18.conusnest2p5-06
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/18/list/oDNG18.conusnest2p5-06
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
