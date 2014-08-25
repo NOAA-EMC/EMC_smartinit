@@ -1,4 +1,5 @@
 #!/bin/ksh
+set -xa
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
@@ -100,7 +101,7 @@ while [ $ffhr -le $ENDHRS ];do
             if [ $chk6 -ne 0 ];then
               export job="DNG${cyc}.${RUNTYP}-${fhrnxt}"
               echo "export ffhr=$fhrnxt" >> ${wkdir}/dng_para_config${RUNTYP}
-              echo "export DATA=/${DATA_IN}/${job}"  >>$wkdir/dng_para_config${RUNTYP}
+              echo "export DATA=${DATA_IN}/${job}"  >>$wkdir/dng_para_config${RUNTYP}
               . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
               sleep 10
               echo `date +%T` $MDL SUBMIT SMINIT JOB :  $RUNTYP CYCLE $cyc FHRNXT $fhrnxt
@@ -127,7 +128,7 @@ while [ $ffhr -le $ENDHRS ];do
 
   export job="DNG${cyc}.${RUNTYP}-${ffhr}"
   echo "export ffhr=$ffhr" >> ${wkdir}/dng_para_config${RUNTYP}
-  echo "export DATA=/${DATA_IN}/${job}" >>$wkdir/dng_para_config${RUNTYP}
+  echo "export DATA=${DATA_IN}/${job}" >>$wkdir/dng_para_config${RUNTYP}
  . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
   echo  $wait `date +%T` SUBMIT $MDL SMINIT JOB :  $RUNTYP CYCLE $cyc FFHR $ffhr
   sleep 10     

@@ -25,18 +25,25 @@ export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
 
-export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
-export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm  # grib2 parm files dir
+#export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
+export HOMEdng=/global/save/$USER/svn/smartinit/branches/EXP-gfs    # dng software root dir
+export utilparm=/nwprod/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/exec    # Location of nam_prdgen
 export EXECdgex=/nwprod/exec   # Location of dgex_prdgen
 export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 
 #TEST WITH Dana's GFS changes
-###export EXECdng=/meso/save/$USER/smartinit/branches/EXP-gfs/exec
+#export EXECdng=/global/save/$USER/svn/smartinit/branches/EXP-gfs/exec
+#export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
 
 export COMROOT=/com
 export gespath=/nwges/prod          
+<<<<<<< .working
 export COM_IN=${COMROOT}/${mdl}/prod 
+=======
+#export COM_IN=${COMROOT}/${mdl}/prod 
+export COM_IN=${COMROOT}/nam/prod 
+>>>>>>> .merge-right.r44637
 
 #TEST WITH Eric's NAM PARA     
 #TEST export COMROOT="/meso/noscrub/Eric.Rogers/com"
@@ -53,6 +60,11 @@ fi
 
 export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
 
+<<<<<<< .working
 export COM_OUT=/ptmpp1/$USER/${model_ver}
+=======
+#export COM_OUT=/ptmpp1/$USER/${model_ver}
+export COM_OUT=/ptmpp1/$USER/${model_ver}
+>>>>>>> .merge-right.r44637
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
