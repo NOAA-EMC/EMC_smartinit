@@ -6,4 +6,4 @@
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]
-#BSUB -R rusage[mem=4800]
+#BSUB -R rusage[mem=5500]

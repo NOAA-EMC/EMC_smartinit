@@ -36,12 +36,12 @@ export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 
 export COMROOT=/com
 export gespath=/nwges/prod          
-xport COM_IN=${COMROOT}/${mdl}/para 
+export COM_IN=${COMROOT}/${mdl}/para 
 
 #TEST WITH Eric's NAM PARA     
-export COMROOT="/meso/noscrub/Eric.Rogers/com"
+#TEST export COMROOT="/meso/noscrub/Eric.Rogers/com"
 #export gespath=/meso/noscrub/Eric.Rogers/nwges/para
-export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
+export COM_IN=${COMROOT}/${mdl}/prod
 
 
 # for dgex downscling thru 192 forecast hours, use locally created gefs files

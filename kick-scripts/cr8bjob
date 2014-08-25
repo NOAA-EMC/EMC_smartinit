@@ -13,7 +13,7 @@ ffhr=$2
   echo "#BSUB -P RTMA"             >>bjobcards-dev${RUNTYP}-$ffhr
   echo "#BSUB -q dev"              >>bjobcards-dev${RUNTYP}-$ffhr
   echo "#BSUB -R "span[ptile=1]""    >>bjobcards-dev${RUNTYP}-$ffhr
-  echo "#BSUB -R "rusage[mem=4800]"" >>bjobcards-dev${RUNTYP}-$ffhr
+  echo "#BSUB -R "rusage[mem=5500]"" >>bjobcards-dev${RUNTYP}-$ffhr
  
 cat bjobcards-dev${RUNTYP}-$ffhr ${jobd}/J${MDL}_SMINIT > J${MDL}_SMINIT.${RUNTYP}
 rm -f bjobcards-dev${RUNTYP}-$ffhr
