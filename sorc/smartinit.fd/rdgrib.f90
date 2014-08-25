@@ -37,7 +37,7 @@ contains
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
 
 !     Get GRIB Variable
-
+      
       CALL GETGB(LUB,LUI,NUMV,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,IRET)
       IMAX=KGDS(2)
       IF(IRET.EQ.0) THEN
@@ -56,13 +56,14 @@ contains
  100   FORMAT('VARB UNPACKED ', 4I7,2F14.4)
       ELSE
        WRITE(6,*)'====================================================='
-       WRITE(6,*)'COULD NOT UNPACK VARB FOR J= ',J,'GRID', JPDS(3),IRET
+       WRITE(6,*)' GETGB ERROR: ',IRET
+       WRITE(6,*)'COULD NOT UNPACK VARB FOR J= ',J,'GRID', JPDS(3)
        WRITE(6,*) 'VARB',JPDS(5),'LVL TYP',JPDS(6),'VERT LVL',JPDS(7)
-       WRITE(6,*)'UNIT', LUB,LUI,NUMV,KF
+       WRITE(6,*)'UNIT', LUB,LUI,'NUMV',NUMV,'KF',KF
        WRITE(6,*)'====================================================='
        print *,'JPDS',jpds(1:25)
        ISTAT = IRET
-! 01-29-13 JTM : past hour 60 nam output onli to level 35
+! 01-29-13 JTM : past hour 60 nam output only to level 35
        if (JPDS(5).eq.191 .or. JPDS(6).eq.109 .or. JPDS(6).eq.245) then 
          print *, 'GRIB VARB READ ERROR: program continuing'
 !       else
@@ -110,9 +111,17 @@ contains
       KSKIP = 0
 
       WRITE(FNAME(6:7),FMT='(I2)')LUB
-      CALL BAOPEN(LUB,FNAME,IRETGB)
+      CALL BAOPENR(LUB,FNAME,IRETGB)
+      print *,'BAOPENR',LUB,'IRET ',IRETGB
+      if (iretgb.ne.0) then
+        print *,' COULD NOT OPEN GRIB FILE UNIT ',LUB
+        stop 99
+      endif
+   
       WRITE(FNAME(6:7),FMT='(I2)')LUI
-      CALL BAOPEN(LUI,FNAME,IRETGI)
+      CALL BAOPENR(LUI,FNAME,IRETGI)
+      print *,'BAOPENR',LUI,'IRET ',IRETGI
+      if (iretgi.ne.0) print *,'COULD NOT OPEN INDEX FILE UNIT',LUI
       CALL GETGI(LUI,KSKIP,MBUF,CBUF,NLEN,NNUM,IRGI)
 
       write(6,*)' IRET FROM GETGI ',IRGI,LUB,LUI,NLEN,NNUM

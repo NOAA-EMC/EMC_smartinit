@@ -5,8 +5,8 @@
 # OUTPUT REGION TO DOWNSCALE TO
 # valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
 
-export RUN_ENVIR=emc
-export envir=emc
+export RUN_ENVIR=dev
+export envir=dev
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -25,32 +25,46 @@ export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
 
-export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
-export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm  # grib2 parm files dir
+#export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
+export HOMEdng=/global/save/$USER/svn/smartinit/branches/EXP-gfs    # dng software root dir
+export utilparm=/nwprod/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/exec    # Location of nam_prdgen
 export EXECdgex=/nwprod/exec   # Location of dgex_prdgen
 export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 
+#TEST WITH Dana's GFS changes
+#export EXECdng=/global/save/$USER/svn/smartinit/branches/EXP-gfs/exec
+#export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
+
 export COMROOT=/com
-export COM_IN=${COMROOT}/${mdl}/prod
+export gespath=/nwges/prod          
+<<<<<<< .working
+export COM_IN=${COMROOT}/${mdl}/prod 
+=======
+#export COM_IN=${COMROOT}/${mdl}/prod 
+export COM_IN=${COMROOT}/nam/prod 
+>>>>>>> .merge-right.r44637
+
+#TEST WITH Eric's NAM PARA     
+#TEST export COMROOT="/meso/noscrub/Eric.Rogers/com"
+#TEST export gespath=/meso/noscrub/Eric.Rogers/nwges/para
+#TEST export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
+
+
 # for dgex downscling thru 192 forecast hours, use locally created gefs files
-export COM_SREF=${COMROOT}/sref/prod
-
-#TEST until dgex bsmart files are available from production run
-if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then 
-  export COMROOT="/meso/noscrub/Eric.Rogers/com"
-  export COM_IN=${COMROOT}/${mdl}/para  
+export COM_SREF=${COMROOT}/sref/prod   
+if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then
   export COM_SREF=/ptmpp1/Jeff.McQueen/com/sref/para
-#TEST  export COM_SREF=/ptmpp1/Jun.Du/com/sref/prod
-
-#TEST until hiresw wrprs files are available from production run
-elif [ $RUNTYP = guamnmmb -o $RUNTYP = guamarw ];then
-  export COMROOT="/meso/noscrub/Matthew.Pyle/com"
-  export COM_IN=${COMROOT}/${mdl}/prod   
 fi
+
 
 export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
 
-export COM_OUT=/ptmpp1/$USER
+<<<<<<< .working
+export COM_OUT=/ptmpp1/$USER/${model_ver}
+=======
+#export COM_OUT=/ptmpp1/$USER/${model_ver}
+export COM_OUT=/ptmpp1/$USER/${model_ver}
+>>>>>>> .merge-right.r44637
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`

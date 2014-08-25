@@ -1,14 +1,26 @@
-#BSUB -J DNG12.conusnest2p5-24
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.conusnest2p5-24
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.conusnest2p5-24
+<<<<<<< .working
+#BSUB -J DNG12.conusnest2p5-36
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
+=======
+<<<<<<< .working
+#BSUB -J DNG00.conusnest2p5-57
+#BSUB -oo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.conusnest2p5-57
+#BSUB -eo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.conusnest2p5-57
+=======
+#BSUB -J DNG12.conusnest2p5-36
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.9/12/list/oDNG12.conusnest2p5-36
+>>>>>>> .merge-right.r44635
+>>>>>>> .merge-right.r44637
 #BSUB -n 1
-#BSUB -W 3:00
+#BSUB -W 2:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]
-#BSUB -R rusage[mem=4800]
+#BSUB -R rusage[mem=6000]
 #!/bin/ksh
-####NCO set -xa   #NCO preferred setting
+#NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -64,12 +76,13 @@ export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
 export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+export RM_TMPDIR=${RM_TMPDIR:-YES}
 
 #####################################################################################
 # This block is for Developer's test run:
 # Run config file to get input parameters
 # This config file should define the following variables
-# DATA_IN: Location of working directory, default to /tmpnwprd
+# DATA_IN: Location of working directory, default to /tmpnwprd2
 # SENDECF: If the job is to be running using ECF, default to YES
 # SENDDBN: Set to NO for developers, default to YES
 # COM_IN:  Directory for input files, default to /com/$NET/${envir}
@@ -85,6 +98,8 @@ export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
+
+if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #NOT FOR NCO
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
    export SENDDBN=${SENDDBN:-NO}
@@ -102,9 +117,8 @@ date
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd}
+export DATA_IN=${DATA_IN:-/tmpnwprd2}
 export DATA=${DATA:-$DATA_IN/${job}.${pid}}
-#NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -120,9 +134,8 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-if [ "$envir" = 'prod' ] ; then
-  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
-else
+export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
+if [ "$envir" = 'dev' ] ; then
   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
 fi
 
@@ -139,14 +152,15 @@ export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
-export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
+export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.${model_ver}}  # NCO preferred
+export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
+
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
-export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
- export FIXdng=${FIXdng:-${HOMEdng}/fix}
+export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
+export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
- export USHdng=${USHdng:-${HOMEdng}/ush}
+export USHdng=${USHdng:-${HOMEdng}/ush}
 
 ###################################
 # Set up the UTILITIES
@@ -154,30 +168,35 @@ export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
-export gespath=${gespath:-/nwges/prod}
+export gespath=${gespath:-/nwges/${envir}}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
 ###############################################################
-sh $utilscript/setup.sh
+.  $utilscript/setup.sh
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-sh $utilscript/setpdy.sh  
-. ${DATA}/PDY    # set local dir for crontab
-####export PDY=20140501   #TEST
+.  $utilscript/setpdy.sh >setpdy.out 
+. ${DATA}/PDY  >PDY.out  # set local dir for crontab
+###export PDY=20140627   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
-sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold start export GUESS=GDAS   #TEST
+.  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+echo GUESS=$GUESS
+export pcfhr=06
+export pcdate=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 1-8`
+export pcyc=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 9-10`
+
 
 ##############################################
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/prod}
+export COM_IN=${COM_IN:-/com/${NET}/${envir}}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
@@ -221,7 +240,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-####NCO SET env  
+####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"

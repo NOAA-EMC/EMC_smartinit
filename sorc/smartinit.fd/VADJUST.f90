@@ -133,7 +133,7 @@
              PHI(I,J,KK) = (1.-OVREL)*PHI(I,J,KK)+ OVREL*FACT*(XX+YY-DSQ*PHI(I,J,2))
 !==================================================================================
            else
-             PHI(I,J,KK)=0.1;XOLD=0.1;PHIIM1=0.1;PHIJM1=0.1;PHIIPI=.1;PHIJP1=0.1
+             PHI(I,J,KK)=0.1;XOLD=0.1;PHIIM1=0.1;PHIJM1=0.1;PHIIP1=.1;PHIJP1=0.1
            endif
            IF(ABS(XOLD).GE.1.0E-10) THEN     
              ERR=ABS((PHI(I,J,KK)-XOLD)/XOLD)

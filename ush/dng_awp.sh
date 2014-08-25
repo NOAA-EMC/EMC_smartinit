@@ -10,6 +10,7 @@
 #  ogrd :  output NDFD grid number (eg: 197,196,195,198...)
 #  outreg  :  output file region name (eg: conus,ak,pr,hi,conus2p5,ak3
 #=======================================================================
+set -x
 outreg=$1    # mdlgrd used for guam to distinguish arw/nmm
 ihindex=0
 case $cyc in 
@@ -20,13 +21,15 @@ esac
 REGCP=`echo $outreg |tr '[a-z]'  '[A-Z]' `
 echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $fhr 
 
-   
+if [ $outreg != guam ]; then   
 # Create HAINES INDEX GRIB FILE
 if [ $ihindex -eq 1 ];then
  ${utilexec}/wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
   ${utilexec}/wgrib -i -grib  MESO${RGIN}${fhr}.tm00 -o hindex.t${cyc}z.smart${outreg}${fhr}.tm00
  $utilexec/cnvgrib -g12 -p40 hindex.t${cyc}z.smart${outreg}${fhr}.tm00  hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi
+fi
+
 $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 
 # Processing grids for AWIPS
@@ -43,6 +46,8 @@ if [ $outreg = conus2p5 ];then
   awpparm=$utilparm/grib2_awp${mdl}dngconus${cyctp}f${fhr}.${ogrd}
 elif [ $outreg = ak3 ];then
   awpparm=$utilparm/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
+elif [ $outreg = guam ];then
+  awpparm=$UTILdng/parm/grib2_${mdl}_smart${outreg}${cyctp}f${fhr}.${ogrd}
 else
   awpparm=$utilparm/grib2_awp${mdl}smart${outreg}${cyctp}f${fhr}.${ogrd}
 fi

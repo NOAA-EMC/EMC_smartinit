@@ -134,11 +134,21 @@
            LUGS6=11;LUGS6i=12
            LUGP3=15;  LUGP3i=16
            LUGS3=17;  LUGS3i=18
+         elseif (trim(CORE) .EQ. 'GFS' .and. LHR6) THEN
+           LUGP3=15; LUGP3i=16
+           LUGS3=17; LUGS3i=18
+           LUGP6=19; LUGP6i=20
+           LUGS6=21; LUGS6i=22
+           IF (trim(CORE) .EQ. 'GFS' .and. LHR12) THEN
+             LUGP12=23; LUGP12i=24
+           ENDIF
          else
            LUGP6=15;LUGP6i=16
            LUGS6=17;LUGS6i=18
          endif
-         LUGP12=19;LUGP12i=20
+         IF (trim(CORE).NE.'GFS') THEN
+           LUGP12=19;LUGP12i=20
+         ENDIF
          LHR9=.FALSE.   ! nests have 3 hour precip in std parent grid (01-28-13, JTM)
        else
          IF(LCYCON) THEN 
@@ -171,6 +181,7 @@
       IF(LHR12) THEN
        LUGT1=23
        IF (.not.LCYCON .or. lnest) LUGT1=21
+       IF (trim(CORE) .EQ. 'GFS') LUGT1=25
        LUGT2=LUGT1+1
        LUGT3=LUGT1+2
        LUGT4=LUGT1+3
@@ -190,6 +201,9 @@
       ELSE IF(LHR6.OR.LHR9) THEN
 !      However Off-Hour cycle runs do not have 6 hour buckets
          LUGT1=19; LUGT2=20; LUGT1I=21; LUGT2I=22
+         IF(trim(CORE) .EQ. 'GFS') THEN
+           LUGT1=23;LUGT2=24; LUGT1I=25; LUGT2I=26
+         ENDIF
        print *,'======================================================='
        print *, 'Read previous 2 hrs of  MAX,MIN TEMP', IFHR, lugt1,lugt2
        print *, 'Read  3 hr precip from unit',lugp3,lugs3
@@ -228,6 +242,7 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
+      print *,'imax,jmax,kmax,numlev,itot,core,lhiresw'
       print *,gdin%imax,jmax,kmax,numlev,itot,core,lhiresw
 
       if (lfull) then
@@ -451,7 +466,7 @@
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 225
       JPDS(6) = 001
-      if (lhiresw) JPDS(5)=81  
+      if (lhiresw .or. trim(CORE).eq.'GFS') JPDS(5)=81  
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
 
       if (lfull.or.lanl) then
@@ -464,6 +479,7 @@
 ! Best Liftex Index 
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 132 
+      if(trim(CORE) .eq. 'GFS') JPDS(5) = 24
       JPDS(6) = 116 
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,BLI,IRET,ISTAT)
       endif
@@ -530,29 +546,29 @@
       ENDIF
 
 !  READ min/max temperature values for previous 2 hours
-      print *, 'Reading max/min for previous 2 hours',LUGT1,LUGT2,IGDNUMT
+      print *, 'Reading temperature for previous 2 hours',LUGT1,LUGT2,IGDNUMT
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly maxmin file
+      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
 
 ! Get min/max temperature values for full 12-hr period for F12,24...
@@ -657,7 +673,7 @@
       if (llimited) return
 
 !   get the vertical profile of cloud fraction for non-nests
-      if (.not. lnest) then
+      if (.not. lnest .or. trim(CORE) .eq. 'GFS') then
       J=0
       DO LL=1,KMAX  
        JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=071; JPDS(6)=KLTYP
@@ -706,14 +722,15 @@
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
 
 ! composite reflectivity
-      JPDS(5) = 212
-      JPDS(6) = 200
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
-
+      if (trim(CORE).NE. 'GFS') then
+        JPDS(5) = 212
+        JPDS(6) = 200
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
+      endif
       if (lanl) return
 
 !     nests already have computed cld fracs...
-      if (lnest) then
+      if (lnest .and. trim(CORE).ne.'GFS') then
         J=0;JPDS=-1
         JPDS(3)=IGDNUM
         JPDS(5) = 71

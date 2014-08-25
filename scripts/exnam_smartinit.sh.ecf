@@ -30,7 +30,7 @@
 # NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #
 
-set -xa
+#NCO set -xa
 msg="JOB $job HAS BEGUN"
 #NCO postmsg "$jlogfile" "$msg"
 
@@ -65,7 +65,6 @@ cd $DATA
   echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
   ${SMINIT_SSH:-$USHdng/smartinit.sh}
 
-set -x
 #####################################################################
 
 echo EXITING $0
