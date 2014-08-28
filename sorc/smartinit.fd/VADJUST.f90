@@ -49,6 +49,7 @@
       KK = 1
       NX=IM;NY=JM
       ALLOCATE (PHI(NX,NY,2),STAT=kret)
+      print *,'============================================================'
       print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY,stat
 
 !     COMPUTE TERRAIN GRADIENTS AND INITIAL POTENTIAL
@@ -62,22 +63,18 @@
       print *,'V ', MINVAL(V),MAXVAL(V)
       do j=2,ny-1
       do i=2,nx-1
-       if(validpt(i,j)) then
-         HBAR=HGHT(I,J,1)
+       HBAR=HGHT(I,J,1)
+       if(validpt(i,j) .and. ABS(HBAR) .gt. 0.1) then
          FX=DXI/(HBAR)
          FY=DYI/(HBAR)
-!         HTOIM1=HTOPO(I,J)
-!         HTOJM1=HTOPO(I,J)
-!         HTOIP1=HTOPO(I,J)
-!         HTOJP1=HTOPO(I,J)
-!         IF(validpt(i-1,j)) HTOIM1=HTOPO(I-1,J)
-!         IF(validpt(i+1,j)) HTOIP1=HTOPO(I+1,J)
-!         IF(validpt(i,j-1)) HTOJM1=HTOPO(I,J-1)
-!         IF(validpt(i,j+1)) HTOJP1=HTOPO(I,J+1)
-          HTOIM1=HTOPO(I-1,J)
-          HTOIP1=HTOPO(I+1,J)
-          HTOJM1=HTOPO(I,J-1)
-          HTOJP1=HTOPO(I,J+1)
+         HTOIM1=HTOPO(I,J)
+         HTOJM1=HTOPO(I,J)
+         HTOIP1=HTOPO(I,J)
+         HTOJP1=HTOPO(I,J)
+         IF(validpt(i-1,j)) HTOIM1=HTOPO(I-1,J)
+         IF(validpt(i+1,j)) HTOIP1=HTOPO(I+1,J)
+         IF(validpt(i,j-1)) HTOJM1=HTOPO(I,J-1)
+         IF(validpt(i,j+1)) HTOJP1=HTOPO(I,J+1)
 
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
@@ -86,6 +83,7 @@
            print *, '==================================================='
             print *,i,j,'PHI Large',phi(i,j,2)
             print *, 'FX',FX,'DHDX', DHDX, 'DHDY', DHDY
+            print *, 'HGHT', HGHT(I,J,1)  
             print *, 'HTOI',HTOIP1,HTOIM1
             print *, 'HTOJ',HTOJP1,HTOJM1
             print *,' U, V', U(i,j),V(i,j)
@@ -105,8 +103,6 @@
        endif
       enddo
       enddo
-      print *,'VADJUST PHI 1 IC :POIS ', MINVAL(PHI(:,:,1)),MAXVAL(PHI(:,:,1))
-      print *,'VADJUST PHI 2 IC :', MINVAL(PHI(:,:,2)),MAXVAL(PHI(:,:,2))
 
 !     SET BOUNDARY VALUES FOR PHI
       call setphibnd(validpt,nx,ny,phi)
@@ -121,8 +117,8 @@
       DSQ=DXSQ*DYSQ
       FACT=1.0/(2.0*(DXSQ+DYSQ))
       DO 100 IT=1,ITMAX
-        ERROR=-1.0E+09
         DO 90 IDIR=1,4
+          ERROR=-1.0E+09
           do jj=2,ny-1
           do ii=2,nx-1
             SELECT CASE (IDIR)
@@ -167,8 +163,8 @@
          enddo
          enddo 
    90   CONTINUE
-        print *,'VADJUST :  ERROR',IT, IDIR, ERROR,' EPSI',EPSI,' XOLD',XOLD
         IF (ERROR.LE.EPSI) exit
+        print *,'VADJUST :' ,IT,IDIR, ' XOLD',XOLD,'ERROR',ERROR
   100 CONTINUE
 
 ! Set PHI at validpt boundaries
