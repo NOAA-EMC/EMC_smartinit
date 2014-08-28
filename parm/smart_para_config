@@ -47,9 +47,6 @@ export COM_IN=${COMROOT}/${mdl}/prod
 
 # for dgex downscling thru 192 forecast hours, use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod   
-if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then
-  export COM_SREF=/com/sref/prod
-fi
 
 
 export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc

@@ -34,7 +34,6 @@
 
  INTERFACE
     SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
-
     use constants
     use grddef
     use aset2d
@@ -44,15 +43,24 @@
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
-    REAL, ALLOCATABLE   :: UB(:,:),VB(:,:)
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
-    integer itmax,ii,jj,kk,idir,it,ispdfc
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD
+    integer itmax,ii,jj,kk,idir,it
+
+    INTERFACE
+    SUBROUTINE setphibnd(validpt,nx,ny,phi)
+!==========================================================
+!     Set PHI at validpt boundaries
+!==========================================================
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: PHI(:,:,:)
+      INTEGER, INTENT(IN) :: NX,NY
+     END SUBROUTINE setphibnd
+    END INTERFACE
+
     END SUBROUTINE vadjust
  END INTERFACE
-
-
 
       print *, '***********************************'
       print *, 'Into NDFDgrid'
@@ -347,7 +355,7 @@
 
 !       Adjust winds to topography
         print *,'UNEW BEFORE ',MINVAL(UNEW),MAXVAL(UNEW)
-!TESTING        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
         print *,'UNEW AFTER ',MINVAL(UNEW),MAXVAL(UNEW)
 
 !============================================

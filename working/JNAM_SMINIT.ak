@@ -1,12 +1,12 @@
-#BSUB -J DNG00.ak-84
-#BSUB -oo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.ak-84
-#BSUB -eo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.ak-84
+#BSUB -J DNG12.ak-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/12/list/oDNG12.ak-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/12/list/oDNG12.ak-12
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]
-#BSUB -R rusage[mem=4800]
+#BSUB -R rusage[mem=6000]
 #!/bin/ksh
 #NCO set -xa   #NCO preferred setting
 

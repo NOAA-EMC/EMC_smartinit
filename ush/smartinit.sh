@@ -574,7 +574,6 @@ EOF5
     ln -sf LANDNDFDi  fort.49
   fi
 
-  ls -ltr 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP

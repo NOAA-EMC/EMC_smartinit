@@ -137,7 +137,8 @@
     use grddef
     use aset2d
     use aset3d
-    use rdgrib
+    use rdgrib     ! GRID and MASK defined in rdgrib
+
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
     REAL, INTENT(INOUT) :: VEG_NAM_NDFD(:,:),TOPO_NDFD(:,:),VEG_NDFD(:,:)
@@ -164,9 +165,8 @@
       real tmean,dz,theta1,theta6,dx,dy
       logical ladjland,lconus,lnest,lhiresw,lvegtype
 
-INTERFACE
+ INTERFACE
     SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
-
     use constants
     use grddef
     use aset2d
@@ -176,14 +176,24 @@ INTERFACE
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
-    REAL, ALLOCATABLE   :: UB(:,:),VB(:,:)
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
-    integer itmax,ii,jj,kk,idir,it,ispdfc
-    END SUBROUTINE vadjust
- END INTERFACE
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD
+    integer itmax,ii,jj,kk,idir,it
 
+    INTERFACE
+    SUBROUTINE setphibnd(validpt,nx,ny,phi)
+!==========================================================
+!     Set PHI at validpt boundaries
+!==========================================================
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: PHI(:,:,:)
+      INTEGER, INTENT(IN) :: NX,NY
+     END SUBROUTINE setphibnd
+    END INTERFACE
+    END SUBROUTINE vadjust
+    END INTERFACE
+    
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
