@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa
+### set -xa
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
@@ -17,7 +17,6 @@ module load ruby emc-utils
 # Jeff McQueen       01/29/2013
 # Vertical structure 08/27/2013
 #=======================================================
-###set -x 
 typeset -Z2 cyc 
 
 #====================User Sets=======================================
@@ -73,7 +72,7 @@ while [ $ffhr -le $ENDHRS ];do
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
 
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-  #TEST export PDY=20140627  ###TEST
+#TEST    export PDY=20140827  ###TEST
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo ==========================================================
   echo `date`
@@ -85,7 +84,7 @@ while [ $ffhr -le $ENDHRS ];do
     ((HHold=ffhr-6))
     if [ $HHold -lt 10 ];then HHold="0"$HHold;fi
     ffhrsv=$ffhr
-    while [ $wait -le 3600 ];do
+    while [ $wait -le 4800 ];do
       smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00
       if [ ! -s $smflold ];then
         echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr
@@ -98,6 +97,7 @@ while [ $ffhr -le $ENDHRS ];do
           while [ $fhrnxt -le $ENDHRS ];do
             if [ $fhrnxt -lt 10 ];then fhrnxt="0"$fhrnxt;fi
             chk6=`expr $fhrnxt % 6`
+
             if [ $chk6 -ne 0 ];then
               export job="DNG${cyc}.${RUNTYP}-${fhrnxt}"
               echo "export ffhr=$fhrnxt" >> ${wkdir}/dng_para_config${RUNTYP}
@@ -108,6 +108,7 @@ while [ $ffhr -le $ENDHRS ];do
               ${kickd}/cr8bjob $job $fhrnxt
               bsub < J${MDL}_SMINIT.${RUNTYP}
             fi
+
             ((fhrnxt=fhrnxt+INCR))
           done
           export INCR=06
@@ -119,7 +120,7 @@ while [ $ffhr -le $ENDHRS ];do
         break
       fi
     done 
-    if [ $wait -ge 3600 ];then
+    if [ $wait -ge 4800 ];then
       echo  `date +%T` $smflold NOT FOUND FOR FFHR=$ffhr
       echo  RUN_ALL for $mdl $RUNTYP $cyc EXITING
       exit
@@ -134,6 +135,7 @@ while [ $ffhr -le $ENDHRS ];do
   sleep 10     
   ${kickd}/cr8bjob $job $ffhr
   bsub < J${MDL}_SMINIT.${RUNTYP}
+
   let ffhr=$ffhr+$INCR 
 done
 

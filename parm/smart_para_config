@@ -51,6 +51,7 @@ export COM_SREF=${COMROOT}/sref/prod
 
 export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
 
-export COM_OUT=/ptmpp1/$USER/${model_ver}
+#TEST export COM_OUT=/ptmpp1/$USER/${model_ver}
+export COM_OUT=/ptmpp1/$USER
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
