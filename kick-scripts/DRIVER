@@ -17,7 +17,7 @@ module load ruby emc-utils
 export model_ver=v3.3.0
 export code_ver=v3.3.0
 export modeld=smartinit
-export rootd=/meso/save/${USER}/smartinit/vers${model_ver}
+export rootd=/meso/save/${USER}/smartinit.${model_ver}
 export RUN_ENVIR=emc
 export envir=emc
 
@@ -27,7 +27,7 @@ export kickd=${rootd}/kick-scripts
 
 cd $kickd
 
-export EXECdng=/global/save/$USER/svn/smartinit/branches/EXP-gfs/exec
+export EXECdng=/meso/save/$USER/smartinit.${model_ver}/exec
 #export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
 # cp -p $rootd/parm/smart_para-CTL $rootd/parm/smart_para_config
 
@@ -40,7 +40,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=00  #TEST
+
 domhrw=;
 case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -51,16 +51,13 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #07/13: added guamnmmb,guamarw  configuration
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 domains="conusnest2p5 hi ak pr conus aknest3 ak_rtmages"
-#domains="hi"
 for RUNTYP in $domains  $domhrw $domdgx ;do
-#for RUNTYP in $domains ;do
-#  export ENDHRS=84
   export ENDHRS=84
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                     ak_rtmages) ENDHRS=12;;
-                    aknest3) export ENDHRS=60;; 
-               conusnest2p5) export ENDHRS=60;; 
+                    aknest3) export ENDHRS=36;; 
+               conusnest2p5) export ENDHRS=36;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
@@ -69,9 +66,8 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
   export RUNTYP=$RUNTYP
 
 # Remove older directories
-#  /nwprod/util/ush/setpdy.sh
-#  dayrm=$( echo `/nwprod/util/exec/ndate -120` |cut -c 1-8 )
-  dayrm=20140821
+  /nwprod/util/ush/setpdy.sh
+  dayrm=$( echo `/nwprod/util/exec/ndate -120` |cut -c 1-8 )
 
   Y=$(echo $dayrm | cut  -c 1-4 )
   M=$(echo $dayrm | cut  -c 5-6 )

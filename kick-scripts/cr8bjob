@@ -15,5 +15,6 @@ ffhr=$2
   echo "#BSUB -R "span[ptile=1]""    >>bjobcards-dev${RUNTYP}-$ffhr
   echo "#BSUB -R "rusage[mem=6000]"" >>bjobcards-dev${RUNTYP}-$ffhr
  
-cat bjobcards-dev${RUNTYP}-$ffhr ${jobd}/J${MDL}_SMINIT > J${MDL}_SMINIT.${RUNTYP}
+#cat bjobcards-dev${RUNTYP}-$ffhr  ${jobd}/J${MDL}_SMINIT.test  > J${MDL}_SMINIT.${RUNTYP}
+cat bjobcards-dev${RUNTYP}-$ffhr  ${jobd}/J${MDL}_SMINIT  > J${MDL}_SMINIT.${RUNTYP}
 rm -f bjobcards-dev${RUNTYP}-$ffhr

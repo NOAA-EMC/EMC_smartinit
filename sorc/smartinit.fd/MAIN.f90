@@ -65,6 +65,7 @@
     use aset3d
     use aset2d
     use rdgrib
+    use constants
 
     TYPE (GINFO) :: GDIN
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
@@ -178,7 +179,7 @@
     TYPE (GINFO)        :: GDIN
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD,DSCALE
     integer itmax,ii,jj,kk,idir,it
 
     INTERFACE
@@ -1108,7 +1109,7 @@
 !      get weight based on pressure - high levels get counted little
 !      maxes out at 700mb, low levels count a little less
 
-        REAL TSKY(7)
+        REAL TSKY(100)
         TYPE (GINFO),INTENT(IN) :: GDIN
         REAL,    INTENT(IN)  :: CFR(:,:,:)
         REAL,    INTENT(INOUT) :: SKY(:,:)
@@ -1350,8 +1351,8 @@
       use aset2d
       use asetdown
 !---------------------------------------------------------
-!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11
-!  since this file serve as 1st guess for Alaskan RTMA
+!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11...fhrhrly
+!  FOR Alaska,  this file serve as 1st guess for RTMA (akrtmages)
 !---------------------------------------------------------
        INTEGER ID(25)
        LOGICAL RITEHD

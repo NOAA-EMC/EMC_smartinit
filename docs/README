@@ -539,3 +539,14 @@ In future, Geoff prefers stripping out previous 2 hours temps from all files
 * MAIN.f90: fixed hr label for T-1 (THOLD3) and T-2 (THOLD2) output fields
 * ush/smartinit.sh : added option to run copygb instead of prdgen
                      but using nearest neighbor (i2) option
+
+09/01/14 12Z
+* VADJUST.f90 : Added fix to PHI iteration
+* NDFDgrid.f90 : turned on ispdadj=1
+
+09/18/14 >18z
+*NDFDgrid.f90 : changed frictional wind adjustment to after VADJUST call
+but turned off so to test the following:
+*VADJUST.f90  :  Adjust phi based on (Topo-nam  - Topo-ndfd)/Topo-nam
+
+

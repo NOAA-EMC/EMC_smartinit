@@ -29,7 +29,7 @@
     TYPE (GINFO)        :: GDIN
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD,DSCALE
     integer itmax,ii,jj,kk,idir,it
 
     INTERFACE
@@ -63,10 +63,11 @@
       print *,'V ', MINVAL(V),MAXVAL(V)
       do j=2,ny-1
       do i=2,nx-1
-       HBAR=HGHT(I,J,1)
-       if(validpt(i,j) .and. ABS(HBAR) .gt. 0.1) then
-         FX=DXI/(HBAR)
-         FY=DYI/(HBAR)
+       if(validpt(i,j)) then
+         HBAR=HGHT(I,J,1)
+         if (HBAR .LT. 1)HBAR=1.0
+         FX=DXI/HBAR
+         FY=DYI/HBAR
          HTOIM1=HTOPO(I,J)
          HTOJM1=HTOPO(I,J)
          HTOIP1=HTOPO(I,J)
@@ -78,19 +79,26 @@
 
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
+
+!  DSCALE based on difference in terrain
+         ZMAX=AMAX1(ZSFC(I,J),HTOPO(I,J))
+        DSCALE=ABS(ZSFC(I,J) - HTOPO(I,J))/ZMAX
+         if (DSCALE.gt.1.) DSCALE=1.0
+!TEST         PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)*DSCALE
          PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)
          if (abs(PHI(i,j,2)).gt.100.) then 
-           print *, '==================================================='
-            print *,i,j,'PHI Large',phi(i,j,2)
-            print *, 'FX',FX,'DHDX', DHDX, 'DHDY', DHDY
-            print *, 'HGHT', HGHT(I,J,1)  
-            print *, 'HTOI',HTOIP1,HTOIM1
-            print *, 'HTOJ',HTOJP1,HTOJM1
-            print *,' U, V', U(i,j),V(i,j)
-           print *, '==================================================='
+!           print *, '==================================================='
+            print *,i,j,'PHI Large',phi(i,j,2),validpt(i,j),DSCALE,U(I,J),ZMAX
+!            print *,'DSCALE',dscale, ' ZMAX',ZMAX
+!            print *, 'FX',FX,'DHDX', DHDX, 'DHDY', DHDY
+!            print *, 'HGHT', HGHT(I,J,1)  
+!            print *, 'HTOIP,IM',HTOIP1,HTOIM1
+!            print *, 'HTOJP,JM',HTOJP1,HTOJM1
+!            print *,' U, V', U(i,j),V(i,j)
+!           print *, '==================================================='
          endif
-         if (abs(U(i,j)).gt.100.) print *, i,j,'U LARGE', U(i,j)
-         if (abs(V(i,j)).gt.100.) print *, i,j,'V LARGE', V(i,j)
+!         if (abs(U(i,j)).gt.100.) print *, i,j,'U LARGE', U(i,j)
+!         if (abs(V(i,j)).gt.100.) print *, i,j,'V LARGE', V(i,j)
 
 !     CALCULATE THE VERTICAL VELOCITY DUE TO TOPOGRAPHIC EFFECTS (JTM)
 !          WTOPO=U(I,J)*DHDX+V(I,J)*DHDY
