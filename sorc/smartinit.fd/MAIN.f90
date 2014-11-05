@@ -167,13 +167,14 @@
       logical ladjland,lconus,lnest,lhiresw,lvegtype
 
  INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
+    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
     use constants
     use grddef
     use aset2d
     use aset3d
 
-    LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    LOGICAL, INTENT(IN) :: VALIDPT(:,:) 
+    REAL, INTENT(IN) :: VEG_NDFD(:,:)
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
@@ -204,7 +205,6 @@
        INTEGER ID(25)
        LOGICAL RITEHD
        TYPE (GINFO) :: GDIN
-       INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
    END SUBROUTINE griblimited
 
    SUBROUTINE HINDEX (IM,JM,HAINES,HLVL,VALIDPT)

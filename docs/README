@@ -549,4 +549,37 @@ In future, Geoff prefers stripping out previous 2 hours temps from all files
 but turned off so to test the following:
 *VADJUST.f90  :  Adjust phi based on (Topo-nam  - Topo-ndfd)/Topo-nam
 
+9/23/14 18Z
+* Turned on frictional wind adjustment and scaling
+* corrected scale factor in VADJUST
 
+10/6/14 18Z
+* Fixed  scale factor to not be used over water (where ZMAX=0)
+
+10/9/14 18Z
+* wkadj2 :  Moved vadjust call to come before coast-line correction code in NDFDgrid.f90
+
+10/14/14 18Z
+* VADJUST.f90: Fixed DSCALE to not be greater than 1.0 and not be used if Z is over water or less than 0.01
+
+10/31/14 18z
+*VADJUST.f90 : Fixed DSCALE to not be less than 0. and not be used if model or ndfd topo less than 0.01
+        Trying to correct blockiness wind direction patterns
+       *** Blockiness Caused by copygb of extended grid 188
+
+11/1/ 12z    
+* Changed DSCALE=0. check to look at veg_ndfd, veg_nam_ndfd
+(also 10/31/ 12z)
+Switched HBAR=ZSFC
+
+11/2 00z  Changed to use 184 smaller NDFD grid rather than extended grid
+(also 11/1 00z)
+* Switched back to use HBAR=HGHT (1)
+since it will never be less than 0 (death valley issue)
+
+11/2 12z
+* slight adjustment for dscale
+ subtracted model 1st level depth (H1) from HGHT to be comparable with ndfd terrain
+
+QUESTION: Is HGHT geopotential ??
+If so, need to recheck dscale computation

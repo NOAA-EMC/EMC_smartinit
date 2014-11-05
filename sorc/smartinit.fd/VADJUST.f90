@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------
-      subroutine vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
+      subroutine vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
 !----------------------------------------------------------------------
 
 ! --- FROM CALMET   Version: 5.8        Level: 050328                 ADJUST
@@ -24,6 +24,7 @@
     use aset3d
 
     LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    REAL, INTENT(IN) :: VEG_NDFD(:,:)
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
@@ -57,8 +58,8 @@
       DXI=0.5/DX
       DYI=0.5/DY
       print *,'DXI DYI',DXI,DYI
-      print *,'HTOPO', MINVAL(HTOPO),MAXVAL(HTOPO)
-      print *,'HGHT 1 ', MINVAL(HGHT(:,:,1)),MAXVAL(HGHT(:,:,1))
+      print *,'NDFD Topo', MINVAL(HTOPO),MAXVAL(HTOPO)
+      print *,'MDL Topo', MINVAL(ZSFC),MAXVAL(ZSFC)
       print *,'U ', MINVAL(U),MAXVAL(U)
       print *,'V ', MINVAL(V),MAXVAL(V)
       do j=2,ny-1
@@ -80,10 +81,6 @@
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
 
-!  DSCALE based on difference in terrain
-         ZMAX=AMAX1(ZSFC(I,J),HTOPO(I,J))
-        DSCALE=ABS(ZSFC(I,J) - HTOPO(I,J))/ZMAX
-         if (DSCALE.gt.1.) DSCALE=1.0
 !TEST         PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)*DSCALE
          PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)
          if (abs(PHI(i,j,2)).gt.100.) then 
@@ -125,8 +122,8 @@
       DSQ=DXSQ*DYSQ
       FACT=1.0/(2.0*(DXSQ+DYSQ))
       DO 100 IT=1,ITMAX
-        DO 90 IDIR=1,4
           ERROR=-1.0E+09
+        DO 90 IDIR=1,4
           do jj=2,ny-1
           do ii=2,nx-1
             SELECT CASE (IDIR)
@@ -195,16 +192,35 @@
           IF(validpt(i,j+1)) PHIJP1=PHI(I,J+1,KK)
           UOLD=U(I,J)
           VOLD=V(I,J)
-          U(I,J)=(PHIIP1-PHIIM1)*DXI+U(I,J)
-          V(I,J)=(PHIJP1-PHIJM1)*DYI+V(I,J)
-          diffi=UOLD-U(i,j)
-          diffj=VOLD-V(i,j)
-          if (diffi.gt.10. .or. diffi.lt.-10.) then
+
+!  DSCALE based on difference in terrain
+!  Using model hght,HGHT, since it is not less than or equal to 0.
+!  NEED to check if HGHT is geopotential or just model level hgt
+          H1=HGHT(I,J,1)-ZSFC(I,J)
+          ZMAX=AMAX1(HGHT(I,J,1),HTOPO(I,J))
+          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
+            DSCALE=0.0
+          else 
+            DSCALE=ABS(HGHT(I,J,1) - (HTOPO(I,J)+H1))/ABS(ZMAX)
+            if (i.eq.300) then
+              if (j.ge.300.and.j.le.400) then
+                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
+              endif
+            endif
+          endif
+          DSCALE=AMIN1(DSCALE,1.0)
+          DSCALE=AMAX1(DSCALE,0.0)
+          U(I,J)=(PHIIP1-PHIIM1)*DXI*DSCALE+U(I,J)
+          V(I,J)=(PHIJP1-PHIJM1)*DYI*DSCALE+V(I,J)
+          diffi=U(i,j)-UOLD
+          diffj=V(i,j)-VOLD
+          if (abs(diffi).gt.10. ) then
             if(diffi.gt.10) diffi=10
             if(diffi.lt.-10) diffi=-10
             U(I,J)=UOLD+diffi
+            print *, i,j,'DIFFU', diffi,diffj,'U ',UOLD, U(I,J),'PHI:',PHIIP1,PHIIM1,'SCAL:',DSCALE
           endif
-          if (diffj.gt.10. .or. diffj.lt.-10.)  then
+          if (abs(diffj).gt.10.)  then
             if(diffj.gt.10) diffj=10
             if(diffj.lt.-10) diffj=-10
             V(I,J)=VOLD+diffj

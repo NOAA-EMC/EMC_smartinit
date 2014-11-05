@@ -33,13 +33,14 @@
       logical ladjland,lconus,lnest,lhiresw,lvegtype
 
  INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
+    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
     use constants
     use grddef
     use aset2d
     use aset3d
 
     LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    REAL, INTENT(IN) :: VEG_NDFD(:,:)
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
@@ -66,7 +67,7 @@
       print *, 'Into NDFDgrid'
       print *, '***********************************'
 
-      ispdfc=1   ! Turn off/on friction adjustment for terrain
+      ispdsfc=1   ! Turn off/on friction adjustment for terrain
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
       iprt=int(im/2);jprt=int(jm/2)
@@ -89,6 +90,7 @@
 !  CHANGE to read GRIB FILES for non-conus regions 
 
       DX=5000.;DY=5000.  ! HARD WIRED for 5 km output grids (Conus,hi,pr)
+!Check if hi/pr grids are reduced to 2.5 km
       if (region .eq. 'CS' ) then
         lconus=.TRUE.;lvegtype=.true.
         print *, 'read in Binary topo and veg files '
@@ -106,7 +108,7 @@
         veglim=0.5
         scale=100.
         ivgid=81 ! all grids including CS2P grid 187 Extended CONUS, 0=water
-!       if (region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type, 16=water
+       if (region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type, 16=water
 
         print* , ' set veglim,rghlim to:  ', veglim,rghlim, ivgid
         print*, ' gdin%region: ', gdin%region
@@ -339,7 +341,7 @@
 ! -- 0.7 factor is a wag at surface effects on wind speed
 !     when interpolating from the free atmosphere to
 !     the NDFD topo.
-          if (ispdfc .eq. 1) then
+          if (ispdsfc .eq. 1) then
             speedc = 0.7*sqrt(uc*uc+vc*vc)
             speed = sqrt(uc**2 + vc**2)
             ratio = max(1.,speedc/(max(0.001,speed)) )
@@ -353,10 +355,8 @@
 
 120     continue
 
-!       Adjust winds to topography
-        print *,'UNEW BEFORE ',MINVAL(UNEW),MAXVAL(UNEW)
-        call vadjust(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
-        print *,'UNEW AFTER ',MINVAL(UNEW),MAXVAL(UNEW)
+!      Adjust  winds to topography
+      call vadjust(validpt,veg_ndfd,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
@@ -492,6 +492,9 @@
        end do
        print *,'TNEW ',minval(tnew),maxval(tnew)
        print *,'PNEW ',minval(pnew),maxval(pnew)
+
+
+!      Adjust dewpoint to downscaled  sfc pressure
        where(validpt)  
          where (dewnew.lt.spval) &
          qnew=PQ0/PSFC*EXP(A2*(dewnew-A3)/(dewnew-A4))

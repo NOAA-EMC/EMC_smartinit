@@ -41,20 +41,22 @@ domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
 export fhrstr=0
+export INCR=03
 echo DRIVER $modeld run CYC $cyc fhr $fhrstr 
 
 #07/13: change to run ak and alaskanest separately for good output listing
 #07/13: added guamnmmb,guamarw  configuration
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
-domains="conusnest2p5 ####  hi ak pr conus aknest3 ak_rtmages"
-domains="conusnest2p5 hi pr aknest3 "
+#domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
+
+domains="conusnest2p5 conus  hi pr ak aknest3 "
 for RUNTYP in $domains  $domhrw $domdgx ;do
   export ENDHRS=12
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
-                    ak_rtmages) ENDHRS=12;;
-                    aknest3) export ENDHRS=12;; 
-               conusnest2p5) export ENDHRS=36;; 
+                         ak_rtmages) ENDHRS=12;;
+                            aknest3) export ENDHRS=12;; 
+                       conusnest2p5) export ENDHRS=36;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
@@ -73,7 +75,6 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
   rm -rf /ptmpp1/${USER}/${mdl}.${wdayd}
 
 # Create and submit JNAM_SMINIT job
-
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
   mkdir -p /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
