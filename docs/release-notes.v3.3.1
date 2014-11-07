@@ -1,0 +1,57 @@
+NAM smartinit.v3.3.1
+November 2014 NAM smartinit Downscaling Bug fix
+These instructions are also located in the docs subdirectory off smartinit.v3.3.1 parent directory.
+
+The primary changes are to correct the diagnostic wind field model code to 
+that accounts for terrain effect using the high resolution downscaled grids.
+These changes are: 
+
+- Corrected wind downscaling error around coastlines
+- Corrected wind downscaling error where winds were sometimes too strong near mountain ridge tops
+
+Code Affected : sorc/smartinit.fd/
+                - VADJUST.f90
+                - NDFDgrid.f90
+                - MAIN.f90
+===================================================================================
+1.  Wind downscaling error around coastlines
+
+*   Moved vadjust call to come before coast-line correction code in NDFDgrid.f90
+
+2.  Wind downscaling error near mountain ridge tops
+===================================================================================
+
+* VADJUST.f90:
+A.  Scaling Factor
+  - Implemented a scale factor, DSCALE, that reduces the terrain adjustment for winds 
+    The adjustment is proportional to ratio of the difference of the model terrain and 
+    the NDFD 2.5 km terrain.
+  - DSCALE was further adjusted to not be greater than 1.0.
+  - Slight adjustment for dscale: 
+       Subtracted model 1st level depth (H1) from HGHT to be comparable with ndfd terrain.
+  - Terrain adjustment was turned off over water.
+
+B. Terrain geopotential computation:
+  - Switched back to use HBAR=HGHT (1) since it will never be less than 0 (death valley issue)
+
+
+#===============================================================================
+   CODE LOCATIONS
+#===============================================================================
+only update the sorc/smartinit.fd directory:
+svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/Build-3.3.1/sorc/smartinit.fd
+
+Implementation instructions
+1.  Create the updated executable "smartinit"
+cd sorc/smartinit.fd
+make
+
+The make command will updated the smartinit executable in the 
+../../exec directory.
+
+
+
+
+
+NOTE: Details on all changes to nam smartinit are found at /meso/save/Jeff.McQueen/smartrun/docs/README
+
