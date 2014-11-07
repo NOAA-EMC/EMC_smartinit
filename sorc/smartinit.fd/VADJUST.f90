@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------
-      subroutine vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
+      subroutine vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
 !----------------------------------------------------------------------
 
 ! --- FROM CALMET   Version: 5.8        Level: 050328                 ADJUST
@@ -24,16 +24,14 @@
     use aset3d
 
     LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    REAL, INTENT(IN) :: VEG_NDFD(:,:)
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD,DSCALE
     integer itmax,ii,jj,kk,idir,it
-
-!     ITERATION CRITERIA
-      DATA ITMAX,EPSI,OVREL/75,0.02,1.5/
 
     INTERFACE
     SUBROUTINE setphibnd(validpt,nx,ny,phi)
@@ -46,33 +44,58 @@
      END SUBROUTINE setphibnd
     END INTERFACE
 
+!     ITERATION CRITERIA
+      DATA ITMAX,EPSI,OVREL/75,0.02,1.5/
+
       KK = 1
       NX=IM;NY=JM
       ALLOCATE (PHI(NX,NY,2),STAT=kret)
-      print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY
+      print *,'============================================================'
+      print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY,stat
 
 !     COMPUTE TERRAIN GRADIENTS AND INITIAL POTENTIAL
       PHI=0.1
       DXI=0.5/DX
       DYI=0.5/DY
+      print *,'DXI DYI',DXI,DYI
+      print *,'NDFD Topo', MINVAL(HTOPO),MAXVAL(HTOPO)
+      print *,'MDL Topo', MINVAL(ZSFC),MAXVAL(ZSFC)
+      print *,'U ', MINVAL(U),MAXVAL(U)
+      print *,'V ', MINVAL(V),MAXVAL(V)
       do j=2,ny-1
       do i=2,nx-1
        if(validpt(i,j)) then
          HBAR=HGHT(I,J,1)
-         FX=DXI/(HBAR)
-         FY=DYI/(HBAR)
+         if (HBAR .LT. 1)HBAR=1.0
+         FX=DXI/HBAR
+         FY=DYI/HBAR
          HTOIM1=HTOPO(I,J)
          HTOJM1=HTOPO(I,J)
          HTOIP1=HTOPO(I,J)
          HTOJP1=HTOPO(I,J)
          IF(validpt(i-1,j)) HTOIM1=HTOPO(I-1,J)
-         IF(validpt(i,j-1)) HTOJM1=HTOPO(I,J-1)
          IF(validpt(i+1,j)) HTOIP1=HTOPO(I+1,J)
+         IF(validpt(i,j-1)) HTOJM1=HTOPO(I,J-1)
          IF(validpt(i,j+1)) HTOJP1=HTOPO(I,J+1)
 
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
+
+!TEST         PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)*DSCALE
          PHI(I,J,2)=(U(I,J)*DHDX+V(I,J)*DHDY)
+         if (abs(PHI(i,j,2)).gt.100.) then 
+!           print *, '==================================================='
+            print *,i,j,'PHI Large',phi(i,j,2),validpt(i,j),DSCALE,U(I,J),ZMAX
+!            print *,'DSCALE',dscale, ' ZMAX',ZMAX
+!            print *, 'FX',FX,'DHDX', DHDX, 'DHDY', DHDY
+!            print *, 'HGHT', HGHT(I,J,1)  
+!            print *, 'HTOIP,IM',HTOIP1,HTOIM1
+!            print *, 'HTOJP,JM',HTOJP1,HTOJM1
+!            print *,' U, V', U(i,j),V(i,j)
+!           print *, '==================================================='
+         endif
+!         if (abs(U(i,j)).gt.100.) print *, i,j,'U LARGE', U(i,j)
+!         if (abs(V(i,j)).gt.100.) print *, i,j,'V LARGE', V(i,j)
 
 !     CALCULATE THE VERTICAL VELOCITY DUE TO TOPOGRAPHIC EFFECTS (JTM)
 !          WTOPO=U(I,J)*DHDX+V(I,J)*DHDY
@@ -88,6 +111,8 @@
 
 !     SET BOUNDARY VALUES FOR PHI
       call setphibnd(validpt,nx,ny,phi)
+      print *,'VADJUST PHI 1 IC :POIS ', MINVAL(PHI(:,:,1)),MAXVAL(PHI(:,:,1))
+      print *,'VADJUST PHI 2 IC :', MINVAL(PHI(:,:,2)),MAXVAL(PHI(:,:,2))
 
 !     SOLVE POISSON EQUATION BY GAUSS-SEIDEL METHOD FOR
 !     VELOCITY POTENTIAL
@@ -97,8 +122,8 @@
       DSQ=DXSQ*DYSQ
       FACT=1.0/(2.0*(DXSQ+DYSQ))
       DO 100 IT=1,ITMAX
-        DO 90 IDIR=1,4
           ERROR=-1.0E+09
+        DO 90 IDIR=1,4
           do jj=2,ny-1
           do ii=2,nx-1
             SELECT CASE (IDIR)
@@ -134,6 +159,7 @@
 !==================================================================================
            else
              PHI(I,J,KK)=0.1;XOLD=0.1;PHIIM1=0.1;PHIJM1=0.1;PHIIP1=.1;PHIJP1=0.1
+             PHI(I,J,2)=0.1
            endif
            IF(ABS(XOLD).GE.1.0E-10) THEN     
              ERR=ABS((PHI(I,J,KK)-XOLD)/XOLD)
@@ -142,8 +168,8 @@
          enddo
          enddo 
    90   CONTINUE
-        print *,'VADJUST :  ERROR',IT, IDIR, ERROR,' EPSI',EPSI,' XOLD',PHIOLD
         IF (ERROR.LE.EPSI) exit
+        print *,'VADJUST :' ,IT,IDIR, ' XOLD',XOLD,'ERROR',ERROR
   100 CONTINUE
 
 ! Set PHI at validpt boundaries
@@ -166,16 +192,35 @@
           IF(validpt(i,j+1)) PHIJP1=PHI(I,J+1,KK)
           UOLD=U(I,J)
           VOLD=V(I,J)
-          U(I,J)=(PHIIP1-PHIIM1)*DXI+U(I,J)
-          V(I,J)=(PHIJP1-PHIJM1)*DYI+V(I,J)
-          diffi=UOLD-U(i,j)
-          diffj=VOLD-V(i,j)
-          if (diffi.gt.10. .or. diffi.lt.-10.) then
+
+!  DSCALE based on difference in terrain
+!  Using model hght,HGHT, since it is not less than or equal to 0.
+!  NEED to check if HGHT is geopotential or just model level hgt
+          H1=HGHT(I,J,1)-ZSFC(I,J)
+          ZMAX=AMAX1(HGHT(I,J,1),HTOPO(I,J))
+          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
+            DSCALE=0.0
+          else 
+            DSCALE=ABS(HGHT(I,J,1) - (HTOPO(I,J)+H1))/ABS(ZMAX)
+            if (i.eq.300) then
+              if (j.ge.300.and.j.le.400) then
+                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
+              endif
+            endif
+          endif
+          DSCALE=AMIN1(DSCALE,1.0)
+          DSCALE=AMAX1(DSCALE,0.0)
+          U(I,J)=(PHIIP1-PHIIM1)*DXI*DSCALE+U(I,J)
+          V(I,J)=(PHIJP1-PHIJM1)*DYI*DSCALE+V(I,J)
+          diffi=U(i,j)-UOLD
+          diffj=V(i,j)-VOLD
+          if (abs(diffi).gt.10. ) then
             if(diffi.gt.10) diffi=10
             if(diffi.lt.-10) diffi=-10
             U(I,J)=UOLD+diffi
+            print *, i,j,'DIFFU', diffi,diffj,'U ',UOLD, U(I,J),'PHI:',PHIIP1,PHIIM1,'SCAL:',DSCALE
           endif
-          if (diffj.gt.10. .or. diffj.lt.-10.)  then
+          if (abs(diffj).gt.10.)  then
             if(diffj.gt.10) diffj=10
             if(diffj.lt.-10) diffj=-10
             V(I,J)=VOLD+diffj
@@ -197,60 +242,63 @@
       REAL, INTENT(INOUT) :: PHI(:,:,:)
       INTEGER, INTENT(IN) :: NX,NY
 
-      PHIAVG=SUM(PHI(:,:,1))/(NX*NY)
+      do kp=1,2
+
+      PHIAVG=SUM(PHI(:,:,kp))/(NX*NY)
       do j=2,ny-1
       do i=2,nx-1
        if (.not.validpt(i,j))then
           if (validpt(i+1,j)) then
-           PHI(I,J,1)=PHI(I+1,J,1)
+           PHI(I,J,kp)=PHI(I+1,J,kp)
           elseif (validpt(i,j+1)) then
-           PHI(I,J,1)=PHI(I,J+1,1)
+           PHI(I,J,kp)=PHI(I,J+1,kp)
           elseif (validpt(i+1,j+1)) then
-           PHI(I,J,1)=PHI(I+1,J+1,1)
+           PHI(I,J,kp)=PHI(I+1,J+1,kp)
           elseif (validpt(i-1,j)) then
-           PHI(I,J,1)=PHI(I-1,J,1)
+           PHI(I,J,kp)=PHI(I-1,J,kp)
           elseif (validpt(i,j-1)) then
-           PHI(I,J,1)=PHI(I,J-1,1)
+           PHI(I,J,kp)=PHI(I,J-1,kp)
           elseif (validpt(i-1,j-1)) then
-           PHI(I,J,1)=PHI(I-1,J-1,1)
+           PHI(I,J,kp)=PHI(I-1,J-1,kp)
           elseif (validpt(i-1,j+1)) then
-           PHI(I,J,1)=PHI(I-1,J+1,1)
+           PHI(I,J,kp)=PHI(I-1,J+1,kp)
           elseif (validpt(i+1,j-1)) then
-           PHI(I,J,1)=PHI(I+1,J-1,1)
+           PHI(I,J,kp)=PHI(I+1,J-1,kp)
           else
-           PHI(I,J,1)=PHIAVG
+           PHI(I,J,kp)=PHIAVG
           endif
         endif
       enddo
       enddo
 
 !     Set PHI at domain edge boundaries
-      PHIAVG=SUM(PHI(:,:,1))/(NX*NY)
-      print *, 'PHIAVG ',PHIAVG
+      PHIAVG=SUM(PHI(:,:,kp))/(NX*NY)
+      print *, kp,'PHIAVG ',PHIAVG
       do j=1,ny
         if(validpt(2,j)) then
-           PHI(1,J,1)=PHI(2,J,1)
+           PHI(1,J,kp)=PHI(2,J,kp)
         else
-           PHI(1,J,1)=PHIAVG
+           PHI(1,J,kp)=PHIAVG
         endif
         if(validpt(NX-1,j)) then
-           PHI(NX,j,1)=PHI(NX-1,j,1)
+           PHI(NX,j,kp)=PHI(NX-1,j,kp)
         else
-           PHI(NX,J,1)=PHIAVG
+           PHI(NX,J,kp)=PHIAVG
         endif
       enddo
       do i=1,nx
         if(validpt(i,1)) then
-           PHI(i,1,1)=PHI(2,1,1)
+           PHI(i,1,kp)=PHI(2,1,kp)
         else
-           PHI(i,1,1)=PHIAVG
+           PHI(i,1,kp)=PHIAVG
         endif
         if(validpt(i,ny-1)) then
-           PHI(i,ny,1)=PHI(i,ny-1,1)
+           PHI(i,ny,kp)=PHI(i,ny-1,kp)
         else
-           PHI(i,ny,1)=PHIAVG
+           PHI(i,ny,kp)=PHIAVG
         endif
       enddo
+     enddo
 
       return
       end

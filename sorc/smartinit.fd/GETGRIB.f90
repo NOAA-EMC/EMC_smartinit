@@ -6,6 +6,7 @@
     use aset3d
     use aset2d
     use rdgrib
+    use constants
 
 !$$$  SUBPROGRAM DOCUMENTATION BLOCK
 !                .      .    .

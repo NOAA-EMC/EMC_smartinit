@@ -65,6 +65,7 @@
     use aset3d
     use aset2d
     use rdgrib
+    use constants
 
     TYPE (GINFO) :: GDIN
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
@@ -137,7 +138,8 @@
     use grddef
     use aset2d
     use aset3d
-    use rdgrib
+    use rdgrib     ! GRID and MASK defined in rdgrib
+
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
     REAL, INTENT(INOUT) :: VEG_NAM_NDFD(:,:),TOPO_NDFD(:,:),VEG_NDFD(:,:)
@@ -164,26 +166,36 @@
       real tmean,dz,theta1,theta6,dx,dy
       logical ladjland,lconus,lnest,lhiresw,lvegtype
 
-INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
-
+ INTERFACE
+    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
     use constants
     use grddef
     use aset2d
     use aset3d
 
-    LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    LOGICAL, INTENT(IN) :: VALIDPT(:,:) 
+    REAL, INTENT(IN) :: VEG_NDFD(:,:)
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
-    REAL, ALLOCATABLE   :: UB(:,:),VB(:,:)
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
-    integer itmax,ii,jj,kk,idir,it,ispdfc
-    END SUBROUTINE vadjust
- END INTERFACE
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD,DSCALE
+    integer itmax,ii,jj,kk,idir,it
 
+    INTERFACE
+    SUBROUTINE setphibnd(validpt,nx,ny,phi)
+!==========================================================
+!     Set PHI at validpt boundaries
+!==========================================================
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: PHI(:,:,:)
+      INTEGER, INTENT(IN) :: NX,NY
+     END SUBROUTINE setphibnd
+    END INTERFACE
+    END SUBROUTINE vadjust
+    END INTERFACE
+    
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
@@ -193,7 +205,6 @@ INTERFACE
        INTEGER ID(25)
        LOGICAL RITEHD
        TYPE (GINFO) :: GDIN
-       INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
    END SUBROUTINE griblimited
 
    SUBROUTINE HINDEX (IM,JM,HAINES,HLVL,VALIDPT)
@@ -1098,7 +1109,7 @@ INTERFACE
 !      get weight based on pressure - high levels get counted little
 !      maxes out at 700mb, low levels count a little less
 
-        REAL TSKY(7)
+        REAL TSKY(100)
         TYPE (GINFO),INTENT(IN) :: GDIN
         REAL,    INTENT(IN)  :: CFR(:,:,:)
         REAL,    INTENT(INOUT) :: SKY(:,:)
@@ -1340,8 +1351,8 @@ INTERFACE
       use aset2d
       use asetdown
 !---------------------------------------------------------
-!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11
-!  since this file serve as 1st guess for Alaskan RTMA
+!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11...fhrhrly
+!  FOR Alaska,  this file serve as 1st guess for RTMA (akrtmages)
 !---------------------------------------------------------
        INTEGER ID(25)
        LOGICAL RITEHD
