@@ -202,11 +202,6 @@
             DSCALE=0.0
           else 
             DSCALE=ABS(HGHT(I,J,1) - (HTOPO(I,J)+H1))/ABS(ZMAX)
-            if (i.eq.300) then
-              if (j.ge.300.and.j.le.400) then
-                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
-              endif
-            endif
           endif
           DSCALE=AMIN1(DSCALE,1.0)
           DSCALE=AMAX1(DSCALE,0.0)
@@ -218,7 +213,6 @@
             if(diffi.gt.10) diffi=10
             if(diffi.lt.-10) diffi=-10
             U(I,J)=UOLD+diffi
-            print *, i,j,'DIFFU', diffi,diffj,'U ',UOLD, U(I,J),'PHI:',PHIIP1,PHIIM1,'SCAL:',DSCALE
           endif
           if (abs(diffj).gt.10.)  then
             if(diffj.gt.10) diffj=10

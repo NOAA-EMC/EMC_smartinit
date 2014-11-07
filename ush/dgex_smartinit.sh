@@ -246,7 +246,7 @@ if [ $ffhr -gt ${fhrstr} ]; then
   if [ $ffhr -lt 12 ]; then pcphr12=;fi
   grbpre="2 0 0 0 0"
 
-####set -x
+set -x
 
   for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 #   prob of pcp > 0.01

@@ -36,7 +36,7 @@
 
 set -xa
 msg="JOB $job HAS BEGUN"
-#NCO postmsg "$jlogfile" "$msg"
+postmsg "$jlogfile" "$msg"
 
 cd $DATA
 
@@ -78,7 +78,7 @@ fi
 
   ${SMINIT_SSH:-$USHdng/dgex_smartinit.sh}
 
-#NCO set -x
+set -x
 #####################################################################
 
 echo EXITING $0

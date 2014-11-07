@@ -30,9 +30,9 @@
 # NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #
 
-#NCO set -xa
+set -xa
 msg="JOB $job HAS BEGUN"
-#NCO postmsg "$jlogfile" "$msg"
+postmsg "$jlogfile" "$msg"
 
 cd $DATA
 
