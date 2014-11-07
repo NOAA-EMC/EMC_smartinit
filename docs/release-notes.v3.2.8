@@ -1,0 +1,45 @@
+smartinit.v3.2.8
+November 2014 NAM smartinit Downscaling Bug fix
+
+The primary change is to correct the diagnostic wind field model code to more accurately account for terrain effectfor the high resolution downscaled grids.
+
+- Corrected wind downscaling error around coastlines
+- Corrected wind downscaling error where winds were sometimes too strong near mountain ridge tops
+
+Code Affected : sorc/smartinit.fd/
+                - VADJUST.f90
+                - NDFDgrid.f90
+                - MAIN.f90
+===================================================================================
+1.  Wind downscaling error around coastlines
+
+*   Moved vadjust call to come before coast-line correction code in NDFDgrid.f90
+
+2.  Wind downscaling error near mountain ridge tops
+===================================================================================
+
+* VADJUST.f90:
+A.  Scaling Factor
+  - Implemented a scale factor, DSCALE, that reduces the terrain adjustment for winds 
+    The adjustment is proportional to ratio of the difference of the model terrain and the NDFD 2.5 km terrain
+  - DSCALE was further adjusted to not be greater than 1.0.
+  - Slight adjustment for dscale subtracted model 1st level depth (H1) from HGHT to be comparable with ndfd terrain.
+  - Terrain adjustment was turned off over water.
+
+B. Terrain geopotential computation:
+
+  - Switched back to use HBAR=HGHT (1) since it will never be less than 0 (death valley issue)
+
+
+#===============================================================================
+   CODE LOCATIONS
+#===============================================================================
+svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/Build-3.2.8/sorc/smartinit.fd
+
+Implementation instructions
+cd sorc/smartinit.fd
+make
+
+
+NOTE: Details on all changes to nam smartinit are found at /meso/save/Jeff.McQueen/smartinit.v3.2.8/docs/README
+
