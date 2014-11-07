@@ -1,23 +1,23 @@
 smartinit.v3.2.8
 November 2014 NAM smartinit Downscaling Bug fix
 
-The primary change is to correct the diagnostic wind field model code to more accurately account for terrain effectfor the high resolution downscaled grids.
+The primary changes are to: 
+1. Correct the diagnostic wind field model code to more accurately account for terrain effectfor the high resolution downscaled grids.
 
-- Corrected wind downscaling error around coastlines
-- Corrected wind downscaling error where winds were sometimes too strong near mountain ridge tops
+1.1 Corrected wind downscaling error around coastlines
+1.2  Corrected wind downscaling error where winds were sometimes too strong near mountain ridge tops
+
+2.  Corrected date/time stamp for previous 2 hours 2 m temperatures fields in grib/grib2 output only on ftpprd
 
 Code Affected : sorc/smartinit.fd/
                 - VADJUST.f90
                 - NDFDgrid.f90
                 - MAIN.f90
 ===================================================================================
-1.  Wind downscaling error around coastlines
-
+1.1  Wind downscaling error around coastlines
 *   Moved vadjust call to come before coast-line correction code in NDFDgrid.f90
 
-2.  Wind downscaling error near mountain ridge tops
-===================================================================================
-
+1.2  Wind downscaling error near mountain ridge tops
 * VADJUST.f90:
 A.  Scaling Factor
   - Implemented a scale factor, DSCALE, that reduces the terrain adjustment for winds 
@@ -25,11 +25,12 @@ A.  Scaling Factor
   - DSCALE was further adjusted to not be greater than 1.0.
   - Slight adjustment for dscale subtracted model 1st level depth (H1) from HGHT to be comparable with ndfd terrain.
   - Terrain adjustment was turned off over water.
-
 B. Terrain geopotential computation:
+  -  Use HBAR=HGHT (1) since it will never be less than 0 (death valley issue)
 
-  - Switched back to use HBAR=HGHT (1) since it will never be less than 0 (death valley issue)
-
+3.  Corrected date/time stamp for previous 2 hours 2m temperatures.
+    These fields are output to grib/grib2 files located only on ftpprd.
+* MAIN.f90 ; the date time stamps for hour minus 1 and hour minus 2  two meter temperature fields were reversed.  The change to the source code corrects the grib/grib2 date/time stamp for these fields.
 
 #===============================================================================
    CODE LOCATIONS
@@ -40,6 +41,9 @@ Implementation instructions
 cd sorc/smartinit.fd
 make
 
+
+* UPSTREAM RUN dependencies:   NAM, DGEX
+* DOWNSTREAM dependencies:     RTMA/URMA (ak_rtmages files for input)
 
 NOTE: Details on all changes to nam smartinit are found at /meso/save/Jeff.McQueen/smartinit.v3.2.8/docs/README
 
