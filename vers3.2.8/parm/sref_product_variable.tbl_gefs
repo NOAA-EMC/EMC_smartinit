@@ -1,0 +1,31 @@
+ 13       raw variables and mean/spread/prob info
+U10m   33  105  M1   10  
+V10m   34  105  M1   10  
+U      33  100  M2   850 250
+V      34  100  M2   850 250  
+SLP     2  102  M1    0
+HGT     7  100  M1   500
+RH     52  100  M1   850
+RH2m   52  105  M1    2
+T      11  100  M1   850 P1  850   < T1 273.0
+T2m    11  105  M1    2  P1  2     < T1 273.0
+T2m    11  105  M0       P1  2     > T1 298.8
+Q2m    51  105  M1    2
+PRCP   61   1   D1    0
+  3      special derived variables, each  of which, needs code to process specially
+APAC   61   1   H4  24  12  6  3  P4  3  6  12  24  > T10 0.25 1.27 2.54 6.35 12.7 25.4 38.1 50.8 101.6 152.4
+WIND   32  105  M1 10 P1 10  > T3 12.89 17.5 25.78
+WIND   32  100  M2 850 250
+ 11      Max, min, mode, 10,25,50,75 and 90%
+T2m    11   105  Q1   2
+T      11   100  Q1 850
+HGT     7   100  Q1 500
+SLP     2   102  Q1   0
+U10M   33   105  Q1  10
+V10M   34   105  Q1  10
+U      33   100  Q2 850 250
+V      34   100  Q2 850 250
+RH     52   100  Q1 850
+RH2m   52   105  Q1   2
+Q2m    51   105  Q1   2
+

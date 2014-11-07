@@ -1,0 +1,63 @@
+#BSUB -J %E%dgex_sminit_ak_f150_%CYC%
+#BSUB -o /com/output/%ENVIR%/today/dgex_sminit_ak_f150_%CYC%.o%J
+#BSUB -e /com/output/%ENVIR%/today/dgex_sminit_ak_f150_%CYC%.o%J
+#BSUB -L /bin/sh
+#BSUB -q prod_shared
+#BSUB -W 00:45
+#BSUB -cwd /tmpnwprd
+#BSUB -P %PROJ%
+#BSUB -n 1
+##BSUB -R span[ptile=1]
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=2000]
+
+
+%include <head.h>
+
+
+# EXPORT list here
+export envir=%ENVIR%
+export job=dgex_sminit_ak_f150_%CYC%
+export cyc=%CYC%
+export ffhr=150
+#RUNTYPE = dgex_ak for 00/12 UTC dgex cycle  ffhr=84  to 192 fhrs
+#          dgex_cs for 06/18 UTC             ffhr=78  t0 192 fhrs
+export RUNTYP=%RUNTYP%   
+
+# CALL executable job script here
+
+if [ $envir != prod -o $envir != para ];then export nwenvir=/meso/save/${USER};fi   #jtm
+export nwenvir=${nwenvir:-/nw$envir}
+VERSION_FILE=${nwenvir}/versions/dgex_smartinit.ver
+if [ -f $VERSION_FILE ]; then
+  . $VERSION_FILE
+else
+   ecflow_client --msg="***JOB ${ECF_NAME} ERROR: Version File $VERSION_FILE does not exist ***"
+   ecflow_client --abort
+   exit
+fi
+#CALL executable job script here
+${nwenvir}/smartinit.${model_ver}/jobs/JDGEX_SMINIT
+
+if [ $? -ne 0 ]; then
+  ecflow_client --msg="***JOB ${ECF_NAME} ERROR RUNNING J-SCRIPT ***"
+  ecflow_client --abort
+  exit
+fi
+
+%include <tail.h>
+%manual
+######################################################################
+# Purpose:  To execute the job that runs NAM postprocessing for the
+#           forecast hour.
+######################################################################
+
+######################################################################
+# dgex_sminit_ak creates grib1, grib2, and awips output files
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+%end
