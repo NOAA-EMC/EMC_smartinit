@@ -1,12 +1,12 @@
-#BSUB -J DNG00.ak_rtmages-12
-#BSUB -oo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.ak_rtmages-12
-#BSUB -eo /stmpp1/Dana.Carlis/smartinit.v3.2.3/00/list/oDNG00.ak_rtmages-12
+#BSUB -J DNG06.ak_rtmages-06
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/06/list/oDNG06.ak_rtmages-06
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/06/list/oDNG06.ak_rtmages-06
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA
 #BSUB -q dev
 #BSUB -R span[ptile=1]
-#BSUB -R rusage[mem=4800]
+#BSUB -R rusage[mem=6000]
 #!/bin/ksh
 #NCO set -xa   #NCO preferred setting
 
@@ -168,7 +168,7 @@ export gespath=${gespath:-/nwges/${envir}}
 ###########################################
 .  $utilscript/setpdy.sh >setpdy.out 
 . ${DATA}/PDY  >PDY.out  # set local dir for crontab
-###export PDY=20140627   #TEST
+     export PDY=20140827   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST

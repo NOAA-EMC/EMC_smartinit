@@ -21,7 +21,8 @@ export wdir=${pldir}/archive
 
 mkdir -p $wdir
 
-for mdl in nam dgex;do
+#for mdl in nam dgex;do
+for mdl in nam;do      
 # Location of smartinit grib files
 #==========================================
   indir=/ptmpp1/${USER}/${mdl}.${yyyymmdd}
@@ -29,7 +30,7 @@ for mdl in nam dgex;do
   case $mdl in 
     nam)
       export regions="conus conus2p5 ak ak3 hi pr"
-      export plregs="${regions} ase boi mfr nyc pajn phnl sdb vgt pu hi";;
+      export plregs="${regions} ase boi pajn phnl vgt pu hi";;
     dgex)
       export regions="conus ak3" 
       export plregs="conus2p5 ak3";;
@@ -47,12 +48,15 @@ for mdl in nam dgex;do
     fi
   done
 
+exit
+
+
 # Archive Plot files
   for REG in ${plregs};do
     ifound=0
     rm -rf $pldir/plarchive
     mkdir -p $pldir/plarchive
-    for cyc in 00 06 12 18;do
+    for cyc in 00 12 ;do
       if [ -s $pldir/d2${mdl}${REG}$cyc ];then
         cd $pldir/d2${mdl}${REG}${cyc}
         cp *gif $pldir/plarchive

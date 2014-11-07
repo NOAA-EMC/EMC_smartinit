@@ -49,7 +49,7 @@ export rg=`echo $RUNTYP |cut -c1-2`
 tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
 echo EXECmdl $EXECmdl
-
+export today=`ndate |cut -c 1-8`
 #=====================================================================
 # Set special filename extensions for mdl,sref,master,wgt,output files
 # mdl input file         : mdlgrd,natgrd
@@ -539,15 +539,19 @@ EOF5
 
 # Test copygb option instead of prdgen for undefined conus extended 2.5 km grid
 # Using i=0 bi-linear interpolation
-  if [ $RUNTYP = conusnest2p5 ];then
-    $utilexec/copygb -g "$cpgbgrd"  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
-  else
+#188  if [ $RUNTYP = conusnest2p5 ];then
+#188    $utilexec/copygb -g "$cpgbgrd"  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
+#188  else
 #POINT TO NETwork prdgen (/nwprod/exec) 
     ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
     export err=$?;  err_chk
-  fi
+#188  fi
 
-  cp /com/date/t${cyc}z DATE
+  if [ $PDY = $today ];then
+    cp ${COMROOT}/date/t${cyc}z DATE
+  else
+    echo "DATE  "${PDY}${cyc}"00WASHINGTON" >DATE
+  fi
   if [ -s $prdgfl ];then  
     echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
     mv ${prdgfl} meso${rg}.NDFDf${fhr}  
@@ -574,7 +578,6 @@ EOF5
     ln -sf LANDNDFDi  fort.49
   fi
 
-  ls -ltr 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
