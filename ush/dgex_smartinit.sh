@@ -43,6 +43,7 @@
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=198
 #======================================================================
 # Check if this is a nest run
+set -x
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
 export rg=`echo $RUNTYP |cut -c1-2` 

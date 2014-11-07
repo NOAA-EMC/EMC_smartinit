@@ -1,23 +1,21 @@
 SHELL=/bin/sh
 #
 #SRCS=    aset3d.f aset2d.f grddef.f constants.f asetdown.f rdgrib.f     \
-GETGRIB.f90 MAIN.f90 BOUND.f90 GRIBIT.f90 GET_BITS.f90  MAKESTRING.f90 NDFDgrid.f90 VADJUST.f90 w3fi71.f w3fi63.f
+GETGRIB.f90 MAIN.f90 BOUND.f90 GRIBIT.f90 GET_BITS.f90  MAKESTRING.f90 NDFDgrid.f90 VADJUST.f90
 
 OBJS1= aset3d.o aset2d.o grddef.o constants.o asetdown.o rdgrib.o 
-OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VADJUST.o 
-OBJS3= w3fi71.o w3fi63.o
+OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VADJUST.o
 
-## FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format -O -debug all -fp-model strict
-FC =   ifort -convert big_endian -g -traceback 
+FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format	
 
 LIBS = -L/usr/local/lib   \
-    -L/nwprod/lib  -lip_4 -lw3nco_4 -lw3emc_4 -lbacio_4
+	-L/nwprod/lib  -lip_4 -lw3nco_4 -lw3emc_4 -lbacio_4
 NCEP_LIB_DIR = 
 
 # FFLAGS = -O -fp-model strict -list 
 # LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused  
 
-FFLAGS = -O2   ## -debug all  ## -fp-model strict -list 
+FFLAGS = -O -list # -fp-model strict -list 
 LDFLAGS =-FR -assume byterecl # -check all -debug all -warn nounused  
 
 CMD =	../../exec/smartinit
@@ -32,11 +30,8 @@ $(OBJS1): %.o: %.f90
 $(OBJS2): %.o: %.f90
 	$(FC) -c $*.f90
 
-$(OBJS3): %.o: %.f
-	$(FC) -c $*.f
-
-$(CMD):		$(OBJS1) $(OBJS2) $(OBJS3)
-	$(FC) $(FFLAGS) $(LDFLAGS) -o $(@) $(OBJS1) $(OBJS2) $(OBJS3) $(LIBS)
+$(CMD):		$(OBJS1) $(OBJS2)
+	$(FC) $(FFLAGS) $(LDFLAGS) -o $(@) $(OBJS1) $(OBJS2) $(LIBS)
 
 clean:
-	-rm -f $(OBJS1) $(OBJS2) $(OBJS3) *.mod
+	-rm -f $(OBJS1) $(OBJS2) *.mod

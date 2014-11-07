@@ -19,16 +19,16 @@ export SENDECF=${SENDECF:-YES}
 # environment. This is used for operational testings
 ###############################################################
 if [ "$RUN_ENVIR" = prod -a $envir != prod ]; then
-  export SENDDBN=${SENDDBN:-NO}
-  export pcom=${pcom:-/pcom/para/nam}
-  export jlogfile=${jlogfile:-/com/logs/para/jlogfile}
+  export DBNROOT=/nwprod/spa_util/para_dbn
+  export pcom=${pcom:-/pcom/${envir}/nam}
+  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
 fi
 
 #####################################################################################
 # This block is for Developer's test run:
 # Run config file to get input parameters
 # This config file should define the following variables
-# DATA_IN: Location of working directory, default to /tmpnwprd
+# DATA_IN: Location of working directory, default to /tmpnwprd2
 # SENDECF: If the job is to be running using ECF, default to YES
 # SENDDBN: Set to NO for developers, default to YES
 # COM_IN:  Directory for input files, default to /com/$NET/${envir}
@@ -51,7 +51,7 @@ date
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd}
+export DATA_IN=${DATA_IN:-/tmpnwprd2}
 export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
@@ -114,13 +114,13 @@ export HOMEscripts=${HOMEscripts:-/nw${envir}/nam_smartinit.${model_ver}/scripts
 # Run setup to initialize working directory and utility scripts
 sh $utilscript/setup.sh
 # Run setpdy and initialize PDY variables
-#export PDY=20121022
 sh $utilscript/setpdy.sh
 . PDY
 
 ##############################################
 # Define COM directories
 ##############################################
+export COM_IN=/com/${NET}/${envir} #XXW
 export COM_IN=${COM_IN:-/com/${NET}/prod}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 export COM_AWP=${COM_AWP:-/com/nawips/${envir}}
@@ -151,4 +151,3 @@ cd $DATA_IN
 if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi
 
 date
-

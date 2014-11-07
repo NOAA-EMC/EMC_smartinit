@@ -4,7 +4,7 @@
 
 # OUTPUT REGION TO DOWNSCALE TO
 # valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
-
+typeset -Z2 ffhr
 export RUN_ENVIR=dev
 export envir=dev
 
@@ -26,13 +26,14 @@ export SENDDBN=NO
 export SENDDBN_GB2=NO
 
 export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
-export utilparm=/meso/save/$USER/smartinit.${model_ver}/util/parm  # grib2 parm files dir
+export utilparm=/nwprod/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/exec    # Location of nam_prdgen
 export EXECdgex=/nwprod/exec   # Location of dgex_prdgen
 export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 
 #TEST WITH Dana's GFS changes
-###export EXECdng=/meso/save/$USER/smartinit/branches/EXP-gfs/exec
+#export EXECdng=/global/save/$USER/svn/smartinit/branches/EXP-gfs/exec
+#export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
 
 export COMROOT=/com
 export gespath=/nwges/prod          
@@ -46,13 +47,11 @@ export COM_IN=${COMROOT}/${mdl}/prod
 
 # for dgex downscling thru 192 forecast hours, use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod   
-if [ $RUNTYP = dgex_cs -o $RUNTYP = dgex_ak ];then
-  export COM_SREF=/ptmpp1/Jeff.McQueen/com/sref/para
-fi
 
 
 export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
 
-export COM_OUT=/ptmpp1/$USER/${model_ver}
+#TEST export COM_OUT=/ptmpp1/$USER/${model_ver}
+export COM_OUT=/ptmpp1/$USER/$model_ver
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`

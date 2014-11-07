@@ -65,6 +65,7 @@
     use aset3d
     use aset2d
     use rdgrib
+    use constants
 
     TYPE (GINFO) :: GDIN
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
@@ -137,7 +138,8 @@
     use grddef
     use aset2d
     use aset3d
-    use rdgrib
+    use rdgrib     ! GRID and MASK defined in rdgrib
+
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
     REAL, INTENT(INOUT) :: VEG_NAM_NDFD(:,:),TOPO_NDFD(:,:),VEG_NDFD(:,:)
@@ -164,26 +166,36 @@
       real tmean,dz,theta1,theta6,dx,dy
       logical ladjland,lconus,lnest,lhiresw,lvegtype
 
-INTERFACE
-    SUBROUTINE vadjust(VALIDPT,U,V,HTOPO,DX,DY,IM,JM,gdin)
-
+ INTERFACE
+    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
     use constants
     use grddef
     use aset2d
     use aset3d
 
-    LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+    LOGICAL, INTENT(IN) :: VALIDPT(:,:) 
+    REAL, INTENT(IN) :: VEG_NDFD(:,:)
     REAL, INTENT(INOUT) :: U(:,:),V(:,:)
     REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
     TYPE (GINFO)        :: GDIN
-    REAL, ALLOCATABLE   :: UB(:,:),VB(:,:)
     REAL, ALLOCATABLE   :: PHI(:,:,:)
     real HBAR,DXI,DYI,FX,FY,HTOIM1,HTOJM1,HTOIP1,HTOJP1,DHDX,DHDY, &
-         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY
-    integer itmax,ii,jj,kk,idir,it,ispdfc
-    END SUBROUTINE vadjust
- END INTERFACE
+         DXSQ,DYSQ,DSQ,FACT,ERROR,ERR,EPSI,OVREL,XX,YY,XOLD,DSCALE
+    integer itmax,ii,jj,kk,idir,it
 
+    INTERFACE
+    SUBROUTINE setphibnd(validpt,nx,ny,phi)
+!==========================================================
+!     Set PHI at validpt boundaries
+!==========================================================
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: PHI(:,:,:)
+      INTEGER, INTENT(IN) :: NX,NY
+     END SUBROUTINE setphibnd
+    END INTERFACE
+    END SUBROUTINE vadjust
+    END INTERFACE
+    
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
@@ -193,7 +205,6 @@ INTERFACE
        INTEGER ID(25)
        LOGICAL RITEHD
        TYPE (GINFO) :: GDIN
-       INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
    END SUBROUTINE griblimited
 
    SUBROUTINE HINDEX (IM,JM,HAINES,HLVL,VALIDPT)
@@ -246,6 +257,7 @@ INTERFACE
       print *, 'REGION ',TRIM(REGION)
       print *, 'OUTPUT GRID # ',OGRD
       print *, 'LNEST ',LNEST, ' INPUT FILE FREQ ',INHRFRQ,' HRS'
+      print *, 'CORE ', trim(CORE), 'LCYCON ', LCYCON
 
       FHR3=FHR-3
       FHR6=FHR-6
@@ -279,6 +291,7 @@ INTERFACE
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
     if (lnest) then   
       GDIN%KMAX=40
+      if (trim(CORE).eq.'GFS') GDIN%KMAX=64
     else
       GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
       if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
@@ -490,8 +503,10 @@ INTERFACE
          ID(18)=FHR3;ID(19)=FHR
          ID(20)=4
          DEC=3.0
-         print *, 'Output 03 hr POP and precip',FHR
-         CALL GRIBIT(ID,RITEHD,POP3,GDIN,70,DEC)
+         IF (trim(CORE) .NE. 'GFS') THEN
+           print *, 'Output 03 hr POP and precip',FHR
+           CALL GRIBIT(ID,RITEHD,POP3,GDIN,70,DEC)
+         ENDIF
          ID(8)=61;ID(9)=1
          CALL GRIBIT(ID,RITEHD,P03M,GDIN,70,DEC)
  
@@ -506,9 +521,10 @@ INTERFACE
           ID(18)=FHR6;ID(19)=FHR
           ID(20)=4
           DEC=3.0
-          print *, 'Output 06 hr POP and precip',FHR
-          CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
-
+          IF (trim(CORE) .NE. 'GFS') THEN
+            print *, 'Output 06 hr POP and precip',FHR
+            CALL GRIBIT(ID,RITEHD,POP6,GDIN,70,DEC)
+          ENDIF
 ! Test output SREF PoP > .01"
 !          ID(8)=194;ID(9)=1
 !          CALL GRIBIT(ID,RITEHD,P6CP01,GDIN,70,DEC)
@@ -530,8 +546,10 @@ INTERFACE
            ID(18)=FHR12;ID(19)=FHR
            ID(20)=4
            DEC=3.0
-           print *, 'Output 12 hr precip',FHR
-           CALL GRIBIT(ID,RITEHD,POP12,GDIN,70,DEC)
+           IF (trim(CORE) .NE. 'GFS') THEN
+             print *, 'Output 12 hr precip',FHR
+             CALL GRIBIT(ID,RITEHD,POP12,GDIN,70,DEC)
+           ENDIF
            ID(8)=61;ID(9)=1
            CALL GRIBIT(ID,RITEHD,P12M,GDIN,70,DEC)
          ENDIF
@@ -551,67 +569,69 @@ INTERFACE
 !    #       more model QPF to get same chances, and higher boundary layer RH
 !    #       to get the adjustment (and maximum adjustment is less).
 !    #--------------------------------------------------------------------------
-       print *, 'Compute WETTING RAIN',FHR
-       QPFMAX=0.60    ! QPF value where raw PoP would be 75%
-       RHexcess=70.0  ! RH above this can add to PoP and below will subtract
-       adjAmount=15.0 ! amount of adjustment allowed
-        DO I = 1, IM
-        DO J = 1, JM
-        if(validpt(i,j)) then
-         lmbl=int(pblmark(i,j))
+       IF (trim(CORE) .NE. 'GFS') THEN
+         print *, 'Compute WETTING RAIN',FHR
+         QPFMAX=0.60    ! QPF value where raw PoP would be 75%
+         RHexcess=70.0  ! RH above this can add to PoP and below will subtract
+         adjAmount=15.0 ! amount of adjustment allowed
+         DO I = 1, IM
+         DO J = 1, JM
+           if(validpt(i,j)) then
+             lmbl=int(pblmark(i,j))
 !JTM     Corrected  ERROR...Added *100 to compute rhavg 11/25/12
-         rhavg=100*SUM(rh(i,j,1:lmbl))/lmbl
-
-         tmpcwr=calcw(qpf3(i,j),lmbl,rhavg,qpfmax,RHexcess,adjAmount)
-         CWR(I,J)=(TMPCWR+2*P3CP10(I,J))/3.
-        endif
-        ENDDO
-        ENDDO
+             rhavg=100*SUM(rh(i,j,1:lmbl))/lmbl
+             tmpcwr=calcw(qpf3(i,j),lmbl,rhavg,qpfmax,RHexcess,adjAmount)
+             CWR(I,J)=(TMPCWR+2*P3CP10(I,J))/3.
+           endif
+         ENDDO
+         ENDDO
 !????   nests and HI uses 25 for max limit ???       
-        WHERE (validpt)
-          WHERE (QPF3.GT. 0.10) CWR=AMAX1(CWR,25.)
-          WHERE (CWR.GT.POP3) CWR=POP3
-        ENDWHERE
-        CALL BOUND(CWR,0.,100.)
+         WHERE (validpt)
+           WHERE (QPF3.GT. 0.10) CWR=AMAX1(CWR,25.)
+           WHERE (CWR.GT.POP3) CWR=POP3
+         ENDWHERE
+         CALL BOUND(CWR,0.,100.)
 
-        ID(1:25) = 0
-        ID(2)=129
-        ID(8)=130;ID(9)=1
-        ID(18)=FHR3;ID(19)=FHR
-        ID(20)=4
-        DEC=3.0
-        CALL GRIBIT(ID,RITEHD,CWR,GDIN,70,DEC)
-
+         ID(1:25) = 0
+         ID(2)=129
+         ID(8)=130;ID(9)=1
+         ID(18)=FHR3;ID(19)=FHR
+         ID(20)=4
+         DEC=3.0
+         CALL GRIBIT(ID,RITEHD,CWR,GDIN,70,DEC)
+       ENDIF !if core not equal gfs
 !======================================================================
 !--->   COMPUTE SNOWFALL  FOR 3 and 6 HR PERIODS
 !======================================================================
-        print *, 'Compute SNOWFALL',FHR
-        ALLOCATE (SNOWAMT3(IM,JM),SNOWAMT6(IM,JM),STAT=kret)
+       IF (trim(CORE) .NE. 'GFS') THEN
+         print *, 'Compute SNOWFALL',FHR
+         ALLOCATE (SNOWAMT3(IM,JM),SNOWAMT6(IM,JM),STAT=kret)
 
 ! HI snowamt3 uses temp < 264 check ????
-        SNOWAMT3=SPVAL
-        CALL SNOWFALL(SN03,SNOWAMT3,DOWNT,THOLD,GDIN,3.,VALIDPT)
-        ID(1:25) = 0
-        ID(8)=66;ID(9)=1
-        ID(18)=FHR3;ID(19)=FHR
-        ID(20)=4
-        DEC=3.0
-        CALL GRIBIT(ID,RITEHD,SNOWAMT3,GDIN,70,DEC)
-        do isn=1,im
-        do jsn=1,jm
-          if (snowamt3(isn,jsn).lt.-0.2) then
-          print *, 'i,j,SN0,T',isn,jsn,SN03(isn,jsn),T(isn,jsn,1),validpt(isn,jsn)
-          print *, 'DOWNT,THOLD',DOWNT(isn,jsn),THOLD(isn,jsn,3),THOLD(isn,jsn,2),SNOWAMT3(isn,jsn)
-          endif
-        enddo
-        enddo
+         SNOWAMT3=SPVAL
+         CALL SNOWFALL(SN03,SNOWAMT3,DOWNT,THOLD,GDIN,3.,VALIDPT)
+         ID(1:25) = 0
+         ID(8)=66;ID(9)=1
+         ID(18)=FHR3;ID(19)=FHR
+         ID(20)=4
+         DEC=3.0
+         CALL GRIBIT(ID,RITEHD,SNOWAMT3,GDIN,70,DEC)
+         do isn=1,im
+         do jsn=1,jm
+           if (snowamt3(isn,jsn).lt.-0.2) then
+             print *, 'i,j,SN0,T',isn,jsn,SN03(isn,jsn),T(isn,jsn,1),validpt(isn,jsn)
+             print *, 'DOWNT,THOLD',DOWNT(isn,jsn),THOLD(isn,jsn,3),THOLD(isn,jsn,2),SNOWAMT3(isn,jsn)
+           endif
+         enddo
+         enddo
 
-        IF (MOD(FHR,6).EQ.0)  THEN  
-          SNOWAMT6=SPVAL
-          CALL SNOWFALL(SN06,SNOWAMT6,DOWNT,THOLD,GDIN,4.,VALIDPT)
-          ID(18)=FHR6;ID(19)=FHR
-          CALL GRIBIT(ID,RITEHD,SNOWAMT6,GDIN,70,DEC)
-        ENDIF
+         IF (MOD(FHR,6).EQ.0)  THEN  
+           SNOWAMT6=SPVAL
+           CALL SNOWFALL(SN06,SNOWAMT6,DOWNT,THOLD,GDIN,4.,VALIDPT)
+           ID(18)=FHR6;ID(19)=FHR
+           CALL GRIBIT(ID,RITEHD,SNOWAMT6,GDIN,70,DEC)
+         ENDIF
+       ENDIF !if core not equal gfs
 
  444    CONTINUE
 
@@ -631,19 +651,32 @@ INTERFACE
           CALL SKYCVR(SKY,CFR,GDIN)
           CALL BOUND (SKY,0.,100.)
         endif
+        IF(trim(CORE) .EQ. 'GFS' ) THEN
+          print *, 'Computing skycvr for GFS DNG'
+          CALL SKYCVR(SKY,CFR,GDIN)
+          CALL BOUND (SKY,0.,100.)
+        ENDIF
         DEALLOCATE (TEMP1,TEMP2,STAT=kret)
 
-        ID(1:25) = 0
-        ID(8)=71;ID(9)=1
-        DEC=3.0
-        CALL GRIBIT(ID,RITEHD,SKY,GDIN,70,DEC)
-
-        ID(1:25) = 0
-        ID(2)=129
-        ID(8)=212;ID(9)=200
-        DEC=3.0
-        print *, 'Output Reflectivity',FHR
-        CALL GRIBIT(ID,RITEHD,REFC,GDIN,70,DEC)
+        IF (MOD(FHR,3).EQ.0 .AND. trim(CORE) .EQ. 'GFS' ) THEN
+          ID(1:25) = 0
+          ID(8)=71;ID(9)=1
+          DEC=3.0
+          CALL GRIBIT(ID,RITEHD,SKY,GDIN,70,DEC)
+        ELSEIF (trim(CORE) .NE. 'GFS' ) THEN
+          ID(1:25) = 0
+          ID(8)=71;ID(9)=1
+          DEC=3.0
+          CALL GRIBIT(ID,RITEHD,SKY,GDIN,70,DEC)
+        ENDIF
+        IF (trim(CORE) .NE. 'GFS' ) THEN
+          ID(1:25) = 0
+          ID(2)=129
+          ID(8)=212;ID(9)=200
+          DEC=3.0
+          print *, 'Output Reflectivity',FHR
+          CALL GRIBIT(ID,RITEHD,REFC,GDIN,70,DEC)
+        ENDIF
 
 !========================================================================
 ! calcSnowLevel - takes sounding of the wetbulb temperature and finds the
@@ -819,17 +852,19 @@ INTERFACE
       CALL GRIBIT(ID,RITEHD,LAL,GDIN,70,DEC)
 
 !     Compute Haines Index
-      print *,'Compute HAINES INDEX'
-      CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
-      ID(1:25) = 0
-      ID(2)=129
-      ID(8)=250;ID(9)=1
-      DEC=3.0
-      CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
+      IF (trim(CORE) .NE. 'GFS' ) THEN
+        print *,'Compute HAINES INDEX'
+        CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
+        ID(1:25) = 0
+        ID(2)=129
+        ID(8)=250;ID(9)=1
+        DEC=3.0
+        CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
 !      ID(2)=2
 !      ID(8)=209;ID(9)=1
 !      DEC=1.0
 !NMXL      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
+      ENDIF
 
 !=================================================
     ENDIF  ! END 3 hour writes
@@ -855,8 +890,8 @@ INTERFACE
 !   The length of hourly file writes set by fhrhrly here and in nam_sminit.sh
 !   11/2013: Conus 2.5 km hrly output extended to 36 hours for wave model input
       fhrhrly=12  
+      IF (TRIM(CORE) .EQ. 'GFS' .AND. .NOT.LCYCON) fhrhrly=18
       IF (TRIM(REGION).EQ.'CS2P') fhrhrly=36
-
       print *, 'REGION ',TRIM(REGION),fhrhrly
       IF (TRIM(REGION).EQ.'HI' .or. TRIM(REGION).EQ.'PR'  & 
       .or. TRIM(REGION).EQ.'AK' .or. TRIM(REGION).EQ.'AK3' & 
@@ -868,6 +903,8 @@ INTERFACE
 
 !  write older T/Td data for max/min to grib file
       ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
+      IF (trim(GDIN%CORE) .EQ. 'GFS' .AND. .NOT. LCYCON .AND. LHR6 ) GOTO 581
+      IF (trim(GDIN%CORE) .EQ. 'GFS' .AND. .NOT. LCYCON .AND. FHR .EQ. 15) GOTO 581
       IF (FHR.NE.0. .AND. LHR3) THEN
 !        IF (.NOT.LHR12) THEN   ! output T at all hours
           DO ivarb=1,2
@@ -895,21 +932,36 @@ INTERFACE
               end where
             endif
             GDIN%FHR=GDIN%FHR-1  ! change current hr to prev. hr for GRIBIT 
-            print *,'OUTPUT Temperature for FHR',GDIN%FHR
-            CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
-            GDIN%FHR=GDIN%FHR-1  ! change current hr to FHR-2
-            print *,'OUTPUT Temperature for FHR',GDIN%FHR
-            CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+            IF ( trim(GDIN%CORE) .EQ. 'GFS' .AND. GDIN%FHR .LE. FHRHRLY ) THEN
+              print *,'GFS OUTPUT MAX-MIN for FHR',GDIN%FHR
+              CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
+              GDIN%FHR=GDIN%FHR-1  ! change current hr to FHR-2
+              print *,'GFS OUTPUT MAX-MIN for FHR',GDIN%FHR
+              CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+            ELSEIF ( trim(GDIN%CORE) .NE. 'GFS' ) THEN
+              print *,'OUTPUT Temperature for FHR',GDIN%FHR
+              CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
+              GDIN%FHR=GDIN%FHR-1  ! change current hr to FHR-2
+              print *,'OUTPUT Temperature for FHR',GDIN%FHR
+              CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+            ENDIF
             GDIN%FHR=IFHRIN;FHR=IFHRIN;IFHR=IFHRIN
           ENDDO 
 !        ENDIF
       ENDIF
       DEALLOCATE (TEMP1,TEMP2,STAT=kret)
+ 581 CONTINUE
 
 !  compute max/min temps for 3,6,9,12.....
      ALLOCATE(TMAX3(IM,JM),RHMAX3(IM,JM),STAT=kret)
      ALLOCATE(TMIN3(IM,JM),RHMIN3(IM,JM),STAT=kret)
-      IF (LHR3 .AND. FHR .NE. 0) THEN
+      IF ( trim(CORE) .EQ. 'GFS' .AND. FHR .GT. FHRHRLY .AND. LCYCON) THEN
+        print *, 'For GFS output and fhr > 12, skip 3hr max/min temps'
+        GO TO 555
+      ELSEIF (trim(CORE) .EQ. 'GFS' .AND. FHR .GE. 15 .AND. .NOT.LCYCON) THEN
+        print *, 'For off cycle GFS output and fhr >= 15, skip 3hr max/min temps'
+        GO TO 555
+      ELSEIF (LHR3 .AND. FHR .NE. 0) THEN
        print *, 'computing maxmin3 for fhr',FHR
 !----------------Make into subroutine CalcMAX
 !       calcmax(psfc,thold,dhold,downt,downdew,tmax,tmin,rhmax,rhmin)
@@ -931,8 +983,10 @@ INTERFACE
           THOLD(I,J,1)=DOWNT(I,J)
           DHOLD(I,J,1)=DOWNDEW(I,J)
           DO L=1,3
-           IF(THOLD(I,J,L).GT.TMAX3(I,J)) TMAX3(I,J)=THOLD(I,J,L)
-           IF(THOLD(I,J,L).LT.TMIN3(I,J)) TMIN3(I,J)=THOLD(I,J,L)
+           IF(THOLD(I,J,L).GT.TMAX3(I,J).AND.THOLD(I,J,L).GT.1.0) &
+             TMAX3(I,J)=THOLD(I,J,L)
+           IF(THOLD(I,J,L).LT.TMIN3(I,J).AND.THOLD(I,J,L).GT.1.0) &
+             TMIN3(I,J)=THOLD(I,J,L)
            QX=CalcQ(psfc(i,j),dhold(i,j,l))
            QSX=CalcQ(psfc(i,j),thold(i,j,l))
            RELH=100*QX/QSX
@@ -973,6 +1027,7 @@ INTERFACE
        ID(8)=217;ID(9)=1
        CALL GRIBIT(ID,RITEHD,RHMIN3,GDIN,70,DEC)
       ENDIF  !LHR3
+ 555 CONTINUE
 
 !  now compute the max and min values if end of 12-hr period
       ALLOCATE(TMAX12(IM,JM),RHMAX12(IM,JM),STAT=kret)
@@ -989,8 +1044,10 @@ INTERFACE
          if (validpt(i,j)) then
           TMAX12(I,J)=-SPVAL;RHMAX12(I,J)=-SPVAL 
           DO L=1,12
-            IF(THOLD(I,J,L).GT.TMAX12(I,J)) TMAX12(I,J)=THOLD(I,J,L)
-            IF(THOLD(I,J,L).LT.TMIN12(I,J)) TMIN12(I,J)=THOLD(I,J,L)
+            IF(THOLD(I,J,L).GT.TMAX12(I,J).AND.THOLD(I,J,L).GT.1.0) &
+              TMAX12(I,J)=THOLD(I,J,L)
+            IF(THOLD(I,J,L).LT.TMIN12(I,J).AND.THOLD(I,J,L).GT.1.0) &
+              TMIN12(I,J)=THOLD(I,J,L)
             QX=CalcQ(psfc(i,j),dhold(i,j,l))
             QSX=CalcQ(psfc(i,j),thold(i,j,l))
             RELH=100*QX/QSX
@@ -1052,7 +1109,7 @@ INTERFACE
 !      get weight based on pressure - high levels get counted little
 !      maxes out at 700mb, low levels count a little less
 
-        REAL TSKY(7)
+        REAL TSKY(100)
         TYPE (GINFO),INTENT(IN) :: GDIN
         REAL,    INTENT(IN)  :: CFR(:,:,:)
         REAL,    INTENT(INOUT) :: SKY(:,:)
@@ -1294,8 +1351,8 @@ INTERFACE
       use aset2d
       use asetdown
 !---------------------------------------------------------
-!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11
-!  since this file serve as 1st guess for Alaskan RTMA
+!  write limited data to grib file for hrs 1,2,4,5,7,8,10,11...fhrhrly
+!  FOR Alaska,  this file serve as 1st guess for RTMA (akrtmages)
 !---------------------------------------------------------
        INTEGER ID(25)
        LOGICAL RITEHD
@@ -1354,15 +1411,17 @@ INTERFACE
        CALL GRIBIT(ID,RITEHD,VEG_NDFD,GDIN,IUNIT,DEC)
 
 ! 03-19-13 : Add Gust and visibility to limited files for RTMA
-      ID(1:25) = 0
-      ID(8)=180;ID(9)=1
-      DEC=3.0
-      CALL GRIBIT(ID,RITEHD,WGUST,GDIN,IUNIT,DEC)
+      IF (trim(GDIN%CORE) .NE. 'GFS') THEN
+        ID(1:25) = 0
+        ID(8)=180;ID(9)=1
+        DEC=3.0
+        CALL GRIBIT(ID,RITEHD,WGUST,GDIN,IUNIT,DEC)
 
-      ID(1:25) = 0
-      ID(8)=20;ID(9)=1
-      DEC=2.7
-      CALL GRIBIT(ID,RITEHD,VIS,GDIN,IUNIT,DEC)
+        ID(1:25) = 0
+        ID(8)=20;ID(9)=1
+        DEC=2.7
+        CALL GRIBIT(ID,RITEHD,VIS,GDIN,IUNIT,DEC)
+      ENDIF
 
        return
        END SUBROUTINE griblimited

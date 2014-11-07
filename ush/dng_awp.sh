@@ -10,6 +10,7 @@
 #  ogrd :  output NDFD grid number (eg: 197,196,195,198...)
 #  outreg  :  output file region name (eg: conus,ak,pr,hi,conus2p5,ak3
 #=======================================================================
+set -x
 outreg=$1    # mdlgrd used for guam to distinguish arw/nmm
 ihindex=0
 case $cyc in 
@@ -78,6 +79,7 @@ if [ -s "$awpparm" ];then
   fi
 fi
 
-if [ $SENDDBN_GB2 = YES ];then
-  $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2_PARA $job $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+export MDL=`echo $mdl |tr [a-z] [A-Z]`
+if [ $SENDDBN = YES ];then
+  $DBNROOT/bin/dbn_alert MODEL ${MDL}_SMART${REGCP}_GB2 $job $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi

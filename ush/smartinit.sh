@@ -1,4 +1,5 @@
 #!/bin/ksh 
+set -x
 #
 # Author:        Geoff Manikin       Org: NP22         Date: 2007-08-06
 #
@@ -113,7 +114,6 @@ while [ $iline -le $linemax ];do
 done
 typeset -Z2 srefcyc gefscyc pcphrl
 text=".tm00"
-#EXT natgrd=`echo $natgrd |cut -d. -f2`
 
 # Define core (nmmb, arw, nems) needed for hiresw veg initialization
 core=$rg
@@ -336,7 +336,7 @@ for fhr in $hours; do
 
            *) 
         if [ $rg = dgx ];then 
-          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z.${natgrd}
+          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
 #         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
@@ -419,12 +419,6 @@ for fhr in $hours; do
     fi;;
   esac 
 
-# Set output interpolation grid definition for copygb
-  cpgbgrd=$grid
-  if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
-  case $RUNTYP in aknest3|conusnest2p5) cpgbgrd=$grid;;esac 
-#ORG   case $RUNTYP in aknest3) cpgbgrd=$grid;;esac 
-
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
   for MKPCP in $mk3p $mk6p $mk12p;do
     if [ $MKPCP -ne 0 ];then
@@ -502,6 +496,9 @@ EOF
       export err=$?;  err_chk
 
 #     Interp precip to smartinit GRID
+      cpgbgrd=$grid
+      if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
+      if [ $RUNTYP = aknest3 ];then cpgbgrd=$grid;fi
       $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}precip.${fhr} ${freq}precip
       $utilexec/grbindex ${freq}precip ${freq}precipi
       $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
@@ -537,28 +534,23 @@ EOF5
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
 
-# Test copygb option instead of prdgen for undefined conus extended 2.5 km grid
-# Using i=0 bi-linear interpolation
-  if [ $RUNTYP = conusnest2p5 ];then
-    $utilexec/copygb -g "$cpgbgrd"  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
-  else
-#POINT TO NETwork prdgen (/nwprod/exec) 
-    ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
-    export err=$?;  err_chk
-  fi
+# POINT TO NETwork prdgen (/nwprod/exec) 
+  ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
+  export err=$?;  err_chk
 
   cp /com/date/t${cyc}z DATE
   if [ -s $prdgfl ];then  
-    echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
     mv ${prdgfl} meso${rg}.NDFDf${fhr}  
+    echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
   elif [ -s ${prdgfl}${fhr} ];then    # check for hawaii ???
-    echo $prdgfl${fhr} FOUND FOR FORECAST HOUR ${fhr}
     mv ${prdgfl}${fhr} meso${rg}.NDFDf${fhr}  
+    echo $prdgfl${fhr} FOUND FOR FORECAST HOUR ${fhr}
   else
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+
 #=================================================================
 #   DECLARE INPUTS and RUN SMARTINIT 
 #=================================================================
@@ -574,18 +566,15 @@ EOF5
     ln -sf LANDNDFDi  fort.49
   fi
 
-  ls -ltr 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
     cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
     if [ -s MAXMIN${fhr1}.tm00 ];then
-      echo MAXMIN${fhr1}.tm00 FOUND
       cp MAXMIN${fhr2}.tm00 MAXMIN2
       cp MAXMIN${fhr1}.tm00 MAXMIN1
     else
 #     For 3 hourly input files, hourly maxmins not created
-      echo MAXMIN$fhr1.tm00 NOT FOUND....3 hrly imputs assumed
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi

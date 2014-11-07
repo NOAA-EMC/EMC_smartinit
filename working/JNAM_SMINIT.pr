@@ -1,6 +1,6 @@
-#BSUB -J DNG12.pr-84
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.pr-84
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.pr-84
+#BSUB -J DNG12.pr-12
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.pr-12
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.5/12/list/oDNG12.pr-12
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA
@@ -8,7 +8,7 @@
 #BSUB -R span[ptile=1]
 #BSUB -R rusage[mem=4800]
 #!/bin/ksh
-#NCO set -xa   #NCO preferred setting
+####NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -69,7 +69,7 @@ export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 # This block is for Developer's test run:
 # Run config file to get input parameters
 # This config file should define the following variables
-# DATA_IN: Location of working directory, default to /tmpnwprd2
+# DATA_IN: Location of working directory, default to /tmpnwprd
 # SENDECF: If the job is to be running using ECF, default to YES
 # SENDDBN: Set to NO for developers, default to YES
 # COM_IN:  Directory for input files, default to /com/$NET/${envir}
@@ -102,8 +102,9 @@ date
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd2}
+export DATA_IN=${DATA_IN:-/tmpnwprd}
 export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+#NCO export DATA=$DATA_IN/${job}.${pid}
 mkdir -p $DATA
 cd $DATA
 
@@ -119,8 +120,9 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
-if [ "$envir" = 'dev' ] ; then
+if [ "$envir" = 'prod' ] ; then
+  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
+else
   export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
 fi
 
@@ -137,15 +139,14 @@ export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.${model_ver}}  # NCO preferred
-export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
-
+export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
+export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
-export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
-export FIXdng=${FIXdng:-${HOMEdng}/fix}
+export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
+ export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
-export USHdng=${USHdng:-${HOMEdng}/ush}
+ export USHdng=${USHdng:-${HOMEdng}/ush}
 
 ###################################
 # Set up the UTILITIES
@@ -153,35 +154,30 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
-export gespath=${gespath:-/nwges/${envir}}
+export gespath=${gespath:-/nwges/prod}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
 ###############################################################
-.  $utilscript/setup.sh
+sh $utilscript/setup.sh
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-.  $utilscript/setpdy.sh  
+sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-###export PDY=20140627   #TEST
+####export PDY=20140501   #TEST
 
 # Set GUESS, CYCLE parameters from NAM run 
+sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold start export GUESS=GDAS   #TEST
-.  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
-echo GUESS=$GUESS
-export pcfhr=06
-export pcdate=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 1-8`
-export pcyc=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 9-10`
-
 
 ##############################################
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}
+export COM_IN=${COM_IN:-/com/${NET}/prod}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}

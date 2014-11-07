@@ -1,6 +1,6 @@
-#BSUB -J DNG06.conusnest2p5-09
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.8/06/list/oDNG06.conusnest2p5-09
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.8/06/list/oDNG06.conusnest2p5-09
+#BSUB -J DNG12.conusnest2p5-03
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.conusnest2p5-03
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.2.7/12/list/oDNG12.conusnest2p5-03
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -8,7 +8,7 @@
 #BSUB -R span[ptile=1]
 #BSUB -R rusage[mem=6000]
 #!/bin/ksh
-#NCO set -xa   #NCO preferred setting
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -64,7 +64,6 @@ export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
 export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
-export RM_TMPDIR=${RM_TMPDIR:-YES}
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -86,12 +85,10 @@ export RM_TMPDIR=${RM_TMPDIR:-YES}
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
-
-if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #NOT FOR NCO
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
-   export SENDDBN=${SENDDBN:-NO}
-   export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
+   export DBNROOT=/nwprod/spa_util/para_dbn
+   export jlogfile=/com/logs/${envir}/jlogfile
    export pcom=${pcom:-/pcom/${envir}/${NET}}
  fi
 else
@@ -106,7 +103,8 @@ date
 ####################################
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd2}
-export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+export DATA=$DATA_IN/${job}.${pid}
+#DEV export DATA=${DATA:-$DATA_IN/${job}.${pid}}
 mkdir -p $DATA
 cd $DATA
 
@@ -123,9 +121,6 @@ export pgmout="OUTPUT.${pid}"
 # File To Log Msgs
 ####################################
 export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
-if [ "$envir" = 'dev' ] ; then
-  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
-fi
 
 ####################################
 # SENDECF  - Flag Events on ECF
@@ -134,15 +129,15 @@ fi
 export SENDECF=${SENDECF:-YES}
 export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
-export SENDDBN_GB2=${SENDDBN_GB2:-YES}
+#XXW export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 
 ####################################
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.${model_ver}}  # NCO preferred
+#XXW export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
 export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
-
+export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.${model_ver}}  # NCO preferred
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
@@ -156,24 +151,24 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
+#XXW export gespath=${gespath:-/nwges/prod}
 export gespath=${gespath:-/nwges/${envir}}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
 ###############################################################
-.  $utilscript/setup.sh
+sh $utilscript/setup.sh
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-.  $utilscript/setpdy.sh >setpdy.out 
-. ${DATA}/PDY  >PDY.out  # set local dir for crontab
-###export PDY=20140627   #TEST
+sh $utilscript/setpdy.sh  
+. ${DATA}/PDY    # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
-#   For testing cold start export GUESS=GDAS   #TEST
 .  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 echo GUESS=$GUESS
+#   For testing cold start export GUESS=GDAS   #TEST
 export pcfhr=06
 export pcdate=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 1-8`
 export pcyc=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 9-10`
@@ -184,7 +179,8 @@ export pcyc=`$utilexec/ndate -${pcfhr} $PDY$cyc |cut -c 9-10`
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}
+#NCO export COM_IN=/com/${NET}/${envir}
+export COM_IN=${COM_IN:-/com/${NET}/prod}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
@@ -228,7 +224,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-####NCO-SET env  
+env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"
@@ -249,4 +245,3 @@ cd $DATA_IN
 if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi
 
 date
-
