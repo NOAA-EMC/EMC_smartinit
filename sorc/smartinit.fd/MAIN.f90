@@ -914,8 +914,8 @@
             IF(ivarb.eq.1) then
               ID(8)=11;ID(9)=1
               where (VALIDPT) 
-                TEMP1=THOLD(:,:,3)   ! 1 hour old Temp
-                TEMP2=THOLD(:,:,2)   ! 2 hour old Temp
+                TEMP1=THOLD(:,:,2)   ! 2 hour old Temp Incorrect
+                TEMP2=THOLD(:,:,3)   ! 1 hour old Temp Incorrect
 ! JTM 01-27-2013
 ! Added check for single points when temperature=0 at validpt 
 ! This should not happen but has been found on some nests
@@ -925,8 +925,8 @@
             else
               ID(8)=17;ID(9)=1
               where (VALIDPT) 
-                TEMP1=DHOLD(:,:,3)
-                TEMP2=DHOLD(:,:,2)
+                TEMP1=DHOLD(:,:,2)   ! Incorrect
+                TEMP2=DHOLD(:,:,3)   ! Incorrect
 !               where (temp1.le.10) TEMP1=SPVAL
 !               where (temp2.le.10) TEMP2=SPVAL
               end where
