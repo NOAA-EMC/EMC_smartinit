@@ -2,22 +2,20 @@ smartinit.v3.2.8
 November 2014 NAM smartinit Downscaling Bug fix
 
 The primary changes are to: 
-1. Correct the diagnostic wind field model code to more accurately account for terrain effectfor the high resolution downscaled grids.
+I. Correct the diagnostic wind field model code to more accurately account for terrain effects with the high resolution downscaled grids.
 
-1.1 Corrected wind downscaling error around coastlines
-1.2  Corrected wind downscaling error where winds were sometimes too strong near mountain ridge tops
-
-2.  Corrected date/time stamp for previous 2 hours 2 m temperatures fields in grib/grib2 output only on ftpprd
+1. Corrected wind downscaling error around coastlines
+2. Corrected wind downscaling error where winds were sometimes too strong near mountain ridge tops
 
 Code Affected : sorc/smartinit.fd/
                 - VADJUST.f90
                 - NDFDgrid.f90
                 - MAIN.f90
 ===================================================================================
-1.1  Wind downscaling error around coastlines
+1.  Wind downscaling error around coastlines
 *   Moved vadjust call to come before coast-line correction code in NDFDgrid.f90
 
-1.2  Wind downscaling error near mountain ridge tops
+2.  Wind downscaling error near mountain ridge tops
 * VADJUST.f90:
 A.  Scaling Factor
   - Implemented a scale factor, DSCALE, that reduces the terrain adjustment for winds 
@@ -27,10 +25,6 @@ A.  Scaling Factor
   - Terrain adjustment was turned off over water.
 B. Terrain geopotential computation:
   -  Use HBAR=HGHT (1) since it will never be less than 0 (death valley issue)
-
-3.  Corrected date/time stamp for previous 2 hours 2m temperatures.
-    These fields are output to grib/grib2 files located only on ftpprd.
-* MAIN.f90 ; the date time stamps for hour minus 1 and hour minus 2  two meter temperature fields were reversed.  The change to the source code corrects the grib/grib2 date/time stamp for these fields.
 
 #===============================================================================
    CODE LOCATIONS
