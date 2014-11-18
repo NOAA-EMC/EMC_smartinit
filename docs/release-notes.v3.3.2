@@ -46,16 +46,10 @@ https://docs.google.com/a/noaa.gov/document/d/1i8Tmwot9WPgGUNqdKSnO4JhjDZF4jX-fk
 
 3.  Use ...docs/smartinit.ver file if desired to set
       model_ver=v3.3.2  parameter
+    also be sure latest version of nam_ver=v3.1.6
+    and dgex_ver=3.1.1 are used to access the latest prdgen executables now in EE
 
-4.  See ...docs/bjobcards-dev for recommended limits to use in JNAM_SMINIT jobs.
-    eg:
-#BSUB -W 03:00
-#BSUB -n 1
-#BSUB -R affinity[core]
-#BSUB -R rusage[mem=5500]
-#BSUB -q dev
-
-5.  RUNTYP,cyc, ffhr are specified in ecflow scripts provided in smartinit.${model_ver}/ecf directory
+4.  RUNTYP,cyc, ffhr are specified in ecflow scripts provided in smartinit.${model_ver}/ecf directory
 
 
 NOTE: Details on all changes to nam smartinit are found at /meso/save/Jeff.McQueen/smartrun/docs/README
