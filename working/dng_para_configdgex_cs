@@ -1,3 +1,9 @@
+export RUNTYP=dgex_cs
+export cyc=18
+export RM_TMPDIR=NO
+export mdl=dgex
+export NET=dgex
+export RUN=dgex
 #!/bin/ksh
 # nam_smartinit configuration
 # Jeff McQueen 01/2013 
@@ -26,12 +32,11 @@ export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
 export nam_ver=v3.1.6
-export dgex_ver=v3.1.1
 
 export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
-export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
+export EXECdgex=/nwprod/nam.$nam_ver/exec   # Location of dgex_prdgen
 #export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
 
 #TEST WITH Dana's GFS changes
@@ -55,3 +60,5 @@ export COM_OUT=/ptmpp1/$USER/${model_ver}
 #TEST export COM_OUT=/ptmpp1/$USER
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
+export ffhr=81
+export DATA=/stmpp1/Jeff.McQueen/smartinit.v3.3.2/18/DNG18.dgex_cs-81

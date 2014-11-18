@@ -40,6 +40,7 @@ echo cyc is ${cyc:?}
 echo envir is ${envir:?}
 echo modeld is ${modeld:?}
 echo model_ver is ${model_ver:?}
+echo nam_ver is ${nam_ver:?}
 
 ######################################################
 # The following two variable could be defined in the
@@ -139,10 +140,11 @@ export SENDDBN=${SENDDBN:-YES}
 export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
 export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
+export HOMEdgex=${HOMEdgex:-/nw${envir}/dgex.${dgex_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
-export EXECdgex=${EXECdgex:-${HOMEnam}/exec}   #Point to dgex_prdgen until dgex is in vert structure
+export EXECdgex=${EXECdgex:-${HOMEdgex}/exec}   #Point to dgex_prdgen until dgex is in vert structure
 export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}

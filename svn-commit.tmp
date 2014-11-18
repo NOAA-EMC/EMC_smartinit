@@ -1,0 +1,9 @@
+Fixed JDGEX_SMINIT to point to dgex_ver prdgen code
+--This line, and those below, will be ignored--
+
+M    parm/smart_para_config
+M    working/JDGEX_SMINIT.dgex_cs
+M    working/JNAM_SMINIT.conusnest2p5
+M    kick-scripts/DRIV-dgex
+M    kick-scripts/DRIVcs2p
+M    jobs/JDGEX_SMINIT
