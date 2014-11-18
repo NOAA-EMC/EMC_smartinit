@@ -599,3 +599,4 @@ If so, need to recheck dscale computation
 
 11/18/12z
 * jobs, NDFDgrid.f90 : added IVADJ switch to turn on/off VADJUST.f90 call (T/F)
+* jobs: synched with NCO version, added dgex_ver parameter
