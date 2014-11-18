@@ -34,6 +34,9 @@ export modeld=${modeld:-smartinit}
 export model_ver=gfs
 export RUNTYP=guamnest
 
+# SWITCH for VADJUST wind terrain adjustment (T/F)
+export IVADJ=${IVADJ:-F}
+ 
 ######################################################
 # The following two variable could be defined in the
 # loadleveler submission script (the ECF script), if

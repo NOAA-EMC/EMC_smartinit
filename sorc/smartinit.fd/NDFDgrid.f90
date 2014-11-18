@@ -31,6 +31,7 @@
       real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
       real tmean,dz,theta1,theta6,dx,dy
       logical ladjland,lconus,lnest,lhiresw,lvegtype
+      character cvadj*1
 
  INTERFACE
     SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
@@ -67,7 +68,9 @@
       print *, 'Into NDFDgrid'
       print *, '***********************************'
 
-      ispdsfc=1   ! Turn off/on friction adjustment for terrain
+      ispdsfc=1     ! Turn off/on friction adjustment for terrain
+      call get_environment_variable("IVADJ",cvadj)  !turn on/off diagnostic wind adjustment
+      print *, 'CVADJ for diagnostic wind adjust: ',CVADJ, '   friction adj: ',ispdsfc
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
       iprt=int(im/2);jprt=int(jm/2)
@@ -356,6 +359,7 @@
 120     continue
 
 !      Adjust  winds to topography
+      if (CVADJ.eq.'T')                           &
       call vadjust(validpt,veg_ndfd,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
 
 !============================================
