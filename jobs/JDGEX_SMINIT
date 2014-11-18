@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -xa   #NCO preferred setting
+####NCO set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -40,6 +40,7 @@ echo cyc is ${cyc:?}
 echo envir is ${envir:?}
 echo modeld is ${modeld:?}
 echo model_ver is ${model_ver:?}
+echo nam_ver is ${nam_ver:?}
 
 ######################################################
 # The following two variable could be defined in the
@@ -100,7 +101,8 @@ date
 ####################################
 export pid=$$
 export DATA_IN=${DATA_IN:-/tmpnwprd2}
-export DATA=$DATA_IN/${job}.${pid}
+#NCO export DATA=$DATA_IN/${job}.${pid}
+export DATA=${DATA:-$DATA_IN/${job}.${pid}}  #DEV
 mkdir -p $DATA
 cd $DATA
 
@@ -138,10 +140,11 @@ export SENDDBN=${SENDDBN:-YES}
 export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
 export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
 export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
+export HOMEdgex=${HOMEdgex:-/nw${envir}/dgex.${dgex_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
-export EXECdgex=${EXECdgex:-${HOMEnam}/exec}   #Point to dgex_prdgen until dgex is in vert structure
+export EXECdgex=${EXECdgex:-${HOMEdgex}/exec}   #Point to dgex_prdgen until dgex is in vert structure
 export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
@@ -174,7 +177,7 @@ sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}   #XXW
+export COM_IN=${COM_IN:-/com/${NET}/${envir}}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
@@ -215,7 +218,7 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 export pcom=${pcom:-/pcom/${NET}}
 mkdir -p $pcom
 
-env  
+####NCO SET env  
 
 msg="JOB $job HAS BEGUN"
 ./postmsg "$jlogfile" "$msg"
