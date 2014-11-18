@@ -581,9 +581,15 @@ since it will never be less than 0 (death valley issue)
 * slight adjustment for dscale
  subtracted model 1st level depth (H1) from HGHT to be comparable with ndfd terrain
 
+******************************************************************
+11/13/14: V3.2.8 DELIVERED TO NCO and ran operationally
+          Fix to VADJUST.f90 wind adjustment
+******************************************************************
 
 11/17/ 18z
 * util/parm : added wmo header awips parm cards for NAM/DGEX haines index for CONUS and Alaska grids
 
+11/18/12z
+* jobs, NDFDgrid.f90 : added IVADJ switch to turn on/off VADJUST.f90 call (T/F)
 QUESTION: Is HGHT geopotential ??
 If so, need to recheck dscale computation
