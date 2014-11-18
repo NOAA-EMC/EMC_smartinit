@@ -82,9 +82,11 @@ export mdl=${mdl:-dgex}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 ###############################################################
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
+   export DBNROOT=/nwprod/spa_util/para_dbn
    export SENDDBN=${SENDDBN:-NO}
    export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
    export pcom=${pcom:-/pcom/${envir}/${NET}}
+   export jlogfile=/com/logs/${envir}/jlogfile
  fi
 else
  dng_para_config${RUNTYP}   #EMC User set
@@ -97,9 +99,9 @@ date
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd}
-export DATA=${DATA:-$DATA_IN/${job}.${pid}}
+export DATA_IN=${DATA_IN:-/tmpnwprd2}
 #NCO export DATA=$DATA_IN/${job}.${pid}
+export DATA=${DATA:-$DATA_IN/${job}.${pid}}  #DEV
 mkdir -p $DATA
 cd $DATA
 
@@ -128,21 +130,22 @@ fi
 export SENDECF=${SENDECF:-YES}
 export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
-export SENDDBN_GB2=${SENDDBN_GB2:-YES}
+#XXW export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 
 ####################################
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-/nwprod}  # or /meso/save/${USER}
+export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
 export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
+export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
-export EXECnam=${EXECnam:-${ROOTdng}/exec}   #Point to nam_prdgen until nam is in vert structure
-export EXECdgex=${EXECdgex:-${ROOTdng}/exec}   #Point to dgex_prdgen until dgex is in vert structure
- export FIXdng=${FIXdng:-${HOMEdng}/fix}
+export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
+export EXECdgex=${EXECdgex:-${HOMEnam}/exec}   #Point to dgex_prdgen until dgex is in vert structure
+export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
- export USHdng=${USHdng:-${HOMEdng}/ush}
+export USHdng=${USHdng:-${HOMEdng}/ush}
 
 ###################################
 # Set up the UTILITIES
@@ -150,7 +153,7 @@ export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
-export gespath=${gespath:-/nwges/prod}
+export gespath=${gespath:-/nwges/${envir}}
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
@@ -162,7 +165,6 @@ sh $utilscript/setup.sh
 ###########################################
 sh $utilscript/setpdy.sh  
 . ${DATA}/PDY    # set local dir for crontab
-#TEST export PDY=20140227  #TEST###########################
 
 # Set GUESS, CYCLE parameters from NAM run 
 sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
@@ -173,7 +175,7 @@ sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
 # USER DEFINES in parm/dng_para_config
 ##############################################
 export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/prod}
+export COM_IN=${COM_IN:-/com/${NET}/${envir}}
 export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
@@ -207,7 +209,7 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com/sref/prod}
+export COM_SREF=${COM_SREF:-/com/sref/${envir}}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
