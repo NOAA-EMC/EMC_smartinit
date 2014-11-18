@@ -43,6 +43,7 @@
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=198
 #======================================================================
 # Check if this is a nest run
+set -x #NCO
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
 export rg=`echo $RUNTYP |cut -c1-2` 
@@ -245,8 +246,6 @@ if [ $ffhr -gt ${fhrstr} ]; then
   if [ $ffhr -lt 6 ]; then pcphr6=;pcphr12=;fi
   if [ $ffhr -lt 12 ]; then pcphr12=;fi
   grbpre="2 0 0 0 0"
-
-####set -x
 
   for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 #   prob of pcp > 0.01
