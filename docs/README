@@ -528,12 +528,16 @@ with NCO NAM para outputs.
 * ush: turned off GDAS set in NCO ush/smartinit.sh
        Fixed SREFPROB cp to cp the SREF 3hrly prob file rather than GEFS
 
+#=======================================================================
+Froze NCO version code v3.2.7
+#=======================================================================
+
 06/26/14 18Z
 * MAIN.f90 : turned on outputting of previous 2 hours temperatures even at 10/11 22/23 Z 
 to reduce confusion with smart files.
 In future, Geoff prefers stripping out previous 2 hours temps from all files
 
-* Turned on grid 187 dng for conus2p5
+* Turned on grid extended conus dng for conus2p5
 
 06/27/14 12Z
 * MAIN.f90: fixed hr label for T-1 (THOLD3) and T-2 (THOLD2) output fields
@@ -566,8 +570,9 @@ but turned off so to test the following:
 *VADJUST.f90 : Fixed DSCALE to not be less than 0. and not be used if model or ndfd topo less than 0.01
         Trying to correct blockiness wind direction patterns
        *** Blockiness Caused by copygb of extended grid 188
+          Need to revisit extended conus option
 
-11/1/ 12z    
+11/1/14 12z    
 * Changed DSCALE=0. check to look at veg_ndfd, veg_nam_ndfd
 (also 10/31/ 12z)
 Switched HBAR=ZSFC
@@ -583,3 +588,14 @@ since it will never be less than 0 (death valley issue)
 
 QUESTION: Is HGHT geopotential ??
 If so, need to recheck dscale computation
+
+******************************************************************
+11/13/14: V3.2.8 DELIVERED TO NCO and ran operationally
+          only Fix to VADJUST.f90 wind adjustment
+******************************************************************
+
+11/17/ 18z
+* util/parm : added wmo header awips parm cards for NAM/DGEX haines index for CONUS and Alaska grids
+
+11/18/12z
+* jobs, NDFDgrid.f90 : added IVADJ switch to turn on/off VADJUST.f90 call (T/F)

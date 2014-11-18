@@ -22,15 +22,19 @@
 # 2011-07-06  Geoff Manikin - Adapted to use nested output
 # 2011-07-22  Geoff Manikin - Can't use nest output for F00
 # 2012-12-03  Jeff McQueen  - Adapted for unified smartinit
-# 2013-08-27  Jeff McQueen  - Put in vertical structure     
+ # 2013-08-27  Jeff McQueen  - Put in vertical structure     
 
 #  NOTE: cyc, ffhr, RUNTYP must be set from controlling ECFlow script
 #   export cyc = 00,06,12,18
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
-
+ 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
+
+# TEMPORARY SWITCH for VADJUST wind terrain adjustment
+export IVADJ=${IVADJ:-T}
+
 
 echo cyc is ${cyc:?}
 echo envir is ${envir:?}

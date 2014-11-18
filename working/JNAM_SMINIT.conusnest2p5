@@ -1,6 +1,6 @@
-#BSUB -J DNG12.conusnest2p5-36
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/12/list/oDNG12.conusnest2p5-36
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/12/list/oDNG12.conusnest2p5-36
+#BSUB -J DNG12.conusnest2p5-03
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.3.1/12/list/oDNG12.conusnest2p5-03
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.3.1/12/list/oDNG12.conusnest2p5-03
 #BSUB -n 1
 #BSUB -W 2:00
 #BSUB -P RTMA
@@ -37,6 +37,9 @@
 #   export cyc = 00,06,12,18
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
+
+# TEMPORARY SWITCH for VADJUST wind terrain adjustment
+export IVADJ=${IVADJ:-T}
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
