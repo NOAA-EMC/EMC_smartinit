@@ -27,7 +27,19 @@ These now will be labelled correctly.  These fields are only available on ftpprd
 
 * NCO modified the current NAM WMO header data cards and created new DGEX WMO header data cards
 to include Haines Index (Fire Weather) downscaled fields to AWIPS grib2 files for CONUS and Alaska
-DNG grids.  More information is found at the NCO provided documentation:
+DNG grids. 
+In addition all NAM/WMO header data card file name formats using consistent filename structure 
+in util/parm sub-directory.
+New format is now grib2_awp{mdl}dng{domain}{on/off}f{fhr}.{grid}
+where
+   mdl=nam/dgex
+   domain=conus/ak/pr/hi
+   grid=   184/91/195/196
+   fhr=00..84 for NAM
+       87..192 for DGEX
+note on/off label not used or needed for dgex.
+   
+ More information is found at the NCO provided documentation:
 https://docs.google.com/a/noaa.gov/document/d/1i8Tmwot9WPgGUNqdKSnO4JhjDZF4jX-fkuAri_Qk_qc/edit
 
 #===============================================================================

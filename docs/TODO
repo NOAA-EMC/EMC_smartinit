@@ -1,15 +1,9 @@
 
-* fix wrfprs copy for guam and test
-* change master ctls ndfd output file names to reduce rg checks
-* unify weight names
-
-UGRD and VGRD are similar
-
-cp gribit, makestring...other ?? arrays to interface statement
-
-
+1. change master ctls ndfd output file names to reduce rg checks
 can all nests use smartmaster.ctl as is done for conusnest,aknest3
 eg for pr and hinest and aknest
+
+2. unify weight names
 
 #NOTE:
 nam_master: pr, hi, ak  (nest)
@@ -29,4 +23,30 @@ case rg in pr hi ak  nam_master${rg}
 case rg in  hi ak         nam_wgt$_{REG}
            ak3 con pr    nam_wgt_$ogrd_${REG}
     
+3.  Run extended conus grid
+   - use wgrib2 instead of prdgen (Eric)
+
+4.  Add grib2 I/O
+   - see Matt
+
+5.  Add Adiabatic adjustment
+
+6.  Check total cloud cover =0 around edges
+
+7.  HRRR/RAP option
+
+8.  Juneau 1 km DNG
+
+9.  Check WFO smartinit developments wfoinv
+
+10. Coastal problem around Milwaukee, lakes too cold
+
+11. modularize MAIN.f90, NDFDgrid.f90
+    modularize ush/ smartinit --> take out smartprecip scripting, wgrib2 scripting
+
+12.  test gfs synchronization
+   - not gfs util/parm name should be changed from smart to dng
             
+
+Plots 
+m

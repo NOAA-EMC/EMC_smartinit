@@ -5,7 +5,7 @@
 
 # OUTPUT REGION TO DOWNSCALE TO
 # valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
-typeset -Z2 ffhr
+#TEST typeset -Z2 ffhr
 export RUN_ENVIR=dev
 export envir=dev
 
