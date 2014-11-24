@@ -1,4 +1,4 @@
-smartinit.v3.3.2  Q1FY15 
+smartinit.v3.3.21  Q2FY15 
 February 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 
 - Synchronized NAM and GFS smartinit systems
@@ -9,7 +9,7 @@ February 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 ===================================================================================
 1.  Synchronized NAM/DGEX and GFS smartinit systems
 
-*   The v3.3.2 system includes all changes needed to run downscaling from NAM, DGEX or GFS parent models
+*   The v3.3.21 system includes all changes needed to run downscaling from NAM, DGEX or GFS parent models
 The same executables, smartinit and smartprecip can be used for either parent model.
 Different jobs/scripts/ush codes are provided for each parent model.  
 Currently NAM and DGEX DNG take advantage of this synchronization.  GFS DNG will be upgraded for a future
@@ -45,7 +45,7 @@ https://docs.google.com/a/noaa.gov/document/d/1i8Tmwot9WPgGUNqdKSnO4JhjDZF4jX-fk
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
 #===============================================================================
-1. svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-V3.3.2
+1. svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-V3.3.21
 
 
 2.  Build sorc codes smartinit.fd, smartprecip.fd
@@ -57,15 +57,9 @@ https://docs.google.com/a/noaa.gov/document/d/1i8Tmwot9WPgGUNqdKSnO4JhjDZF4jX-fk
           This will create smartprecip  executable in ../../smartinit.${model_ver}/exec
 
 3.  Use ...docs/smartinit.ver file if desired to set
-      model_ver=v3.3.2  parameter
+      model_ver=v3.3.21  parameter
 
 4.  See ...docs/bjobcards-dev for recommended limits to use in JNAM_SMINIT jobs.
-    eg:
-#BSUB -W 03:00
-#BSUB -n 1
-#BSUB -R affinity[core]
-#BSUB -R rusage[mem=5500]
-#BSUB -q dev
 
 5.  RUNTYP,cyc, ffhr are specified in ecflow scripts provided in smartinit.${model_ver}/ecf directory
 
