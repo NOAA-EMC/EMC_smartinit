@@ -33,7 +33,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#TEST export cyc=06  #TEST
+#TEST  export cyc=12  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
