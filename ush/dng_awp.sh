@@ -17,18 +17,10 @@ case $cyc in
   00|12) cyctp=on;;
   06|18) cyctp=off;;
 esac
+if [ $mdl = dgex ];then cyctp=;fi
 
 REGCP=`echo $outreg |tr '[a-z]'  '[A-Z]' `
 echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $fhr 
-
-if [ $outreg != guam ]; then   
-# Create HAINES INDEX GRIB FILE
-if [ $ihindex -eq 1 ];then
- ${utilexec}/wgrib  MESO${RGIN}${fhr}.tm00 |grep ":HINDEX" | \
-  ${utilexec}/wgrib -i -grib  MESO${RGIN}${fhr}.tm00 -o hindex.t${cyc}z.smart${outreg}${fhr}.tm00
- $utilexec/cnvgrib -g12 -p40 hindex.t${cyc}z.smart${outreg}${fhr}.tm00  hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-fi
-fi
 
 $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 
@@ -49,7 +41,7 @@ elif [ $outreg = ak3 ];then
 elif [ $outreg = guam ];then
   awpparm=$UTILdng/parm/grib2_${mdl}_smart${outreg}${cyctp}f${fhr}.${ogrd}
 else
-  awpparm=$utilparm/grib2_awp${mdl}smart${outreg}${cyctp}f${fhr}.${ogrd}
+  awpparm=$utilparm/grib2_awp${mdl}dng${outreg}${cyctp}f${fhr}.${ogrd}
 fi
 
 if [ -s "$awpparm" ];then

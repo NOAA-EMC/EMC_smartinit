@@ -17,7 +17,7 @@ module load ruby emc-utils
 # Jeff McQueen       01/29/2013
 # Vertical structure 08/27/2013
 #=======================================================
-typeset -Z2 cyc ffhr fhrstr fhrnxt ffhrsv HHold strhr
+typeset -Z2 cyc #ffhr fhrnxt ffhrsv HHold strhr
 
 #====================User Sets=======================================
 # Location of smart config file to set up directories
@@ -56,8 +56,8 @@ mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 
 while [ $ffhr -le $ENDHRS ];do
+  if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
   cd ${wkdir}
-#  if [ $ffhr -lt 10 ];then ffhr="0"${ffhr};fi
   export job="DNG${cyc}.${RUNTYP}-${ffhr}"
 
 # Create and invoke config file needed by Job 
@@ -83,22 +83,26 @@ while [ $ffhr -le $ENDHRS ];do
 # 6 hr interval forecasts use 6 hour old smart files so
 # wait until old smart file is created 
   if [ $subint -eq 0 ];then 
-    ffhrsv=$ffhr
+
 #   Submit the intermediate hour forecasts while waiting for 6/12 hr files
+    ffhrsv=$ffhr
     fhrnxt=$ffhr
     while [ $fhrnxt -le $ENDHRS ];do
       chk6=`expr $fhrnxt % 6`
-      if [ $chk6 -ne 0 -o $fhrnxt -eq 0 ];then
+      if [ $chk6 -ne 0 -o $fhrnxt -eq $fhrstr ];then
         export job="DNG${cyc}.${RUNTYP}-${fhrnxt}"
         echo "export ffhr=$fhrnxt" >> ${wkdir}/dng_para_config${RUNTYP}
         echo "export DATA=${DATA_IN}/${job}"  >>$wkdir/dng_para_config${RUNTYP}
         . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
         sleep 10
+
         echo `date +%T` $MDL SUBMIT SMINIT JOB :  $RUNTYP CYCLE $cyc FHRNXT $fhrnxt
         ${kickd}/cr8bjob $job $fhrnxt
         bsub < J${MDL}_SMINIT.${RUNTYP}
+
       fi
       ((fhrnxt=fhrnxt+INCR))
+      if [ $fhrnxt -lt 10 ];then fhrnxt="0"${fhrnxt};fi
     done
     export INCR=06
     export ffhr=$ffhrsv
@@ -106,15 +110,18 @@ while [ $ffhr -le $ENDHRS ];do
   fi 
 
   wait=0
-  while [ $wait -le 3600 -a $ffhr -ge 06 ];do
+  while [ $wait -le 3600 -a $ffhr -ge $((fhrstr+06)) ];do
     ((HHold=ffhr-6))
+    if [ $HHold -lt 10 ];then HHold="0"${HHold};fi
     smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00
+
     if [ ! -s $smflold ];then
       echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr
       sleep 60
       ((wait=wait+60))
     else
       ((HHold=ffhr-3))
+      if [ $HHold -lt 10 ];then HHold="0"${HHold};fi
       smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00
       if [ ! -s $smflold ];then
         echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr

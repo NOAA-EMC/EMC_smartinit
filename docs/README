@@ -532,14 +532,14 @@ with NCO NAM para outputs.
 Froze NCO version code v3.2.7
 #=======================================================================
 
-06/26/14 18Z
+06/26/14 18Z V3.2.9
 * MAIN.f90 : turned on outputting of previous 2 hours temperatures even at 10/11 22/23 Z 
 to reduce confusion with smart files.
 In future, Geoff prefers stripping out previous 2 hours temps from all files
 
 * Turned on grid extended conus dng for conus2p5
 
-06/27/14 12Z
+06/27/14 12Z V3.3.0
 * MAIN.f90: fixed hr label for T-1 (THOLD3) and T-2 (THOLD2) output fields
 * ush/smartinit.sh : added option to run copygb instead of prdgen
                      but using nearest neighbor (i2) option
@@ -582,7 +582,7 @@ Switched HBAR=ZSFC
 * Switched back to use HBAR=HGHT (1)
 since it will never be less than 0 (death valley issue)
 
-11/2 12z
+11/2 12z V3.3.1
 * slight adjustment for dscale
  subtracted model 1st level depth (H1) from HGHT to be comparable with ndfd terrain
 
@@ -591,11 +591,16 @@ If so, need to recheck dscale computation
 
 ******************************************************************
 11/13/14: V3.2.8 DELIVERED TO NCO and ran operationally
-          only Fix to VADJUST.f90 wind adjustment
+          only Fix to VADJUST.f90 wind adjustment was included 
 ******************************************************************
 
-11/17/ 18z
+11/17/ 18z V3.3.2
 * util/parm : added wmo header awips parm cards for NAM/DGEX haines index for CONUS and Alaska grids
 
-11/18/12z
+11/18/12z 
 * jobs, NDFDgrid.f90 : added IVADJ switch to turn on/off VADJUST.f90 call (T/F)
+* jobs: synched with NCO version, added dgex_ver parameter
+
+11/19/12z
+* ush awp_dng.sh and parm/util : changed nam/dgex wmo data card file format to "dng" except for gfs
+    grib2_awp{mdl}{rgn}{on/off}f{fhr}.{grd}

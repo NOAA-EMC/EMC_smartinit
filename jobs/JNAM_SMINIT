@@ -81,9 +81,11 @@ export RM_TMPDIR=${RM_TMPDIR:-YES}
 # environment. This is used for operational testings
 ###############################################################
 
-if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #NOT FOR NCO
+if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
+   export DBNROOT=/nwprod/spa_util/para_dbn
+   export jlobfile=/com/logs/${envir}/jlogfile
    export SENDDBN=${SENDDBN:-NO}
    export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
    export pcom=${pcom:-/pcom/${envir}/${NET}}
@@ -128,7 +130,7 @@ fi
 export SENDECF=${SENDECF:-YES}
 export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
-export SENDDBN_GB2=${SENDDBN_GB2:-YES}
+#XXW export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 
 ####################################
 # Specify Execution Areas
