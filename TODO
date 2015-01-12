@@ -1,0 +1,32 @@
+
+plot diff between canned and new
+
+create new script 
+conus + conusnest
+00-60 hrs
+sub(VARB:+2)
+
+cp sv met web page for sminit
+
+fix q for nests
+double check tmax,tmin
+do diffgb on conus vs conusnest
+
+add rtmages option --> just run ak with nam parent for hrs 3,6,9
+add config for regions
+
+region.cfg
+      sgrb ogrd grid rg wgt-file
+conus  212 197 
+
+grid.cfg
+
+conus "255 0 ...
+
+
+read prdgfl and from master file
+
+
+Fix hour 00 conusnest name with dset
+
+Ensure that all dset grids are being ftppd

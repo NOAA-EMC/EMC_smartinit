@@ -1,0 +1,184 @@
+#!/bin/ksh
+#=======================================================
+# Driving script to run DGEX plotmet jobs
+# calls plotmet.job, plotdiff.job, ftpmet.job
+# Jeff McQueen   01/29/2013
+# grib dir :  /com/${mdld}/prod/${mdl}.${ymd} (/com/nam/prod/nam.20130715
+# mdl file :  ${mdld}.t00z.smart{REGION}{fhr}.tm00 (nam.t12z.smarthi03.tm00)
+
+# Separate script needed since dgex downscalings is completed much later than other model (nam, hiresw) 
+# downscaling.  It must be invoked several hours later than RUN_dgex
+#=======================================================
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+
+# Plot yesterday to compare to obs
+export ymd=`/nwprod/util/exec/ndate |cut -c 1-8`
+
+# Determine cycle
+let HH=`date +%H`
+if [ $HH -ge 01 -a $HH -le 08 ];then export cyc=00;
+elif [ $HH -le 14 ];then export cyc=06;
+elif [ $HH -le 20 ];then export cyc=12;
+else
+  export cyc=18
+fi
+#export cyc=06  #TEST
+
+domhrw=;
+domdgx="dgex_conus"
+case $cyc in 00|12) 
+  domhrw="guamnmmb guamarw"
+  domdgx="dgex_ak3";;
+esac
+
+#==============================================================================
+export iftp=1
+export pltcfg=smart   #cfg varbs to plt : smart,nam,nam2,nmm,test
+export nplts=7        # number of varbs to plot 
+export nftp=2         # number of ftps while job is running sep by slpftp (eg: 30 mins)
+
+export strhr=90           # Starting forecast hour
+export ENDHRS=126         # Ending forecast hour
+export INCR=03            # Forecast hour increment
+set -A mdl smart smart    # GRIB model file type (ctl model should be first)
+
+# domains for nam mdl: conus/conusnest alaskanest  hawaiinest priconest            gfs
+# domains for smart  : conus/conus2p5  ak/ak3      hi         pr        ak_rtmages guam
+# domains for dgex   : dgex_conus         dgex_ak3
+export domains="${domdgx}"
+#==============================================================================
+export scrdir=/meso/save/$USER/gempak/sfcplot/smart
+mkdir -p /stmpp1/${USER}/smartplt/list
+
+#copy gempak obs file from tempest
+scp -p wd22jm@tempest.ncep.noaa.gov:/export-4/tempest/mpyle/obs/sfc/${ymd}.sfc /ptmpp1/Jeff.McQueen/gemfiles
+
+((nplfcst=(ENDHRS-strhr)/INCR + 1))
+((SLPDIFF=60*nplfcst))
+((slpftp=45*nplfcst*(nplts-1)))
+
+export endhrs=$ENDHRS
+for REGION in ${domains}; do
+  case ${REGION} in
+    hi|conus|conus2p5|ak|ak3|pr ) set -A ptypes met diff;let slpdiff=$SLPDIFF;;
+                         *) set -A ptypes  met;slpdiff=45;;
+   esac
+   nptypes=${#ptypes[*]}
+
+   for PTYP in ${ptypes[*]};do
+     export mdld="nam nam"  # Directory where grib files are located(nam,hiresw,gfs)
+     case ${REGION} in
+      conus|conusnest) set -A PAREA "dset" "nyc**" "mfr**" "sdb***" "ase****" "boi***" "vgt***";;
+               ak|ak3) set -A PAREA "dset" "pajn****";;
+                   hi) set -A PAREA "phnl***";;
+                   pr) set -A PAREA "pu";;
+     guamnmmb|guamarw)
+                       set -A PAREA guam
+                       set -A mdl gfs smart
+                       export mdld="gfs hiresw";;
+ dgex_ak3|dgex_conus|dgex) set -A PAREA dset
+                       set -A mdl dgex smart
+                       export mdld="dgex dgex"
+                       export strhr=84
+                       export ENDHRS=192;;     #TEST
+                    *) set -A PAREA dset;;
+    esac
+
+    iparea=0
+    npareas=${#PAREA[*]}
+    for plotarea in ${PAREA[*]};do  
+      export plotarea
+      parea=`echo $plotarea |cut -d* -f1`
+      ((iparea=iparea+1))
+#=========================================================
+#     Set Regions for control vs smart init comparisons
+#=========================================================
+      export reg="$REGION $REGION"
+      if [ ${mdl[0]} != ${mdl[1]} ];then
+        if [ ${mdl[1]} = nam ];then
+         case $REGION in
+           conus|conus2p5)  export reg="${REGION} conusnest";;
+           ak|ak3|aknest3)  export reg="${REGION} alaskanest";;
+         guamnmmb|guamarw)  export reg="${REGION} guam";;
+                       hi)  export reg="${REGION} hawaiinest";export ENDHRS=60;;
+                       pr)  export reg="${REGION} priconest";;
+                       * )  export reg="$REGION $REGION";;
+         esac
+        elif [ ${mdl[1]} = smart ];then
+         case $REGION in
+           conus|conus2p5)  export reg="conusnest ${REGION}";;
+           ak|ak3|aknest3)  export reg="alaskanest ${REGION}";;
+         guamnmmb|guamarw)  export reg="guam ${REGION}";;
+                       hi)  export reg="hawaiinest $REGION"; export ENDHRS=60;;
+                       pr)  export reg="priconest ${REGION}";;
+    dgex|dgex_ak3|dgex_conus)
+                            export REGION=`echo $REGION |cut -d_ -f2`
+                            export reg="conus ${REGION}"
+                            if [ $REGION = ak3 ];then 
+                              export reg="alaska ${REGION}"
+                            fi;;
+                       * )  export reg="$REGION $REGION";;
+         esac
+        else
+          echo " model prefix to plot  ${mdl[*]} "
+        fi
+       fi
+
+#=========================================================
+#     Submit plotmet or plotdiff jobs
+#=========================================================
+       export endhrs=$ENDHRS
+       export mdlin="${mdl[*]}"    #mdlin is passed to jobs and scripts
+       jobpar=;
+       if [ ${parea} != dset ];then jobpar=${parea};fi
+       if [ ${mdl[0]} != smart ];then jobmdl=${mdl[0]}
+       elif [ ${mdl[1]} != smart ];then jobmdl=${mdl[1]}
+       else; jobmdl=`echo $mdld |cut -d" " -f1`;fi
+       export job="${jobmdl}${cyc}.${REGION}${jobpar}-${PTYP}"
+
+       echo;echo `date`
+       echo SUBMIT plot${PTYP}_${REGION}${parea}.job GAREA $plotarea CYCLE: $cyc Z FHRS $strhr to $ENDHRS
+       echo REGIONS = $reg
+       echo "#!/bin/ksh --login" >hdr
+       echo "#BSUB -J ${job}"  >>hdr
+       echo "#BSUB -oo /stmpp1/Jeff.McQueen/smartplt/list/${job} " >>hdr
+       echo "#BSUB -eo /stmpp1/Jeff.McQueen/smartplt/list/${job} " >>hdr
+       cat hdr ${scrdir}/plot${PTYP} > plot${PTYP}_${REGION}${parea}.job
+       bsub < plot${PTYP}_${REGION}${parea}.job
+
+       iwt=0
+       if [ $PTYP = met ];then
+         if [ $npareas -gt 1 -a $iparea -eq 1 ];then
+           iwt=1
+         elif [ $npareas -eq 1 ];then
+           iwt=1
+         fi
+         if [ $iwt = 1 ];then
+           echo `date`
+           echo;echo $iparea $npareas Wait $slpdiff secs before plotting  \
+           GAREA: ${PAREA[iparea]} CYCLE: $cyc Z cycle
+           sleep $slpdiff
+         fi
+       fi
+
+   sleep 10;rm -f plot${PTYP}_${REGION}${parea}.job
+   done  #PLOT AREA 
+   sleep 30
+   $scrdir/FTP_MET 
+ done  #PLOT TYPES
+done #REGIONS
+
+let jftp=1
+export jftp
+while [ $jftp -le $nftp ];do
+   echo;echo Wait ${slpftp} secs for  CYCLE: $cyc Z cycle gem plots to be ftpd  $jftp
+   sleep $slpftp
+   echo `date`
+   $scrdir/FTP_MET 
+   ((jftp=jftp+1))
+   export jftp
+done
+
+echo;echo `date`
+echo RUN_dgex COMPLETED CYCLE $cyc   PLTCFG$pltcfg

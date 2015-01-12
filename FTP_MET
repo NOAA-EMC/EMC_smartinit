@@ -1,0 +1,52 @@
+#!/bin/ksh
+#=======================================================
+# Driving script to ftp all plots to web server
+# calls ftpmet.job
+# Jeff McQueen   07/15/2013
+#=======================================================
+. /usrx/local/Modules/3.2.9/init/ksh
+module load ibmpe lsf ics
+
+typeset -Z2 cyc ffhr
+nftp=1
+if [ -z "$ymd" ];then
+  export ymd=`/nwprod/util/exec/ndate  -24|cut -c 1-8`
+  export cyc=12     
+  export strhr=00           # Starting forecast hour
+  export endhrs=24 
+  export INCR=03            # Forecast hour increment
+  export ftparea="ak3"
+  export ftpmdl="nam"
+  export PTYP=met
+  export wkroot=/stmpp1/${USER}/smartplt/$ymd
+  export scrdir=/meso/save/${USER}/gempak/sfcplot/smart
+fi
+set -A ftpmdl ${ftpmdl}
+if [ "${ftpmdl[0]}" = "${ftpmdl[1]}" ];then set -A ftpmdl ${ftpmdl[0]};fi
+
+# domains for nam :        conus ak hi    conusnest    alaskanest hawaiinest priconest
+# domains reg for sminit : conus ak hi pr conus2p5 ak3 ak_rtmages
+
+mkdir -p $wkroot/jobs/list
+cd $wkroot/jobs
+for REGION in ${ftparea};do
+  export ENDHRS=$endhrs
+  export plotarea=$REGION
+  export REGION
+  for FMDL in ${ftpmdl[*]};do
+    export FMDL
+    if [ $FMDL = dgex ];then REGION=`echo $REGION |cut -d_ -f2`;fi
+    export job=${FMDL}${cyc}${REGION}-FTP${PTYP}
+    echo;echo FTPMET $job `date`
+    echo FTP $FMDL $REGION $PTYP $ymd CYCLE: $cyc Z cycle gem plots $jftp
+    echo $wkroot
+
+    echo "#!/bin/ksh --login" >ftphdr
+    echo "#BSUB -J ${job}" >>ftphdr
+    echo "#BSUB -oo ${wkroot}/jobs/list/${job}.out" >>ftphdr
+    echo "#BSUB -eo ${wkroot}/jobs/list/${job}.out" >>ftphdr
+    cat ftphdr ${scrdir}/ftpmet >${job}${cyc}.job
+
+    bsub < ${wkroot}/jobs/${job}${cyc}.job
+ done
+done

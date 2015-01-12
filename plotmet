@@ -1,0 +1,309 @@
+#BSUB -n 1
+#BSUB -W 03:00
+#BSUB -P RTMA
+#BSUB -q dev
+#BSUB -R "span[ptile=1]"
+#BSUB -R "rusage[mem=1000]"
+
+###set -x
+#
+export NET=prod    # prod,para,test for NCO com output
+export envir=dev
+#===========================================================
+# plotmet:  script to create gempak plots    
+# Calls: plotmet.sh  
+
+# The script searches if 2nd gempak (gem) file exists in wkdir2(gribd2)
+# to plot two models on one graphic (2 panels)
+# Input smart gribfile name = {MDL}.tCCz.smart{REG}{FHR}.tm00
+#              gemfile name = gem{MDL}{REG}.gem{FHR}
+
+# Jeff McQueen 12/12
+#===========================================================
+export twopl=d2
+
+export endhrs=$ENDHRS
+export incr=$INCR
+export avghr=0
+# export plotarea="20.19;-121.55;50.11;-60.88"   #NDFD 197,184
+# export proj="LCC/25;-95;25"
+export today=`/nwprod/util/exec/ndate | cut -c 1-8`
+export todaym1=`/nwprod/util/exec/ndate -24| cut -c 1-8`
+if [ -z "$ymd" ];then
+# The Following IS SET in RUN_ALL or RUN_GEM
+  export pltcfg=test
+  export mdlin="smart smart"
+  export ymd=`/nwprod/util/exec/ndate | cut -c 1-8`
+  export mdld="nam nam"
+  export reg="conus conus"
+  export cyc=12
+  export strhr=03
+  export endhrs=12
+  export incr=03
+  export iftp=1
+  echo USING DEFAULT $mdlin $reg
+fi
+
+export vdate="${ymd}${cyc}"
+
+# mdlin passed from RUN_GEM and will be passed to plotmet.sh
+# mdld = local array used below to set dir and filenames
+set -A mdl ${mdlin[*]}
+export mdl
+set -A mdld ${mdld[*]}
+export mdld
+set -A reg ${reg[*]}
+export reg
+
+export rootd=/meso/save/$USER/gempak
+#plotarea = garea with gempak wild card symbols to plot
+# gpoint =  domain or region name to identify grib filename (conus2p5...)
+export gpoint=${reg[0]}
+if [ ${mdl[1]} = smart ];then export gpoint=${reg[1]};fi
+
+# To plot subdomain of a grid, give a unique dir name
+if [ $plotarea != $gpoint -a $plotarea != dset ];then export gpoint=${reg}$plotarea;fi
+if [ $plotarea = dset ];then endhrs=12;fi
+case ${reg[0]} in guamnmmb|guamarw) gpoint=${reg};;esac
+case ${reg[1]} in guamnmmb|guamarw) gpoint=${reg[1]};;esac
+export gpoint=`echo $gpoint |cut -d"*" -f1`
+echo GPOINT $gpoint PAREA $plotarea
+
+#==============================================================================
+export obsd=/ptmpp1/${USER}/gemfiles   #GEMPAK SFC FILES Directory
+#==============================================================================
+#
+#export wkdir2=/stmpp1/$USER/smartplt/${twopl}${mdld}${gpoint}${cyc}
+export wkdir2=${wkdir}
+export wkdir=${wkroot}/${twopl}${mdld}${gpoint}${cyc}
+echo WKDIR ${wkdir}
+echo WKDIR2 ${wkdir2}
+
+#============================================================
+# SET model grib directory and Grib file name
+#============================================================
+nmdls=2;im=0
+while [ $im -lt  $nmdls ];do
+
+  export comroot=/com    
+
+# ARCHIVE DNG com location
+  if [ $ymd -ne $today -a $ymd -ne $todaym1 ];then
+    export comroot=/meso/noscrub/$USER/com/
+  fi
+#export comroot=/meso/noscrub/Eric.Rogers/com    #DGEX EMC PARA
+
+# NAM
+  if [ ${mdl[im]} = nam ];then
+   case ${reg[im]} in 
+    conus2p5|conusnest|alaskanest|ak3)
+      mdlt=".hiresf"     #NAM NEST File type identifier
+      REGT=${reg[im]}
+      export mdlfrt[im]=${mdld[im]}.t${cyc}z.${REGT}${mdlt};;
+   *) 
+      mdlt=awip
+      REGT=12;reg[im]=$REGT    # NAM PARENT GRIB FILE type identifier
+      export mdlfrt=${mdld[im]}.t${cyc}z.${mdlt}${REGT};;
+  esac
+  export gribd[im]=${comroot}/${mdld[im]}/$NET/${mdld[im]}.$ymd  # NAM PROD
+  mdlfile=${gribd[im]}/${mdlfrt[im]}${strhr}.tm00
+
+# DGEX 
+  elif [ ${mdl[im]} = dgex ];then 
+    export gribd[im]=${comroot}/${mdld[im]}/$NET/${mdld[im]}.$ymd       
+    mdlt=awp
+    REGT=185 # dgex conus grib type id
+    if [ ${reg[im]} = alaska ];then  REGT=186;fi   
+    export mdlfrt[im]=${mdld[im]}_${reg[im]}.t${cyc}z.${mdlt}${REGT}
+    mdlfile=${gribd[im]}/${mdlfrt[im]}${strhr}.tm00
+
+# URMA2P5 file 
+  elif [ ${mdl[im]} = urma2p5 ];then  
+    export gribd[im]=${comroot}/urma/prod/${mdld[im]}.$ymd  # URMA PROD 
+    if [ ${mdl[1]} = ${mdl[0]} ];then export gribd[1]=${comroot}/${mdld[im]}/$NET/${mdld[im]}.$ymd;fi 
+    mdlt=2dvaranl_ndfd
+    REGT=;
+    export mdlfrt[im]=${mdld[im]}.t${strhr}z.${mdlt}${REGT}
+    mdlfile=${gribd[im]}/${mdlfrt[im]}.grb1
+    REGT=${reg[im]}
+
+# SMART DNG file 
+  elif [ ${mdl[im]} = smart ];then  
+    mdlver=;
+#   case ${reg[im]} in  conus2p5) mdlver=v3.3.0;;  esac
+    export gribd[im]=/ptmpp1/${USER}/${mdlver}/${mdld[1]}.$ymd   #SMART R-T EMC PARA
+#TEST    export gribd[im]=/meso/noscrub/${USER}/com/$mdld/para/${mdld[1]}.$ymd   #SMART R-T EMC PARA
+
+#   Archived directory
+    if [ $ymd -ne $today -a $ymd -ne $todaym1 ];then
+      export gribd[im]=${comroot}/${mdld[im]}/para/${mdld[im]}.$ymd
+    fi
+
+#   To compare EMC para smart to NCO smart run
+    if [ ${mdl[0]} = smart -a ${mdl[1]} = smart ];then 
+     export gribd[1]=${comroot}/${mdld[im]}/$NET/${mdld[im]}.$ymd
+#      export gribd[1]=/ptmpp1/${USER}/v3.2.8/${mdld[1]}.$ymd   #SMART R-T EMC PARA
+    fi
+
+    mdlt=${mdl[im]}
+    REGT=${reg[im]}
+    export mdlfrt[im]=${mdld[im]}.t${cyc}z.${mdlt}${REGT}
+    mdlfile=${gribd[im]}/${mdlfrt[im]}${strhr}.tm00
+  fi
+  echo " ";echo INPUT GRIB FILE $im MDLFRT ${mdlfrt[im]}
+
+# Check if input grib file is Available
+  if [ -s ${mdlfile} ];then 
+    echo gribd $im DIR ${gribd[im]} $im FOUND
+    echo gribd $im MDLFILE ${mdlfrt[im]} $strhr FOUND
+    export gribd2=${gribd[1]}
+  else
+    echo " GRIB  $im  ${mdlfile}  NOT FOUND"
+    exit
+  fi
+  let im=im+1
+done 
+
+echo;echo 0 MDL ${mdl[0]} REGT $REGT 
+echo 1 MDL ${mdl[1]} REGT $REGT 
+
+export scrdir=${rootd}/sfcplot/smart 
+export webrt=/home/people/emc/www/htdocs/mmb/aq/smart
+
+case $strhr in 00|03|15|78|84)
+ if [ $plotarea != dset ];then
+  rm -rf $wkdir
+  rm -rf $wkdir2
+ fi;;
+esac
+mkdir -p  $wkdir
+mkdir -p  $wkdir2
+rm -f $wkdir/ftpdone
+rm -f $wkdir2/ftpdone
+
+# all   tables set for MET variables
+
+cp $scrdir/namsminit_ncepgrib2.tbl $wkdir/ncepgrib2.tbl
+cp $scrdir/namsminit_ncepgrib129.tbl $wkdir/ncepgrib129.tbl
+cp $scrdir/namsminit_wmogrib2.tbl $wkdir/wmogrib2.tbl
+cp $scrdir/namsminit_vcrdgrib1.tbl $wkdir/vcrdgrib1.tbl
+cp $scrdir/grdnav.tbl  $wkdir
+cp $wkdir/*tbl $wkdir2
+
+cp $rootd/*nts $wkdir
+cp $rootd/*nts $wkdir2
+cp $rootd/col* $wkdir
+cp $rootd/col* $wkdir2
+
+for YMD in $ymd1 $ymd0;do
+if [ -s ${obsd}/${YMD}.sfc ];then
+  cp -p $obsd/${YMD}.sfc $wkdir
+  cp -p $obsd/${YMD}.sfc $wkdir2
+  echo OBSFILE ${obsd}/${YMD}.sfc FOUND
+else 
+  echo OBSFILE ${obsd}/${YMD}.sfc NOT FOUND
+fi
+done
+
+cd $wkdir
+
+export run=`echo $gribd |cut -d '/' -f4 `
+export nco=`echo $gribd |cut -d '/' -f2 `
+export yyyymmdd=$ymd
+#===========================USER SETS===================================
+typeset -Z2 cyc avghr CHR
+
+# Define variables to plot based on WMO GRIB Table 141 used by nagrib
+case $pltcfg in 
+  test)
+  export avghr=0 
+  set -A varblist TMPF SKNT HGHT #ZPBL #  GKNT CLD SKNT TMPF DRCT DIST P03I POP06 P06I
+  set -A glvllist 2    10   0 ;; # 0 0   0     0  PBLR PBLR  0   0  0  ;;
+  smart)
+  set -A varblist  TMPF  DWPF  SKNT  HGHT GKNT
+  set -A glvllist    2     2     0     0    0 ;;
+  smdgex)
+  set -A varblist TMPF  DWPF  SKNT P03I P06I POP03 POP06
+  set -A glvllist   2     2   0    0    0    0     0 ;;
+  smfull)
+  set -A varblist RELH POP03 POP06 POP12 P03I P06I P12I TMXK12 TMNK12 MAXRH12 MINRH12 HGHT DRCT SPED RELH DIST
+  set -A glvllist    2     0     0     0    0    0    0      0      0    LLTW   LLTW  PBLR PBLR PBLR PBLR PBLR ;;
+  urma|urma2p5)
+  set -A varblist TMPF  DWPF   RELH CLD  SKNT  DRCT P03I 
+  set -A glvllist   2     2     2   0     10    10    0  ;;
+  nam)
+  set -A varblist TMPF RELH DWPF SPFH P03I CLD GUST SPED PRES ZPBL FXSH FXLH SOIM
+  set -A glvllist   2     2    2    2    0   0    0   10  0   0       0    0 "0:10" ;;
+  nmm)
+# NAM Conus nest
+  set -A varblist HGHT ZPBL TMPF SPFH P01I TCLD OMEG
+  set -A glvllist 0    0    2    2    0    0    700;;
+esac  
+echo;echo VARBS TO PLOT ${varblist[*]}
+echo STRHR $strhr ENDHRS $endhrs
+
+export mdld="${mdld[*]}"
+export reg="${reg[*]}"
+
+#=======================================================================
+. /nwprod/gempak/.gempak >/dev/null 2>&1
+
+let ivarb=0
+for VARB in ${varblist[*]};do 
+  export glevel=${glvllist[ivarb]}
+  if [ -z "${glvllist[ivarb]}" ];then export glevel=${glvllist[0]};fi
+  vhdr=`echo $VARB |cut -c1-4`
+  let ivarb=$ivarb+1
+  let fhr=$strhr
+
+  while [ $fhr -le $endhrs ];do 
+    export fhrplot=-1
+# plot previous hour plot
+#TEST    if [ $vhdr -eq TMPF -a $fhr -gt 0 ];then ((fhrplot=fhr-1));fi
+    export fhrplot
+
+    if [ $fhr -lt 10 ];then fhr=0${fhr};fi
+    if [ $fhrplot -lt 10 ];then export fhrplot=0${fhrplot};fi
+
+#   Copy correct mesowinds obs file to obs directory
+#   Assume previous day HH=cyc --> 23 thru CYMD HH=00-->cyc available
+    export obsdate=`/nwprod/util/exec/ndate $fhr $vdate |cut -c 1-8 `
+    export obshr=`/nwprod/util/exec/ndate $fhr $vdate |cut -c 9-10 `
+    export CYMD=$obsdate;export CHR=$obshr
+
+    if [ $fhr -le 24 ];then
+      export CHR=`/nwprod/util/exec/ndate $fhr $ymd$cyc |cut -c 9-10`
+      export CYMD=$ymd
+      if [ $CHR -lt $cyc ];then CYMD=$ymd0;fi
+      case ${REGT} in 
+        ak|ak3|alaska|aknest3|alaskanest) export obsext=alaska;;
+               pr|pu|priconest) export obsext=prico;;
+         hi|hawaii|hawaiinest) export obsext=hawaii;;
+                            *) export obsext=urma;;
+
+      esac
+      obsfile=$obsd/${CYMD}/mesowinds_t${CHR}z_${obsext}.sfc 
+      if [ -s $obsfile ];then
+        echo MESOWINDS OBS FILE FOUND: $obsfile
+        cp -p $obsfile $wkdir
+        cp -p $obsfile $wkdir2 
+      else 
+        echo MESOWINDS SFC OBS FILE NOT FOUND: $obsfile
+      fi
+    fi
+
+    echo Creating  $VARB $run Model ${mdl[*]} plots for cycle $cyc $ymd FHR $fhr  
+    $scrdir/plotmet.sh $cyc $fhr $VARB  $glevel 
+    if [ $VARB = HGHT -a $plotarea = dset ];then fhr=$endhrs;fi
+    let fhr=$fhr+$incr
+  done
+done
+
+cd $wkdir
+echo `date` >ftpdone
+#mkdir -p /meso/noscrub/$USER/smartplt/$ymd/$cyc/${mdld}${gpoint}${cyc}
+#cp *.gem?? /meso/noscrub/$USER/smartplt/$ymd/$cyc/${mdld}${gpoint}${cyc}
+cd $wkdir2
+echo `date` >ftpdone
+#mkdir -p /meso/noscrub/$USER/smartplt/$ymd/$cyc/${twopl}${mdld}${gpoint}${cyc}
+#cp *.gem?? /meso/noscrub/$USER/smartplt/$ymd/$cyc/${twopl}${mdld}${gpoint}${cyc}

@@ -1,0 +1,86 @@
+#!/bin/ksh --login
+
+#BSUB -J ftpmet
+#BSUB -oo /stmp/Jeff.McQueen/smartplt/list/plsiftp.out
+#BSUB -eo /stmp/Jeff.McQueen/smartplt/list/plsiftp.out  
+#BSUB -n 1
+#BSUB -W 01:00
+#BSUB -q transfer
+#BSUB -R span[ptile=1]
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=200]
+#BSUB -P RTMA     
+export envir=dev
+
+####set -x 
+#===========================================================
+# metplot:  script to ftp gempak plots    
+# Calls: 
+# Jeff McQueen 12/12
+#===========================================================
+
+export can=d2
+export endhrs=$ENDHRS
+export incr=$INCR
+ export iftp=1
+#The Following CAN BE SET in RUN_ALL or RUN_GEM
+if [ -z "$ymd" ];then
+ export ymd=`/nwprod/util/exec/ndate |cut -c 1-8`
+ export reg="hi hi"
+ export cyc=12
+ export strhr=03
+ export endhrs=12
+ export incr=03
+ export plotarea=dset
+fi
+set -A reg ${reg}
+
+export rootd=/meso/save/$USER/gempak
+
+if [ $plotarea = dset ];then
+  set -A drt ${reg[*]}
+else
+  set -A drt $plotarea $plotarea
+fi
+
+export wkdir1=/stmp/$USER/smartplt/${drt[0]}${cyc}
+export wkdir2=/stmp/$USER/smartplt/${can}${drt[0]}${cyc}
+export wkdifdir=/stmp/$USER/smartplt/gemdif${drt[0]}
+
+export scrdir=${rootd}/sfcplot/smart 
+export webrt=/home/people/emc/www/htdocs/mmb/aq/smart
+
+cd $wkdir1
+#===========================USER SETS===================================
+typeset -Z2 endhrs cyc avghr fhr
+
+  let fhr=$strhr
+  while [ $fhr -le $endhrs ];do 
+
+#   SCP all gif files for current variable plots to web
+    if [ $iftp -eq 1 ];then
+      echo;echo FTP smartinit Model plots for cycle $cyc $ymd FHR $fhr  
+      echo REGION ${drt}  $can  ENDHRS $endhrs
+
+      cd $wkdir1
+      echo `pwd` 
+      ls *$fhr.gif
+      chmod 755 *${fhr}.gif
+      ssh wd22jm@emcrzdm.ncep.noaa.gov "mkdir -p $webrt/$ymd$cyc/" >sm.out 2>&1
+      scp -p *${fhr}.gif wd22jm@emcrzdm.ncep.noaa.gov:$webrt/$ymd$cyc >sm.out 2>&1
+
+      cd $wkdir2
+      echo `pwd` 
+      ls *$fhr.gif
+      chmod 755 *${fhr}.gif
+      scp -p *${fhr}.gif wd22jm@emcrzdm.ncep.noaa.gov:$webrt/$ymd$cyc >sm.out 2>&1
+
+      cd $wkdifdir
+      echo `pwd` 
+      ls *$fhr.gif
+      chmod 755 *${fhr}.gif
+      scp -p *${fhr}.gif wd22jm@emcrzdm.ncep.noaa.gov:$webrt/$ymd$cyc >sm.out 2>&1 
+    fi
+    let fhr=$fhr+$incr
+  done
+rm -f sm.out
