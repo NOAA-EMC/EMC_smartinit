@@ -1,0 +1,248 @@
+#!/bin/ksh
+echo "======================================================="
+echo 'into' $0 $1 $2 $3 $4 $5 $reg
+
+set -x
+#####################################################################
+#  Script to produce NAWIPS gridded difference plots
+#  Input files:
+#     MDL GEMPAK pressure grib file: nam.gem
+#    NOTE set nam file directory in var rootd below
+#    NOTE set nam file name format in var mdlfile below
+#####################################################################
+dev=GIF
+if [ -z "$plotarea" ];then plotarea=dset;fi
+
+# rootd defined in parent job
+rootd=/stmp/$USER
+
+# export From parent job: 
+# cycle: run cycle eg: 00, 06, 12, 18...
+# fhr: forecast hour eg: from 0 to 84...
+# VARB: GEMPAK VARIABLE NAME: eg: tmpc, dwpc, p06i...
+# mdlin: mdls to plot diff: eg: nam, namy, aqm,obs
+# REG:  mdltypes to plot diff: eg: conus,conusnest...
+# glevel: variable vertical level
+
+set -A REG $REG
+
+# Assume control directory name prefix is gemcan
+set -A dirin  ${rootd}/gemp6${REG[0]} ${rootd}/gem${REG[1]}
+
+#===========================================================
+#=SET GRAPHICS DEFAULTS based on area: line, text, mapfile...
+#===========================================================
+
+# SET label for plot file name (gpoint)
+gpoint=`echo ${REG[0]} |cut -c 1-3 `
+
+# COLOR BAR: color/V/Location/Starting x;y/box length;width/label location
+clrbar="1/V/LL/.001;.3/.5;.02/-1"
+
+case ${REG[0]} in
+  sv )
+    mapf="HICNUS.NWS + HISTUS.NWS "
+    filter=NO
+    skipv="/1;1";;
+  dset|conus|conusnest )
+    mapf="HISTUS.NWS + HIPOWO.CIA "
+    filter=YES
+    skipv="4/20;20"
+    line="1/1/3/0/2/2/T"
+    TTEXT="0.9/22/0.9/221///SW";;
+  * )
+    mapf="HISTUS.NWS + HIPOWO.CIA "
+    filter=YES
+    skipv="2/3;3"
+#TEXT size/font/width/border/rotation/justification/HW or SW
+    TEXT="1.0/22/1.0/221///SW"
+#LINE color/type/width/label frequency/smoothing/filter/suppress small contours 
+    line="1/1/3/2/2/2/F";;
+esac
+
+#=====END USER SETS============================================
+typeset -Z2 cyc fhr avghr 
+
+#  avghr, yyyymmdd defined in parent job
+yymmdd=`echo $yyyymmdd | cut -c 3-8`
+echo DATE to PLOT: $yyyymmdd
+
+vhdrm=`echo $VARB |cut -c1-2`
+export vhdr=`echo $VARB |cut -c1-4` 
+if [ "$vhdrm" = "P0" ];then export vhdr=$VARB;fi
+
+type=f
+dir=`pwd |cut -d/ -f4`
+title="$dir _ valid  ~ "
+
+#Set vertical coordinite
+HYBL=`echo $glevel |cut -c 1-1`
+echo GLEVEL $glevel $VARB
+case $glevel in
+             0 ) coord=none;;
+          2|10 ) coord=HGHT;;
+     [11-1099] ) if [ $HYBL != H ];then coord=PRES;fi;;
+  [1100-99999] ) coord=SGMA;;
+     PBLR|LLTW ) coord=$glevel;glevel=0;;
+            *  ) echo "HYBRID LEVEL ASSUMED" $glevel;;
+esac
+if [ $HYBL = H ];then 
+  coord=HYBL
+  glevel=`echo $glevel|cut -c 2-3` 
+fi
+
+case $vhdr in 
+ TMPF|DWPF|TMPC|TMXK|TMNK|VSBY )
+   fint="1/0.2/10"
+   FLINE="0;30-14;0";;
+ SPFH )
+   fint=".0005/0.0005/.001"
+   FLINE="0;15-25;0";;
+ RELH|MINR|MAXR )
+   fint="2/0.2/10"
+   FLINE="0;19-25";;
+ SPED|GUST )
+   FLINE="0;28-16" 
+   fint="1/0.2/10";;
+ ZPBL )
+   fint="50"
+   title="  _ (m) valid ? ~ ";;
+ TCLD|CLD )
+   fint="1/0.2/10"
+   FLINE="0;18-25"
+   title=" TOTAL  _ (%) valid ? ~ ";;
+ OMEG )
+   VARB="MUL(OMEG,-3600.)"
+   fint="5"
+   FLINE="0;24-14"
+   title=" Vertical Motion (cm/s) valid ? ~ ";;
+ DIST|HGHT )
+   cint=100
+   line2="0;20-31"
+ *) 
+   FLINE="0;30-14"
+   fint="1/0.2/10";;
+esac      
+cint=0
+if [ $vhdrm = P0 ];then
+  fint=".005;.01;.1;.25;.5;.75;1.0"
+  FLINE="0;18-28"
+  export coord=none
+  glevel=0
+fi
+
+#===========================================================
+#  CREATE MODEL DIFFERENCE PLOTS
+#=========================================================== 
+let plt=0
+for mdl in ${mdlin[*]};do 
+  case $mdl in
+    nam| namx| namy )
+      export HOLDIN=${dirin[plt]}
+      GRD=smart${REG[plt]} 
+      MDL=$mdl
+      gemfl[$plt]=${HOLDIN}/$mdl$GRD.gem$fhr;;
+   nmm )
+#    NAM  NEST file 
+     skipv="/2;2"
+     export HOLDIN=/com/nam/prod/nam.$yyyymmdd
+     GRD=hiresf
+     MDL=$mdl
+     gemfl[$plt]=${HOLDIN}/$mdl$GRD.gem$fhr;;
+  esac 
+
+  if [ -s "${gemfl[plt]}" ];then
+   echo "GEMFILE : " ${gemfl[plt]} FOUND 
+  else
+   echo "INPUT GEMFILE FILE" ${gemfl[plt]} "NOT FOUND"
+   exit
+  fi
+  let plt=$plt+1
+done
+    
+#=======================================================
+# plot mdl differences
+echo Running $0 for $mdlin  on GRID $GRD for Cycle $cyc $yyyymmdd
+echo VARB = $VARB on $coord Surfaces at level $glevel
+#=======================================================
+plotfile=${mdl}${gpoint}${VARB}_DIFF${fhr}.gif
+
+#   AQM PRECIP is accumulated to 3 hours and then dumped (P01I, P02I, P03I)
+if [ $vhdrm = P0 ]; then
+   apcp=$((fhr%3))
+   if [ $apcp -eq 0 ];then apcp=3;fi
+   VARB="P0${apcp}I"
+   echo APCP $apcp VARB $VARB
+ fi
+
+#=========================================================
+# Plot model Maps
+#=========================================================
+gemhr="${yymmdd}/${cyc}00F0${fhr}"
+ gemhr="f${fhr}"
+
+typeset -Z2 fhr1 fhr2 
+if [ $avghr -gt 0 ];then
+  let fhr1=$fhr-$avghr+1
+  let fhr2=$avghr+$fhr1-1
+  if [ $VARB = $VARBAVG ];then gemhr="F0$fhr1:F0$fhr2";fi
+fi
+echo VARB $VARB VARBAVG $VARBAVG $gemhr $coord $glevel 
+
+# Negate the colors ahead of time except white and black
+gpcolor>gdplotdiff$vhdr.log << EOFC
+COLORS="0=255:255:255;31=0:173:220;30=109:200:191;29=0:166:81"
+DEVICE   = ${dev}|${plotfile}|800;850
+l
+r
+#COLORS="28=226:234:50;27=255:242:0;26=255:209:5"
+#COLORS="25=255:153:0;24=255:0:0;23=220:28:36;22=180:39:45;21=223:115:255"
+#COLORS="20=169:0:230;19=115:0:76"
+
+ex
+EOFC
+
+gdplot2 >gdplotdiff$vhdr.log << EOF
+  GDFILE   = "${gemfl[0]} + ${gemfl[1]}"     
+  GDATTIM  = $gemhr    
+  GLEVEL   = $glevel                   
+  GVCORD   = $coord                   
+  GDPFUN   = abs(sub(${VARB},${VARB}+2))
+  CINT     = $cint                     
+  LINE     = $line                    
+ \$MAPFIL = $mapf
+  MAP      = "1/2/2 + 1/1/2"
+  BORDER   = 1
+  WIND     = 
+  TITLE    = "1.5/-1/${title}"       
+  DEVICE   = ${dev}|${plotfile}|800;850
+  SATFIL   =
+  RADFIL   =
+  PROJ     = $proj
+  GAREA    = $plotarea
+  CLEAR    = n                      
+  PANEL    = .1;.1;.9;.9/1/1/3/PLOT  
+  TEXT     = $TTEXT
+  SCALE    = 0
+  LATLON   = 0
+  HILO     = 0
+  HLSYM    = 0
+  CLRBAR   = $clrbar      
+  CONTUR   = 0
+  FINT     = $fint       
+  FLINE    = $FLINE     
+  TYPE     = $type     
+  LUTFIL   =
+  STNPLT   =
+  IJSKIP   = 
+  SKIP     =
+  FILTER   = 
+l
+r
+\
+
+ex
+EOF
+
+gpend
+exit

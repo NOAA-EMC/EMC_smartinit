@@ -1,0 +1,285 @@
+#!/bin/ksh
+echo "======================================================="
+echo 'into' $0 $1 $2 $3 $4 $5 $reg
+
+###set -x
+#####################################################################
+#  Script to produce NAWIPS gridded difference plots
+#  Input files:
+#     MDL GEMPAK pressure grib file: nam.gem
+#    NOTE set nam file directory in var rootd below
+#    NOTE set nam file name format in var mdlfile below
+#####################################################################
+dev=GIF
+if [ -z "$plotarea" ];then plotarea=dset;fi
+
+# Set ovly=y to plot topo on top of difference fields
+ovly=n
+
+# rootd defined in parent job
+rootd=/stmp/$USER
+
+# export From parent job: 
+# cycle: run cycle eg: 00, 06, 12, 18...
+# fhr: forecast hour eg: from 0 to 84...
+# VARB: GEMPAK VARIABLE NAME: eg: tmpc, dwpc, p06i...
+# mdlin: mdls to plot diff: eg: nam, namy, aqm,obs
+# reg:  mdltypes to plot diff: eg: conus,conusnest...
+# glevel: variable vertical level
+
+set -A reg ${reg[*]}
+
+# Assume control directory name prefix is gem${can}
+set -A dirin  ${rootd}/smartplt/p6${reg[0]}${cyc} ${rootd}/smartplt/${reg[1]}${cyc}
+
+#===========================================================
+#=SET GRAPHICS DEFAULTS based on area: line, text, mapfile...
+#===========================================================
+
+# SET label for plot file name (gpoint)
+#TEST gpoint=`echo ${reg[0]} |cut -c 1-3 `
+gpoint=${reg}
+
+inest=`echo $reg|awk '{ print( index($0,"nest") )}' `
+
+# COLOR BAR: color/V/Location/Starting x;y/box length;width/label location
+clrbar="1/V/LL/.001;.3/.5;.02/-1"
+
+case ${reg[0]} in
+  sv )
+    mapf="HICNUS.NWS + HISTUS.NWS "
+    filter=NO
+    skipv="/1;1";;
+  dset|conus|conusnest )
+    mapf="HISTUS.NWS + HIPOWO.CIA "
+    filter=YES
+    skipv="4/20;20"
+    line="1/1/3/0/2/2/T"
+    TTEXT="0.9/22/0.9/221///SW";;
+  * )
+    mapf="HISTUS.NWS + HIPOWO.CIA "
+    filter=YES
+    skipv="2/3;3"
+#TEXT size/font/width/border/rotation/justification/HW or SW
+    TEXT="1.0/22/1.0/221///SW"
+#LINE color/type/width/label frequency/smoothing/filter/suppress small contours 
+    line="1/1/3/2/2/2/F";;
+esac
+
+
+#=====END USER SETS============================================
+typeset -Z2 cyc fhr avghr 
+
+#  avghr, yyyymmdd defined in parent job
+yymmdd=`echo $yyyymmdd | cut -c 3-8`
+echo DATE to PLOT: $yyyymmdd
+
+vhdrm=`echo $VARB |cut -c1-2`
+export vhdr=`echo $VARB |cut -c1-4` 
+if [ "$vhdrm" = "P0" ];then export vhdr=$VARB;fi
+
+type=f
+dir=`pwd |cut -d/ -f1`
+#title="$dir _ valid  ~ "
+title="EXP - OP $mdlin $reg  _ valid  ~ "
+
+#Set vertical coordinite
+HYBL=`echo $glevel |cut -c 1-1`
+echo GLEVEL $glevel $VARB
+case $glevel in
+             0 ) coord=none;;
+          2|10 ) coord=HGHT;;
+     [11-1099] ) if [ $HYBL != H ];then coord=PRES;fi;;
+  [1100-99999] ) coord=SGMA;;
+     PBLR|LLTW ) coord=$glevel;glevel=0;;
+            *  ) echo "HYBRID LEVEL ASSUMED" $glevel;;
+esac
+if [ $HYBL = H ];then 
+  coord=HYBL
+  glevel=`echo $glevel|cut -c 2-3` 
+fi
+
+oclear=y
+if [ $ovly = y ];then
+# plot topo contours on top of diff fields.
+ ogfile=gemfile2
+ ovarb=DIST
+ ocord=PBLR
+ otype=C
+ ocint=200
+ oline="0;20-30/2/2/2/2/2/F"
+ oclear=n
+fi
+
+FLINE="28-23;31;20-12"
+case $vhdr in 
+ TMPF|DWPF|TMPC|TMXK|TMNK|VSBY )
+   fint="-10;-8;-6;-4;-2;-1;1;2;4;6;8;10"
+   FLINE="28-23;31;20-12";;
+ SPFH )
+   fint="-.025;-.020;-.015;-.010;-.005;-.002;.002;.005;.010;.015;.020;.025"
+   FLINE="28-23;31;20-12";;
+ RELH|MINR|MAXR )
+   fint="-30;-25;-20;-15;-10;-5;5;10;15;20;25;30"
+   FLINE="28-23;31;20-12";;
+ SPED|GUST )
+   fint="-10;-8;-6;-4;-2;-1;1;2;4;6;8;10"
+   FLINE="28-23;31;20-12";;
+ ZPBL |DIST  )
+#   title="  _ (m) valid ? ~ "
+   fint="-2500;-1000;-500;-250;-100;-50;50;100;250;500;1000;2500"
+   FLINE="28-23;31;20-12";;
+ TCLD|CLD )
+#   title=" TOTAL  _ (%) valid ? ~ "
+   fint="-40;-30;-20;-10;-5;-1;1;5;10;20;30;40"
+   FLINE="28-23;31;20-12";;
+ OMEG )
+   VARB="MUL(OMEG,-3600.)"
+   fint="5"
+   FLINE="28-23;31;20-12"
+   title=" Vertical Motion (cm/s) valid ? ~ ";;
+ *) 
+   fint="-10;-8;-6;-4;-2;-1;1;2;4;6;8;10"
+   FLINE="28-23;31;20-12";;
+esac      
+cint=0
+if [ $vhdrm = P0 ];then
+  fint="-1;-.75;-.5;-.25;-.1;-.01;.01;.1;.25;.5;.75;1.0"
+   FLINE="28-23;31;20-12"
+  export coord=none
+  glevel=0
+fi
+
+#===========================================================
+#  CREATE MODEL DIFFERENCE PLOTS
+#=========================================================== 
+let plt=0
+for mdl in ${mdlin[*]};do 
+  if [ $inest -gt 0 -a $mdl = smart ];then
+   case ${reg[plt]} in 
+    conusnest|conusnest2p5 )reg=conus;;
+    conusnest2p5) reg=conus2p5;;
+    alaskanest  ) reg=ak;;
+    alaskanest3 ) reg=ak3;;
+    hawaiinest  ) reg=hi;;
+    priconest   ) reg=pr;;
+    * ) reg=`echo $reg |cut -c 1-3`;;
+   esac
+  fi
+  reg[$plt]=$reg
+
+  MDL=$mdl
+  case $mdl in
+    nam| namx| namy )
+      export HOLDIN=${dirin[plt]}
+      GRD=${reg[plt]} 
+      gemfl[$plt]=${HOLDIN}/$mdl$GRD.hiresf.gem$fhr;;
+    smart )
+      export HOLDIN=${dirin[plt]}
+      GRD=${reg[plt]} 
+      gemfl[$plt]=${HOLDIN}/$mdl$GRD.gem$fhr;;
+   nmm )
+#    NAM  NEST file 
+     skipv="/2;2"
+     export HOLDIN=/com/nam/prod/nam.$yyyymmdd
+     GRD=hiresf
+     gemfl[$plt]=${HOLDIN}/$mdl$GRD.gem$fhr;;
+  esac 
+
+  if [ -s "${gemfl[plt]}" ];then
+   echo "GEMFILE : " ${gemfl[plt]} FOUND 
+   ln -fs ${gemfl[plt]} gemfile$((plt+1))
+  else
+   echo "INPUT GEMFILE FILES" ${gemfl[plt]} "NOT FOUND"
+   exit
+  fi
+  let plt=$plt+1
+done
+    
+#=======================================================
+# plot mdl differences
+echo Running $0 for $mdlin  on GRID $GRD for Cycle $cyc $yyyymmdd
+echo VARB = $VARB on $coord Surfaces at level $glevel
+#=======================================================
+plotfile=${mdl}${gpoint}${VARB}_DIFF${fhr}.gif
+
+#   AQM PRECIP is accumulated to 3 hours and then dumped (P01I, P02I, P03I)
+if [ $vhdrm = P0 ]; then
+   apcp=$((fhr%3))
+   if [ $apcp -eq 0 ];then apcp=3;fi
+   VARB="P0${apcp}I"
+   echo APCP $apcp VARB $VARB
+ fi
+
+#=========================================================
+# Plot model Maps
+#=========================================================
+gemhr="${yymmdd}/${cyc}00F0${fhr}"
+# gemhr="f${fhr}"
+
+typeset -Z2 fhr1 fhr2 
+if [ $avghr -gt 0 ];then
+  let fhr1=$fhr-$avghr+1
+  let fhr2=$avghr+$fhr1-1
+  if [ $VARB = $VARBAVG ];then gemhr="F0$fhr1:F0$fhr2";fi
+fi
+echo VARB $VARB VARBAVG $VARBAVG $gemhr $coord $glevel 
+
+# Negate the colors ahead of time except white and black
+gpcolor>gdplotdiff$vhdr.log << EOFC
+COLORS="0=255:255:255;30=109:200:191;29=0:166:81"
+DEVICE   = ${dev}|${plotfile}|800;850
+l
+r
+#COLORS="28=226:234:50;27=255:242:0;26=255:209:5"
+#COLORS="25=255:153:0;24=255:0:0;23=220:28:36;22=180:39:45;21=223:115:255"
+#COLORS="20=169:0:230;19=115:0:76"
+
+ex
+EOFC
+
+gdplot2 >>gdplotdiff$vhdr.log << EOF
+  GDFILE   = gemfile1 + gemfile2  ! $ogfile
+  GDATTIM  = $gemhr    
+  GLEVEL   = $glevel                         ! 0
+  GVCORD   = $coord                          ! $ocord
+  GDPFUN   = sub(${VARB},${VARB}+2)          ! $ovarb
+  CINT     = $cint                           ! $ocint
+  LINE     = $line                           ! $oline
+ \$MAPFIL = $mapf
+  MAP      = "32/2/2 + 32/1/2"
+  BORDER   = 1
+  WIND     = 
+  TITLE    = "1.5/-1/${title}"               ! 0
+  DEVICE   = ${dev}|${plotfile}|800;850
+  SATFIL   =
+  RADFIL   =
+  PROJ     = $proj
+  GAREA    = $plotarea
+  CLEAR    = $oclear                         ! y
+  PANEL    = .1;.1;.9;.9/1/1/3/PLOT          ! ".1;.1;.9;.9/1/1/3/PLOT"
+  TEXT     = $TTEXT
+  SCALE    = 0
+#      LATLON   = 4/8/1/1/0.5;0.5
+  LATLON   = 0
+  HILO     = 0
+  HLSYM    = 0
+  CLRBAR   = $clrbar                         ! 0
+  CONTUR   = 0
+  FINT     = $fint                           ! 0
+  FLINE    = $FLINE                          ! 0
+  TYPE     = $type                           ! $otype
+  LUTFIL   =
+  STNPLT   =
+  IJSKIP   = 
+  SKIP     =
+  FILTER   = 
+l
+r
+\
+
+ex
+EOF
+
+gpend
+exit

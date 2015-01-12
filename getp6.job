@@ -1,0 +1,29 @@
+#!/bin/ksh --login
+
+#BSUB -J getp6
+#BSUB -oo /stmpp1/Jeff.McQueen/smartplt/getp6sm.out
+#BSUB -eo /stmpp1/Jeff.McQueen/smartplt/getp6sm.out
+#BSUB -n 1
+#BSUB -W 01:00
+#BSUB -R span[ptile=1]
+#BSUB -R rusage[mem=200]
+#BSUB -R "affinity[core]"
+#BSUB -x
+#BSUB -q transfer
+
+# copy grib files from cirrus to wcoss p6 directory
+# called by plotmet.job
+
+echo   CCS DIR $cgribd2   MDL: $mdl   REG: $reg   CYC: $cyc 
+echo WCOSS DIR $gribd2    MDL: $mdl
+cd $gribd2
+
+typeset -Z2 fhr
+fhr=$strhr
+while [ $fhr -le $endhrs ];do
+  echo SCP ${mdlfrt}f${fhr}.tm00
+  scp -p wx22mc@cirrus:${cgribd2}/${mdlfrt}${fhr}.tm00 .
+  ((fhr=fhr+incr))
+done
+echo "GET P6 FILES ftpd COMPLETED"
+ls -ltr $mdlfrt*.tm00

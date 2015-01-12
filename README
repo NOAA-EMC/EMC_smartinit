@@ -1,0 +1,79 @@
+
+6/21/2013
+make-sfc.sh : added overlay option of barbs for wind speed
+
+07/15/2013  :  ALL (RUN_GEM, plotmet.job, plotdiff.job, make-sfc.sh, plotdiff.sh, ftpmet.job)
+* Option to set mdl=nam to plot nam or nam nests (depending on reg identifier)
+  Otherwise set mdl=smart to plot smartinit output from $mdld files
+* mdld option to set sub-directory to plot smart guam gfs vs hiresw downscaled output
+
+getp6.job, plotmet.job: added checks for noscrub p6 file availability (pgribd2 varb)
+                        Reduced cp of com_p6 files to just strhr-endhrs with incr
+                          and exact filename 
+                          using mdlt varb=hiresf,awip12,""
+                          eg: nam.t12z.conusnest.hiresf03.tm00
+                              nam.t12z.awip12f03.tm00
+                              nam.t12z.smartconusHH.tm00 
+
+RUN_GEM, plotmet.job : Added option for different plotareas for a given region besides dset
+                       using plotarea variable  (dset, nyc*...)
+
+09/30/2013:  RUN_GEM, plotmet.job :
+Changed to compare NAM nest vs SMARTINIT
+mdl=nam smart
+make-sfc.sh : Fixed title to add PROD or EMC PARA
+For Hawaii, extended ENDHRS=60
+
+10/01/2013: plotdiff.job, sh
+Allowed difference plots from two different models (eg: nam - smart)
+plotdiff.sh only:
+Allowed difference plots from two different variables at different vertical levels and coord
+  eg: gdpfun=(TMPF @2 %HGHT, TMPF+2 @0 %NONE)
+      gdpfun=(VARB @glevel %coord, VARB+2 @oglvl %ocord)
+
+crontab, plotdiff.job :
+Create Plots for all 4 NAM smartinit cycles
+
+10/02/2013 : plotmet.job, sh
+* Fixed plots for ak3 and conus2p5 nam nest vs smart comparisons
+* Fixed FTP_MET to ftp 60 hours hi and ak3, conus2p5 plots
+smart.html.base
+* changed reg names to ak3 and conus2p5
+RUN_GEM, plotmet.job, sh
+* Fixed export of mdlin array to jobs and scripts
+* Fixed plotdiff calls from RUN_GEM for only hi, ak3 and conus2p5 (same grids as nam nest)
+
+10/03/2013: plotdiff.sh
+* Fixed reg = smart region (eg: hi, ak3..) to match plotmet dirs
+  where all dirs use smart reg nomenclature rather than nam
+
+10/04/2013 :plotdiff.sh, plotmet.sh
+* Added option to have different varb for each model (ovarb)
+* Used for PBL where NAM = ZPBL at level 0 and vert coord none
+                   SMART = DIST at level 0 and vert coord PBLR
+* Tried to fix for GUST and CLD but these fields are not available 
+  in NAM prod gemfiles.  They are produced for my EMC Para smartinit files.
+* NOTE : This option assumes that the 2nd model is smart DNG product
+* Added differencing for all grids.
+10/07/2013: plotmet.sh
+* Changed TMPF,DWPF contours to winter season ranges
+
+11/13/2013: plotmet.sh
+* Tested and modified sfmap overlay plots
+* added wind speed plot in knts (VARB=SKNT)
+* Added stnplt for zoomed maps
+* Added HAINES and LMXL (haines level) option
+plotdiff.sh
+* Added sfmap overlay plot (winds) not tested
+* Added wind speed plot option in knts
+* Added stnplt for zoomed maps
+
+11/18/2013: RUN_GEM
+* Set up to copy obsdata from tempest
+* Set up to plot yesterday's smartinit in order to overlay obs
+* Added HAINES, NMXL plots
+plotmet.sh:
+* fixed skipv to only skip vectors if overlay=r
+  otherwise, conus skipping produces bulls eyes in color filled field
+* Checked to see if parent gem file is created if plotting several sub regions
+  from the same gem file

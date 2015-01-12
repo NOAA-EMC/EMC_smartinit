@@ -1,0 +1,155 @@
+#BSUB -n 1
+#BSUB -W 02:00
+#BSUB -P RTMA
+#BSUB -q dev
+#BSUB -R "span[ptile=1]"
+#BSUB -R rusage[mem=1000]
+export envir=dev
+
+#===========================================================
+# plotdiff.job  job to create gempak diff plots    
+# Calls: plotdiff.sh
+# Jeff McQueen 12/12
+#===========================================================
+#*********** CANNED        TEST      
+set -A mdlin ${mdlin[*]}
+
+# export plotarea="36.0;-82;42.;-73.0"
+# export plotarea=dset
+
+iftp=0
+export endhrs=$ENDHRS
+export incr=$INCR
+export avghr=0
+set -A reg ${reg[*]}
+if [ -z "$cyc" ];then
+  export strhr=00
+  export endhrs=12
+  let incr=03
+  export cyc=12
+  set -A mdlin nam smart
+  set -A reg hawaiinest hi
+  export plotarea=dset
+  export pltcfg=test
+fi
+set -A mdld ${mdld[*]}
+export mdld=${mdld[0]}
+echo MDLD $mdld
+
+export gpoint=${reg[0]}
+if [ ${mdlin[1]} = smart ];then gpoint=${reg[1]};fi
+
+# To plot subdomain of a grid, give a unique dir name
+if [ $plotarea != $gpoint -a $plotarea != dset ];then export gpoint=${reg}${plotarea};fi
+export gpoint=`echo $gpoint |cut -d"*" -f1`
+
+echo PLOTDIFF-JOB  MDL $mdl  REG ${reg[*]}  PLTCFG $pltcfg  PLOTAREA $plotarea
+
+# export yyyymmdd=`/nwprod/util/exec/ndate |cut -c 1-8`
+export yyyymmdd=$ymd
+
+export rootd=/stmpp1/$USER/smartplt
+
+export wkdir=$rootd/gemdif${mdld}${gpoint}
+
+export scrdir=/meso/save/${USER}/gempak/sfcplot/smart 
+
+export webrt=/home/people/emc/www/htdocs/mmb/aq/smart
+
+export obsd=/ptmpp1/${USER}/gemfiles
+
+rm -rf $wkdir
+mkdir -p $wkdir
+cd $wkdir
+echo GEMDIFF WKDIR ${wkdir}
+
+cp $scrdir/namsminit_ncepgrib2.tbl $wkdir/ncepgrib2.tbl
+cp $scrdir/namsminit_ncepgrib129.tbl $wkdir/ncepgrib129.tbl
+cp $scrdir/namsminit_wmogrib2.tbl $wkdir/wmogrib2.tbl
+cp $scrdir/namsminit_vcrdgrib1.tbl $wkdir/vcrdgrib1.tbl
+if [ -s ${obsd}/${ymd}.sfc ];then
+  cp -p $obsd/${ymd}.sfc $wkdir
+  echo PLOTDIFF: OBSFILE ${obsd}/${ymd}.sfc FOUND
+else
+  echo PLOTDIFF: OBSFILE ${obsd}/${ymd}.sfc NOT FOUND
+fi
+
+
+if [ ${mdlin[0]} = nam ];then
+  if [ $endhrs -le 60 ];then
+    mdlt=".hiresf"     #NAM NEST File type identifier
+    REGT=${reg}
+  else
+    mdlt=awip;REGT=12;reg[0]=$REGT;   # NAM PARENT GRIB FILE type identifier
+  fi
+  export gribd=/com/${mdld}/prod/${mdld}.$ymd         #NAM PROD
+  export mdlfrt=${mdld}.t${cyc}z.${REGT}${mdlt}
+else   # SMART DNG file
+  mdlt=$mdlin
+  REGT=${reg}
+  export gribd=/com/${mdld}/prod/${mdld}.$ymd         #NAM PROD
+  export mdlfrt=${mdld}.t${cyc}z.${mdlt}${REGT}
+fi
+
+#===========================USER SETS===================================
+# Define variables to plot based on WMO GRIB Table 141 used by nagrib
+case $pltcfg in 
+  test)
+#  export mdl=nam
+  export avghr=0 
+  set -A varblist TMPF SPED DRCT 
+  set -A glvllist 0 0 0 ;;
+  smart)
+#  set -A varblist TMPF RELH DWPF P03I CLD SPED DRCT HGHT
+  set -A varblist  SPED DRCT TMPF  DWPF
+  set -A glvllist   0    0    0     0;;
+  nam)
+  set -A varblist ZPBL TMPF RELH DWPF P03I CLD  SPED FXSH FXLH SOIM 
+  set -A glvllist 0       2    2    2    0   0    10    0    0    "0:10";;
+  nam2)
+#  export mdl=nam
+  set -A varblist HGHT DRCT SPED RELH DIST
+  set -A glvllist LLTW PBLR PBLR PBLR PBLR;;
+  nmm)
+# NAM Conus nest
+#  export mdl=nmm
+  set -A varblist HGHT ZPBL TMPF SPFH P01I TCLD OMEG
+  set -A glvllist 0    0    2    2    0    0 700;;
+esac  
+
+#=======================================================================
+####typeset -Z2 strhr endhrs cyc avghr fhr incr
+
+export mdlin="${mdlin[*]}"
+export reg=${reg[*]}
+
+. /nwprod/gempak/.gempak >/dev/null 2>&1
+
+cp $scrdir/*nts $wkdir
+rm -f $wkdir/ftpdone
+
+let ivarb=0
+for VARB in ${varblist[*]};do 
+  if [ -z "${glvllist[ivarb]}" ];then
+    export glevel=${glvllist[0]}
+  else
+    export glevel=${glvllist[ivarb]}
+  fi
+  vhdr=`echo $VARB |cut -c1-4`
+  let fhr=$strhr
+  export cyc
+  export VARB
+  export glevel
+
+  while [ $fhr -le $endhrs ];do 
+    export fhr
+    echo;echo Creating $VARB smart diff plots for ${reg} cyc $cyc $yyyymmdd FHR $fhr 
+    echo "PLOTAREA = $plotarea"
+    $scrdir/plotdiff.sh
+    ((fhr=fhr+incr))
+  done
+  ((ivarb=ivarb+1))
+done
+cd $wkdir
+echo `date` >ftpdone
+

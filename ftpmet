@@ -1,0 +1,101 @@
+#BSUB -n 1
+#BSUB -W 03:00
+#BSUB -q transfer
+#BSUB -R span[ptile=1]
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=200]
+#BSUB -P RTMA     
+export envir=dev
+
+# set -x 
+#===========================================================
+# ftpmet.job:  script to ftp gempak plots    
+# Calls: 
+# Jeff McQueen 12/12
+#===========================================================
+
+typeset -Z2 cyc avghr fhr
+export can=d2
+export incr=$INCR
+#The Following CAN BE SET in RUN_ALL or RUN_GEM
+if [ -z "$ymd" ];then
+ export ymd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
+ echo SETTING DEFAULT FTP parameters $ymd
+ export REGION=conus
+ export cyc=12
+ export strhr=03
+ export endhrs=12
+ export incr=03
+ export plotarea=dset
+ export FMDL=nam
+fi
+
+if [ $plotarea != dset -a $plotarea != $REGION ];then
+  set -A drt ${REGION}${plotarea}
+else
+  set -A drt ${REGION}
+fi 
+
+export rootd=/meso/save/$USER/gempak
+export scrdir=${rootd}/sfcplot/smart 
+export webrt=/home/people/emc/www/htdocs/mmb/aq/smart
+if [ $PTYP = diff ];then
+ wkdir1=;wkdir2=;
+ export wkdifdir=$wkroot/gemdif${FMDL}${drt[0]}  
+else
+ export wkdir1=$wkroot/${can}${FMDL}${drt[0]}${cyc}
+ export wkdir2=$wkroot/${FMDL}${drt[0]}${cyc}
+ export wkdifdir=;
+fi
+
+echo "===========================================================================
+echo FTP smartinit Model plots for cycle $cyc $ymd $strhr to $endhrs hrs   incr $INCR
+echo WEB DIR $webrt DATE $ymd CYC $cyc  PTYP $PTYP
+echo "===========================================================================
+echo ftpmet.job wkdir1 $wkdir1
+echo ftpmet.job wkdir2 $wkdir2
+echo ftpmet.job wkdifdir $wkdifdir
+
+ssh wd22jm@emcrzdm.ncep.noaa.gov "mkdir -p $webrt/$ymd$cyc/" >sm.out 2>&1
+fhr=${endhrs}
+#while [ $fhr -le $endhrs ];do 
+  echo;echo $ymd $cyc FHR= $fhr  
+
+# SCP all gif plot files for current variable to web
+  for WKDIR in $wkdir1 $wkdir2 $wkdifdir;do
+    slpdir=0
+    slplim=7200
+    while [ $slpdir -le 600 ];do
+      slpftp=0
+      if [ -s $WKDIR ];then
+        slpdir=9999
+        while [ $slpftp -le $slplim ];do
+          cd $WKDIR 
+          if [ -s ftpdone ];then
+            echo `date +%T` FTPMET:  plot job complete for $WKDIR
+            echo SCP gif files to emcrzdm $webrt/$ymd$cyc 
+            ls *.gif
+            scp -p *.gif wd22jm@emcrzdm.ncep.noaa.gov:$webrt/$ymd$cyc >sm.out 2>&1
+            sleep 10
+            ((slpftp=slplim+100))
+          else
+            echo `date +%T` WAIT for gif plots to complete at $WKDIR  $slpftp
+            sleep 60
+            ((slpftp=slpftp+60))
+            if [ $slpftp -gt $slplim ];then
+              echo `date +%T` FTPMET TIME OUT FOR $WKDIR
+              ls -ltr *.gif
+              scp -p *.gif wd22jm@emcrzdm.ncep.noaa.gov:$webrt/$ymd$cyc >sm.out 2>&1
+              sleep 10
+            fi
+          fi
+        done
+      else
+        echo `date +%T` PLOT DIR $WKDIR NOT FOUND $slpdir
+        ((slpdir=slpdir+60))
+      fi
+    done
+  done
+#  ((fhr=fhr+incr))
+#done
+rm -f sm.out
