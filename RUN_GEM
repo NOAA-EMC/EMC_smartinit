@@ -31,10 +31,10 @@ elif [ $HH -le 20 ];then export cyc=12;
 else
   export cyc=18
 fi
-
 #==============================================================================
-USER SETS
-export pltcfg=smart   #cfg varbs to plt : smart,nam,nam2,nmm,test
+#USER SETS
+#==============================================================================
+export pltcfg=smart   # cfg varbs to plt set in plotmet job : smart,nam,nam2,nmm,test
 
 export strhr=00           # Starting forecast hour
 export ENDHRS=24          # Ending forecast hour
