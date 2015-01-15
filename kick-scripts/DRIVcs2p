@@ -13,8 +13,8 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.3.2
-export code_ver=v3.3.2
+export model_ver=v3.4.0
+export code_ver=v3.4.0
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 export RUN_ENVIR=emc
@@ -46,7 +46,10 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #07/13: changed so 00 hr comes from parent nam for conus,ak,hi,pr (ecf scripts file)
 #domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
 
+#====================================================================
 domains="conusnest2p5 conus  hi pr ak aknest3 "
+#====================================================================
+
 for RUNTYP in $domains  $domhrw $domdgx ;do
   export ENDHRS=12
   export mdl=nam
