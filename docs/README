@@ -611,3 +611,8 @@ VERS 3.3.2 frozen
 
 * sorc/VADJUST.f90
   - Turned on wind adjustment at coastlines when NAM thinks gridpoint is over water
+
+1/15/15  V3.4.0
+* sorc/MAIN.f90 : Fixed Haines Index calculation
+
+
