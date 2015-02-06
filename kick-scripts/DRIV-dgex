@@ -13,8 +13,8 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.3.2 
-export code_ver=v3.3.2
+export model_ver=v3.4.0 
+export code_ver=v3.4.0
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
 export RUN_ENVIR=emc
@@ -33,7 +33,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#TEST export cyc=06  #TEST
+export cyc=06  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 

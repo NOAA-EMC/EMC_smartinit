@@ -101,7 +101,7 @@
         read (46) topo_ndfd
         close (46)
      
-!  Read in 5 km vegetation for CONUS domain
+!       Read in 5 km vegetation for CONUS domain
         open (48, file='LANDNDFD', form='unformatted')
         read (48) veg_ndfd
         close (48)
@@ -110,10 +110,12 @@
         rghlim=0.5
         veglim=0.5
         scale=100.
-        ivgid=81 ! all grids including CS2P grid 187 Extended CONUS, 0=water
-       if (region .eq. 'CS2P') ivgid=225 ! CS2P grid 184, Veg type, 16=water
 
-        print* , ' set veglim,rghlim to:  ', veglim,rghlim, ivgid
+!      All NDFD grids including Extended CONUS csp2 grid, water=0
+       ivgid=81 
+!      CS2P grid 184, input is Veg type,   water=16
+       if (region .eq. 'CS2P') ivgid=225 
+
         print*, ' gdin%region: ', gdin%region
         print *, 'READ IN NDFD GRIB  TOPO file'
         JGDS=-1
@@ -144,14 +146,12 @@
         CALL RDHDRS(48,49,IGDNUM,GDIN,NUMVAL)
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1;JPDS(7)=0;JGDS=-1
         CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
-        print*, ' min, max of veg_ndfd: ', minval(veg_ndfd),maxval(veg_ndfd),NUMVAL
 
         if (LHIRESW .or. REGION .eq. 'CS2P') then 
           if (region.eq.'CS2P') lconus=.TRUE.
-          lvegtype=.true.   ! or = false, then use veg fraction
+          lvegtype=.true.     ! or = false, then use veg fraction
           where (veg_ndfd.le.0.) veg_ndfd=16. 
         endif
-
         DEALLOCATE(GRID,MASK)
       endif
      
@@ -160,7 +160,7 @@
         veglim=16.
         scale=1.
         print *, 'NDFD Land Mask grid file is VEG Fraction',rghlim, veglim 
-        print *, 'Convert Model land use to VEG Fraction (0-.1)'
+        print *, 'Convert Model land use to VEG Fraction (0.0 or 0.1)'
         where(veg_nam_ndfd.eq.16.) veg_nam_ndfd = -1.
         where(veg_nam_ndfd.ne.16. .and. veg_nam_ndfd.gt.0.) veg_nam_ndfd = 0.10
         where(veg_nam_ndfd.eq.-1.) veg_nam_ndfd =  0.
@@ -168,6 +168,7 @@
 
       print *,'NDFD TOPO: ',MINVAL(topo_ndfd),MAXVAL(topo_ndfd)
       print *,'MDL  TOPO: ',MINVAL(zsfc),MAXVAL(zsfc)
+      print* , 'veglim,rghlim: ', veglim,rghlim, ' grib vgid: ', ivgid
       print *,'NDFD MASK: ',MINVAL(veg_ndfd),MAXVAL(veg_ndfd)
       print *,'MDL  MASK: ',MINVAL(veg_nam_ndfd),MAXVAL(veg_nam_ndfd)
       print *,'MDL Q :       ',MINVAL(q),MAXVAL(q)

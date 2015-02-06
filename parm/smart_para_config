@@ -29,6 +29,7 @@ export nam_ver=v3.1.6
 export dgex_ver=v3.1.1
 
 export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
+echo HOMEdng $HOMEdng
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
 export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
