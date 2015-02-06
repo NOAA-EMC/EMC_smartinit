@@ -198,16 +198,16 @@
 !  NEED to check if HGHT is geopotential or just model level hgt
           H1=HGHT(I,J,1)-ZSFC(I,J)
           ZMAX=AMAX1(HGHT(I,J,1),HTOPO(I,J))
-          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
-            DSCALE=0.0
-          else 
+!12-14          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
+!12-14            DSCALE=0.0
+!12-14          else 
             DSCALE=ABS(HGHT(I,J,1) - (HTOPO(I,J)+H1))/ABS(ZMAX)
 !            if (i.eq.300) then
 !              if (j.ge.300.and.j.le.400) then
 !                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
 !              endif
 !            endif
-          endif
+!12-14          endif
           DSCALE=AMIN1(DSCALE,1.0)
           DSCALE=AMAX1(DSCALE,0.0)
           U(I,J)=(PHIIP1-PHIIM1)*DXI*DSCALE+U(I,J)

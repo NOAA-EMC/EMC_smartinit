@@ -14,7 +14,7 @@ export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
 export pldir=/stmpp1/${USER}/smartplt
 #===========================================================
 
-hpssdir=/NCEPDEV/hpssuser/g01/wx22mc
+hpssdir=/NCEPDEV/emc-naqfc/2year/Jeff.McQueen
 hpssexe=/nwprod/util/ush
 
 export wdir=${pldir}/archive

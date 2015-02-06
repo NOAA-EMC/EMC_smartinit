@@ -1,6 +1,6 @@
-#BSUB -J DNG12.pr-12
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/12/list/oDNG12.pr-12
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.3.0/12/list/oDNG12.pr-12
+#BSUB -J DNG12.pr-03
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.pr-03
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.pr-03
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA
@@ -37,6 +37,9 @@
 #   export cyc = 00,06,12,18
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
+
+# TEMPORARY SWITCH for VADJUST wind terrain adjustment
+export IVADJ=${IVADJ:-T}
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
@@ -87,9 +90,11 @@ export RM_TMPDIR=${RM_TMPDIR:-YES}
 # environment. This is used for operational testings
 ###############################################################
 
-if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #NOT FOR NCO
+if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" = prod ];then
  if [ "$envir" != prod ]; then
+   export DBNROOT=/nwprod/spa_util/para_dbn
+   export jlobfile=/com/logs/${envir}/jlogfile
    export SENDDBN=${SENDDBN:-NO}
    export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
    export pcom=${pcom:-/pcom/${envir}/${NET}}
@@ -134,7 +139,7 @@ fi
 export SENDECF=${SENDECF:-YES}
 export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
-export SENDDBN_GB2=${SENDDBN_GB2:-YES}
+#XXW export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 
 ####################################
 # Specify Execution Areas

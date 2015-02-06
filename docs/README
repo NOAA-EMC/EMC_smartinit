@@ -604,3 +604,15 @@ If so, need to recheck dscale computation
 11/19/12z
 * ush awp_dng.sh and parm/util : changed nam/dgex wmo data card file format to "dng" except for gfs
     grib2_awp{mdl}{rgn}{on/off}f{fhr}.{grd}
+
+VERS 3.3.2 frozen
+
+12/1/14  V3.4.0
+
+* sorc/VADJUST.f90
+  - Turned on wind adjustment at coastlines when NAM thinks gridpoint is over water
+
+1/15/15  V3.4.0
+* sorc/MAIN.f90 : Fixed Haines Index calculation
+
+
