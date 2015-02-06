@@ -5,6 +5,8 @@ February 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 - Correction to 2m temperature hour minus 1 and hour minus 2 labels in 3 hourly DNG files
 - Addition of Haines Index Fire weather product to NAM and DGEX CONUS and Alaska DNG grids
   for transmittal through AWIPS
+- Corrected AWIPS Haines Index calculation to use correct dewpoint depression and intercept
+- Limited Haines Index to values between 2-6 (except water=0)
 
 ===================================================================================
 1.  Synchronized NAM/DGEX and GFS smartinit systems
@@ -24,6 +26,9 @@ These now will be labelled correctly.  These fields are only available on ftpprd
 
 3. Addition of Haines Index Fire weather product to NAM and DGEX CONUS and Alaska DNG grids
   for transmittal through AWIPS.
+* Corrected AWIPS Haines Index calculation to use correct dewpoint depression and intercept
+* Limited Haines Index to values between 2-6 (except water=0)
+
 
 * NCO modified the current NAM WMO header data cards and created new DGEX WMO header data cards
 to include Haines Index (Fire Weather) downscaled fields to AWIPS grib2 files for CONUS and Alaska
