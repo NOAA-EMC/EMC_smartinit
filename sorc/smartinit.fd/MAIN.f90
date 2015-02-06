@@ -863,11 +863,11 @@
         TEMP1=real(HAINES)
         CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
 
-        ID(2)=2
-        ID(8)=209;ID(9)=1
-        DEC=1.0
-        TEMP2=real(HLVL)
-        CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+!        ID(2)=2
+!        ID(8)=209;ID(9)=1
+!        DEC=1.0
+!        TEMP2=real(HLVL)
+!        CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
         DEALLOCATE (TEMP1,TEMP2,STAT=kret)
       ENDIF
 
@@ -1553,13 +1553,13 @@
           HLVL(I,J)=0
        endif
 
-       if (i.gt.125 .and. i.lt.150) then
-       if (j.eq.200) then
-         print *,'HAINES ',i,j,HAINES(I,J),HLVL(i,j),RHMOIS
-         print *,'HIT',HAINEST,TMOIS,HAT
-         print *,'HIM',HAINESM,DPMOIS,TDDIFF
-       endif
-       endif
+!       if (i.gt.125 .and. i.lt.150) then
+!       if (j.eq.200) then
+!         print *,'HAINES ',i,j,HAINES(I,J),HLVL(i,j),RHMOIS
+!         print *,'HIT',HAINEST,TMOIS,HAT
+!         print *,'HIM',HAINESM,DPMOIS,TDDIFF
+!       endif
+!       endif
 
       endif
    
