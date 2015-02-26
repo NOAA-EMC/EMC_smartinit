@@ -53,7 +53,7 @@
       print *,'============================================================'
       print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY,stat
 
-!     COMPUTE TERRAIN GRADIENTS AND INITIAL POTENTIAL
+!     COMPUTE TERRAIN GRADIENTS from "obs" ndfd topo AND INITIAL POTENTIAL
       PHI=0.1
       DXI=0.5/DX
       DYI=0.5/DY
@@ -69,14 +69,14 @@
          if (HBAR .LT. 1)HBAR=1.0
          FX=DXI/HBAR
          FY=DYI/HBAR
-         HTOIM1=HTOPO(I,J)
-         HTOJM1=HTOPO(I,J)
-         HTOIP1=HTOPO(I,J)
-         HTOJP1=HTOPO(I,J)
-         IF(validpt(i-1,j)) HTOIM1=HTOPO(I-1,J)
-         IF(validpt(i+1,j)) HTOIP1=HTOPO(I+1,J)
-         IF(validpt(i,j-1)) HTOJM1=HTOPO(I,J-1)
-         IF(validpt(i,j+1)) HTOJP1=HTOPO(I,J+1)
+         HTOIM1=AMAX1(HTOPO(I,J),1.)
+         HTOJM1=AMAX1(HTOPO(I,J),1.)
+         HTOIP1=AMAX1(HTOPO(I,J),1.)
+         HTOJP1=AMAX1(HTOPO(I,J),1.)
+         IF(validpt(i-1,j)) HTOIM1=AMAX1(HTOPO(I-1,J),1.)
+         IF(validpt(i+1,j)) HTOIP1=AMAX1(HTOPO(I+1,J),1.)
+         IF(validpt(i,j-1)) HTOJM1=AMAX1(HTOPO(I,J-1),1.)
+         IF(validpt(i,j+1)) HTOJP1=AMAX1(HTOPO(I,J+1),1.)
 
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
@@ -197,11 +197,17 @@
 !  Using model hght,HGHT, since it is not less than or equal to 0.
 !  NEED to check if HGHT is geopotential or just model level hgt
           H1=HGHT(I,J,1)-ZSFC(I,J)
-          ZMAX=AMAX1(HGHT(I,J,1),HTOPO(I,J))
+          ZNDFD=AMAX1(HTOPO(I,J),1.)
+          ZMAX=AMAX1(ZSFC(I,J),ZNDFD)
+          ZMAX=ABS(ZMAX)
+          DZTOPO=ABS(ZSFC(I,J) - ZNDFD)
+          
+          DSCALE=DZTOPO/ZMAX
+         
 !12-14          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
 !12-14            DSCALE=0.0
 !12-14          else 
-            DSCALE=ABS(HGHT(I,J,1) - (HTOPO(I,J)+H1))/ABS(ZMAX)
+!12-14     DSCALE=ABS(ZSFC(I,J) - HTOPO(I,J))/ABS(ZMAX)
 !            if (i.eq.300) then
 !              if (j.ge.300.and.j.le.400) then
 !                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
