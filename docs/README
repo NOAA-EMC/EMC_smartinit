@@ -619,5 +619,14 @@ VERS 3.3.2 frozen
 *sorc/VADJUST.f90 : Changed DSCALE calculation to be the ratio of  sfc heights
                     (Zndfd - Zmdl)/Zmax
                     where Zmax=max (Zndfd, Zmdl)
+                  : Limited HTOPO (NDFD grid hght) to be greater or equal to 1 m
+                    to avoid problems around areas with topo less than MSL
+
+2/26/15 v3.4.0
+*sorc/VADJUST.f90 : Limited BOTH HTOPO and ZSFC (NDFD and MDL terrain) to be greater than 0 m
+                       --> These changes help Salton sea problem
+                  : Turned back off wind adjustment over water (DSCALE=16)
+                       --> Since it does not help salton sea problem and 
+                           the problem with too much wind adjustment over water returned (see 11/01/2014)
 
 

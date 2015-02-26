@@ -69,14 +69,14 @@
          if (HBAR .LT. 1)HBAR=1.0
          FX=DXI/HBAR
          FY=DYI/HBAR
-         HTOIM1=AMAX1(HTOPO(I,J),1.)
-         HTOJM1=AMAX1(HTOPO(I,J),1.)
-         HTOIP1=AMAX1(HTOPO(I,J),1.)
-         HTOJP1=AMAX1(HTOPO(I,J),1.)
-         IF(validpt(i-1,j)) HTOIM1=AMAX1(HTOPO(I-1,J),1.)
-         IF(validpt(i+1,j)) HTOIP1=AMAX1(HTOPO(I+1,J),1.)
-         IF(validpt(i,j-1)) HTOJM1=AMAX1(HTOPO(I,J-1),1.)
-         IF(validpt(i,j+1)) HTOJP1=AMAX1(HTOPO(I,J+1),1.)
+         HTOIM1=AMAX1(HTOPO(I,J),0.)
+         HTOJM1=AMAX1(HTOPO(I,J),0.)
+         HTOIP1=AMAX1(HTOPO(I,J),0.)
+         HTOJP1=AMAX1(HTOPO(I,J),0.)
+         IF(validpt(i-1,j)) HTOIM1=AMAX1(HTOPO(I-1,J),0.)
+         IF(validpt(i+1,j)) HTOIP1=AMAX1(HTOPO(I+1,J),0.)
+         IF(validpt(i,j-1)) HTOJM1=AMAX1(HTOPO(I,J-1),0.)
+         IF(validpt(i,j+1)) HTOJP1=AMAX1(HTOPO(I,J+1),0.)
 
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
@@ -193,21 +193,17 @@
           UOLD=U(I,J)
           VOLD=V(I,J)
 
-!  DSCALE based on difference in terrain
-!  Using model hght,HGHT, since it is not less than or equal to 0.
-!  NEED to check if HGHT is geopotential or just model level hgt
-          H1=HGHT(I,J,1)-ZSFC(I,J)
-          ZNDFD=AMAX1(HTOPO(I,J),1.)
-          ZMAX=AMAX1(ZSFC(I,J),ZNDFD)
-          ZMAX=ABS(ZMAX)
-          DZTOPO=ABS(ZSFC(I,J) - ZNDFD)
+!  DSCALE based on difference in terrain only
+!  ensure that all topo > 0 for salton sea problem
+          ZNDFD=AMAX1(HTOPO(I,J),0.)
+          ZMDL=AMAX1(ZSFC(I,J),0.)
+          ZMAX=AMAX1(ZMDL,ZNDFD)
+          DZTOPO=ABS(ZMDL - ZNDFD)
           
           DSCALE=DZTOPO/ZMAX
-         
-!12-14          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
-!12-14            DSCALE=0.0
-!12-14          else 
-!12-14     DSCALE=ABS(ZSFC(I,J) - HTOPO(I,J))/ABS(ZMAX)
+
+!        Do not change winds over water  02/15
+         if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16)  DSCALE=0.0
 !            if (i.eq.300) then
 !              if (j.ge.300.and.j.le.400) then
 !                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
