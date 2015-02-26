@@ -113,7 +113,7 @@
 
 !      All NDFD grids including Extended CONUS csp2 grid, water=0
        ivgid=81 
-!      CS2P grid 184, input is Veg type,   water=16
+!      FOR VEG_NDFD CS2P grid 184, input is Veg type:  water=16
        if (region .eq. 'CS2P') ivgid=225 
 
         print*, ' gdin%region: ', gdin%region
