@@ -7,6 +7,7 @@
 module load ibmpe ics lsf
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
+export mdlver=v3.4.0
 ####export yyyymmdd=20140411   #TEST
 
 # Location of smartinit gif plot files
@@ -25,7 +26,7 @@ mkdir -p $wdir
 for mdl in nam;do      
 # Location of smartinit grib files
 #==========================================
-  indir=/ptmpp1/${USER}/${mdl}.${yyyymmdd}
+  indir=/ptmpp1/${USER}/${mdlver}/${mdl}.${yyyymmdd}
 #==========================================
   case $mdl in 
     nam)
