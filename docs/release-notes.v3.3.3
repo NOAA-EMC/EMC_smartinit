@@ -23,8 +23,9 @@ implementation of GFS
 for example, in the 3-h NAM DNG file, 2-m T at hour 1 was labelled as hour 2, and hour 2 was labelled as hour 1.
 These now will be labelled correctly.  These fields are only available on ftpprd.
 
+3.  Minor correction to winds when NDFD topography < 0
 
-3. Addition of Haines Index Fire weather product to NAM and DGEX CONUS and Alaska DNG grids
+4. Addition of Haines Index Fire weather product to NAM and DGEX CONUS and Alaska DNG grids
   for transmittal through AWIPS.
 * Corrected AWIPS Haines Index calculation to use correct dewpoint depression and intercept
 * Limited Haines Index to values between 2-6 (except water=0)
@@ -33,6 +34,7 @@ These now will be labelled correctly.  These fields are only available on ftpprd
 * NCO modified the current NAM WMO header data cards and created new DGEX WMO header data cards
 to include Haines Index (Fire Weather) downscaled fields to AWIPS grib2 files for CONUS and Alaska
 DNG grids. 
+
 In addition all NAM/WMO header data card file name formats using consistent filename structure 
 in util/parm sub-directory.
 New format is now grib2_awp{mdl}dng{domain}{on/off}f{fhr}.{grid}
