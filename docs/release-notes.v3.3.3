@@ -1,0 +1,84 @@
+smartinit.v3.3.3  Q1FY15 
+February 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
+
+- Synchronized NAM and GFS smartinit systems
+- Correction to 2m temperature hour minus 1 and hour minus 2 labels in 3 hourly DNG files
+- Addition of Haines Index Fire weather product to NAM and DGEX CONUS and Alaska DNG grids
+  for transmittal through AWIPS
+- Minor correction to wind adjustment where NDF topo <0 
+- Corrected AWIPS Haines Index calculation to use correct dewpoint depression and intercept
+- Limited Haines Index to values between 2-6 (except water=0)
+
+===================================================================================
+1.  Synchronized NAM/DGEX and GFS smartinit systems
+
+*   The v3.3.3 system includes all changes needed to run downscaling from NAM, DGEX or GFS parent models
+The same executables, smartinit and smartprecip can be used for either parent model.
+Different jobs/scripts/ush codes are provided for each parent model.  
+Currently NAM and DGEX DNG take advantage of this synchronization.  GFS DNG will be upgraded for a future
+implementation of GFS
+
+2.  Correction of 2m Temperature hour minus 1 and hour minus 2 labels in 3 hourly DNG files
+
+* Fixed the mislabelling of the NAM/DGEX off-hour 2-m temperature records in the 3-hourly DNG files; 
+for example, in the 3-h NAM DNG file, 2-m T at hour 1 was labelled as hour 2, and hour 2 was labelled as hour 1.
+These now will be labelled correctly.  These fields are only available on ftpprd.
+
+
+3. Addition of Haines Index Fire weather product to NAM and DGEX CONUS and Alaska DNG grids
+  for transmittal through AWIPS.
+* Corrected AWIPS Haines Index calculation to use correct dewpoint depression and intercept
+* Limited Haines Index to values between 2-6 (except water=0)
+
+
+* NCO modified the current NAM WMO header data cards and created new DGEX WMO header data cards
+to include Haines Index (Fire Weather) downscaled fields to AWIPS grib2 files for CONUS and Alaska
+DNG grids. 
+In addition all NAM/WMO header data card file name formats using consistent filename structure 
+in util/parm sub-directory.
+New format is now grib2_awp{mdl}dng{domain}{on/off}f{fhr}.{grid}
+where
+   mdl=nam/dgex
+   domain=conus/ak/pr/hi
+   grid=   184/91/195/196
+   fhr=00..84 for NAM
+       87..192 for DGEX
+note on/off label not used or needed for dgex.
+
+4. Minor correction to VADJUST.f90 to limit terrain wind adjustment where NDFD topo <0.
+This corrects problems around Salton Sea winds near high terrain where topo gradient is incorrectly calculated.
+   
+ More information is found at the NCO provided documentation:
+
+https://drive.google.com/drive/#folders/0B_-GJGdRdReTci1uTGxiVEpJamc
+
+#===============================================================================
+ IMPLEMENTATION INSTRUCTIONS 
+#===============================================================================
+1. svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/DNG-V3.3.3
+
+
+2.  Build sorc codes smartinit.fd, smartprecip.fd
+        cd smartinit.${model_ver}/sorc/smartinit.fd
+        make
+          This will create smartinit  executable in ../../smartinit.${model_ver}/exec
+        cd ...smartinit.${model_ver}/sorc/smartprecip.fd
+        make
+          This will create smartprecip  executable in ../../smartinit.${model_ver}/exec
+
+3.  Use ...docs/smartinit.ver file if desired to set
+      model_ver=v3.3.3  parameter
+
+4.  See ...docs/bjobcards-dev for recommended limits to use in JNAM_SMINIT jobs.
+    eg:
+#BSUB -W 03:00
+#BSUB -n 1
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=5500]
+#BSUB -q dev
+
+5.  RUNTYP,cyc, ffhr are specified in ecflow scripts provided in smartinit.${model_ver}/ecf directory
+
+
+NOTE: Details on all changes to nam smartinit are found at /meso/save/Jeff.McQueen/smartrun/docs/README
+
