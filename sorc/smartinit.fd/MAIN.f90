@@ -194,8 +194,54 @@
      END SUBROUTINE setphibnd
     END INTERFACE
     END SUBROUTINE vadjust
-    END INTERFACE
     
+    SUBROUTINE wndadj(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE    :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: di(:,:)
+      INTEGER niter,it
+      REAL dxs,dys,ra,dxi,dyi,ddij
+    END SUBROUTINE wndadj
+
+    SUBROUTINE divmin(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE   :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: div(:,:)
+      INTEGER niter,it
+      REAL dxi,dyi
+
+      INTERFACE
+        SUBROUTINE divcel(validpt,u,v,div,nx,ny,dxm,dym,divmax)
+!----------------------------------------------------------------------
+        LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+        REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+        REAL, INTENT(INOUT) :: DIV(:,:)
+        REAL, INTENT(IN) :: DXM,DYM
+        INTEGER, INTENT(IN) :: NX,NY
+        REAL dxi,dyi
+        END SUBROUTINE divcel
+      END INTERFACE
+   END SUBROUTINE divmin
+ END INTERFACE
+
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
