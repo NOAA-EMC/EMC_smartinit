@@ -31,7 +31,7 @@
       real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
       real tmean,dz,theta1,theta6,dx,dy
       logical ladjland,lconus,lnest,lhiresw,lvegtype
-      character cvadj*1
+      character cvadj*1, dmadj*1, woxadj*1
 
  INTERFACE
     SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
@@ -62,6 +62,54 @@
     END INTERFACE
 
     END SUBROUTINE vadjust
+
+    SUBROUTINE wndadj(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE    :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: di(:,:)
+      INTEGER niter,it
+      REAL dxs,dys,ra,dxi,dyi,ddij
+    END SUBROUTINE wndadj
+
+    SUBROUTINE divmin(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE   :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: div(:,:)
+      INTEGER niter,it
+      REAL dxi,dyi
+
+      INTERFACE
+        SUBROUTINE divcel(validpt,u,v,div,nx,ny,dxm,dym,divmax)
+!----------------------------------------------------------------------
+        LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+        REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+        REAL, INTENT(INOUT) :: DIV(:,:)
+        REAL, INTENT(IN) :: DXM,DYM
+        INTEGER, INTENT(IN) :: NX,NY
+        REAL dxi,dyi
+        END SUBROUTINE divcel
+      END INTERFACE
+
+      END SUBROUTINE divmin
+
  END INTERFACE
 
       print *, '***********************************'
@@ -71,6 +119,10 @@
       ispdsfc=1     ! Turn off/on friction adjustment for terrain
       call get_environment_variable("IVADJ",cvadj)  !turn on/off diagnostic wind adjustment
       print *, 'CVADJ for diagnostic wind adjust: ',CVADJ, '   friction adj: ',ispdsfc
+      call get_environment_variable("IDMADJ",dmadj)  !turn on/off diagnostic wind adjustment
+      print *, 'DMADJ for nondivergent wind adjustment (Calmet method): ',DMADJ, '   friction adj: ',ispdsfc
+      call get_environment_variable("IWOXADJ",woxadj)  !turn on/off diagnostic wind adjustment
+      print *, 'WOXADJ for nondivergent wind adjustment (WOX method): ',WOXADJ, '   friction adj: ',ispdsfc
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
       iprt=int(im/2);jprt=int(jm/2)
@@ -361,6 +413,12 @@
 !      Adjust  winds to topography
       if (CVADJ.eq.'T')                           &
       call vadjust(validpt,veg_ndfd,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+
+!      Remove divergence so winds adjust to terrain using calmet method
+      if (DMADJ.eq.'T') call divmin(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+
+!      Remove divergence so winds adjust to terrain using wocss method
+      if (WOXADJ.eq.'T') call wndadj(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
