@@ -53,7 +53,7 @@
       print *,'============================================================'
       print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY,stat
 
-!     COMPUTE TERRAIN GRADIENTS AND INITIAL POTENTIAL
+!     COMPUTE TERRAIN GRADIENTS from "obs" ndfd topo AND INITIAL POTENTIAL
       PHI=0.1
       DXI=0.5/DX
       DYI=0.5/DY
@@ -69,14 +69,14 @@
          if (HBAR .LT. 1)HBAR=1.0
          FX=DXI/HBAR
          FY=DYI/HBAR
-         HTOIM1=HTOPO(I,J)
-         HTOJM1=HTOPO(I,J)
-         HTOIP1=HTOPO(I,J)
-         HTOJP1=HTOPO(I,J)
-         IF(validpt(i-1,j)) HTOIM1=HTOPO(I-1,J)
-         IF(validpt(i+1,j)) HTOIP1=HTOPO(I+1,J)
-         IF(validpt(i,j-1)) HTOJM1=HTOPO(I,J-1)
-         IF(validpt(i,j+1)) HTOJP1=HTOPO(I,J+1)
+         HTOIM1=AMAX1(HTOPO(I,J),0.)
+         HTOJM1=AMAX1(HTOPO(I,J),0.)
+         HTOIP1=AMAX1(HTOPO(I,J),0.)
+         HTOJP1=AMAX1(HTOPO(I,J),0.)
+         IF(validpt(i-1,j)) HTOIM1=AMAX1(HTOPO(I-1,J),0.)
+         IF(validpt(i+1,j)) HTOIP1=AMAX1(HTOPO(I+1,J),0.)
+         IF(validpt(i,j-1)) HTOJM1=AMAX1(HTOPO(I,J-1),0.)
+         IF(validpt(i,j+1)) HTOJP1=AMAX1(HTOPO(I,J+1),0.)
 
          DHDX=(HTOIP1-HTOIM1)*FX
          DHDY=(HTOJP1-HTOJM1)*FY
@@ -179,6 +179,7 @@
       print *,'VADJUST PHI 2 :', MINVAL(PHI(:,:,2)),MAXVAL(PHI(:,:,2))
 
 !     COMPUTE WIND COMPONENTS FROM VELOCITY POTENTIAL
+      iu=0; iv=0; iu5=0; iv5=0
       do j=2,ny-1
       do i=2,nx-1
         if (validpt(i,j)) then
@@ -193,21 +194,23 @@
           UOLD=U(I,J)
           VOLD=V(I,J)
 
-!  DSCALE based on difference in terrain
-!  Using model hght,HGHT, since it is not less than or equal to 0.
-!  NEED to check if HGHT is geopotential or just model level hgt
-          H1=HGHT(I,J,1)-ZSFC(I,J)
-          ZMAX=AMAX1(HGHT(I,J,1),HTOPO(I,J))
-          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16) then
-            DSCALE=0.0
-          else 
-            DSCALE=ABS(HGHT(I,J,1) - (HTOPO(I,J)+H1))/ABS(ZMAX)
+!  DSCALE based on difference in terrain only
+!  ensure that all topo > 0 for salton sea problem
+          ZNDFD=AMAX1(HTOPO(I,J),0.)
+          ZMDL=AMAX1(ZSFC(I,J),0.)
+          ZMAX=AMAX1(ZMDL,ZNDFD)
+          DZTOPO=ABS(ZMDL - ZNDFD)
+
+          DSCALE=DZTOPO/ZMAX
+
+!        Do not change winds over water  02/15
+         if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16)  DSCALE=0.0
 !            if (i.eq.300) then
 !              if (j.ge.300.and.j.le.400) then
 !                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
 !              endif
 !            endif
-          endif
+!12-14          endif
           DSCALE=AMIN1(DSCALE,1.0)
           DSCALE=AMAX1(DSCALE,0.0)
           U(I,J)=(PHIIP1-PHIIM1)*DXI*DSCALE+U(I,J)
@@ -215,19 +218,49 @@
           diffi=U(i,j)-UOLD
           diffj=V(i,j)-VOLD
           if (abs(diffi).gt.10. ) then
+            iu=iu+1
+            print*, 'diffi=',diffi
             if(diffi.gt.10) diffi=10
             if(diffi.lt.-10) diffi=-10
             U(I,J)=UOLD+diffi
             print *, i,j,'DIFFU', diffi,diffj,'U ',UOLD, U(I,J),'PHI:',PHIIP1,PHIIM1,'SCAL:',DSCALE
+            print *, i,j,'DIFFU,DIFFV', diffi,diffj,'U ',UOLD, U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
+        wndold = 1.944*sqrt(uold*uold + vold*vold)
+        wndnew = 1.944*sqrt(u(i,j)*u(i,j) + v(i,j)*v(i,j))
+        print*,'wndold,wndnew=',wndold,wndnew
           endif
           if (abs(diffj).gt.10.)  then
+            iv=iv+1
+            print*,'diffj=',diffj
             if(diffj.gt.10) diffj=10
             if(diffj.lt.-10) diffj=-10
             V(I,J)=VOLD+diffj
+          print *, i,j,'DIFFU,DIFFV', diffi,diffj,'V ',VOLD, V(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
+        wndold = 1.944*sqrt(uold*uold + vold*vold)
+        wndnew = 1.944*sqrt(u(i,j)*u(i,j) + v(i,j)*v(i,j))
+        print*,'wndold,wndnew=',wndold,wndnew
+          endif
+          if (abs(diffi).gt.5. ) then
+          print *, i,j,'DIFFU,DIFFV', diffi,diffj,'U ',UOLD, U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
+        wndold = 1.944*sqrt(uold*uold + vold*vold)
+        wndnew = 1.944*sqrt(u(i,j)*u(i,j) + v(i,j)*v(i,j))
+        print*,'wndold,wndnew=',wndold,wndnew
+            iu5=iu5+1
+          endif
+          if (abs(diffj).gt.5. ) then
+          print *, i,j,'DIFFU,DIFFV', diffi,diffj,'V ',VOLD, V(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
+        wndold = 1.944*sqrt(uold*uold + vold*vold)
+        wndnew = 1.944*sqrt(u(i,j)*u(i,j) + v(i,j)*v(i,j))
+        print*,'wndold,wndnew=',wndold,wndnew
+            iv5=iv5+1
           endif
         endif
       enddo
       enddo
+      print *,'total number (diffu) > 10', iu
+      print *,'total number (diffv) > 10', iv
+      print *,'total number (diffu) > 5', iu5
+      print *,'total number (diffv) > 5', iv5
       print *,'VADJUST UWND  :',  MINVAL(U(:,:)),MAXVAL(U(:,:))
       print *,'VADJUST VWND  :',  MINVAL(V(:,:)),MAXVAL(V(:,:))
 
