@@ -1,16 +1,18 @@
 #!/bin/ksh
 
+# move parm files to new filename convention
+
 typeset -Z2 fhr
 mdl=nam
-endhrs=84
+endhrs=60
 
-for rgn in pr hi;do
+for rgn in conus ak;do
   case $rgn in 
-     pr)grd=195;;
-     hi)grd=196;;
+     conus)grd=197;;
+        ak)grd=198;;
   esac
   for cctp in on off;do
-    fhr=03
+    fhr=06
     while [ $fhr -le $endhrs ];do
       ffold=grib2_awp${mdl}smart${rgn}${cctp}f${fhr}.${grd}
       ffnew=grib2_awp${mdl}dng${rgn}${cctp}f${fhr}.${grd}
