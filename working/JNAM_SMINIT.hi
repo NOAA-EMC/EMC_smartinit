@@ -1,9 +1,15 @@
+<<<<<<< .mine
+#BSUB -J DNG12.hi-21
+#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.hi-21
+#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.hi-21
+=======
 #BSUB -J DNG12.hi-03
 #BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.hi-03
 #BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.hi-03
+>>>>>>> .r55579
 #BSUB -n 1
 #BSUB -W 1:00
-#BSUB -P RTMA
+#BSUB -P NAM-T2O
 #BSUB -q dev
 #BSUB -R span[ptile=1]
 #BSUB -R rusage[mem=6000]

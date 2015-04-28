@@ -4,7 +4,7 @@
 #========================================
 
 . /usrx/local/Modules/3.2.9/init/ksh
-module load ibmpe ics lsf
+module load ibmpe ics lsf hpss
 
 export yyyymmdd=`/nwprod/util/exec/ndate -24 |cut -c 1-8`
 export mdlver=v3.4.0
@@ -24,10 +24,12 @@ mkdir -p $wdir
 
 #for mdl in nam dgex;do
 for mdl in nam;do      
+
 # Location of smartinit grib files
 #==========================================
   indir=/ptmpp1/${USER}/${mdlver}/${mdl}.${yyyymmdd}
 #==========================================
+
   case $mdl in 
     nam)
       export regions="conus conus2p5 ak ak3 hi pr"

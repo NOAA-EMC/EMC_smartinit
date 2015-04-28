@@ -33,7 +33,11 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
+<<<<<<< .mine
+#TEST export cyc=12  #TEST
+=======
 export cyc=12  #TEST
+>>>>>>> .r55571
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -51,7 +55,11 @@ domains="conusnest2p5 conus hi pr ak aknest3 "
 #====================================================================
 
 for RUNTYP in $domains  $domhrw $domdgx ;do
+<<<<<<< .mine
+  export ENDHRS=24
+=======
   export ENDHRS=03
+>>>>>>> .r55571
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                          ak_rtmages) ENDHRS=12;;

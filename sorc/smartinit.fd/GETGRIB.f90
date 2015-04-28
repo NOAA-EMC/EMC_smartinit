@@ -634,6 +634,7 @@
        J=K
       ENDDO
 
+
 ! note points that are within bitmap
        VALIDPT=.TRUE.
          WHERE(T(:,:,1).LE.10.) VALIDPT = .FALSE.
@@ -702,6 +703,7 @@
 !   500 mb temperature
       JPDS(7) = 500
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T500,IRET,ISTAT)
+
 
 !   850 mb RH
       J=0

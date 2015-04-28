@@ -11,7 +11,7 @@ jfhr=$2
   echo "#BSUB -eo /stmpp1/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -n 1"                >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -W ${WALLCLK}"       >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -P RTMA"             >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -P NAM-T2O"             >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -q dev"              >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -R "span[ptile=1]""    >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -R "rusage[mem=6000]"" >>bjobcards-dev${RUNTYP}-$jfhr
