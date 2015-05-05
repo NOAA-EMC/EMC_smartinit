@@ -5,6 +5,9 @@
      use aset2d             ! Define 2-d grids
      use asetdown           ! Define downscaled output grids 
      use rdgrib             ! Define grib read routines rdhdrs, setvar
+    USE GRIB_MOD
+    USE pdstemplates
+
 !========================================================================
 !$$$  SUBPROGRAM DOCUMENTATION BLOCK
 !                .      .    .
@@ -54,38 +57,84 @@
 !
 !   REAL,    ALLOCATABLE   :: GRID(:)
    TYPE (GINFO) :: GDIN
+   TYPE(GRIBFIELD):: GFLD, GFLD8
 
     INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
 !-----------------------------------------------------------------------------------------
     INTERFACE
-    SUBROUTINE GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
-    P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
-    S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT)
+!   SUBROUTINE GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+!   P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
+!   S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT)
+!   use grddef
+!   use aset3d
+!   use aset2d
+!   use rdgrib
+!   use constants
+
+!   TYPE (GINFO) :: GDIN
+!   INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+!   INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR
+!   PARAMETER(MBUF=2000000)
+!   CHARACTER CBUF(MBUF)
+!   CHARACTER*80 FNAME
+!   CHARACTER*4 DUM1, REGION, CORE
+!   LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED,LNEST,LHIRESW
+!   INTEGER JENS(200),KENS(200),CYC
+!  INTEGER, INTENT(INOUT) :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
+!  REAL,    INTENT(INOUT) :: P03M(:,:),P06M(:,:),P12M(:,:),SN03(:,:),SN06(:,:)
+!  REAL,    INTENT(INOUT) :: WETFRZ(:,:)
+!  REAL,    INTENT(INOUT) :: THOLD(:,:,:),DHOLD(:,:,:)
+!  REAL,    INTENT(INOUT) :: VEG(:,:)
+!  REAL,    INTENT(INOUT) :: S3REF01(:,:),S3REF10(:,:),S3REF50(:,:)
+!  REAL,    INTENT(INOUT) :: S6REF01(:,:),S6REF10(:,:),S6REF50(:,:)
+!  REAL,    INTENT(INOUT) :: S12REF01(:,:),S12REF10(:,:),S12REF50(:,:)
+!  LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
+!  END SUBROUTINE getgrib
+!--------------------------------------------------------------------------------------
+   SUBROUTINE GETGRIB2(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+   P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
+   S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,&
+   VALIDPT,GFLD,GFLD8)
+
     use grddef
     use aset3d
     use aset2d
     use rdgrib
     use constants
+    USE GRIB_MOD
+    USE pdstemplates
 
-    TYPE (GINFO) :: GDIN
-    INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR
-    PARAMETER(MBUF=2000000)
-    CHARACTER CBUF(MBUF)
-    CHARACTER*80 FNAME
-    CHARACTER*4 DUM1, REGION, CORE
-    LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED,LNEST,LHIRESW
-    INTEGER JENS(200),KENS(200),CYC
-   INTEGER, INTENT(INOUT) :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
-   REAL,    INTENT(INOUT) :: P03M(:,:),P06M(:,:),P12M(:,:),SN03(:,:),SN06(:,:)
-   REAL,    INTENT(INOUT) :: WETFRZ(:,:)
-   REAL,    INTENT(INOUT) :: THOLD(:,:,:),DHOLD(:,:,:)
-   REAL,    INTENT(INOUT) :: VEG(:,:)
-   REAL,    INTENT(INOUT) :: S3REF01(:,:),S3REF10(:,:),S3REF50(:,:)
-   REAL,    INTENT(INOUT) :: S6REF01(:,:),S6REF10(:,:),S6REF50(:,:)
-   REAL,    INTENT(INOUT) :: S12REF01(:,:),S12REF10(:,:),S12REF50(:,:)
-   LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
-   END SUBROUTINE getgrib
+      TYPE (GINFO) :: GDIN
+      TYPE(GRIBFIELD):: GFLD, GFLD8
+      INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
+      INTEGER YEAR,MON,DAY,IHR,DATE,IFHR
+!     INTEGER:: NUMVAL, IMAX, JMAX, KMAX, NUMLEV
+!     INTEGER :: LUB,LUI,J,JDISC,JPDTN,JGDTN
+!     INTEGER,DIMENSION(:) :: JIDS(200),JPDT(200),JGDT(200)
+!     LOGICAL :: UNPACK
+!     INTEGER :: K,IRET, IGDNUM, IGDNUM2, IGDNUM3, IGDNUMSN3, NUMVAL2
+!     INTEGER :: NUMVAL3, NUMVALSN3, IGDNUM5
+!     INTEGER :: LUG6PI, IGDNUM6, NUMVAL6, IGDNUMSN6, NUMVALSN6
+!     INTEGER :: IGDNUM12, NUMVAL12, IGDNUMT, NUMVALT, LUGTI, IT, KRET
+!     INTEGER :: ITOT, KK, NUMVP, NUMVS, IFHR4, IFHR12, KT, LUGTA, LUGTB
+!     INTEGER :: IIH, LL, M, N, I, ISTAT, KF, ISSREF
+      PARAMETER(MBUF=2000000)
+      CHARACTER CBUF(MBUF)
+      CHARACTER*80 FNAME
+      CHARACTER*4 DUM1, REGION, CORE
+      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED, LHIRESW
+      LOGICAL LNEST   ! for nests
+      INTEGER JENS(200),KENS(200),CYC
+      INTEGER, INTENT(INOUT) :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
+      REAL,    INTENT(INOUT) :: P03M(:,:),P06M(:,:),P12M(:,:),SN03(:,:),SN06(:,:)
+      REAL,    INTENT(INOUT) :: WETFRZ(:,:)
+      REAL,    INTENT(INOUT) :: THOLD(:,:,:),DHOLD(:,:,:)
+      REAL,    INTENT(INOUT) :: VEG(:,:)
+      REAL,    INTENT(INOUT) :: S3REF01(:,:),S3REF10(:,:),S3REF50(:,:)
+      REAL,    INTENT(INOUT) :: S6REF01(:,:),S6REF10(:,:),S6REF50(:,:)
+      REAL,    INTENT(INOUT) :: S12REF01(:,:),S12REF10(:,:),S12REF50(:,:)
+      LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
+   END SUBROUTINE getgrib2
 !--------------------------------------------------------------------------------------
    SUBROUTINE SKYCVR(SKY,CFR,GDIN)
         use grddef
@@ -227,9 +276,11 @@
 
    END INTERFACE
 !-----------------------------------------------------------------------------------------
+      IGRB=2
       LNEST=.FALSE.
       LHIRESW=.FALSE.
-      LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+!     LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+      LCYCON=.FALSE.;LHR12=.FALSE.;LHR3=.FALSE.
       nargc=iargc()
       call getarg(1,CTMP)
       READ (ctmp,*) GDIN%CYC
@@ -250,6 +301,7 @@
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
       CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
+      INHRFRQ=GDIN%INHRFRQ
       if (CORE.eq.'nmmb'.or. CORE.eq.'arw') GDIN%LHIRESW=.true.
       LHIRESW=GDIN%LHIRESW
       print *,  nargc,' Running Smartinit for FHR', FHR,' IFHRSTR ',IFHRSTR
@@ -287,7 +339,13 @@
 !     READ INDEX FILE TO GET GRID SPECS
 !==========================================================
     LUGB=11;LUGI=12
-    CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+    if(IGRB .eq. 1)then
+!     CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+    else
+      write(0,*) 'to RDHDRS_g2 call'
+      CALL RDHDRS_g2(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+    endif
+
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
     if (lnest) then   
       GDIN%KMAX=40
@@ -320,15 +378,25 @@
    ALLOCATE (P6CP01(IM,JM),P6CP10(IM,JM),P6CP50(IM,JM),STAT=kret)
    ALLOCATE (P12CP01(IM,JM),P12CP10(IM,JM),P12CP50(IM,JM),STAT=kret)
    ALLOCATE (HAINES(IM,JM),HLVL(IM,JM),STAT=kret)
+   ALLOCATE (CEIL(IM,JM),STAT=kret)
 !  for nests
    ALLOCATE (VALIDPT(IM,JM),STAT=kret)
    VALIDPT=.TRUE.
    if(lnest) ALLOCATE (LCLD(IM,JM),MCLD(IM,JM),HCLD(IM,JM),TCLD(IM,JM),STAT=kret)
 
-    RH=0.
-    CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
-    P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
-    P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
+!   RH=0.
+!   if(IGRB .eq. 1)then
+!     CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+!     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
+!     P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
+!   else
+      CALL GETGRIB2(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+      P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
+      P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT, &
+      GFLD,GFLD8)
+        write(0,*) 'GFLD%igdtmpl(8): ', GFLD%igdtmpl(8)
+        write(0,*) 'GFLD%igdtmpl(9): ', GFLD%igdtmpl(9)
+!   endif
 
 !!! Reset VEG here (Matt Pyle, 1/14)
         print *,'VEG ',minval(veg),maxval(veg)
@@ -427,7 +495,9 @@
          ID(9)=1
          DEC=-2.0
          CALL GRIBIT(ID,RITEHD,TOPO,GDIN,70,DEC)
-         IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
+! Comment out CS2P - Expanded CONUS Nest reads in land cover now instead of Vegetation Type
+!!       IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
+         IF (REGION .NE. 'CS')THEN
            ID(1:25) = 0
            ID(8)=81
            ID(9)=1
@@ -1486,7 +1556,14 @@
       REAL hainesm,hainest
  
       print *, 'Computing HAINES INDEX', IM,JM
+        write(0,*) 'min/max of RH700: ', minval(RH700),maxval(RH700)
+        write(0,*) 'min/max of RH850: ', minval(RH850),maxval(RH850)
+        write(0,*) 'min/max of T700: ', minval(T700),maxval(T700)
+        write(0,*) 'min/max of T850: ', minval(T850),maxval(T850)
+        write(0,*) 'min/max of T500: ', minval(T500),maxval(T500)
+
       
+      irh=0
       DO J=1,JM
       DO I=1,IM
        if (validpt(i,j)) then
@@ -1521,9 +1598,35 @@
         HLVL(I,J)=3
        ENDIF
 
+         if (RHMOIS .le. 0)  then
+!        write(0,*) 'bad RHMOIS: ', I,J,RHMOIS
+!        write(0,*) 'rh700(I,J),rh850(i,j),topo: ', &
+!                    rh700(I,J),rh850(i,j),topo(i,j)
+         irh=irh+1
+         endif
+
+! Fix bad RHMOIS - set RHMOIS values <= 0 to 1.0
+        RHMOIS=AMAX1(RHMOIS,1.0)
+
 !      Compute Dew point depression
        RHMOIS=RHMOIS/100.
        TERM=log10(RHMOIS) / 7.5 + (TMOIS / (TMOIS + 237.3))
+
+         if (TERM .ne. TERM) then
+         write(0,*) 'TERM is garbage'
+         write(0,*) 'RHMOIS, TMOIS: ', RHMOIS, TMOIS
+         endif
+ 
+         if ( abs(1.0 - TERM) .le. 1.e-9) then
+         write(0,*) 'heading for trouble with TERM: ', TERM
+         write(0,*) 'I,J,RHMOIS,TMOIS: ', I,J,RHMOIS,TMOIS
+         endif
+ 
+         if (abs(TERM) .gt. 1.e9) then
+         write(0,*) 'large TERM: ', TERM
+         endif
+
+!      print*,'term,rhmois,tmois,log10(rhmois)=',i,j,term,rhmois,tmois,log10(rhmois)
        DPMOIS=(TERM * 237.3) / (1.0 - TERM)
        TDDIFF=TMOIS-DPMOIS 
 
@@ -1565,6 +1668,7 @@
    
       ENDDO
       ENDDO
+      print*,'# of bad RH gridpoints=',irh
       RETURN
       END     
 
