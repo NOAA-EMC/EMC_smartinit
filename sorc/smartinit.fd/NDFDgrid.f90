@@ -114,7 +114,8 @@
 !      All NDFD grids including Extended CONUS csp2 grid, water=0
        ivgid=81 
 !      FOR VEG_NDFD CS2P grid 184, input is Veg type:  water=16
-       if (region .eq. 'CS2P') ivgid=225 
+! Not needed for Expanded CONUS; comment out
+!!     if (region .eq. 'CS2P') ivgid=225 
 
         print*, ' gdin%region: ', gdin%region
         print *, 'READ IN NDFD GRIB  TOPO file'
@@ -147,8 +148,12 @@
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1;JPDS(7)=0;JGDS=-1
         CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
 
-        if (LHIRESW .or. REGION .eq. 'CS2P') then 
-          if (region.eq.'CS2P') lconus=.TRUE.
+
+! Not needed for Expanded CONUS; comment out
+
+!!      if (LHIRESW .or. REGION .eq. 'CS2P') then 
+        if (LHIRESW ) then 
+!!        if (region.eq.'CS2P') lconus=.TRUE.
           lvegtype=.true.     ! or = false, then use veg fraction
           where (veg_ndfd.le.0.) veg_ndfd=16. 
         endif
@@ -180,6 +185,8 @@
       zdif_max = -1000.
       n_rough_yes=0
       n_rough_no =0
+      m_rough_yes=0
+      m_rough_no =0
 !C ****************************************************************
 ! -- Now let's start reducing to NDFD topo elevation.
 !C ****************************************************************
