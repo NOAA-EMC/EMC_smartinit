@@ -51,7 +51,7 @@
       LOGICAL :: UNPACK
       INTEGER :: K,IRET, IGDNUM, IGDNUM2, IGDNUM3, IGDNUMSN3, NUMVAL2
       INTEGER :: NUMVAL3, NUMVALSN3, IGDNUM5
-      INTEGER :: LUG6PI, IGDNUM6, NUMVAL6, IGDNUMSN6, NUMVALSN6
+      INTEGER :: IGDNUM6, NUMVAL6, IGDNUMSN6, NUMVALSN6
       INTEGER :: IGDNUM12, NUMVAL12, IGDNUMT, NUMVALT, LUGTI, IT, KRET
       INTEGER :: ITOT, KK, NUMVP, NUMVS, IFHR4, IFHR12, KT, LUGTA, LUGTB
       INTEGER :: IIH, LL, M, N, I, ISTAT, KF, ISSREF
@@ -307,7 +307,7 @@
 !     READ 6-HR PRECIP/SNOW FILES AT F12,F24,F36.....
 !     OR 12-hr PRECIP FOR OFF-CYCLE RUNS
       IF (LHR6.OR.LHR9.OR.LHR12) THEN
-        print *, 'READING 6 hr precip HDR from Unit ', LUGP6,LUG6PI
+        print *, 'READING 6 hr precip HDR from Unit ', LUGP6,LUGP6I
 !       CALL RDHDRS(LUGP6,LUGP6I,IGDNUM6,GDIN,NUMVAL6)
         CALL RDHDRS_g2(LUGP6,LUGP6I,IGDNUM6,GDIN,NUMVAL6)
         write(0,*) 'here gb - '
@@ -334,8 +334,8 @@
 !     ALL OF THESE MIN/MAX FILES AND NOT DO THIS FOR EACH
 
       print *, "Reading min/max Temp HDR from UNIT:",LUGT1, LUGT1I
-      CALL RDHDRS(LUGT1,LUGT1I,IGDNUMT,GDIN,NUMVALT)
-!     CALL RDHDRS_g2(LUGT1,LUGT1I,IGDNUMT,GDIN,NUMVALT)
+!     CALL RDHDRS(LUGT1,LUGT1I,IGDNUMT,GDIN,NUMVALT)
+      CALL RDHDRS_g2(LUGT1,LUGT1I,IGDNUMT,GDIN,NUMVALT)
         write(0,*) 'past RDHDRS_g2(aa) call'
 
 !     Fill the max/min T/Td holders with 0's to
@@ -345,8 +345,8 @@
       DHOLD=0.
 
       print *, "Reading min/max Temp HDR from UNIT:",LUGT2, LUGT2I, NUMVALT
-      CALL RDHDRS(LUGT2,LUGT2I,IGDNUMT,GDIN,NUMVALT)
-!     CALL RDHDRS_g2(LUGT2,LUGT2I,IGDNUMT,GDIN,NUMVALT)
+!     CALL RDHDRS(LUGT2,LUGT2I,IGDNUMT,GDIN,NUMVALT)
+      CALL RDHDRS_g2(LUGT2,LUGT2I,IGDNUMT,GDIN,NUMVALT)
         write(0,*) 'past RDHDRS_g2(a) call'
 
       IF (LHR12) THEN
@@ -354,8 +354,8 @@
         LUGTI=LUGT3I   
         DO  IT=3,5
           print *, "Reading min/max Temp  UNIT:",LUGT, LUGTI
-          CALL RDHDRS(LUGT,LUGTI,IGDNUMT,GDIN,NUMVALT)
-!         CALL RDHDRS_g2(LUGT,LUGTI,IGDNUMT,GDIN,NUMVALT)
+!         CALL RDHDRS(LUGT,LUGTI,IGDNUMT,GDIN,NUMVALT)
+          CALL RDHDRS_g2(LUGT,LUGTI,IGDNUMT,GDIN,NUMVALT)
         write(0,*) 'past RDHDRS_g2(b) call'
           LUGT=LUGT+1
           LUGTI=LUGTI+1
@@ -639,6 +639,17 @@
 
         write(0,*) 'IRET for vis: ', IRET
 
+! Cloud ceiling height
+       JDISC=0
+       JPDT=-9999
+       JPDT(1) = 3
+       JPDT(2) = 5
+       JPDT(10) = 215
+        J=0
+      CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,CEIL,GFLD,ISSREF,IRET,ISTAT)
+        write(0,*) 'IRET  for CEIL: ', IRET, minval(CEIL),MAXVAL(CEIL)
+
       endif
 
 ! 2-m temp
@@ -771,17 +782,6 @@
                      KPDS,KGDS,MASK,GRID,BLI,GFLD,ISSREF,IRET,ISTAT)
         write(0,*) 'IRET  for BLI: ', IRET, minval(BLI),MAXVAL(BLI)
 
-! Cloud ceiling height
-       JDISC=0
-       JPDT=-9999
-       JPDT(1) = 3
-       JPDT(2) = 5
-       JPDT(10) = 215
-        J=0
-      CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
-                     KPDS,KGDS,MASK,GRID,CEIL,GFLD,ISSREF,IRET,ISTAT)
-        write(0,*) 'IRET  for CEIL: ', IRET, minval(CEIL),MAXVAL(CEIL)
-
       endif
 
 !====================================================================
@@ -891,67 +891,67 @@
 
 !  READ min/max temperature values for previous 2 hours
       print *, 'Reading temperature for previous 2 hours',LUGT1,LUGT2,IGDNUMT
-      JPDS=-1;J=0;JPDS(3) = IGDNUMT
-      JPDS(5) = 11
-      JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
-      CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
+!     JPDS=-1;J=0;JPDS(3) = IGDNUMT
+!     JPDS(5) = 11
+!     JPDS(6) = 001
+!     if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
+!     CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
 
-!      JPDTN=0
-!      JPDT(1) = 0
-!      JPDT(2) = 000
-!      JPDT(10) = 103
-!      JPDT(12) = 2
-!       J=0
-!     CALL SETVAR_g2(LUGT1,LUGT1I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
-!                    KPDS,KGDS,MASK,GRID,THOLD(:,:,2),GFLD,ISSREF,IRET,ISTAT)
+       JPDTN=0
+       JPDT(1) = 0
+       JPDT(2) = 000
+       JPDT(10) = 103
+       JPDT(12) = 2
+        J=0
+      CALL SETVAR_g2(LUGT1,LUGT1I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,THOLD(:,:,2),GFLD,ISSREF,IRET,ISTAT)
 
-!        print*, 'THOLD(251,100,2): ', THOLD(251,100,2)
-!        print*, 'THOLD(253,131,2): ', THOLD(253,131,2)
-
-
-      JPDS=-1;J=0;JPDS(3) = IGDNUMT
-      JPDS(5) = 17
-      JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
-      CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
-
-!      JPDT(1) = 0
-!      JPDT(2) = 006
-!      JPDT(10) = 103
-!      JPDT(12) = 2
-!       J=0
-!     CALL SETVAR_g2(LUGT1,LUGT1I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
-!                    KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),GFLD,ISSREF,IRET,ISTAT)
-
-      JPDS=-1;J=0;JPDS(3) = IGDNUMT
-      JPDS(5) = 11
-      JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
-      CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
+         print*, 'THOLD(251,100,2): ', THOLD(251,100,2)
+         print*, 'THOLD(253,131,2): ', THOLD(253,131,2)
 
 
-!      JPDT(1) = 0
-!      JPDT(2) = 000
-!      JPDT(10) = 103
-!      JPDT(12) = 2
-!       J=0
-!     CALL SETVAR_g2(LUGT2,LUGT2I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
-!                    KPDS,KGDS,MASK,GRID,THOLD(:,:,3),GFLD,ISSREF,IRET,ISTAT)
+!     JPDS=-1;J=0;JPDS(3) = IGDNUMT
+!     JPDS(5) = 17
+!     JPDS(6) = 001
+!     if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
+!     CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
 
-      JPDS=-1;J=0;JPDS(3) = IGDNUMT
-      JPDS(5) = 17
-      JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
-      CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
+       JPDT(1) = 0
+       JPDT(2) = 006
+       JPDT(10) = 103
+       JPDT(12) = 2
+        J=0
+      CALL SETVAR_g2(LUGT1,LUGT1I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),GFLD,ISSREF,IRET,ISTAT)
 
-!      JPDT(1) = 0
-!      JPDT(2) = 006
-!      JPDT(10) = 103
-!      JPDT(12) = 2
-!       J=0
-!     CALL SETVAR_g2(LUGT2,LUGT2I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
-!                    KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),GFLD,ISSREF,IRET,ISTAT)
+!     JPDS=-1;J=0;JPDS(3) = IGDNUMT
+!     JPDS(5) = 11
+!     JPDS(6) = 001
+!     if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
+!     CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
+
+
+       JPDT(1) = 0
+       JPDT(2) = 000
+       JPDT(10) = 103
+       JPDT(12) = 2
+        J=0
+      CALL SETVAR_g2(LUGT2,LUGT2I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,THOLD(:,:,3),GFLD,ISSREF,IRET,ISTAT)
+
+!     JPDS=-1;J=0;JPDS(3) = IGDNUMT
+!     JPDS(5) = 17
+!     JPDS(6) = 001
+!     if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
+!     CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
+
+       JPDT(1) = 0
+       JPDT(2) = 006
+       JPDT(10) = 103
+       JPDT(12) = 2
+        J=0
+      CALL SETVAR_g2(LUGT2,LUGT2I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),GFLD,ISSREF,IRET,ISTAT)
 
 ! Get min/max temperature values for full 12-hr period for F12,24...
       IF (LHR12) THEN
