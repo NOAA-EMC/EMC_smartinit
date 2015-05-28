@@ -26,8 +26,10 @@
 
       LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST,LHIRESW
       CHARACTER*4 CTMP,REGION,CORE
+      character*1 igrbin, igrbout
 
       CHARACTER*50, ALLOCATABLE :: WXSTRING(:,:)
+      CHARAcTER(LEN=80) :: FNAMEOUT, FNAME2OUT
 !-----------------------------------------------------------------------------------
 !  TYPE(ISET), INTENT(IN) :: iprcp(,:,)
    INTEGER, ALLOCATABLE :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
@@ -57,7 +59,7 @@
 !
 !   REAL,    ALLOCATABLE   :: GRID(:)
    TYPE (GINFO) :: GDIN
-   TYPE(GRIBFIELD):: GFLD, GFLD8
+   TYPE (GRIBFIELD):: GFLD, GFLD8
 
     INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
 !-----------------------------------------------------------------------------------------
@@ -105,7 +107,7 @@
     USE pdstemplates
 
       TYPE (GINFO) :: GDIN
-      TYPE(GRIBFIELD):: GFLD, GFLD8
+      TYPE (GRIBFIELD):: GFLD, GFLD8
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
       INTEGER YEAR,MON,DAY,IHR,DATE,IFHR
 !     INTEGER:: NUMVAL, IMAX, JMAX, KMAX, NUMLEV
@@ -247,13 +249,16 @@
     
    END SUBROUTINE ndfdgrid 
 
-   SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
+   SUBROUTINE GRIBLIMITED(IUNIT,GDIN,GFLD,IGRBOUT,IM,JM)
       use grddef
       use aset2d
       use asetdown
+      USE GRIB_MOD
        INTEGER ID(25)
        LOGICAL RITEHD
+       character*1 igrbout
        TYPE (GINFO) :: GDIN
+   TYPE (GRIBFIELD):: GFLD, GFLD8
    END SUBROUTINE griblimited
 
    SUBROUTINE HINDEX (IM,JM,HAINES,HLVL,VALIDPT)
@@ -276,7 +281,12 @@
 
    END INTERFACE
 !-----------------------------------------------------------------------------------------
-      IGRB=2
+      call get_environment_variable("IGRBI",igrbin)  ! GRIB input: 1=GRIB1; 2=GRIB2
+      call get_environment_variable("IGRBO",igrbout)  ! GRIB output: 1=GRIB1; 2=GRIB2
+      print *, 'INPUT is GRIB',igrbin,', OUTPUT is GRIB',igrbout
+
+      IGRBIN='2'
+      IGRBOUT='2'
       LNEST=.FALSE.
       LHIRESW=.FALSE.
 !     LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
@@ -339,11 +349,14 @@
 !     READ INDEX FILE TO GET GRID SPECS
 !==========================================================
     LUGB=11;LUGI=12
-    if(IGRB .eq. 1)then
-!     CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
-    else
+    if(IGRBIN .eq. '1')then
+      CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+    elseif(igrbin .eq. '2')then
       write(0,*) 'to RDHDRS_g2 call'
       CALL RDHDRS_g2(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+    else
+      print*,'igrbin is not defined...stopping'
+      stop
     endif
 
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
@@ -385,18 +398,18 @@
    if(lnest) ALLOCATE (LCLD(IM,JM),MCLD(IM,JM),HCLD(IM,JM),TCLD(IM,JM),STAT=kret)
 
 !   RH=0.
-!   if(IGRB .eq. 1)then
-!     CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
-!     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
-!     P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
-!   else
+    if(IGRBIN .eq.'1')then
+      CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+      P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
+      P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
+    else
       CALL GETGRIB2(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
       P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
       P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT, &
       GFLD,GFLD8)
         write(0,*) 'GFLD%igdtmpl(8): ', GFLD%igdtmpl(8)
         write(0,*) 'GFLD%igdtmpl(9): ', GFLD%igdtmpl(9)
-!   endif
+    endif
 
 !!! Reset VEG here (Matt Pyle, 1/14)
         print *,'VEG ',minval(veg),maxval(veg)
@@ -446,6 +459,8 @@
 !=================================================
 
          print *, 'OUTPUT  3-hrly downscaled Varibles',FHR
+
+      if(IGRBOUT .eq. '1')then
          RITEHD = .TRUE.
          ID(1:25) = 0
          ID(8)=11;ID(9)=1
@@ -506,6 +521,244 @@
            CALL GRIBIT(ID,RITEHD,VEG_NDFD,GDIN,70,DEC)
          ENDIF
 
+       else
+
+         ! MODIFY HERE to write as proper level?
+
+!! "2 m" fields
+!
+       ID(9)=105
+       ID(11)=2
+!
+       RITEHD = .TRUE.
+       ID(1:25) = 0
+       ID(8)=11
+       ID(9)=105
+       ID(11)=2
+       DEC=-2.0
+!! need to use a GRIBI2 routine like is available in grib2_module
+
+       FNAMEOUT='smartg2.xx'
+        write(0,*) 'FHR known as: ', FHR
+       WRITE(FNAMEOUT(9:10),FMT='(I2.2)')FHR
+        write(0,*) 'FNAMEOUT(1:10): ', FNAMEOUT(1:10)
+
+       CALL BAOPEN(51,FNAMEOUT,IRET)
+        write(0,*) 'IRET from BAOPEN of 51: ', IRET
+
+        NUMV=IM*JM
+
+        do J=1,JM
+        do I=1,IM
+
+        if (validpt(I,J)) then
+
+        if (DOWNT(I,J) .le. 200.) then
+        write(0,*) 'bad small DOWNT: ', I,J, DOWNT(I,J)
+        DOWNT(I,J)=230.
+        endif
+
+        if (DOWNT(I,J) .ge. 330.) then
+        write(0,*) 'bad large DOWNT: ', I,J, DOWNT(I,J)
+        DOWNT(I,J)=310.
+        endif
+
+        endif
+
+        enddo
+        enddo
+
+        CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNT)
+
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(9)=gdin%FHR
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+
+       GFLD%idrtnum=40 ! 40 = JPEG
+       GFLD%idrtmpl(5)=0
+       GFLD%idrtmpl(6)=0
+       GFLD%idrtmpl(7)=-1
+
+       gfld%idrtmpl(1)=0
+
+
+       CALL set_scale(gfld, DEC)
+        write(0,*) 'back from set_scale'
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNT
+
+! ----------------------------------------
+
+       DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNDEW)
+
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=6
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+       gfld%idrtmpl(2)=DEC
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNDEW
+
+! ----------------------------------------
+
+       DEC=6.0
+
+        do J=1,JM
+        do I=1,IM
+
+        if (validpt(I,J)) then
+
+        if (DOWNQ(I,J) .le. 1.e-12) then
+        write(0,*) 'bad DOWNQ: ', I,J, DOWNQ(I,J)
+        DOWNQ(I,J)=1.e-8
+        endif
+
+        if (DOWNQ(I,J) .ge. 50.e-3) then
+        write(0,*) 'bad large DOWNQ: ', I,J, DOWNQ(I,J)
+        DOWNQ(I,J)=10.e-3
+        endif
+
+        endif
+
+        enddo
+        enddo
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNQ)
+
+       GFLD%ipdtmpl(1)=1
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+
+        write(0,*) 'scale and write DOWNQ'
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! DOWNQ
+
+! ----------------------------------------
+
+       DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNU)
+
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=2
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=10
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNU
+
+! ----------------------------------------
+
+       DEC=-2.0
+
+       print *, 'DOWNU',minval(downu),maxval(downu)
+       print *, 'DOWNV',minval(downv),maxval(downv)
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNV)
+
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=3
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=10
+        write(0,*) 'gfld%idrtmpl: ', gfld%idrtmpl
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNV
+
+! ----------------------------------------
+
+! Check to see if we need to write out PSFC in addition to DOWNP (both have same
+! IDs).
+!      DEC=3.0
+
+!      CALL FILL_FLD(GFLD,NUMV,IM,JM,PSFC)
+
+!      GFLD%ipdtmpl(1)=3
+!      GFLD%ipdtmpl(2)=0
+!      GFLD%ipdtmpl(10)=1
+!      GFLD%ipdtmpl(12)=0
+
+!      CALL set_scale(gfld, DEC)
+!      CALL PUTGB2(51,GFLD,IRET) ! PSFC
+
+
+
+!      Output high res topo,land for nests ??
+!      Output topo for all grids 03-07-13
+         DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,TOPO)
+
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=5
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! TOPO
+
+! ----------------------------------------
+! Comment out CS2P - Expanded CONUS Nest reads in land cover now instead of Vegetation Type
+!      IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
+       IF (REGION .NE. 'CS' )THEN
+
+         DEC=1.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,VEG_NDFD)
+
+       GFLD%discipline=2
+
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=0 ! was 198
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+        write(0,*) 'min,max(VEG_NDFD): ', minval(VEG_NDFD), &
+                                          maxval(VEG_NDFD)
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! VEG_NDFD
+       ENDIF
+! ----------------------------------------
+
+       DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,WGUST)
+
+       GFLD%discipline=0
+
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=22
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! WGUST
+
+! ----------------------------------------
+
+       DEC=6.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNP)
+
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNP
+
+        write(0,*) 'IRET for DOWNP PUTGB2: ', IRET
+
+     endif  ! IGRBOUT
+
 !  Boundary layer computations, find the # levels within the lowest 180 mb
 !??? do we need to check for validpt ????
          print *, 'Calculate PBL Levels',FHR
@@ -529,6 +782,9 @@
          print *, 'Calculate RH',FHR
          ALLOCATE (RH(IM,JM,KMAX),STAT=kret)
          ktop=kmax
+
+        write(0,*) 'kmax, ktop: ', kmax, ktop
+
          DO J=1,JM
          DO I=1,IM
            if (validpt(I,J)) then
@@ -568,6 +824,7 @@
          CALL MKPOP(PBLMARK,RH,BLI,P3CP01,P3CP10,P12CP01,P12CP10,QPF3,POP3,GDIN,3,VALIDPT)
          CALL BOUND(POP3,0.,100.)
 
+       if(igrbout .eq. '1')then
          ID(1:25) = 0
          ID(8)=193;ID(9)=1
          ID(18)=FHR3;ID(19)=FHR
@@ -579,6 +836,59 @@
          ENDIF
          ID(8)=61;ID(9)=1
          CALL GRIBIT(ID,RITEHD,P03M,GDIN,70,DEC)
+      else
+
+                DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,POP3)
+
+       GFLD8%idrtnum=40 ! 40 = JPEG
+       GFLD8%idrtmpl(5)=0
+       GFLD8%idrtmpl(6)=0
+       GFLD8%idrtmpl(7)=-1
+
+       GFLD8%discipline=1
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=2
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! POP3
+
+! ----------------------------------------
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,P03M)
+
+        write(0,*) 'maxval(P03M) at write: ', maxval(P03m)
+        write(0,*) 'sum(P03M) at write: ', sum(P03M)
+        write(0,*) 'maxval(gfld8%fld) : ', maxval(gfld8%fld)
+        write(0,*) 'sum(gfld8%fld): ', sum(gfld8%fld)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=8
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=3
+
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! P03M
+
+! ----------------------------------------
+ 
+     endif
  
 ! 6-hr POP
         IF(MOD(FHR,6).EQ.0) THEN
@@ -586,6 +896,7 @@
           WHERE(POP6.LT.POP3) POP6=POP3
           CALL BOUND(POP6,0.,100.)
 
+        if(igrbout .eq. '1')then
           ID(1:25) = 0
           ID(8)=193;ID(9)=1
           ID(18)=FHR6;ID(19)=FHR
@@ -602,7 +913,52 @@
           ID(8)=61;ID(9)=1
           CALL GRIBIT(ID,RITEHD,P06M,GDIN,70,DEC)
          
-        ENDIF
+        else
+
+         DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,POP6)
+
+       GFLD8%discipline=1
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=2
+       GFLD8%ipdtmpl(9)=FHR6
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=6
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! POP6
+
+! ----------------------------------------------------
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,P06M)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=8
+       GFLD8%ipdtmpl(9)=FHR6
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=6
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! P06M
+
+       endif
+
+       ENDIF
+
+! ----------------------------------------
+
 
 ! 12-hr POP
        IF (LHR12) THEN
@@ -611,6 +967,7 @@
            WHERE (POP12.LT.POP6) POP12=POP6
            CALL BOUND(POP12,0.,100.)
 
+         if(igrbout .eq. '1')then
            ID(1:25) = 0
            ID(8)=193;ID(9)=1
            ID(18)=FHR12;ID(19)=FHR
@@ -622,6 +979,46 @@
            ENDIF
            ID(8)=61;ID(9)=1
            CALL GRIBIT(ID,RITEHD,P12M,GDIN,70,DEC)
+
+        else
+
+         DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,POP12)
+
+       GFLD8%discipline=1
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=2
+       GFLD8%ipdtmpl(9)=FHR12
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=12
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! POP12
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,P12M)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=8
+       GFLD8%ipdtmpl(9)=FHR12
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=12
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! P12M
+
+       endif  ! IGRBOUT
          ENDIF
       ENDIF
 
@@ -629,10 +1026,26 @@
       ALLOCATE (WXSTRING(IM,JM),GRIDWX(IM,JM),STAT=kret)
       CALL MAKESTRING(IRAIN,ISNOW,IZR,IIP,BLI,POP3,GDIN,WXSTRING,GRIDWX,VALIDPT)
 
+      if(igrbout .eq. '1')then
       ID(1:25) = 0
       ID(8)=140;ID(9)=1
       DEC=3.0
       CALL GRIBIT(ID,RITEHD,GRIDWX,GDIN,70,DEC)
+      else
+      DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,GRIDWX)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=1
+       GFLD%ipdtmpl(2)=192
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! GRIDWX
+      endif
 
 !    #--------------------------------------------------------------------------
 !    #  Chance of Wetting Rain (0.1 inch).  Same algorithm as PoP, but requires
@@ -662,6 +1075,7 @@
          ENDWHERE
          CALL BOUND(CWR,0.,100.)
 
+         if(igrbout .eq. '1')then
          ID(1:25) = 0
          ID(2)=129
          ID(8)=130;ID(9)=1
@@ -669,6 +1083,26 @@
          ID(20)=4
          DEC=3.0
          CALL GRIBIT(ID,RITEHD,CWR,GDIN,70,DEC)
+         else
+                 DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,CWR)
+
+       GFLD8%discipline=1
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=195
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! CWR
+         endif  ! IGRBOUT
        ENDIF !if core not equal gfs
 !======================================================================
 !--->   COMPUTE SNOWFALL  FOR 3 and 6 HR PERIODS
@@ -680,12 +1114,34 @@
 ! HI snowamt3 uses temp < 264 check ????
          SNOWAMT3=SPVAL
          CALL SNOWFALL(SN03,SNOWAMT3,DOWNT,THOLD,GDIN,3.,VALIDPT)
+         if(igrbout .eq. '1')then
          ID(1:25) = 0
          ID(8)=66;ID(9)=1
          ID(18)=FHR3;ID(19)=FHR
          ID(20)=4
          DEC=3.0
          CALL GRIBIT(ID,RITEHD,SNOWAMT3,GDIN,70,DEC)
+         else
+                 DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,SNOWAMT3)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=11
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! SNOWAMT3
+         endif
+
          do isn=1,im
          do jsn=1,jm
            if (snowamt3(isn,jsn).lt.-0.2) then
@@ -697,9 +1153,30 @@
 
          IF (MOD(FHR,6).EQ.0)  THEN  
            SNOWAMT6=SPVAL
+        write(0,*) 'maxval(SN06): ', maxval(SN06)
            CALL SNOWFALL(SN06,SNOWAMT6,DOWNT,THOLD,GDIN,4.,VALIDPT)
+        if(igrbout .eq. '1')then
            ID(18)=FHR6;ID(19)=FHR
            CALL GRIBIT(ID,RITEHD,SNOWAMT6,GDIN,70,DEC)
+        else
+                  CALL FILL_FLD(GFLD8,NUMV,IM,JM,SNOWAMT6)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=11
+       GFLD8%ipdtmpl(9)=FHR6
+       GFLD8%ipdtmpl(10)=1
+       GFLD8%ipdtmpl(12)=0
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(27)=6
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! SNOWAMT6
+
+        endif
          ENDIF
        ENDIF !if core not equal gfs
 
@@ -728,6 +1205,7 @@
         ENDIF
         DEALLOCATE (TEMP1,TEMP2,STAT=kret)
 
+      if(igrbout .eq. '1')then
         IF (MOD(FHR,3).EQ.0 .AND. trim(CORE) .EQ. 'GFS' ) THEN
           ID(1:25) = 0
           ID(8)=71;ID(9)=1
@@ -747,8 +1225,57 @@
           print *, 'Output Reflectivity',FHR
           CALL GRIBIT(ID,RITEHD,REFC,GDIN,70,DEC)
         ENDIF
+      else
+        IF (MOD(FHR,3).EQ.0 .AND. trim(CORE) .EQ. 'GFS' ) THEN
+                DEC=3.0
 
-!========================================================================
+        CALL FILL_FLD(GFLD,NUMV,IM,JM,SKY)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=6
+       GFLD%ipdtmpl(2)=1
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+        CALL set_scale(gfld, DEC)
+        CALL PUTGB2(51,GFLD,IRET) ! SKY
+
+        ELSEIF (trim(CORE) .NE. 'GFS' ) THEN
+                DEC=3.0
+
+        CALL FILL_FLD(GFLD,NUMV,IM,JM,SKY)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=6
+       GFLD%ipdtmpl(2)=1
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+        CALL set_scale(gfld, DEC)
+        CALL PUTGB2(51,GFLD,IRET) ! SKY
+        ENDIF
+
+        IF (trim(CORE) .NE. 'GFS' ) THEN
+
+        DEC=3.0
+
+        print*, 'return with REFC min/max: ', minval(REFC),maxval(REFC)
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,REFC)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=16
+       GFLD%ipdtmpl(2)=196 ! old version more familiar to downstream codes?
+       GFLD%ipdtmpl(10)=200
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! REFC
+        ENDIF
+       endif  ! IGRBOUT
+
 ! calcSnowLevel - takes sounding of the wetbulb temperature and finds the
 !   lowest elevation (above ground) where wetbulb crosses from
 !   above freezing to below freezing. When top wetbulb is above
@@ -756,6 +1283,7 @@
 !   field straight out of the NAM. 
 !========================================================================
 
+      if(igrbout .eq. '1')then
       ID(1:25) = 0
       ID(8)=7;ID(9)=245
       DEC=3.0
@@ -768,6 +1296,62 @@
       ID(8)=20;ID(9)=1
       DEC=2.7
       CALL GRIBIT(ID,RITEHD,VIS,GDIN,70,DEC)
+
+      else
+ 
+      DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,WETFRZ)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=5
+       GFLD%ipdtmpl(10)=245
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! WETFRZ
+       write(0,*) 'IRET for WETFRZ: ', IRET
+
+
+! VISIBILITY
+
+      DEC=2.7
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,VIS)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=19
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! VIS
+        write(0,*) 'IRET for VIS: ', IRET
+
+! CLOUD CEILING HEIGHT
+
+      DEC=3.0
+      print *, 'Output Cloud Ceiling Height',FHR
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,CEIL)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=3 
+       GFLD%ipdtmpl(2)=5
+       GFLD%ipdtmpl(10)=215
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! CEIL
+        write(0,*) 'IRET for CEIL: ', IRET
+        write(0,*) 'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
+
+       endif ! IGRBOUT
 
 !==========================================================================
 !  TransWind - the average winds in the layer between the surface
@@ -800,6 +1384,7 @@
        ENDDO
       ENDDO
 
+      if(igrbout .eq. '1')then
       ID(1:25) = 0
       ID(8)=31;ID(9)=220
       DEC=3.0
@@ -811,6 +1396,40 @@
       DEC=-3.0
       print *, 'Output PBL Wind Speed',FHR
       CALL GRIBIT(ID,RITEHD,MGTRANS,GDIN,70,DEC)
+   
+      else
+  
+           DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DIRTRANS)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=220
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DIRTRANS
+        write(0,*) 'IRET for PBL WINDIR: ', IRET
+
+      DEC=-3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,MGTRANS)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=1
+       GFLD%ipdtmpl(10)=220
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! MGTRANS
+        write(0,*) 'IRET for PBL WINSPD: ', IRET
+
+       endif ! IGRBOUT
 
 !  compute PBL RH
 
@@ -829,10 +1448,32 @@
       ENDDO
       CALL BOUND(BLR,0.,100.)
 
+      if(igrbout .eq. '1')then
+
       ID(1:25) = 0
       ID(8)=52;ID(9)=220
       DEC=3.0
       CALL GRIBIT(ID,RITEHD,BLR,GDIN,70,DEC)
+   
+      else
+
+            DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,BLR)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=1
+       GFLD%ipdtmpl(2)=1
+       GFLD%ipdtmpl(10)=220
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! BLR
+        write(0,*) 'IRET for PBL RH: ', IRET
+
+       endif  ! IGRBOUT
+
 
 !========================================================================
 !  MixHgt - the height to which a parcel above a 'fire' would rise
@@ -866,10 +1507,33 @@
       ENDDO
       ENDDO
 
+      if(igrbout .eq. '1')then
       ID(1:25) = 0
       ID(8)=8;ID(9)=220
       DEC=-3.0    ! HI = +3.0 ?????
       CALL GRIBIT(ID,RITEHD,MIXHGT,GDIN,70,DEC)
+      
+      else
+
+            DEC=-3.0    ! HI = +3.0 ?????
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,MIXHGT)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+!       GFLD%ipdtmpl(1)=19
+!       GFLD%ipdtmpl(2)=3
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=6
+       GFLD%ipdtmpl(10)=220
+       GFLD%ipdtmpl(12)=0
+
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! MIXHGT
+        write(0,*) 'IRET for PBL MIXHGT: ', IRET
+ 
+       endif  ! IGRBOUT
 
 !--------------------------------------------------------------------------
 ! LAL - Based mainly on lifted index.  Adds more when RH at top of BL is
@@ -904,28 +1568,68 @@
           RH2SUM=RH2SUM+1.
         ENDIF
        ENDDO
+
+        if (RH1SUM .ge. 1) then
        RH1=RH1TOT/RH1SUM
-       RH2=RH2TOT/RH2SUM 
+        else
+        write(0,*) 'RH1SUM is zero...would divide by zero'
+       RH1=0.2
+        endif
+
+        if (RH2SUM .ge. 1) then
+       RH2=RH2TOT/RH2SUM
+        else
+        write(0,*) 'RH2SUM is zero...would divide by zero'
+       RH2=0.8
+        endif
+
+!      RH1=RH1TOT/RH1SUM
+!      RH2=RH2TOT/RH2SUM 
+
        IF (RH2.GT.0.8 .AND. RH1.LT.0.2) THEN
         LAL(I,J)=LLAL+1.
        ELSE
         LAL(I,J)=LLAL
        ENDIF
        IF (LAL(I,J) .LT.-18.) LAL(I,J)=1.
-      endif
+      endif ! validpt
       ENDDO
       ENDDO
 
+      if(igrbout .eq. '1')then
       ID(1:25) = 0
       ID(8)=132;ID(9)=1
       DEC=2.0     ! HI DEC=3.0 ????
       CALL GRIBIT(ID,RITEHD,LAL,GDIN,70,DEC)
+    
+      else
+
+            DEC=2.0     ! HI DEC=3.0 ????
+        print*, 'past LAL write'
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,LAL)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=7
+       GFLD%ipdtmpl(2)=193 ! or 195 - CWDI?
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! LAL
+        write(0,*) 'IRET for LAL: ', IRET
+
+       endif
 
 !     Compute Haines Index
       IF (trim(CORE) .NE. 'GFS' ) THEN
         ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
         print *,'Compute HAINES INDEX'
         CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
+        print*, 'return with min/max: ', minval(HAINES),maxval(HAINES)
+
+        if(igrbout .eq. '1')then
         ID(1:25) = 0
         ID(2)=129
         ID(8)=250;ID(9)=1
@@ -938,16 +1642,40 @@
 !        DEC=1.0
 !        TEMP2=real(HLVL)
 !        CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+
+         else
+
+      DEC=3.0
+        TEMP1=real(HAINES)
+        print*, 'return with min/max: ', minval(TEMP1),maxval(TEMP1)
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,TEMP1)
+
+       GFLD%discipline=2
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=4
+       GFLD%ipdtmpl(2)=2
+       GFLD%ipdtmpl(9)=gdin%FHR
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! HINDEX
+
+       endif
         DEALLOCATE (TEMP1,TEMP2,STAT=kret)
+
       ENDIF
+
 
 !=================================================
     ENDIF  ! END 3 hour writes
 !=================================================
 
+        print*, 'here checking LCYCON'
     IF(LCYCON .AND. .NOT.LHR12 .OR.             &
       .NOT.LCYCON.AND.MOD(FHR-6,12).NE.0) THEN 
       print *, 'going to write minmax ', fhr
+      if(igrbout .eq. '1')then
       RITEHD = .TRUE.
       ID(1:25) = 0
       ID(8)=11;ID(9)=1
@@ -958,6 +1686,50 @@
       ID(8)=17;ID(9)=1
       DEC=-2.0
       CALL GRIBIT(ID,RITEHD,DOWNDEW,GDIN,71,DEC)
+
+      else
+
+       FNAME2OUT='MAXMING2.fxx'
+       WRITE(FNAME2OUT(11:12),FMT='(I2.2)')FHR
+       write(0,*) 'FNAME2OUT(1:12): ', FNAME2OUT(1:12)
+       CALL BAOPEN(52,FNAME2OUT,IRET)
+       write(0,*) 'IRET from BAOPEN of 52: ', IRET
+
+        NUMV=IM*JM
+
+       DEC=-2.0
+
+        write(0,*) 'min,max DOWNT: ', minval(DOWNT),maxval(DOWNT)
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNT)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(52,GFLD,IRET) ! DOWNT for MAXMIN file
+
+
+      DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNDEW)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=6
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(52,GFLD,IRET) ! DOWNDEW for MAXMIN file
+        call baclose(52,iret)
+
+       endif ! IGRBOUT
     ENDIF
 
 !   For Nests Write limited data to grib file for hrs 1,2,4,5,7,8,10,11
@@ -973,9 +1745,29 @@
       .or. TRIM(REGION).EQ.'AKRT' .or. TRIM(REGION).EQ.'CS2P' &
       .or. TRIM(REGION).EQ.'GM') THEN
          print *, 'GET GRIBLIMITIED ',TRIM(REGION),fhrhrly
-         IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(70,GDIN)
-      ENDIF
 
+         IF(.not.LHR3 .AND. FHR.LT.fhrhrly)then
+
+         if(igrbout .eq. '1')then
+           iunit=70
+           CALL GRIBLIMITED(iunit,GDIN,GFLD,IGRBOUT,IM,JM)
+         else
+           iunit=51
+           FNAMEOUT='smartg2.xx'
+           write(0,*) 'FHR known as: ', FHR
+           WRITE(FNAMEOUT(9:10),FMT='(I2.2)')FHR
+           write(0,*) 'FNAMEOUT(1:10): ', FNAMEOUT(1:10)
+
+           CALL BAOPEN(51,FNAMEOUT,IRET)
+           write(0,*) 'IRET from BAOPEN of 51: ', IRET
+
+           CALL GRIBLIMITED(iunit,GDIN,GFLD,IGRBOUT,IM,JM)
+           call baclose(51,iret)
+         endif ! IGRBOUT
+      ENDIF ! .not.LHR3 .AND. FHR.LT.fhrhrly
+      ENDIF ! TRIM(REGION).EQ.'HI'...
+
+        write(6,*) 'to write of older T'
 !  write older T/Td data for max/min to grib file
       ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
       IF (trim(GDIN%CORE) .EQ. 'GFS' .AND. .NOT. LCYCON .AND. LHR6 ) GOTO 581
@@ -987,7 +1779,16 @@
             DEC=-2.0
             TEMP1=SPVAL;TEMP2=SPVAL
             IF(ivarb.eq.1) then
+              if(igrbout .eq. '1')then
               ID(8)=11;ID(9)=1
+              else
+              GFLD%discipline=0
+              GFLD%ipdtnum=0
+              GFLD%ipdtmpl(1)=0
+              GFLD%ipdtmpl(2)=0
+              GFLD%ipdtmpl(10)=103
+              GFLD%ipdtmpl(12)=2
+              endif ! IGRBOUT
               where (VALIDPT) 
                 TEMP1=THOLD(:,:,3)   ! 1 hour old Temp
                 TEMP2=THOLD(:,:,2)   ! 2 hour old Temp
@@ -997,34 +1798,96 @@
 !                where (temp1.le.10) TEMP1=SPVAL
 !                where (temp2.le.10) TEMP2=SPVAL
               end where
-            else
+            else ! ivarb.eq.1
+              if(igrbout .eq. '1')then
               ID(8)=17;ID(9)=1
+              else
+              GFLD%discipline=0
+              GFLD%ipdtnum=0
+              GFLD%ipdtmpl(1)=0
+              GFLD%ipdtmpl(2)=6
+              GFLD%ipdtmpl(10)=103
+              endif ! IGRBOUT
+
               where (VALIDPT) 
                 TEMP1=DHOLD(:,:,3)
                 TEMP2=DHOLD(:,:,2)
 !               where (temp1.le.10) TEMP1=SPVAL
 !               where (temp2.le.10) TEMP2=SPVAL
               end where
-            endif
+            endif ! ivarb.eq. 1
+
             GDIN%FHR=GDIN%FHR-1  ! change current hr to prev. hr for GRIBIT 
             IF ( trim(GDIN%CORE) .EQ. 'GFS' .AND. GDIN%FHR .LE. FHRHRLY ) THEN
               print *,'GFS OUTPUT MAX-MIN for FHR',GDIN%FHR
+              if(igrbout .eq. '1')then
               CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
               GDIN%FHR=GDIN%FHR-1  ! change current hr to FHR-2
               print *,'GFS OUTPUT MAX-MIN for FHR',GDIN%FHR
               CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+              else
+                  CALL FILL_FLD(GFLD,NUMV,IM,JM,TEMP1)
+
+!      GFLD%ipdtmpl(9)=gdin%FHR-1
+       GFLD%ipdtmpl(9)=gdin%FHR ! 1 is already subtracted above
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! TEMP or TD (-1 h)
+
+              print *,'GFS OUTPUT MAX-MIN for FHR',GDIN%FHR
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,TEMP2)
+!      GFLD%ipdtmpl(9)=gdin%FHR-2
+       GFLD%ipdtmpl(9)=gdin%FHR-1 ! 1 is already subtracted above
+       CALL set_scale(gfld, DEC)
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! TEMP or TD (-1 h)
+
+              print *,'GFS OUTPUT MAX-MIN for FHR',GDIN%FHR
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,TEMP2)
+!      GFLD%ipdtmpl(9)=gdin%FHR-2
+       GFLD%ipdtmpl(9)=gdin%FHR-1 ! 1 is already subtracted above
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! TEMP or TD (-2 h)
+
+             endif ! IGRBOUT
             ELSEIF ( trim(GDIN%CORE) .NE. 'GFS' ) THEN
               print *,'OUTPUT Temperature for FHR',GDIN%FHR
+              if(igrbout .eq. '1')then
               CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
               GDIN%FHR=GDIN%FHR-1  ! change current hr to FHR-2
               print *,'OUTPUT Temperature for FHR',GDIN%FHR
               CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+       
+              else ! IGRBOUT
+
+              print *,'OUTPUT Temperature for FHR',GDIN%FHR
+                  CALL FILL_FLD(GFLD,NUMV,IM,JM,TEMP1)
+
+!      GFLD%ipdtmpl(9)=gdin%FHR-1
+       GFLD%ipdtmpl(9)=gdin%FHR ! 1 is already subtracted above
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! TEMP or TD (-1 h)
+
+              print *,'OUTPUT Temperature for FHR',GDIN%FHR
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,TEMP2)
+!      GFLD%ipdtmpl(9)=gdin%FHR-2
+       GFLD%ipdtmpl(9)=gdin%FHR-1 ! 1 is already subtracted above
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! TEMP or TD (-2 h)
+
+            endif ! IGRBOUT
+
             ENDIF
             GDIN%FHR=IFHRIN;FHR=IFHRIN;IFHR=IFHRIN
+
           ENDDO 
 !        ENDIF
       ENDIF
+        write(6,*) 'past write of older T'
       DEALLOCATE (TEMP1,TEMP2,STAT=kret)
+        write(6,*) 'past dealloc of TEMP1, TEMP2'
  581 CONTINUE
 
 !  compute max/min temps for 3,6,9,12.....
@@ -1080,6 +1943,7 @@
        CALL BOUND(RHMAX3,0.,100.)
        CALL BOUND(RHMIN3,0.,100.)
  
+       if(igrbout .eq. '1')then
        ID(1:25) = 0
        ID(8)=15;ID(9)=1
        ID(18)=FHR3;ID(19)=FHR
@@ -1101,6 +1965,91 @@
 
        ID(8)=217;ID(9)=1
        CALL GRIBIT(ID,RITEHD,RHMIN3,GDIN,70,DEC)
+
+       else
+
+      DEC=-2.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMAX3)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=0
+!correct       GFLD8%ipdtmpl(2)=0
+       GFLD8%ipdtmpl(2)=4
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=2
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! TMAX3
+
+
+
+       where(tmin3.eq.0)tmin3=spval
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMIN3)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=0
+!correct       GFLD8%ipdtmpl(2)=0
+       GFLD8%ipdtmpl(2)=5
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=3
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! TMIN3
+
+       DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMAX3)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=27 ! maxrh
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=2 ! 2=max
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! RHMAX3
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMIN3)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=198 ! minrh
+       GFLD8%ipdtmpl(9)=FHR3
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=3 ! 3=min
+       GFLD8%ipdtmpl(27)=3
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! RHMIN3
+
+       endif ! IGRBOUT
       ENDIF  !LHR3
  555 CONTINUE
 
@@ -1135,6 +2084,7 @@
         CALL BOUND(RHMAX12,0.,100.)
         CALL BOUND(RHMIN12,0.,100.)
 
+        if(igrbout .eq. '1')then
         ID(1:25) = 0
         ID(8)=15;ID(9)=1
         ID(18)=FHR12;ID(19)=FHR
@@ -1153,7 +2103,97 @@
         CALL GRIBIT(ID,RITEHD,RHMAX12,GDIN,70,DEC)
         ID(8)=217;ID(9)=1
         CALL GRIBIT(ID,RITEHD,RHMIN12,GDIN,70,DEC)
+
+        else
+
+         DEC=-2.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMAX12)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=0
+!correct       GFLD8%ipdtmpl(2)=0
+       GFLD8%ipdtmpl(2)=4
+       GFLD8%ipdtmpl(9)=FHR12
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=2
+       GFLD8%ipdtmpl(27)=12
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! TMAX12
+
+!        1-28-13 JTM : check for incorrect tmin even for validpt=true
+         where(tmin12.le.10)tmin12=spval
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMIN12)
+
+        write(0,*) 'minval(TMIN12): ', minval(TMIN12)
+        write(0,*) 'maxval(TMIN12): ', maxval(TMIN12)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=0
+!tst       GFLD8%ipdtmpl(2)=0
+       GFLD8%ipdtmpl(2)=5
+       GFLD8%ipdtmpl(9)=FHR12
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=3
+       GFLD8%ipdtmpl(27)=12
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! TMIN12
+
+         DEC=3.0
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMAX12)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=27 ! rhmax
+       GFLD8%ipdtmpl(9)=FHR12
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=2 ! 2=max
+       GFLD8%ipdtmpl(27)=12
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! RHMAX12
+
+       CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMIN12)
+
+       GFLD8%discipline=0
+       GFLD8%ipdtnum=8     ! should be superfluous
+
+       GFLD8%ipdtmpl(1)=1
+       GFLD8%ipdtmpl(2)=198 ! minrh
+       GFLD8%ipdtmpl(9)=FHR12
+       GFLD8%ipdtmpl(10)=103
+       GFLD8%ipdtmpl(12)=2
+
+       GFLD8%ipdtmpl(22)=1
+       GFLD8%ipdtmpl(24)=3 ! 3=min
+       GFLD8%ipdtmpl(27)=12
+
+       CALL set_scale(gfld8, DEC)
+       CALL PUTGB2(51,GFLD8,IRET) ! RHMIN12
+
+       endif ! IGRBOUT
       ENDIF !LHR12
+
+        call baclose(51,iret)
 
       print *, 'completed main'
       STOP
@@ -1261,19 +2301,47 @@
          idiv=1
          IF (avg.gt.3.) idiv=2    !for 6 hr snow depths
         
-         WHERE (validpt) 
-         WHERE (SN0.GT.0.) 
-           TEMP1=(DOWNT(:,:)+THOLD(:,:,2)+idiv*THOLD(:,:,3))/AVG  !TAVG
-           WHERE (TEMP1.LT.264.)     ! using newwer nest codes
-             TEMP2=20.
-           ELSEWHERE
-             TEMP2=(273.15-TEMP1)+8.   !SNOWR using newer nest codes 
-           ENDWHERE
-         END WHERE
+        write(0,*) 'what is SN0: ', maxval(SN0)
+        write(0,*) 'avg: ', avg
+        write(0,*) 'downt=', maxval(downt), minval(downt)
+        write(0,*) 'thold2=', maxval(thold(:,:,2)), minval(thold(:,:,2))
+        write(0,*) 'thold3=', maxval(thold(:,:,3)), minval(thold(:,:,3))
+
+        do J=1,JM
+        do I=1,IM
+
+        if (SN0(I,J) .gt. 0) then
+          TEMP1(I,J)=(DOWNT(I,J)+THOLD(I,J,2)+idiv*THOLD(I,J,3))/AVG  !TAVG
+          IF (TEMP1(I,J) .LT.264.) THEN     ! using newwer nest codes
+             TEMP2(I,J)=20.
+          ELSE
+             TEMP2(I,J)=(273.15-TEMP1(I,J))+8.   !SNOWR using newer nest codes
+          ENDIF
+
+          SNOWAMT(I,J)=SN0(I,J)*TEMP2(I,J)*0.001            !Convert to m
+
+        else
+          SNOWAMT(I,J)=0.
+        endif
+
+
+        IF (SNOWAMT(I,J).LT.0) SNOWAMT(I,J)=0.    ! Added for alaskanest for non-valid pt
+        enddo
+        enddo
+
+!        WHERE (validpt) 
+!        WHERE (SN0.GT.0.) 
+!          TEMP1=(DOWNT(:,:)+THOLD(:,:,2)+idiv*THOLD(:,:,3))/AVG  !TAVG
+!          WHERE (TEMP1.LT.264.)     ! using newwer nest codes
+!            TEMP2=20.
+!          ELSEWHERE
+!            TEMP2=(273.15-TEMP1)+8.   !SNOWR using newer nest codes 
+!          ENDWHERE
+!        END WHERE
         
-         SNOWAMT=SN0*TEMP2*0.001            !Convert to m
-         WHERE (SNOWAMT.LT.0) SNOWAMT=0.    ! Added for alaskanest for non-valid pt
-         endwhere
+!        SNOWAMT=SN0*TEMP2*0.001            !Convert to m
+!        WHERE (SNOWAMT.LT.0) SNOWAMT=0.    ! Added for alaskanest for non-valid pt
+!        endwhere
           
          DEALLOCATE (TEMP1,TEMP2,STAT=kret)
  
@@ -1421,20 +2489,24 @@
       RETURN 
       END SUBROUTINE mkpop
 
-      SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
+      SUBROUTINE GRIBLIMITED(IUNIT,GDIN,GFLD,IGRBOUT,IM,JM)
       use grddef
       use aset2d
       use asetdown
+      USE GRIB_MOD
 !---------------------------------------------------------
 !  write limited data to grib file for hrs 1,2,4,5,7,8,10,11...fhrhrly
 !  FOR Alaska,  this file serve as 1st guess for RTMA (akrtmages)
 !---------------------------------------------------------
        INTEGER ID(25)
        LOGICAL RITEHD
+       character*1 igrbout
        TYPE (GINFO) :: GDIN
+       TYPE (GRIBFIELD):: GFLD, GFLD8
 
     INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
 
+       if(igrbout .eq. '1')then
        print *,'OUTPUT LIMITED GRIB FILE at FHR ',GDIN%FHR,' for REGION ',GDIN%REGION
        RITEHD = .TRUE.
        ID(1:25) = 0
@@ -1456,15 +2528,6 @@
        CALL GRIBIT(ID,RITEHD,DOWNQ,GDIN,IUNIT,DEC)
 
        ID(1:25) = 0
-       ID(8)=33
-       ID(9)=1
-       DEC=-2.0
-       CALL GRIBIT(ID,RITEHD,DOWNU,GDIN,IUNIT,DEC)
-
-       ID(1:25) = 0
-       ID(8)=34
-       ID(9)=1
-       DEC=-2.0
        CALL GRIBIT(ID,RITEHD,DOWNV,GDIN,IUNIT,DEC)
 
        ID(1:25) = 0
@@ -1497,6 +2560,193 @@
         DEC=2.7
         CALL GRIBIT(ID,RITEHD,VIS,GDIN,IUNIT,DEC)
       ENDIF
+
+      else
+
+       NUMV=IM*JM
+       DEC=-2.0
+        CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNT)
+
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(9)=gdin%FHR
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+
+       GFLD%idrtnum=40 ! 40 = JPEG
+       GFLD%idrtmpl(5)=0
+       GFLD%idrtmpl(6)=0
+       GFLD%idrtmpl(7)=-1
+
+       gfld%idrtmpl(1)=0
+
+
+       CALL set_scale(gfld, DEC)
+        write(0,*) 'back from set_scale'
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNT
+! ----------------------------------------
+
+       DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNDEW)
+
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=6
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+       gfld%idrtmpl(2)=DEC
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNDEW
+
+! ----------------------------------------
+
+       DEC=6.0
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNQ)
+
+       GFLD%ipdtmpl(1)=1
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=2
+
+        write(0,*) 'scale and write DOWNQ'
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! DOWNQ
+
+! ----------------------------------------
+
+       DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNU)
+
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=2
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=10
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNU
+
+! ----------------------------------------
+
+       DEC=-2.0
+
+       print *, 'DOWNU',minval(downu),maxval(downu)
+       print *, 'DOWNV',minval(downv),maxval(downv)
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNV)
+
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=3
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=10
+        write(0,*) 'gfld%idrtmpl: ', gfld%idrtmpl
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! DOWNV
+
+! ----------------------------------------
+
+       DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,PSFC)
+
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! PSFC
+
+         DEC=-2.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,TOPO)
+
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=5
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! TOPO
+
+! ----------------------------------------
+
+         DEC=1.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,VEG_NDFD)
+
+       GFLD%discipline=2
+
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=0 ! was 198
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+        write(0,*) 'min,max(VEG_NDFD): ', minval(VEG_NDFD), &
+                                          maxval(VEG_NDFD)
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! VEG_NDFD
+
+! 03-19-13 : Add Gust and visibility to limited files for RTMA
+! 05-11-15 : Add Cloud Ceiling Height to limited files for RTMA
+      IF (trim(GDIN%CORE) .NE. 'GFS') THEN
+       DEC=3.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,WGUST)
+
+       GFLD%discipline=0
+
+       GFLD%ipdtmpl(1)=2
+       GFLD%ipdtmpl(2)=22
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET) ! WGUST
+! VISIBILITY
+
+      DEC=2.7
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,VIS)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=19
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! VIS
+        write(0,*) 'IRET for VIS: ', IRET
+       ENDIF
+
+! CLOUD CEILING HEIGHT
+
+      DEC=3.0
+      print *, 'Output Cloud Ceiling Height',FHR
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,CEIL)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=3 
+       GFLD%ipdtmpl(2)=5
+       GFLD%ipdtmpl(10)=215
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(51,GFLD,IRET)  ! VIS
+        write(0,*) 'IRET for CEIL: ', IRET
+        write(0,*) 'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
+
+       endif ! IGRBOUT
+
+
 
        return
        END SUBROUTINE griblimited
@@ -1665,10 +2915,244 @@
 !       endif
 
       endif
-   
-      ENDDO
-      ENDDO
-      print*,'# of bad RH gridpoints=',irh
-      RETURN
-      END     
 
+      ENDDO
+      ENDDO
+      RETURN
+      END
+! -------------------------
+        SUBROUTINE FILL_FLD(GFLD,NUMV,IM,JM,ARRAY2D)
+        USE GRIB_MOD
+        USE pdstemplates
+        TYPE (GRIBFIELD)  :: GFLD
+        INTEGER :: NUMV, IM, JM, KK
+        REAL :: ARRAY2D(IM,JM)
+
+        DO KK = 1, NUMV
+          IF(MOD(KK,IM).EQ.0) THEN
+            M=IM
+            N=INT(KK/IM)
+          ELSE
+            M=MOD(KK,IM)
+            N=INT(KK/IM) + 1
+          ENDIF
+          GFLD%FLD(KK)=ARRAY2D(M,N)
+!        if (mod(KK,25000) .eq. 0) then
+!        write(0,*) 'M,N, ARRAY2D from gfld: ', M,N, GFLD%FLD(KK)
+!        endif
+        ENDDO
+        END SUBROUTINE FILL_FLD
+
+! -------------------------
+        SUBROUTINE SET_SCALE(GFLD,DEC)
+        USE GRIB_MOD
+        USE pdstemplates
+        TYPE (GRIBFIELD)  :: GFLD
+        LOGICAL*1, allocatable:: locbmap(:)
+        real :: DEC
+
+
+
+        allocate(locbmap(size(GFLD%fld)))
+
+        if (GFLD%ibmap .eq. 0 .or. GFLD%ibmap .eq. 254) then
+        locbmap=GFLD%bmap
+        write(0,*) 'used GFLD bmap'
+        else
+        write(0,*) 'hardwire locbmap to true'
+        locbmap=.true.
+        endif
+
+! INPUT
+!   ibm: integer, bitmap flag (grib2 table 6.0)
+!   scl: real, significant digits,OR binary precision if < 0
+!   len: integer, field and bitmap length
+!   bmap: logical(len), bitmap (.true.: keep, bitmap (.true.: keep, .false.
+!   skip)
+!   fld: real(len), datafield
+! OUTPUT
+!   ibs: integer, binary scale factor
+!   ids: integer, decimal scale factor
+!   nbits: integer, number of bits to pack
+
+
+
+        call g2getbits(GFLD%ibmap,DEC,size(GFLD%fld),locbmap,GFLD%fld, &
+                      GFLD%idrtmpl(1),GFLD%idrtmpl(2),GFLD%idrtmpl(3),GFLD%idrtmpl(4))
+
+        write(0,*) 'gfld%idrtmpl(2:3) defined, inumbits: ', gfld%idrtmpl(2:4)
+
+        END SUBROUTINE SET_SCALE
+
+! --------------------------------
+
+       subroutine g2getbits(ibm,scl,len,bmap,g,gmin,ibs,ids,nbits)
+!$$$
+!   This subroutine is changed from w3 lib getbit to compute the total number of
+!   bits,
+!   The argument list is modified to have ibm,scl,len,bmap,g,ibs,ids,nbits
+!
+!  Progrma log:
+!    Jun Wang  Apr, 2010
+!
+! INPUT
+!   ibm: integer, bitmap flag (grib2 table 6.0)
+!   scl: real, significant digits,OR binary precision if < 0
+!   len: integer, field and bitmap length
+!   bmap: logical(len), bitmap (.true.: keep, bitmap (.true.: keep, .false.
+!   skip)
+!   fld: real(len), datafield
+! OUTPUT
+!   ibs: integer, binary scale factor
+!   ids: integer, decimal scale factor
+!   nbits: integer, number of bits to pack
+!
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN)   :: IBM,LEN
+      LOGICAL*1,INTENT(IN) :: BMAP(LEN)
+      REAL,INTENT(IN)      :: scl,G(LEN)
+      INTEGER,INTENT(OUT)  :: IBS,IDS,NBITS
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      INTEGER,PARAMETER    :: MXBIT=16
+!
+!  NATURAL LOGARITHM OF 2 AND 0.5 PLUS NOMINAL SAFE EPSILON
+      real,PARAMETER :: ALOG2=0.69314718056,HPEPS=0.500001
+!
+!local vars
+      INTEGER :: I,I1,icnt,ipo,le,irange
+      REAL    :: GROUND,GMIN,GMAX,s,rmin,rmax,range,rr,rng2,po,rln2
+!
+      DATA       rln2/0.69314718/
+
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!  ROUND FIELD AND DETERMINE EXTREMES WHERE BITMAP IS ON
+      IF(IBM == 255) THEN
+        GMAX = G(1)
+        GMIN = G(1)
+        DO I=2,LEN
+          GMAX = MAX(GMAX,G(I))
+          GMIN = MIN(GMIN,G(I))
+        ENDDO
+      ELSE
+        do i1=1,len
+          if (bmap(i1)) exit
+        enddo
+!       I1 = 1
+!       DO WHILE(I1 <= LEN .AND. .not. BMAP(I1))
+!         I1=I1+1
+!       ENDDO
+        IF(I1 <= LEN) THEN
+          GMAX = G(I1)
+          GMIN = G(I1)
+          DO I=I1+1,LEN
+            IF(BMAP(I)) THEN
+              GMAX = MAX(GMAX,G(I))
+              GMIN = MIN(GMIN,G(I))
+            ENDIF
+          ENDDO
+        ELSE
+          GMAX = 0.
+          GMIN = 0.
+        ENDIF
+      ENDIF
+      write(0,*)' GMIN=',GMIN,' GMAX=',GMAX
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!  COMPUTE NUMBER OF BITS
+      icnt = 0
+      ibs = 0
+      ids = 0
+      range = GMAX - GMIN
+!      IF ( range .le. 0.00 ) THEN
+      IF ( range .le. 1.e-30 ) THEN
+        nbits = 8
+        return
+      END IF
+!*
+      IF ( scl .eq. 0.0 ) THEN
+          nbits = 8
+          RETURN
+      ELSE IF ( scl  >  0.0 ) THEN
+          ipo = INT (ALOG10 ( range ))
+!jw: if range is smaller than computer precision, set nbits=8
+          if(ipo<0.and.ipo+scl<-20) then
+            print *,'for small range,ipo=',ipo,'ipo+scl=',ipo+scl,'scl=',scl
+            nbits=8
+            return
+          endif
+
+          IF ( range .lt. 1.00 ) ipo = ipo - 1
+          po = float(ipo) - scl + 1.
+          ids = - INT ( po )
+          rr = range * 10. ** ( -po )
+          nbits = INT ( ALOG ( rr ) / rln2 ) + 1
+      ELSE
+          ibs = -NINT ( -scl )
+          rng2 = range * 2. ** (-ibs)
+          nbits = INT ( ALOG ( rng2 ) / rln2 ) + 1
+      END IF
+!     write(0,*)'in g2getnits,ibs=',ibs,'ids=',ids,'nbits=',nbits,'range=',range
+!*
+      IF(nbits <= 0) THEN
+        nbits = 0
+        IF(ABS(GMIN) >= 1.) THEN
+          ids = -int(alog10(abs(gmin)))
+        ELSE IF (ABS(GMIN) < 1.0.AND.ABS(GMIN) > 0.0) THEN
+          ids = -int(alog10(abs(gmin)))+1
+        ELSE
+          ids = 0
+        ENDIF
+      ENDIF
+      nbits = min(nbits,MXBIT)
+!     write(0,*)'in g2getnits ibs=',ibs,'ids=',ids,'nbits=',nbits
+!
+      IF ( scl > 0.0 ) THEN
+        s=10.0 ** ids
+        IF(IBM == 255) THEN
+          GROUND = G(1)*s
+          GMAX   = GROUND
+          GMIN   = GROUND
+          DO I=2,LEN
+            GMAX = MAX(GMAX,G(I)*s)
+            GMIN = MIN(GMIN,G(I)*s)
+          ENDDO
+        ELSE
+          do i1=1,len
+            if (bmap(i1)) exit
+          enddo
+ !        I1=1
+ !        DO WHILE(I1.LE.LEN.AND..not.BMAP(I1))
+ !          I1=I1+1
+ !        ENDDO
+          IF(I1 <= LEN) THEN
+            GROUND = G(I1)*s
+            GMAX   = GROUND
+            GMIN   = GROUND
+            DO I=I1+1,LEN
+              IF(BMAP(I)) THEN
+                GMAX = MAX(GMAX,G(I)*S)
+                GMIN = MIN(GMIN,G(I)*S)
+              ENDIF
+            ENDDO
+          ELSE
+            GMAX = 0.
+            GMIN = 0.
+          ENDIF
+        ENDIF
+
+        range = GMAX-GMIN
+        if(GMAX == GMIN) then
+          ibs = 0
+        else
+          ibs = nint(alog(range/(2.**NBITS-0.5))/ALOG2+HPEPS)
+        endif
+!
+      endif
+        write(0,*) 'leave g2getbits with GMIN: ', GMIN
+!        GFLD%idrtmpl(1)=GMIN
+!     write(0,*)'in g2getnits,2ibs=',ibs,'ids=',ids,'nbits=',nbits,'range=',&
+!                range, 'scl=',scl,'data=',maxval(g),minval(g)
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      RETURN
+      END subroutine g2getbits
