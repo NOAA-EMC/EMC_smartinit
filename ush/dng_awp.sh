@@ -22,7 +22,9 @@ if [ $mdl = dgex ];then cyctp=;fi
 REGCP=`echo $outreg |tr '[a-z]'  '[A-Z]' `
 echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $fhr 
 
-$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+if [ $GRBopt = 1];then
+  $utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+fi
 
 # Processing grids for AWIPS
  pgm=tocgrib2
@@ -51,7 +53,9 @@ else
   echo AWP PARM FILE not found: $awpparm
 fi
 
-mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+if [ $GRBopt = 1];then
+  mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+fi
 mv ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 if [ $ihindex -eq 1 ];then
  mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00
