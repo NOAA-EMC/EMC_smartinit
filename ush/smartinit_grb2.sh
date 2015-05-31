@@ -55,7 +55,7 @@ EXECmdl=$(eval echo \$$tempvar)
 echo EXECmdl $EXECmdl  IVADJ $IVADJ
 echo GRIBopt $GRIBopt
 echo IGRBI $IGRBI IGRBO $IGRBO
-export today=`$util/exec/ndate |cut -c 1-8`
+export today=`${utilexec}/exec/ndate |cut -c 1-8`
 #=====================================================================
 # Set special filename extensions for mdl,sref,master,wgt,output files
 # mdl input file         : mdlgrd,natgrd
@@ -265,7 +265,8 @@ else
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
   fi
-  $GRB2INDEX/grb2index SREFPROB SREFPROBI
+! $GRB2INDEX/grb2index SREFPROB SREFPROBI
+  $GRB2INDEX SREFPROB SREFPROBI
   # check for missing sref data
   export err=$?; err_chk
 fi  #GRIBopt
@@ -281,7 +282,8 @@ fi  #GRIBopt
 if [ $GRIBopt = 1 ];then
     $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 64 64 0 0"|grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
 else
-    $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >0.25" | grep ":${PHR}-${pcphr} hour" | $WGRIB2/wgrib2 -i SREFPROB  -grib dump
+!   $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >0.25" | grep ":${PHR}-${pcphr} hour" | $WGRIB2/wgrib2 -i SREFPROB  -grib dump
+    $WGRIB2 SREFPROB | grep APCP |  grep "prob >0.25" | grep ":${PHR}-${pcphr} hour" | $WGRIB2 -i SREFPROB  -grib dump
 fi
     let IP=IP+1
     mv dump srefpcp$IP
@@ -290,7 +292,8 @@ fi
 if [ $GRIBopt = 1 ];then
     $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 20 81 236"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
 else
-    $WGRIB2/wgrib2 SREFPROB | grep APCP | grep "prob >1.27" | grep ":${PHR}-${pcphr} hour" | $WGRIB2/wgrib2 -i SREFPROB  -grib  dump
+!   $WGRIB2/wgrib2 SREFPROB | grep APCP | grep "prob >1.27" | grep ":${PHR}-${pcphr} hour" | $WGRIB2/wgrib2 -i SREFPROB  -grib  dump
+    $WGRIB2 SREFPROB | grep APCP | grep "prob >1.27" | grep ":${PHR}-${pcphr} hour" | $WGRIB2 -i SREFPROB  -grib  dump
 fi
     let IP=IP+1
     mv dump srefpcp$IP
@@ -299,7 +302,8 @@ fi
 if [ $GRIBopt = 1 ];then
     $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 40 163 215"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
 else
-    $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >2.54" | grep ":${PHR}-${pcphr} hour"  | $WGRIB2/wgrib2 -i SREFPROB -grib dump
+!   $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >2.54" | grep ":${PHR}-${pcphr} hour"  | $WGRIB2/wgrib2 -i SREFPROB -grib dump
+    $WGRIB2 SREFPROB | grep APCP |  grep "prob >2.54" | grep ":${PHR}-${pcphr} hour"  | $WGRIB2 -i SREFPROB -grib dump
 fi
     let IP=IP+1
     mv dump srefpcp$IP
@@ -308,7 +312,8 @@ fi
 if [ $GRIBopt = 1 ];then
     $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 101 153 154"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
 else
-    $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >6.35" | grep ":${PHR}-${pcphr} hour"  | $WGRIB2/wgrib2 -i SREFPROB -grib dump
+!   $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >6.35" | grep ":${PHR}-${pcphr} hour"  | $WGRIB2/wgrib2 -i SREFPROB -grib dump
+    $WGRIB2 SREFPROB | grep APCP |  grep "prob >6.35" | grep ":${PHR}-${pcphr} hour"  | $WGRIB2 -i SREFPROB -grib dump
 fi
     let IP=IP+1
     mv dump srefpcp$IP
@@ -317,7 +322,8 @@ fi
 if [ $GRIBopt = 1 ];then
     $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 203 51 51"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
 else
-    $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >12.7" | grep ":${PHR}-${pcphr} hour" | $WGRIB2/wgrib2 -i SREFPROB -grib dump
+!   $WGRIB2/wgrib2 SREFPROB | grep APCP |  grep "prob >12.7" | grep ":${PHR}-${pcphr} hour" | $WGRIB2/wgrib2 -i SREFPROB -grib dump
+    $WGRIB2 SREFPROB | grep APCP |  grep "prob >12.7" | grep ":${PHR}-${pcphr} hour" | $WGRIB2 -i SREFPROB -grib dump
 fi
     let IP=IP+1
     mv dump srefpcp$IP
@@ -337,9 +343,11 @@ if [ $GRIBopt = 1 ];then
 ##$utilexec/grbindex srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
   $utilexec/grbindex srefpcp${rg} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
 else
-  $WGRIB2/wgrib2  srefallpcp -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
+! $WGRIB2/wgrib2  srefallpcp -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
+  $WGRIB2  srefallpcp -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
   ln -s srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}
-  $GRB2INDEX/grb2index srefpcp${rg} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
+! $GRB2INDEX/grb2index srefpcp${rg} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
+  $GRB2INDEX srefpcp${rg} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
 fi
 
 fi #fhr -ge 0
@@ -429,7 +437,8 @@ for fhr in $hours; do
 if [ $GRIBopt = 1 ];then 
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 else
-  $GRB2INDEX/grb2index WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+! $GRB2INDEX/grb2index WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+  $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 fi
   inhrfrq=1
 ## Temp
@@ -541,8 +550,10 @@ if [ $GRIBopt = 1 ];then
       $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 else
-      $GRB2INDEX/grb2index WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
-      $GRB2INDEX/grb2index WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+!     $GRB2INDEX/grb2index WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+!     $GRB2INDEX/grb2index WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+      $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+      $GRB2INDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 fi
 
       export pgm=smartprecip; . prep_step
@@ -564,7 +575,8 @@ fi
 if [ $GRIBopt = 1 ];then 
         $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 else
-        $GRB2INDEX/grb2index WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+!       $GRB2INDEX/grb2index WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+        $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 fi
 
 #if [ $GRIBopt = 1 ];then 
@@ -580,7 +592,8 @@ fi
 if [ $GRIBopt = 1 ];then 
         $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 else
-        $GRB2INDEX/grb2index WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+!       $GRB2INDEX/grb2index WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+        $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 fi
 
         ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
@@ -607,10 +620,14 @@ if [ $GRIBopt = 1 ];then
       $utilsorc/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
       $utilexec/grbindex ${freq}snow ${freq}snowi
 else
-      $WGRIB2/wgrib2 ${freq}precip.${fhr} -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} ${freq}precip
-      $GRB2INDEX/grb2index ${freq}precip ${freq}precipi
-      $WGRIB2/wgrib2 ${freq}snow.${fhr} -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} ${freq}snow
-      $GRB2INDEX/grb2index ${freq}snow ${freq}snowi
+!     $WGRIB2/wgrib2 ${freq}precip.${fhr} -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} ${freq}precip
+!     $GRB2INDEX/grb2index ${freq}precip ${freq}precipi
+!     $WGRIB2/wgrib2 ${freq}snow.${fhr} -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} ${freq}snow
+!     $GRB2INDEX/grb2index ${freq}snow ${freq}snowi
+      $WGRIB2 ${freq}precip.${fhr} -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} ${freq}precip
+      $GRB2INDEX ${freq}precip ${freq}precipi
+      $WGRIB2 ${freq}snow.${fhr} -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} ${freq}snow
+      $GRB2INDEX ${freq}snow ${freq}snowi
 fi
     fi #MKPCP>0
   done #MKPCP loop
@@ -619,11 +636,13 @@ fi
 #  RUN PRODUCT GENERATOR
 #=================================================================
 if [ $GRIBopt = 2 ];then
-  $GRB2INDEX/grb2index WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+! $GRB2INDEX/grb2index WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+  $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 # Use inventory to get smartinit fields - not necessary; NAM Nest already outputs the correct smartinit fields
 # cp -p $PARMdng/nam_smartinit_grib2.parmlist inventory.txt
 # $WGRIB2 WRFPRS00.tm00 | grep -F -f inventory.txt | $WGRIB2 -i -grib $prdgfl WRFPRS00.tm00
-  $WGRIB2/wgrib2 WRFPRS${fhr}.tm00 -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} $prdgfl
+! $WGRIB2/wgrib2 WRFPRS${fhr}.tm00 -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} $prdgfl
+  $WGRIB2 WRFPRS${fhr}.tm00 -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} $prdgfl
 else
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
   echo creating $prdgfl file for fhr $fhr
@@ -682,7 +701,8 @@ fi # GRIBopt fi
     exit
   fi
 if [ $GRIBopt = 2 ];then
-  $GRB2INDEX/grb2index meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+! $GRB2INDEX/grb2index meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+  $GRB2INDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 else
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 fi
@@ -729,8 +749,10 @@ else
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi
-    $GRB2INDEX/grb2index MAXMIN1 MAXMIN1i
-    $GRB2INDEX/grb2index MAXMIN2 MAXMIN2i
+!   $GRB2INDEX/grb2index MAXMIN1 MAXMIN1i
+!   $GRB2INDEX/grb2index MAXMIN2 MAXMIN2i
+    $GRB2INDEX MAXMIN1 MAXMIN1i
+    $GRB2INDEX MAXMIN2 MAXMIN2i
 fi
   fi
   freq=6;fmx=21   #fmx =  maxmin unit number for 1st maxmin file
@@ -769,9 +791,12 @@ else
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00.grib2 MAXMIN3
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00.grib2 MAXMIN4
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00.grib2 MAXMIN5
-    $GRB2INDEX/grb2index MAXMIN3 MAXMIN3i
-    $GRB2INDEX/grb2index MAXMIN4 MAXMIN4i
-    $GRB2INDEX/grb2index MAXMIN5 MAXMIN5i
+!   $GRB2INDEX/grb2index MAXMIN3 MAXMIN3i
+!   $GRB2INDEX/grb2index MAXMIN4 MAXMIN4i
+!   $GRB2INDEX/grb2index MAXMIN5 MAXMIN5i
+    $GRB2INDEX MAXMIN3 MAXMIN3i
+    $GRB2INDEX MAXMIN4 MAXMIN4i
+    $GRB2INDEX MAXMIN5 MAXMIN5i
 fi
 
     if [ $cycon -eq 1 -a inest -eq 0 ];then
