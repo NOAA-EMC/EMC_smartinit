@@ -1,0 +1,19 @@
+updated NAM AWIPS headers using old format
+--This line, and those below, will be ignored--
+
+RM   util/parm/grib2_awpnamdngconusonf69.197
+RM   util/parm/grib2_awpnamdngconusonf78.197
+RM   util/parm/grib2_awpnamdngconusofff69.197
+RM   util/parm/grib2_awpnamdngconusofff78.197
+RM   util/parm/grib2_awpnamdngconusonf63.197
+RM   util/parm/grib2_awpnamdngconusonf72.197
+RM   util/parm/grib2_awpnamdngconusonf81.197
+RM   util/parm/grib2_awpnamdngconusofff63.197
+RM   util/parm/grib2_awpnamdngconusofff72.197
+RM   util/parm/grib2_awpnamdngconusofff81.197
+RM   util/parm/grib2_awpnamdngconusonf66.197
+RM   util/parm/grib2_awpnamdngconusonf75.197
+RM   util/parm/grib2_awpnamdngconusonf84.197
+RM   util/parm/grib2_awpnamdngconusofff66.197
+RM   util/parm/grib2_awpnamdngconusofff75.197
+RM   util/parm/grib2_awpnamdngconusofff84.197
