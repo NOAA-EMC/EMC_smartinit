@@ -43,7 +43,12 @@
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
 #======================================================================
 # Check if this is a nest run
+
+set -x
+
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
+
+export grib=2
 
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
@@ -111,6 +116,22 @@ while [ $iline -le $linemax ];do
     fi
   fi
 done
+
+# Begin wgrib2
+
+compress="c3 -set_bitmap 1"
+
+case $RUNTYP in
+# old conusnest2p5) mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540";;
+  conusnest2p5) natgrd=.bsmart; ogrd=188; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
+   hi) rg=hi; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
+# old  pr) rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
+   pr) mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1500:296.0156 16.977485:225:1500:19.52200";;
+  aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
+esac
+
+# End wgrib2
+ 
 typeset -Z2 srefcyc gefscyc pcphrl
 text=".tm00"
 #EXT natgrd=`echo $natgrd |cut -d. -f2`
@@ -206,6 +227,10 @@ echo INPUT MDL DIR : $COM_IN
 echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
+# Begin wgrib2
+echo INTERP GRID for wgrib2 : $wgrib2def
+echo OUTPUT GRID: $outreg
+# End wgrib2
 echo "============================================================"
 echo 
 
@@ -340,6 +365,7 @@ for fhr in $hours; do
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
 #         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
+# NDAS = NAM Data Assimilation System; GDAS = Global Data Assimilation System (GFS)
           if [ $fhr -eq 00 -a $GUESS = GDAS ];then
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
@@ -350,13 +376,22 @@ for fhr in $hours; do
             ln -fs WRFPRS${fhr}.tm00 fort.51
             echo ${PDY}${cyc} | ${utilexec}/overdate.grib
           else
+# Begin wgrib2
+            if [ $grib = 2 ];then
+            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COM_IN/${mdl}.$PDY
+            fi
+# End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
           fi
         fi;;
     esac
 
+# Begin wgrib2
+if [ $grib = 1 ];then
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+fi
+# End wgrib2
   inhrfrq=1
 
   if [ $fhr -gt ${fhrstr} ];then
@@ -512,6 +547,7 @@ EOF
 #=================================================================
 #  RUN PRODUCT GENERATOR
 #=================================================================
+if [ $grib = 1 ];then
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
   echo creating $prdgfl file for fhr $fhr
   cat >input${fhr}.prd <<EOF5
@@ -546,6 +582,50 @@ EOF5
     ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
     export err=$?;  err_chk
 #188  fi
+
+else
+
+# Begin wgrib2
+
+# nearest neighbor or bi-linear interpolation
+
+if [ $RUNTYP = pr ]; then
+  interp="-new_grid_interpolation bilinear"
+else
+  interp="-new_grid_interpolation neighbor"
+fi
+
+# use either bilinear or nearest neighbor interpolation, dependent on domain
+# Puerto Rico uses bilinear -> going from 3 km to 1.5 km; the rest use nearest neighbor
+
+cp -p $PARMdng/nam_smartinit_grb2.parmlist inventory.txt
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt | $WGRIB2 -i -grib inputs.grb2 WRFPRS${fhr}.tm00
+$WGRIB2 inputs.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1
+
+# always use budget interpolation
+
+interp="-new_grid_interpolation budget"
+cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist inventoryb.txt
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt | $WGRIB2 -i -grib inputsb.grb2 WRFPRS${fhr}.tm00
+$WGRIB2 inputsb.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b
+
+# always use nearest neighbor interpolation for these fields
+
+interp="-new_grid_interpolation neighbor"
+
+cp -p $PARMdng/nam_smartinit_grb2_nn.parmlist inventoryn.txt
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
+$WGRIB2 inputsn.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_n
+
+cat model.ndfd_1 model.ndfd_b model.ndfd_n > ${prdgfl}.grb2
+
+# convert to grib1
+
+cnvgrib -g21 ${prdgfl}.grb2 ${prdgfl}
+
+# End wgrib2
+
+fi # grib = 1
 
   if [ $PDY = $today ];then
     cp ${COMROOT}/date/t${cyc}z DATE
