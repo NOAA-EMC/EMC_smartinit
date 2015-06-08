@@ -1,0 +1,4 @@
+Note: due to no surface visibility from nmmb's 4-7 members,
+the prob/mean/spread calculation for visibility and flight
+restriction are specially treated in util.f and getflight.f
+two routines.  -- Jun Du, 20120525

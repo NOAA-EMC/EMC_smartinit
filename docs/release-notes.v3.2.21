@@ -1,0 +1,45 @@
+smartinit V3.2.21 Q1FY14      
+Jeff McQueen
+November 21, 2013
+
+This upgrade is primarily needed for the implementation of RTMA v2.2.0 scheduled for 
+Q1FY14.
+An error in reading parent model visibility for the ak_rtmages alaska RUNTYP was found and corrected in sorc/nam_smartinit/GETGRIB.f90 for forecast hours 1,2,4,5,7,8,10,11. Downscaled visibility will now eb correctly output for the ak_rtmages in-between hour files.
+
+For this version, NCO ECF submission will be exactly the same as previous upgrade.
+JNAM_SMINIT will continue to be triggered every 3 hrs from 00-84 forecast hours
+by existence of NAM BGRD or BSMART post files as done for previous upgrades.
+
+The following RUNTYP submissions will continue as before(RUNTYP set in ecf scripts?).
+# NCO SUBMISSION  ffhrs     RUNTYP
+#                 00-12     ak_rtmages
+#                 00-84     conus,ak,hi,pr
+#                 00-60     aknest3,conusnest2p5
+
+BUILD INSTRUCTIONS:
+checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/nam_smartinit.v3.2.21
+
+1.  Check out and copy to /nwprod/smartinit.v3.2.21
+    cd /nwprod/smartinit.v3.2.21
+
+2.  Build sorc codes nam_smartinit.fd, nam_smartprecip.fd
+        cd smartinit.${model_ver}/sorc/nam_smartinit.fd
+        make
+        cp nam_smartinit ../../smartinit.${model_ver}/exec
+        cd ...smartinit.${model_ver}/sorc/nam_smartprecip.fd
+        make
+        cp nam_smartprecip ...smartinit.${model_ver}/exec
+  
+3.  Use ...docs/smartinit.ver file if desired to set 
+      model_ver=v3.2.21  parameter
+
+4.  See ...docs/bjobcards-dev for recommended limits to use in JNAM_SMINIT jobs.
+    eg: 
+#BSUB -W 03:00
+#BSUB -n 1
+#BSUB -R rusage[mem=5500]
+#BSUB -q dev
+#BSUB -P RTMA
+
+5.  Set RUNTYP,cyc, ffhr from ecflow scripts or in specific JNAM_SMINIT jobs.
+
