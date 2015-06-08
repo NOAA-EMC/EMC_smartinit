@@ -1,0 +1,37 @@
+smartinit V3.3.4 Q3FY15      
+Jeff McQueen
+June 8, 2015
+
+This upgrade corrects WMO AWIPS header files needed to distribute NAM DNG fields on the CONUS 197 AWIPS 5 km grid from 
+forecast hours 63-84. Specifically, NAM DNG parm files from f63 to 84  were changed back to use the **M** KWBE to designate the 5 km CONUS domain for all fields except Haines Index where the more recent **O*** KWBE designation is used.
+
+The only files updated located in the util/parm subdirectory:
+grib2_awpnamdngconusofff63.197  grib2_awpnamdngconusonf63.197
+grib2_awpnamdngconusofff66.197  grib2_awpnamdngconusonf66.197
+grib2_awpnamdngconusofff69.197  grib2_awpnamdngconusonf69.197
+grib2_awpnamdngconusofff72.197  grib2_awpnamdngconusonf72.197
+grib2_awpnamdngconusofff75.197  grib2_awpnamdngconusonf75.197
+grib2_awpnamdngconusofff78.197  grib2_awpnamdngconusonf78.197
+grib2_awpnamdngconusofff81.197  grib2_awpnamdngconusonf81.197
+grib2_awpnamdngconusofff84.197  grib2_awpnamdngconusonf84.197
+
+
+BUILD INSTRUCTIONS:
+checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/DNG.V3.3.4
+
+For this version, NCO ECF submission will be exactly the same as previous upgrade.
+
+1.  Check out and copy to /nwprod/smartinit.v3.3.4  
+    cd /nwprod/smartinit.v3.3.4  
+
+2. Either copy executables from smartinit.v3.3.3 or
+   Build sorc codes nam_smartinit.fd, nam_smartprecip.fd
+        cd smartinit.${model_ver}/sorc/nam_smartinit.fd
+        make
+        cp nam_smartinit ../../smartinit.${model_ver}/exec
+        cd ...smartinit.${model_ver}/sorc/nam_smartprecip.fd
+        make
+        cp nam_smartprecip ...smartinit.${model_ver}/exec
+  
+3.  Use ...docs/smartinit.ver file if desired to set 
+      model_ver=v3.3.4   parameter
