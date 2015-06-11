@@ -11,6 +11,7 @@
 #  outreg  :  output file region name (eg: conus,ak,pr,hi,conus2p5,ak3
 #=======================================================================
 set -x
+
 outreg=$1    # mdlgrd used for guam to distinguish arw/nmm
 ihindex=0
 case $cyc in 
@@ -22,7 +23,30 @@ if [ $mdl = dgex ];then cyctp=;fi
 REGCP=`echo $outreg |tr '[a-z]'  '[A-Z]' `
 echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $fhr 
 
-$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+#$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+$CNVGRIB -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+cp ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 old.grb2
+
+# Correct for grib2 precision (AMG)
+# This needs to be done, because when terrain and land/water mask was converted from grib2 to grib1, precision was lost
+# in some of the grid specs.
+# Will need to add other domains, once new EMC/GFE common terrain and land/water mask fields are used
+
+if [ $outreg = pr ];then
+# Mercator PR 1.25 grid
+  $WGRIB2 -set_int 3 39 16977485 old.grb2 -grib new.grb2_1
+  $WGRIB2 -set_int 3 43 291972167 new.grb2_1 -grib new.grb2_2
+  $WGRIB2 -set_int 3 56 296015600 new.grb2_2 -grib ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+elif [ $outreg = conus2p5 ];then
+# Expanded CONUS Nest
+  $WGRIB2 -set_int 3 39 19228976 old.grb2 -grib new.grb2_1
+  $WGRIB2 -set_int 3 43 233723448 new.grb2_1 -grib new.grb2_2
+  $WGRIB2 -set_int 3 56 2539703.000 new.grb2_2 -grib new.grb2_3
+  $WGRIB2 -set_int 3 60 2539703.000 new.grb2_3 -grib ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+fi
+
+rm *grb2*
+# End Correct for grib2 precision (AMG)
 
 # Processing grids for AWIPS
  pgm=tocgrib2
