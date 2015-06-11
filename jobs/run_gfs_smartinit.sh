@@ -116,7 +116,7 @@ date
 ####################################
 export pid=$$
 #export DATA_IN=${DATA_IN:-/tmpnwprd}
-export DATA_IN=${DATA_IN:-/ptmpp1/$USER}
+export DATA_IN=${DATA_IN:-/ptmpp2/$USER}
 #export DATA=${DATA:-$DATA_IN/${job}.${pid}}
 export DATA=${DATA:-$DATA_IN/gfsdng_${RUNTYP}.${pid}}
 #NCO export DATA=$DATA_IN/${job}.${pid}
