@@ -121,12 +121,24 @@ done
 
 compress="c3 -set_bitmap 1"
 
+# if [ $RUNTYP = hi ];then
+#   export RUNTYP=hawaiinest
+# fi
 case $RUNTYP in
-# old conusnest2p5) mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540";;
-  conusnest2p5) natgrd=.bsmart; ogrd=188; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
-   hi) rg=hi; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
-# old  pr) rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
-   pr) mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1500:296.0156 16.977485:225:1500:19.52200";;
+    hi ) export RUNTYP=hawaiinest;;
+    pr ) export RUNTYP=priconest;;  # CHANGE should be mesoak3.NDFD (meso{rg}
+esac
+
+
+case $RUNTYP in
+# old conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540";;
+#  conusnest2p5) natgrd=.bsmart; ogrd=188; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
+#  conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
+   conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2539 19.228:1597:2539";;
+   hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
+# old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
+# new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
+   priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
   aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
 esac
 
@@ -377,9 +389,9 @@ for fhr in $hours; do
             echo ${PDY}${cyc} | ${utilexec}/overdate.grib
           else
 # Begin wgrib2
-            if [ $grib = 2 ];then
-            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COM_IN/${mdl}.$PDY
-            fi
+#            if [ $grib = 2 ];then
+#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COM_IN/${mdl}.$PDY
+#            fi
 # End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
@@ -589,7 +601,7 @@ else
 
 # nearest neighbor or bi-linear interpolation
 
-if [ $RUNTYP = pr ]; then
+if [ $RUNTYP = priconest ]; then
   interp="-new_grid_interpolation bilinear"
 else
   interp="-new_grid_interpolation neighbor"
