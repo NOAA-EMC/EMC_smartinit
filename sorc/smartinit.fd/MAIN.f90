@@ -320,6 +320,7 @@
    ALLOCATE (P6CP01(IM,JM),P6CP10(IM,JM),P6CP50(IM,JM),STAT=kret)
    ALLOCATE (P12CP01(IM,JM),P12CP10(IM,JM),P12CP50(IM,JM),STAT=kret)
    ALLOCATE (HAINES(IM,JM),HLVL(IM,JM),STAT=kret)
+   ALLOCATE (CEIL(IM,JM),STAT=kret)
 !  for nests
    ALLOCATE (VALIDPT(IM,JM),STAT=kret)
    VALIDPT=.TRUE.
@@ -427,7 +428,9 @@
          ID(9)=1
          DEC=-2.0
          CALL GRIBIT(ID,RITEHD,TOPO,GDIN,70,DEC)
-         IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
+! Comment out CS2P - Expanded CONUS Nest reads in land cover now instead of Vegetation Type
+!!       IF (REGION .NE. 'CS' .and. REGION .NE.'CS2P' )THEN
+         IF (REGION .NE. 'CS')THEN
            ID(1:25) = 0
            ID(8)=81
            ID(9)=1
@@ -698,6 +701,15 @@
       ID(8)=20;ID(9)=1
       DEC=2.7
       CALL GRIBIT(ID,RITEHD,VIS,GDIN,70,DEC)
+
+! CLOUD CEILING HEIGHT
+      print*, 'Output Cloud Ceiling Height', FHR
+      ID(1:25) = 0
+      ID(8)=7;ID(9)=215
+      DEC=-5.0
+      CALL GRIBIT(ID,RITEHD,CEIL,GDIN,70,DEC)
+      print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
+
 
 !==========================================================================
 !  TransWind - the average winds in the layer between the surface
@@ -1416,6 +1428,7 @@
        CALL GRIBIT(ID,RITEHD,VEG_NDFD,GDIN,IUNIT,DEC)
 
 ! 03-19-13 : Add Gust and visibility to limited files for RTMA
+! 06-03-15 : Add Cloud Ceiling to limited files for RTMA
       IF (trim(GDIN%CORE) .NE. 'GFS') THEN
         ID(1:25) = 0
         ID(8)=180;ID(9)=1
@@ -1426,6 +1439,15 @@
         ID(8)=20;ID(9)=1
         DEC=2.7
         CALL GRIBIT(ID,RITEHD,VIS,GDIN,IUNIT,DEC)
+
+! CLOUD CEILING HEIGHT
+      print*, 'Output Cloud Ceiling Height', FHR
+      ID(1:25) = 0
+      ID(8)=7;ID(9)=215
+      DEC=-5.0
+      CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
+      print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
+
       ENDIF
 
        return

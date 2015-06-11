@@ -421,6 +421,14 @@
         JPDS(5) = 020
         JPDS(6) = 001
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,VIS,IRET,ISTAT)
+
+       print*, 'cloud ceiling height', lnest, LHR3
+        JPDS=-1;J=0
+        JPDS(5) = 007
+        JPDS(6) = 215
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,CEIL,IRET,ISTAT)
+        print*,'min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
+
       endif
 
 ! 2-m temp
