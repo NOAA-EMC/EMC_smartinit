@@ -135,11 +135,16 @@ case $RUNTYP in
 #  conusnest2p5) natgrd=.bsmart; ogrd=188; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
 #  conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
    conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2539 19.228:1597:2539";;
+   conus) natgrd=bgrd3d; mdlgrd=""; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
+   conusnest) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
    hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
 # old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
 # new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
    priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
   aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
+  ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
+  alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
+  ak_rtmages) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
 esac
 
 # End wgrib2
@@ -362,10 +367,14 @@ for fhr in $hours; do
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
         fi
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
+# Begin wgrib2
+if [ $grib = 1 ];then
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
-        mv temp WRFPRS${fhr}.tm00;;
+        mv temp WRFPRS${fhr}.tm00
+fi;;
+# End wgrib2
 
       wrfprs)  
         mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
@@ -601,14 +610,24 @@ else
 
 # nearest neighbor or bi-linear interpolation
 
-if [ $RUNTYP = priconest ]; then
-  interp="-new_grid_interpolation bilinear"
-else
-  interp="-new_grid_interpolation neighbor"
-fi
+#if [ $RUNTYP = priconest ]; then
+#  interp="-new_grid_interpolation bilinear"
+#else
+#  interp="-new_grid_interpolation neighbor"
+#fi
 
 # use either bilinear or nearest neighbor interpolation, dependent on domain
-# Puerto Rico uses bilinear -> going from 3 km to 1.5 km; the rest use nearest neighbor
+# Puerto Rico uses bilinear -> going from 3 km to 1.5 km; 
+# Conus uses bilinear -> going from 12 km to 5 km; 
+# Conusnest uses bilinear -> going from 3 km to 5 km; 
+# ak uses bilinear -> going from 12 km to 6 km; 
+# alaskanest uses bilinear -> going from 3 km to 6 km; 
+# ak_rtmages uses bilinear -> going from 3 km to 6 km; 
+# the rest use nearest neighbor
+
+interp="-new_grid_interpolation neighbor"
+case $RUNTYP in conus|conusnest|priconest) interp="-new_grid_interpolation bilinear";; esac
+case $RUNTYP in ak|alaskanest|ak_rtmages) interp="-new_grid_interpolation bilinear";; esac
 
 cp -p $PARMdng/nam_smartinit_grb2.parmlist inventory.txt
 $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt | $WGRIB2 -i -grib inputs.grb2 WRFPRS${fhr}.tm00
