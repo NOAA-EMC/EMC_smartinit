@@ -505,26 +505,51 @@ fi
           FHRFRQ=$fhr9;freq=12
           pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
       esac
-      cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
+# Begin wgrib2
+      if [ $grib = 2 ];then
+        cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00.grb2
+        cnvgrib -g21 WRFPRS${FHRFRQ}.tm00.grb2 WRFPRS${FHRFRQ}.tm00
+        cp WRFPRS${fhr}.tm00 WRFPRS${fhr}.tm00.grb2
+        cnvgrib -g21 WRFPRS${fhr}.tm00.grb2 WRFPRS${fhr}.tm00.grb
+      else
+        cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
+      fi
+# End wgrib2
       case $natgrd in bgrd3d) 
         ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
         mv temp WRFPRS${FHRFRQ}.tm00;;
       esac
-      $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+      if [ $grib = 2 ];then
+        $utilexec/grbindex WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
+      else
+        $utilexec/grbindex WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
+      fi
       $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
       export pgm=smartprecip; . prep_step
       ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
       ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
+      if [ $grib = 2 ];then
+      ln -sf "WRFPRS${fhr}.tm00.grb"     fort.15
+      ln -sf "WRFPRS${fhr}i.tm00.grb"    fort.16
+      else
       ln -sf "WRFPRS${fhr}.tm00"     fort.15
       ln -sf "WRFPRS${fhr}i.tm00"    fort.16
+      fi
       ln -sf "${freq}precip.${fhr}"  fort.50
       ln -sf "${freq}cprecip.${fhr}" fort.51
       ln -sf "${freq}snow.${fhr}"    fort.52
 
       if [ $MKPCP -eq $mk12p ];then
-        cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+# Begin wgrib2
+        if [ $grib = 2 ];then
+          cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00.grb2
+          cnvgrib -g21 WRFPRS${fhr3}.tm00.grb2 WRFPRS${fhr3}.tm00
+        else
+          cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+        fi
+# End wgrib2
         case $natgrd in bgrd3d) 
           ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
           ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
@@ -532,7 +557,14 @@ fi
         esac
         $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
-        cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
+# Begin wgrib2
+        if [ $grib = 2 ];then
+          cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00.grb2
+          cnvgrib -g21 WRFPRS${fhr6}.tm00.grb2 WRFPRS${fhr6}.tm00
+        else
+          cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
+        fi
+# End wgrib2
         case $natgrd in bgrd3d) 
           ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
           ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
@@ -544,8 +576,13 @@ fi
         ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
         ln -sf "WRFPRS${fhr3}.tm00"      fort.17
         ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
+      if [ $grib = 2 ];then
+        ln -sf "WRFPRS${fhr}.tm00.grb"       fort.19
+        ln -sf "WRFPRS${fhr}i.tm00.grb"      fort.20
+      else
         ln -sf "WRFPRS${fhr}.tm00"       fort.19
         ln -sf "WRFPRS${fhr}i.tm00"      fort.20
+      fi
       fi  # mk12p
 
 #===============================================================
