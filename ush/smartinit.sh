@@ -478,7 +478,9 @@ fi
 # Set output interpolation grid definition for copygb
   cpgbgrd=$grid
   if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
-  case $RUNTYP in aknest3|conusnest2p5) cpgbgrd=$grid;;esac 
+# Begin wgrib2 - added priconest and pr
+  case $RUNTYP in aknest3|conusnest2p5|priconest|pr) cpgbgrd=$grid;;esac 
+# End wgrib2
 #ORG   case $RUNTYP in aknest3) cpgbgrd=$grid;;esac 
 
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
