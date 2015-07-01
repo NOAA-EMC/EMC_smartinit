@@ -54,7 +54,7 @@ export rg=`echo $RUNTYP |cut -c1-2`
 tempvar=$(echo EXEC$mdl)
 EXECmdl=$(eval echo \$$tempvar)
 echo EXECmdl $EXECmdl  IVADJ $IVADJ
-export today=`ndate |cut -c 1-8`
+export today=`${utilexec}/ndate |cut -c 1-8`
 #=====================================================================
 # Set special filename extensions for mdl,sref,master,wgt,output files
 # mdl input file         : mdlgrd,natgrd
@@ -125,8 +125,8 @@ compress="c3 -set_bitmap 1"
 #   export RUNTYP=hawaiinest
 # fi
 case $RUNTYP in
-    hi ) export RUNTYP=hawaiinest;;
-    pr ) export RUNTYP=priconest;;  # CHANGE should be mesoak3.NDFD (meso{rg}
+#   hi ) export RUNTYP=hawaiinest;;
+#   pr ) export RUNTYP=priconest;;  # CHANGE should be mesoak3.NDFD (meso{rg}
 esac
 
 
@@ -138,9 +138,11 @@ case $RUNTYP in
    conus) natgrd=bgrd3d; mdlgrd=""; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
    conusnest) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
    hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
+   hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
 # old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
 # new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
    priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
+   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
   aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
   ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
   alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
@@ -510,9 +512,9 @@ fi
 # Begin wgrib2
       if [ $grib = 2 ];then
         cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00.grb2
-        cnvgrib -g21 WRFPRS${FHRFRQ}.tm00.grb2 WRFPRS${FHRFRQ}.tm00
+        $CNVGRIB -g21 WRFPRS${FHRFRQ}.tm00.grb2 WRFPRS${FHRFRQ}.tm00
         cp WRFPRS${fhr}.tm00 WRFPRS${fhr}.tm00.grb2
-        cnvgrib -g21 WRFPRS${fhr}.tm00.grb2 WRFPRS${fhr}.tm00.grb
+        $CNVGRIB -g21 WRFPRS${fhr}.tm00.grb2 WRFPRS${fhr}.tm00.grb
       else
         cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
       fi
@@ -547,7 +549,7 @@ fi
 # Begin wgrib2
         if [ $grib = 2 ];then
           cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00.grb2
-          cnvgrib -g21 WRFPRS${fhr3}.tm00.grb2 WRFPRS${fhr3}.tm00
+          $CNVGRIB -g21 WRFPRS${fhr3}.tm00.grb2 WRFPRS${fhr3}.tm00
         else
           cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
         fi
@@ -562,7 +564,7 @@ fi
 # Begin wgrib2
         if [ $grib = 2 ];then
           cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00.grb2
-          cnvgrib -g21 WRFPRS${fhr6}.tm00.grb2 WRFPRS${fhr6}.tm00
+          $CNVGRIB -g21 WRFPRS${fhr6}.tm00.grb2 WRFPRS${fhr6}.tm00
         else
           cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
         fi
@@ -656,16 +658,18 @@ else
 #fi
 
 # use either bilinear or nearest neighbor interpolation, dependent on domain
-# Puerto Rico uses bilinear -> going from 3 km to 1.5 km; 
+
+# Puerto Rico und PR uses bilinear -> going from 3 km to 1.5 km and 12 km to 1.5 km
+# Hi uses bilinear -> going from 12 km to 3 km 
 # Conus uses bilinear -> going from 12 km to 5 km; 
 # Conusnest uses bilinear -> going from 3 km to 5 km; 
 # ak uses bilinear -> going from 12 km to 6 km; 
 # alaskanest uses bilinear -> going from 3 km to 6 km; 
 # ak_rtmages uses bilinear -> going from 3 km to 6 km; 
-# the rest use nearest neighbor
+# the rest use nearest neighbor (conusnest2p5, hawaiinest, akenst3)
 
 interp="-new_grid_interpolation neighbor"
-case $RUNTYP in conus|conusnest|priconest) interp="-new_grid_interpolation bilinear";; esac
+case $RUNTYP in conus|conusnest|priconest|pr|hi) interp="-new_grid_interpolation bilinear";; esac
 case $RUNTYP in ak|alaskanest|ak_rtmages) interp="-new_grid_interpolation bilinear";; esac
 
 cp -p $PARMdng/nam_smartinit_grb2.parmlist inventory.txt
@@ -691,7 +695,8 @@ cat model.ndfd_1 model.ndfd_b model.ndfd_n > ${prdgfl}.grb2
 
 # convert to grib1
 
-cnvgrib -g21 ${prdgfl}.grb2 ${prdgfl}
+#cnvgrib -g21 ${prdgfl}.grb2 ${prdgfl}
+$CNVGRIB -g21 ${prdgfl}.grb2 ${prdgfl}
 
 # End wgrib2
 
