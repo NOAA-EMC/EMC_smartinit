@@ -5,13 +5,13 @@ conusnest    con  conus    conusnest  212      .bsmart   197     3  1073 689 201
 ak           ak   ak       ""         216       bgrd3d   198     5   825 553 40530 181429 8 210000 5953 5953 
 ak_rtmages   ak   ak       ""         216       bgrd3d   198     5   825 553 40530 181429 8 210000 5953 5953 
 alaskanest   ak   ak       alaskanest 216      .bsmart   198     198
-#hi           hi   hi       ""         243       bgrd3d   196     1   321 225 18067 -161626 128 23082 -153969 20000
-hi           hi   hi       ""         243      .bsmart   196     1   321 225 18067 -161626 128 23082 -153969 20000
+##hi           hi   hi       ""         243      .bsmart   196     1   321 225 18067 -161626 128 23082 -153969 20000
+hi           hi   hi       ""         243       bgrd3d   196     1   321 225 18067 -161626 128 23082 -153969 20000
 hawaiinest   hi   hi       hawaiinest 243      .bsmart   196     196
 ##pr           pr   pr       ""         212       bgrd3d   195     1   177 129 16829  -68196 128 19747  -63972 20000
 #pr          pr   pr       ""         212      .bsmart   195     1   339 225 16977485  -68027833 128 1952200  -639844 20000
-pr          pr   pr       ""         212      .bsmart   254     1   339 225 16977  -68028 128 19522  -63985 20000
 #priconest    pr   pr       priconest  212      .bsmart   195     195 
+pr          pr   pr       ""         212      bgrd3d   254     1   339 225 16977  -68028 128 19522  -63985 20000
 priconest    pr   pr       priconest  212      .bsmart   254    1   339 225 16977  -68028 128 19522  -63985 20000 
 guamnmmb     gm   guam     guamnmmb   243       wrfprs   199     199
 guamarw      gm   guam     guamarw    243       wrfprs   199     199
