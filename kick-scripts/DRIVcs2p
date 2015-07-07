@@ -33,7 +33,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=00  #TEST
+#export cyc=12  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -47,22 +47,25 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
 
 #====================================================================
-#domains="conusnest2p5 conus hi pr ak aknest3 "
+domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
+#domains="conusnest2p5 hi pr aknest3 conus"
 #domains="conusnest2p5 "
+#domains="conus"
 #domains="aknest3 "
-domains="hi "
+#domains="hi "
 #domains="pr "
+#domains="pr aknest3 conusnest2p5"
 #domains="hi pr aknest3 "
 #domains="conusnest2p5 pr "
 #====================================================================
 
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=12
+  export ENDHRS=84
   export mdl=nam
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
-                         ak_rtmages) ENDHRS=12;;
-                            aknest3) export ENDHRS=12;; 
-                       conusnest2p5) export ENDHRS=12;; 
+                         ak_rtmages) ENDHRS=09;;
+                            aknest3) export ENDHRS=60;; 
+                       conusnest2p5) export ENDHRS=60;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
  
