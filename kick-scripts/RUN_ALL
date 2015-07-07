@@ -6,6 +6,7 @@ export stutil=/hwrf/noscrub/soft/modulefiles
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
+module load GrADS/2.0.2
 
 #=======================================================
 # Driving script to run a smartinit domain
@@ -25,6 +26,7 @@ cfgdir=${rootd}/parm
 export wkdir=${rootd}/working
 mkdir -p $wkdir
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
+plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade
 export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
@@ -75,7 +77,7 @@ while [ $ffhr -le $ENDHRS ];do
  . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
 
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-# export PDY=20150605 ###TEST
+#export PDY=20150629 ###TEST
 
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo;echo `date`
@@ -152,3 +154,22 @@ export RUNTYP=$RUNTYP
 export cyc=$cyc
 export strhr=$fhrstr
 #bsub < $gemdir/plotmet.job
+
+export PDY=$PDY
+export cyc=$cyc
+
+if [ $runreg = conus2p5 ];then
+  pltrun=conusnest
+  bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2
+  $plotdir/make_DNG_page.sh >& $plotdir/logs/make_DNG_out.${cyc}
+elif [ $runreg = ak3 ];then
+  pltrun=ak3
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+elif [ $runreg = hi ];then
+  pltrun=hi
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+elif [ $runreg = pr ];then
+  pltrun=pr
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+fi
+
