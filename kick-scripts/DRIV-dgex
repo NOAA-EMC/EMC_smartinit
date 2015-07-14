@@ -10,6 +10,11 @@ module load ruby emc-utils
 # calls RUN_ALL which submits each RUNTYP domain JNAM_SMINIT job
 # Viable RUNTYP=conus,conusnest2p5,ak,ak_rtmages,aknest3,hi,pr,guamnmmb, guamarw
 # Jeff McQueen
+
+#   Jun 2015 Annette Gibbs - Changed smartinit to run on phase 2
+# 7 Jul 2015 Annette Gibbs - Changed smartinit output from /ptmpp2/$USER to /meso2/noscrub/$USER
+# 7 Jul 2015 Annette Gibbs - Changed smartinit output from /stmpp2/$USER to /ptmpp2/$USER and added $PDY to dir
+# 7 Jul 2015 Annette Gibbs - $PDY is now determined in DRIVcs2p and DRIV-dgex
 #==========================================
 
 # set job directory needed if running from cron
@@ -24,6 +29,10 @@ export jobd=${rootd}/jobs
 export kickd=${rootd}/kick-scripts
 
 cd $kickd
+
+# Determine date
+  export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
+#export PDY=20150629 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -70,14 +79,14 @@ for RUNTYP in $dgexrun;do
   M=$(echo $dayrm | cut  -c 5-6 )
   D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
-  rm -rf /ptmpp2/${USER}/${mdl}.${wdayd}
+  rm -rf /meso2/noscrub/${USER}/${mdl}.${wdayd}
 
 # Create and submit JNAM_SMINIT job
 
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /stmpp2/${USER}/${modeld}.${model_ver}/${cyc}
-  mkdir -p /stmpp2/${USER}/${modeld}.${model_ver}/${cyc}/list
-  ${kickd}/RUN_ALL >/stmpp2/$USER/${modeld}.${model_ver}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
+  mkdir -p /ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}
+  mkdir -p /ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}/list
+  ${kickd}/RUN_ALL >/ptmpp2/$USER/${modeld}.${model_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done
