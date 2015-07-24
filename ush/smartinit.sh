@@ -672,26 +672,132 @@ interp="-new_grid_interpolation neighbor"
 case $RUNTYP in conus|conusnest|priconest|pr|hi) interp="-new_grid_interpolation bilinear";; esac
 case $RUNTYP in ak|alaskanest|ak_rtmages) interp="-new_grid_interpolation bilinear";; esac
 
-cp -p $PARMdng/nam_smartinit_grb2.parmlist inventory.txt
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt | $WGRIB2 -i -grib inputs.grb2 WRFPRS${fhr}.tm00
-$WGRIB2 inputs.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1
+# Begin parallel wgrib2
 
-# always use budget interpolation
+if [ -e inputs.grb2_1 ]
+then
+rm inputs.grb2_1 inputs.grb2_2 inputs.grb2_3 inputs.grb2_4 inputs.grb2_5 inputs.grb2_6 inputs.grb2_7 inputs.grb2_8 inputs.grb2_9 inputs.grb2_10 inputsb.grb2_1 inputsb.grb2_2 inputsn.grb2
+fi
+
+ngrd=$natgrd
+if [ $natgrd = ".bsmart" ];then
+  ngrd=bsmart
+fi
+
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_1 inventory.txt1
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_2 inventory.txt2
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_3 inventory.txt3
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_4 inventory.txt4
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_5 inventory.txt5
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_6 inventory.txt6
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_7 inventory.txt7
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_8 inventory.txt8
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_9 inventory.txt9
+cp -p $PARMdng/nam_smartinit_${ngrd}_grb2.parmlist_10 inventory.txt10
+cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_1 inventoryb.txt1
+cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_2 inventoryb.txt2
+cp -p $PARMdng/nam_smartinit_grb2_nn.parmlist inventoryn.txt
+
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt1 | $WGRIB2 -i -grib inputs.grb2_1 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt2 | $WGRIB2 -i -grib inputs.grb2_2 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt3 | $WGRIB2 -i -grib inputs.grb2_3 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt4 | $WGRIB2 -i -grib inputs.grb2_4 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt5 | $WGRIB2 -i -grib inputs.grb2_5 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt6 | $WGRIB2 -i -grib inputs.grb2_6 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt7 | $WGRIB2 -i -grib inputs.grb2_7 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt8 | $WGRIB2 -i -grib inputs.grb2_8 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt9 | $WGRIB2 -i -grib inputs.grb2_9 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt10 | $WGRIB2 -i -grib inputs.grb2_10 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputsb.grb2_1 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${fhr}.tm00
+$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
+
+rm wgrib2.poe
+
+if [ -e model.ndfd_1 ]
+then
+rm  model.ndfd_1  model.ndfd_2  model.ndfd_3  model.ndfd_4  model.ndfd_5 model.ndfd_6 
+rm  model.ndfd_7 model.ndfd_8 model.ndfd_9 model.ndfd_10 model.ndfd_b1 model.ndfd_b2 model.ndfd_n
+fi
+
+echo "#! /bin/ksh" > a.poe
+echo "$WGRIB2 inputs.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1" >> a.poe
+echo "#! /bin/ksh" > b.poe
+echo "$WGRIB2 inputs.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_2" >> b.poe
+echo "#! /bin/ksh" > c.poe
+echo "$WGRIB2 inputs.grb2_3 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_3" >> c.poe
+echo "#! /bin/ksh" > d.poe
+echo "$WGRIB2 inputs.grb2_4 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_4" >> d.poe
+echo "#! /bin/ksh" > e.poe
+echo "$WGRIB2 inputs.grb2_5 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_5" >> e.poe
+echo "#! /bin/ksh" > f.poe
+echo "$WGRIB2 inputs.grb2_6 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_6" >> f.poe
+echo "#! /bin/ksh" > g.poe
+echo "$WGRIB2 inputs.grb2_7 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_7" >> g.poe
+echo "#! /bin/ksh" > h.poe
+echo "$WGRIB2 inputs.grb2_8 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_8" >> h.poe
+echo "#! /bin/ksh" > i.poe
+echo "$WGRIB2 inputs.grb2_9 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_9" >> i.poe
+echo "#! /bin/ksh" > j.poe
+echo "$WGRIB2 inputs.grb2_10 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_10" >> j.poe
+
+#$WGRIB2 inputs.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1
+
+# always use budget interpolation for precip and snow
 
 interp="-new_grid_interpolation budget"
-cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist inventoryb.txt
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt | $WGRIB2 -i -grib inputsb.grb2 WRFPRS${fhr}.tm00
-$WGRIB2 inputsb.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b
+echo "#! /bin/ksh" > k.poe
+echo "$WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1" >> k.poe
+echo "#! /bin/ksh" > l.poe
+echo "$WGRIB2 inputsb.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b2" >> l.poe
+
+#cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist inventoryb.txt
+#$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt | $WGRIB2 -i -grib inputsb.grb2 WRFPRS${fhr}.tm00
+#$WGRIB2 inputsb.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b
 
 # always use nearest neighbor interpolation for these fields
 
 interp="-new_grid_interpolation neighbor"
-
-cp -p $PARMdng/nam_smartinit_grb2_nn.parmlist inventoryn.txt
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
+#cp -p $PARMdng/nam_smartinit_grb2_nn.parmlist inventoryn.txt
+#$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
 $WGRIB2 inputsn.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_n
 
-cat model.ndfd_1 model.ndfd_b model.ndfd_n > ${prdgfl}.grb2
+chmod 775 a.poe
+chmod 775 b.poe
+chmod 775 c.poe
+chmod 775 d.poe
+chmod 775 e.poe
+chmod 775 f.poe
+chmod 775 g.poe
+chmod 775 h.poe
+chmod 775 i.poe
+chmod 775 j.poe
+chmod 775 k.poe
+chmod 775 l.poe
+
+echo "a.poe" > wgrib2.poe
+echo "b.poe" >> wgrib2.poe
+echo "c.poe" >> wgrib2.poe
+echo "d.poe" >> wgrib2.poe
+echo "e.poe" >> wgrib2.poe
+echo "f.poe" >> wgrib2.poe
+echo "g.poe" >> wgrib2.poe
+echo "h.poe" >> wgrib2.poe
+echo "i.poe" >> wgrib2.poe
+echo "j.poe" >> wgrib2.poe
+echo "k.poe" >> wgrib2.poe
+echo "l.poe" >> wgrib2.poe
+
+chmod 775 wgrib2.poe
+export MP_PGMMODEL=mpmd
+export MP_CMDFILE=wgrib2.poe
+time mpirun.lsf
+export err=$?;  err_chk
+
+cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_6 \
+    model.ndfd_7 model.ndfd_8 model.ndfd_9 model.ndfd_10 model.ndfd_b1 model.ndfd_b2 model.ndfd_n > ${prdgfl}.grb2
+
+# End parallel wgrib2
 
 # convert to grib1
 
