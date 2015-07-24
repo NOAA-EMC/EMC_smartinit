@@ -29,10 +29,6 @@
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
-#module load grib_util
-export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export CNVGRIB=/meso/save/Eric.Rogers/nam.v4.0.0/sorc/cnvgrib.fd/cnvgrib
- 
 # TEMPORARY SWITCH for VADJUST wind terrain adjustment
 export IVADJ=${IVADJ:-T}
 
@@ -157,6 +153,10 @@ export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
 export gespath=${gespath:-/nwges/${envir}}
+
+# use local versions of cnvgrib and wgrib2
+export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
+export CNVGRIB=${EXECdng}/cnvgrib
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
