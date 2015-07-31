@@ -180,6 +180,7 @@ elif [ $runreg = hi ];then
   pltrun=hi
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
 elif [ $runreg = pr ];then
+  sleep 360
   pltrun=pr
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
 fi
