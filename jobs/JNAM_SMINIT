@@ -156,7 +156,7 @@ export gespath=${gespath:-/nwges/${envir}}
 
 # use local versions of cnvgrib and wgrib2
 export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export CNVGRIB=${EXECdng}/cnvgrib
+export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
