@@ -48,7 +48,7 @@ set -x
 
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
-export grib=2
+export grib=1
 
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
@@ -143,7 +143,7 @@ case $RUNTYP in
 # new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
    priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
    pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
-  aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
+  aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
   ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
   alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
   ak_rtmages) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
@@ -350,6 +350,9 @@ for fhr in $hours; do
   fi
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
+ceilmdl=bgdawp
+case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
+
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
       bgrd3d) 
@@ -366,11 +369,17 @@ for fhr in $hours; do
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
+          ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
         fi
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
 # Begin wgrib2
 if [ $grib = 1 ];then
+     if [ -e $ceil_file ];then
+        wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
+        cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
+        mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
+     fi
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
         ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
@@ -405,6 +414,7 @@ fi;;
 #            fi
 # End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
+            ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
           fi
         fi;;
@@ -412,6 +422,11 @@ fi;;
 
 # Begin wgrib2
 if [ $grib = 1 ];then
+  if [ -e $ceil_file ];then
+  wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
+  cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
+  mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
+  fi
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 fi
 # End wgrib2
@@ -631,7 +646,8 @@ EOF5
     ln -sf $FIXdng/wgt/${mdl}_wgt_${ogrd}_${mdlgrd} fort.21
   fi
 
-  export pgm=${mdl}_prdgen; . prep_step
+# export pgm=${mdl}_prdgen; . prep_step
+  export pgm=smartinit_prdgen; . prep_step
   ln -sf master${fhr}.ctl            fort.10
   ln -sf input${fhr}.prd             fort.621   #WCOSS CHANGE
 
@@ -641,7 +657,8 @@ EOF5
 #188    $utilexec/copygb -g "$cpgbgrd"  WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00 ${prdgfl}
 #188  else
 #POINT TO NETwork prdgen (/nwprod/exec) 
-    ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
+#   ${EXECmdl}/${mdl}_prdgen < input${fhr}.prd > prdgen.out${fhr}
+    $EXECdng/smartinit_prdgen < input${fhr}.prd > prdgen.out${fhr}
     export err=$?;  err_chk
 #188  fi
 
@@ -983,9 +1000,11 @@ fi # grib = 1
     case $RUNTYP in
      ak_rtmages) 
        cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
-       mksmart=0;;
+#       mksmart=0;;
+       mksmart=1;;
      hawaiinest|priconest|conusnest2p5|aknest3)
        cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+       mksmart=1
        if [ $RUNTYP = conusnest2p5 ];then mksmart=1;fi;;  #make grib2 files for wave group
    esac
   fi
