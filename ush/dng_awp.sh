@@ -23,6 +23,10 @@ if [ $mdl = dgex ];then cyctp=;fi
 REGCP=`echo $outreg |tr '[a-z]'  '[A-Z]' `
 echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $fhr 
 
+if [ $RGIN = AKRT ];then
+  outreg=ak_rtmages
+fi
+
 #$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 $CNVGRIB -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 cp ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 old.grb2
@@ -47,6 +51,8 @@ fi
 
 rm *grb2*
 # End Correct for grib2 precision (AMG)
+
+if [ $RGIN != AKRT ];then
 
 # Processing grids for AWIPS
  pgm=tocgrib2
@@ -75,6 +81,8 @@ else
   echo AWP PARM FILE not found: $awpparm
 fi
 
+fi # RGIN != AKRT
+
 mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
 mv ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 if [ $ihindex -eq 1 ];then
@@ -83,6 +91,7 @@ if [ $ihindex -eq 1 ];then
 fi
 
 # Move grib2 awips file to pcom
+if [ $RGIN != AKRT ];then
 if [ $outreg = ak3 ];then
   mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
 else
@@ -98,6 +107,8 @@ if [ -s "$awpparm" ];then
     fi
   fi
 fi
+
+fi # RGIN != AKRT
 
 if [ $SENDDBN_GB2 = YES ];then
   $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2_PARA $job $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
