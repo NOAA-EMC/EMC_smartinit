@@ -106,7 +106,8 @@ while [ $ffhr -le $ENDHRS ];do
         sleep 10
 
         echo `date +%T` $MDL SUBMIT SMINIT JOB :  $RUNTYP CYCLE $cyc FHRNXT $fhrnxt
-        ${kickd}/cr8bjob_poe $job $fhrnxt
+#       ${kickd}/cr8bjob_poe $job $fhrnxt
+        ${kickd}/cr8bjob $job $fhrnxt
         bsub < J${MDL}_SMINIT.${RUNTYP}
       fi
       ((fhrnxt=fhrnxt+INCR))
@@ -142,7 +143,8 @@ while [ $ffhr -le $ENDHRS ];do
         . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
         echo  $wait `date +%T` SUBMIT $MDL SMINIT JOB :  $RUNTYP CYCLE $cyc FFHR $ffhr
         sleep 10     
-        ${kickd}/cr8bjob_poe $job $ffhr
+#       ${kickd}/cr8bjob_poe $job $ffhr
+        ${kickd}/cr8bjob $job $ffhr
         bsub -K < J${MDL}_SMINIT.${RUNTYP}
         break
       fi
@@ -170,9 +172,10 @@ if [ $runreg = conus2p5 ];then
   pltrun=conusnest
   bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2
   date
-  sleep 360
-  date
-  $plotdir/make_DNG_page.sh 
+  bsub < ${kickd}/hpss_archive.sh
+# $plotdir/make_DNG_page.sh 
+#  $plotdir/make_DNG_page_region.sh 
+#  bsub < $plotdir/webdiag.bsub
 elif [ $runreg = ak3 ];then
   pltrun=ak3
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
