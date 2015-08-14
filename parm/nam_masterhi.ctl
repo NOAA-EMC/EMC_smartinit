@@ -972,3 +972,5 @@
 84/196/X/-3.0/mesohi.NDFD/0/0
   212 200   0   0   0 129   1   COMPOSITE RADAR RE
 84/196/X/-3.0/mesohi.NDFD/0/0
+    7 215   0   0   0   2   1   CEILING
+84/196/X/-5.0/mesohi.NDFD/0/0
