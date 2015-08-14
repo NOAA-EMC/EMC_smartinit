@@ -198,13 +198,14 @@
     
    END SUBROUTINE ndfdgrid 
 
-   SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
+   SUBROUTINE GRIBLIMITED(SKY,IUNIT,GDIN)
       use grddef
       use aset2d
       use asetdown
        INTEGER ID(25)
        LOGICAL RITEHD
        TYPE (GINFO) :: GDIN
+       REAL,    INTENT(INOUT)  :: SKY(:,:)
    END SUBROUTINE griblimited
 
    SUBROUTINE HINDEX (IM,JM,HAINES,HLVL,VALIDPT)
@@ -703,12 +704,14 @@
       CALL GRIBIT(ID,RITEHD,VIS,GDIN,70,DEC)
 
 ! CLOUD CEILING HEIGHT
+      IF (trim(CORE) .NE. 'dgx' ) THEN
       print*, 'Output Cloud Ceiling Height', FHR
       ID(1:25) = 0
       ID(8)=7;ID(9)=215
       DEC=-5.0
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,70,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
+      endif
 
 
 !==========================================================================
@@ -915,7 +918,31 @@
       .or. TRIM(REGION).EQ.'AKRT' .or. TRIM(REGION).EQ.'CS2P' &
       .or. TRIM(REGION).EQ.'GM') THEN
          print *, 'GET GRIBLIMITIED ',TRIM(REGION),fhrhrly
-         IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(70,GDIN)
+!        IF(.not.LHR3 .AND. FHR.LT.fhrhrly) CALL GRIBLIMITED(SKY,70,GDIN)
+         IF(.not.LHR3 .AND. FHR.LT.fhrhrly)then
+           print *, 'Compute SKYCVR for limited files',FHR
+           ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
+           ALLOCATE (SKY(IM,JM),STAT=kret)
+             if(lnest.and. .not.lhiresw) then
+               print*,'Compute SKYCVR using low, middle and high clouds from NAM Nest'
+               SKY=SPVAL
+               where(validpt)
+                 TEMP1=AMAX1(LCLD,MCLD)
+                 SKY=AMAX1(TEMP1,HCLD)
+               endwhere
+             else
+               print*,'Compute SKYCVR from subroutine SKYCVR'
+               CALL SKYCVR(SKY,CFR,GDIN)
+               CALL BOUND (SKY,0.,100.)
+             endif
+             IF(trim(CORE) .EQ. 'GFS' ) THEN
+               print *, 'Computing skycvr for GFS DNG'
+               CALL SKYCVR(SKY,CFR,GDIN)
+               CALL BOUND (SKY,0.,100.)
+             ENDIF
+             DEALLOCATE (TEMP1,TEMP2,STAT=kret)
+             CALL GRIBLIMITED(SKY,70,GDIN)
+           endif ! not.LHR3 .and. FHR .lt. fhrhrly
       ENDIF
 
 !  write older T/Td data for max/min to grib file
@@ -1363,7 +1390,7 @@
       RETURN 
       END SUBROUTINE mkpop
 
-      SUBROUTINE GRIBLIMITED(IUNIT,GDIN)
+      SUBROUTINE GRIBLIMITED(SKY,IUNIT,GDIN)
       use grddef
       use aset2d
       use asetdown
@@ -1374,6 +1401,7 @@
        INTEGER ID(25)
        LOGICAL RITEHD
        TYPE (GINFO) :: GDIN
+       REAL,    INTENT(INOUT)  :: SKY(:,:)
 
     INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
 
@@ -1429,6 +1457,7 @@
 
 ! 03-19-13 : Add Gust and visibility to limited files for RTMA
 ! 06-03-15 : Add Cloud Ceiling to limited files for RTMA
+! 08-12-15 : Add Sky Cover to limited files for RTMA
       IF (trim(GDIN%CORE) .NE. 'GFS') THEN
         ID(1:25) = 0
         ID(8)=180;ID(9)=1
@@ -1440,13 +1469,23 @@
         DEC=2.7
         CALL GRIBIT(ID,RITEHD,VIS,GDIN,IUNIT,DEC)
 
+! SKY COVER
+        print*, 'Output Sky Cover', GDIN%FHR
+        ID(1:25) = 0
+        ID(8)=71;ID(9)=1
+        DEC=3.0
+        print*,'maxval(SKY),minval(SKY): ', maxval(SKY),minval(SKY)
+        CALL GRIBIT(ID,RITEHD,SKY,GDIN,IUNIT,DEC)
+
 ! CLOUD CEILING HEIGHT
-      print*, 'Output Cloud Ceiling Height', FHR
+      IF (trim(GDIN%CORE) .NE. 'dgx') THEN
+      print*, 'Output Cloud Ceiling Height', GDIN%FHR
       ID(1:25) = 0
       ID(8)=7;ID(9)=215
       DEC=-5.0
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
+      endif
 
       ENDIF
 
