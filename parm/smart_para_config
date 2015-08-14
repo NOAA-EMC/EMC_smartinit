@@ -48,13 +48,14 @@ export COM_IN=${COMROOT}/${mdl}/prod
 #TEST export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
 
 ## Test with Eric's NAM PARA
-#export ERIC_NAM="/meso2/noscrub/Eric.Rogers/com/nam/para"
-#export COMROOT="/meso/noscrub/Annette.Gibbs/com"
-export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
+##export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
 ## End Test
 
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod   
+
+# Use parallel SREF
+#export COM_SREF=/com2/sref/para
 
 export DATA_IN=/ptmpp2/$USER/smartinit.${model_ver}/$PDY/$cyc
 
