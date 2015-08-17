@@ -13,7 +13,7 @@
 
 ! ABSTRACT:   THIS CODE TAKES NATIVE NAM/GFS/HRW FILES AND GENERATES
 !          2.5 or 5 KM OUTPUT CONTAINING NDFD ELEMENTS
-
+!  Input : RH (0-1), T at 950,850,700 and 500 mb
 ! PROGRAM HISTORY LOG:
 !   07-08-06  G MANIKIN  - COMPLETED ADAPTING CODE TO NAM 
 !   12-11-30  J McQueen  - Converted to f90, unified for different domains
@@ -46,9 +46,9 @@
    REAL,    ALLOCATABLE :: RHMAX3(:,:),RHMIN3(:,:)
 
 !  USED in MAIN only
-   REAL,    ALLOCATABLE :: DIRTRANS(:,:),MGTRANS(:,:),LAL(:,:),HAINES(:,:),MIXHGT(:,:)
+   REAL,    ALLOCATABLE :: DIRTRANS(:,:),MGTRANS(:,:),LAL(:,:),MIXHGT(:,:)
    REAL,    ALLOCATABLE :: TEMP1(:,:),TEMP2(:,:)
-   REAL, ALLOCATABLE :: HLVL(:,:)
+   INTEGER, ALLOCATABLE :: HAINES(:,:),HLVL(:,:)
 
    LOGICAL, ALLOCATABLE :: VALIDPT(:,:)
 !
@@ -257,7 +257,7 @@
       use aset2d
       use asetdown
       LOGICAL, INTENT(IN)   :: VALIDPT(:,:)
-      REAL, INTENT(INOUT)    :: HAINES(:,:),HLVL(:,:)
+      INTEGER, INTENT(INOUT)    :: HAINES(:,:),HLVL(:,:)
    END SUBROUTINE hindex
 
    FUNCTION CalcQ(ptmp,ttmp)
@@ -899,17 +899,22 @@
 
 !     Compute Haines Index
       IF (trim(CORE) .NE. 'GFS' ) THEN
+        ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
         print *,'Compute HAINES INDEX'
         CALL HINDEX(IM,JM,HAINES,HLVL,VALIDPT)
         ID(1:25) = 0
         ID(2)=129
         ID(8)=250;ID(9)=1
-        DEC=3.0
-        CALL GRIBIT(ID,RITEHD,HAINES,GDIN,70,DEC)
-!      ID(2)=2
-!      ID(8)=209;ID(9)=1
-!      DEC=1.0
-!NMXL      CALL GRIBIT(ID,RITEHD,HLVL,GDIN,70,DEC)
+        DEC=1.0
+        TEMP1=real(HAINES)
+        CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
+
+!        ID(2)=2
+!        ID(8)=209;ID(9)=1
+!        DEC=1.0
+!        TEMP2=real(HLVL)
+!        CALL GRIBIT(ID,RITEHD,TEMP2,GDIN,70,DEC)
+        DEALLOCATE (TEMP1,TEMP2,STAT=kret)
       ENDIF
 
 !=================================================
@@ -1506,19 +1511,32 @@
 !  Calculate Haines Index
 !  type is "LOW", "MEDIUM", "HIGH"
 !  NOTE, the default haines index calcaulation is defined by:
-!  self.whichHainesIndex, which can be set to "LOW", "MEDIUM", "HIGH".
+!  python self.whichHainesIndex, which can be set to "LOW", "MEDIUM", "HIGH".
+!
+!  From Haines,D.A. (1988, Nat.Wea.Dig,V.13,#2, pp.23-27)
+!  where amount of atmospheric stability and dryness are
+!  accounted for to estimate fire potential growth.
+!
+!  INPUT : T in K, RH in percent (0-100), Topo (m)
+!
 !  11-05-2013 J.T. McQueen
-!  11-15-2013 Using standard elevatios for P950, P850
+!  11-15-2013 Using standard elevations for P950, P850
+!  02-03-2015 corrected dew point depression calculation
+!             and conversion of RHMOIS to 0-1 for TD calculation
 !=======================================================================
       use aset2d
       use asetdown
       LOGICAL, INTENT(IN)   :: VALIDPT(:,:)
-      REAL, INTENT(INOUT)    :: HAINES(:,:),HLVL(:,:)
+      INTEGER, INTENT(INOUT)    :: HAINES(:,:),HLVL(:,:)
+      REAL slopet,slopem,hat,tmois,rhmois,term,dpmois,tddiff,intt,intm
+      REAL hainesm,hainest
+
+      print *, 'Computing HAINES INDEX', IM,JM
       
       DO J=1,JM
       DO I=1,IM
        if (validpt(i,j)) then
-!       IF(DOWNP(I,J).GT.95000.) THEN
+!jtm       IF(DOWNP(I,J).GT.95000.) THEN
        IF(TOPO(I,J).LT.540.) THEN  
         HAT=T950(I,J)-T850(I,J)
         TMOIS=T850(I,J)-273.15
@@ -1528,7 +1546,7 @@
         MT1=10
         MT2=5
         HLVL(I,J)=1
-!       ELSE IF(DOWNP(I,J).GT.85000.) THEN
+!jtm       ELSE IF(DOWNP(I,J).GT.85000.) THEN
        ELSE IF(TOPO(I,J).LT. 1456.) THEN
         HAT=T850(I,J)-T700(I,J)
         TMOIS=T850(I,J)-273.15
@@ -1548,17 +1566,49 @@
         MT2=14
         HLVL(I,J)=3
        ENDIF
+
+!      Compute Dew point depression
+       RHMOIS=RHMOIS/100.
        TERM=log10(RHMOIS) / 7.5 + (TMOIS / (TMOIS + 237.3))
        DPMOIS=(TERM * 237.3) / (1.0 - TERM)
-       HAINESM=TMOIS-DPMOIS 
-       SLOPET=1/(ST1-ST2)
-       INTT=1.5-(ST2-0.5)*SLOPET
+       TDDIFF=TMOIS-DPMOIS
+
+!      Compute contribution from thermal stability
+       SLOPET=1./real(ST1-ST2)
+!jtm       INTT=1.5-(ST2-0.5)*SLOPET  ! intercept for temperature Lapse rate
+       INTT=1.5-(ST2+0.5)*SLOPET  ! intercept for temperature Lapse rate
        HAINEST=(SLOPET*HAT)+INTT
-       SLOPEM=1/(MT1-MT2)
-       INTM=1.5-(MT2-0.5)*SLOPEM
-       HAINESM=(SLOPEM*DPMOIS)+INTM
-       HAINES(I,J)=HAINEST+HAINESM
+       HAINEST=amin1(HAINEST,3.0)
+       HAINEST=amax1(HAINEST,1.0)
+
+!      Compute contribution from atmospheric dryness
+       SLOPEM=1./real(MT1-MT2)
+!jtm       INTM=1.5-(MT2-0.5)*SLOPEM
+       INTM=1.5-(MT2+0.5)*SLOPEM
+!jtm    HAINESM=(SLOPEM*DPMOIS)+INTM
+       HAINESM=(SLOPEM*TDDIFF)+INTM
+       HAINESM=amin1(HAINESM,3.0)
+       HAINESM=amax1(HAINESM,1.0)
+       HAINEST=NINT(HAINEST)
+       HAINESM=NINT(HAINESM)
+
+!      Compute total Haines Index from stability and dryness
+       HAINES(I,J)=INT(HAINEST)+INT(HAINESM)
+       if (VEG_NDFD(I,J).LE.0..OR.VEG_NDFD(I,J).EQ.16) then
+          HAINES(I,J)=0
+          HLVL(I,J)=0
+       endif
+
+!       if (i.gt.125 .and. i.lt.150) then
+!       if (j.eq.200) then
+!         print *,'HAINES ',i,j,HAINES(I,J),HLVL(i,j),RHMOIS
+!         print *,'HIT',HAINEST,TMOIS,HAT
+!         print *,'HIM',HAINESM,DPMOIS,TDDIFF
+!       endif
+!       endif
+
       endif
+
       ENDDO
       ENDDO
       RETURN
