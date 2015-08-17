@@ -49,9 +49,9 @@ export COM_IN=${COMROOT}/${mdl}/prod
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
 export COM_SREF=${COMROOT}/sref/prod   
 
-export DATA_IN=/stmpp1/$USER/smartinit.${model_ver}/$cyc
+export DATA_IN=/stmpp2/$USER/smartinit.${model_ver}/$cyc
 
-export COM_OUT=/ptmpp1/$USER/${model_ver}
-#TEST export COM_OUT=/ptmpp1/$USER
+export COM_OUT=/ptmpp2/$USER/${model_ver}
+#TEST export COM_OUT=/ptmpp2/$USER
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
