@@ -51,7 +51,7 @@ esac
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
+export DATA_IN=/stmpp2/${USER}/${modeld}.${model_ver}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 
@@ -75,7 +75,7 @@ while [ $ffhr -le $ENDHRS ];do
  . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
 
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-#  export PDY=20141031 ###TEST
+#  export PDY=20150810 ###TEST
 
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo;echo `date`
