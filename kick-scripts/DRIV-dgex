@@ -42,7 +42,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=06  #TEST
+#export cyc=00  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -79,7 +79,7 @@ for RUNTYP in $dgexrun;do
   M=$(echo $dayrm | cut  -c 5-6 )
   D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
-  rm -rf /meso2/noscrub/${USER}/${mdl}.${wdayd}
+  rm -rf /meso2/noscrub/${USER}/${code_ver}/${mdl}.${wdayd}
 
 # Create and submit JNAM_SMINIT job
 

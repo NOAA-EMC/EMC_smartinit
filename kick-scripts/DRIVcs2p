@@ -93,6 +93,8 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
   D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
   rm -rf /meso2/noscrub/${USER}/${code_ver}/${mdl}.${wdayd}
+  rm /meso2/noscrub/${USER}/${code_ver}/jlogfile.${wdayd}
+  rm -r /ptmpp2/${USER}/${modeld}.${model_ver}/${wdayd}
 
 # Create and submit JNAM_SMINIT job
 
