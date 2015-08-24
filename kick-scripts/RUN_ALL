@@ -171,6 +171,7 @@ date
 if [ $runreg = conus2p5 ];then
   pltrun=conusnest
   bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2
+  bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2_hourly
   date
   bsub < ${kickd}/hpss_archive.sh
 # $plotdir/make_DNG_page.sh 
@@ -179,12 +180,15 @@ if [ $runreg = conus2p5 ];then
 elif [ $runreg = ak3 ];then
   pltrun=ak3
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 elif [ $runreg = hi ];then
   pltrun=hi
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 elif [ $runreg = pr ];then
   sleep 360
   pltrun=pr
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 fi
 
