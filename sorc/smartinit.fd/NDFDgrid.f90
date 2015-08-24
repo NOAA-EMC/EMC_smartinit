@@ -134,7 +134,7 @@
 
         DX=2500.;DY=2500. ! hardwired for conus nests
 !
-        if(region.eq.'PR') then ! PR is now 1.5 km
+        if(region.eq.'PR') then ! PR is now 1.25 km
           DX=1250.
           DY=1250.
         endif
