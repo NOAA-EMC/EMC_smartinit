@@ -433,6 +433,14 @@
 
       endif
 
+!  sfc wind gust 
+      J=0
+      JPDS=-1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 180 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
+
 !     nests already have computed cld fracs...
       if (lnest .and. trim(CORE).ne.'GFS' .and. .not.lanl) then
         J=0;JPDS=-1
@@ -748,7 +756,7 @@
       JPDS(3) = IGDNUM
       JPDS(5) = 180 
       JPDS(6) = 001
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
+!     CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
 
 ! composite reflectivity
       if (trim(CORE).NE. 'GFS') then
