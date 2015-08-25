@@ -1,11 +1,12 @@
 #!/bin/ksh
-### set -xa
+set -xa
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
+module load GrADS/2.0.2
 
 #=======================================================
 # Driving script to run a smartinit domain
@@ -153,3 +154,12 @@ export RUNTYP=$RUNTYP
 export cyc=$cyc
 export strhr=$fhrstr
 #bsub < $gemdir/plotmet.job
+
+export PDY=$PDY
+export cyc=$cyc
+date
+plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_divmin
+
+if [ $runreg = ak3 ];then
+ bsub < $plotdir/run_webpage00_ak3_grib2_hourly_wox
+fi
