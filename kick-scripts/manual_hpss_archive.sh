@@ -17,7 +17,11 @@
 
 set -x
 
-PDY=20150729
+###
+### Set PDY, which_nam and code_ver ###
+###
+
+PDY=20150708
 which_nam=para
 code_ver=v3.4.0
 
