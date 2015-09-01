@@ -78,9 +78,9 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
         cd smartinit.${model_ver}/sorc/smartinit_prdgen.fd
         make
           This will create smartinit_prdgen executable in ../../smartinit.${model_ver}/exec
-        cd smartinit.${model_ver}/sorc/smartinit_wgrib2.fd
+        cd smartinit.${model_ver}/sorc/smartinit_wgrib2.cd
         make
-        cp wgrib2/wgrib2 ../../../exec/smartinit_wgrib2
+        cp wgrib2/wgrib2 ../../exec/smartinit_wgrib2
         
 3.  Will be running ak_rtmages for 00-12 hours.  Therefore, create ecf/sminit_ak/akrtmages/jnam_sminit_akrtmages_f00.ecf and             ecf/sminit_ak/akrtmages/jnam_sminit_akrtmages_f12.ecf.  Change 5 instances of HH (e.g. 06) to 00 and 12 for each script,             respectively. 
 
