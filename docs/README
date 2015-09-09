@@ -747,7 +747,24 @@ Aug 2015
 * Use parallel SREF /com2/sref/para
 	- changed in parm/smart_para_config
 
+Sept 2015 -  smartinit.v3.4.4
 
+* Changed Puerto Rico 1.25 km grid back to Puerto Rico 2.5 km grid (3 September 2015)
+	link topo and mask files to PR grid 195
+        link master control file for PR to grid 195 (parm/nam_masterpr.ctl)
+        add ceiling height to parm/nam_masterpr.ctl-195
+	parm/SMINIT.CTL (changed grid specs back to grid 195)
+	ush/smartinit.sh (changed grid specs back to grid 195)
+	ush/dng_awp.sh (commented out GRIB2 precision change)
+        sorc/smartinit.fd/NDFDgrid.f90 (changed DX,DY back to 2500 km)
 
+* Changed Conus Nest 2.5 km Terrain & Land/Sea mask (used GRIB1 precision)
+	link topo and mask files to new Terrain & Land/Sea mask files
+        sorc/smartinit.fd/w3fi71.f (changed grid specs for grid 188)
+	parm/SMINIT.CTL (change grid specs)
+	ush/smartinit.sh (change grid specs)
+	ush/dng_awp.sh (commented out GRIB2 precision change)
+
+	
 
 
