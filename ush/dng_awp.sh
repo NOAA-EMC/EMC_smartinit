@@ -35,19 +35,24 @@ cp ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 old.grb2
 # This needs to be done, because when terrain and land/water mask was converted from grib2 to grib1, precision was lost
 # in some of the grid specs.
 # Will need to add other domains, once new EMC/GFE common terrain and land/water mask fields are used
+# Rethink if you need to do this here.  
+# Perhaps you can do this directly within the Terrain and Land/Sea mask files (/meso/save/Annette.Gibbs/bin2grib)
+# Also sorc/smartinit.fd/w3fi71.f, ush/smartinit.sh, and parm/SMINIT.CTL
 
-if [ $outreg = pr ];then
+#if [ $outreg = pr ];then
 # Mercator PR 1.25 grid
-  $WGRIB2 -set_int 3 39 16977485 old.grb2 -grib new.grb2_1
-  $WGRIB2 -set_int 3 43 291972167 new.grb2_1 -grib new.grb2_2
-  $WGRIB2 -set_int 3 56 296015600 new.grb2_2 -grib ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-elif [ $outreg = conus2p5 ];then
+# $WGRIB2 -set_int 3 39 16977485 old.grb2 -grib new.grb2_1
+# $WGRIB2 -set_int 3 43 291972167 new.grb2_1 -grib new.grb2_2
+# $WGRIB2 -set_int 3 56 296015600 new.grb2_2 -grib ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+#elif [ $outreg = conus2p5 ];then
+
+#if [ $outreg = conus2p5 ];then
 # Expanded CONUS Nest
-  $WGRIB2 -set_int 3 39 19228976 old.grb2 -grib new.grb2_1
-  $WGRIB2 -set_int 3 43 233723448 new.grb2_1 -grib new.grb2_2
-  $WGRIB2 -set_int 3 56 2539703.000 new.grb2_2 -grib new.grb2_3
-  $WGRIB2 -set_int 3 60 2539703.000 new.grb2_3 -grib ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-fi
+# $WGRIB2 -set_int 3 39 19228976 old.grb2 -grib new.grb2_1
+# $WGRIB2 -set_int 3 43 233723448 new.grb2_1 -grib new.grb2_2
+# $WGRIB2 -set_int 3 56 2539703.000 new.grb2_2 -grib new.grb2_3
+# $WGRIB2 -set_int 3 60 2539703.000 new.grb2_3 -grib ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+#fi
 
 rm *grb2*
 # End Correct for grib2 precision (AMG)
