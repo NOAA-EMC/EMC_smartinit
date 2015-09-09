@@ -134,10 +134,11 @@
 
         DX=2500.;DY=2500. ! hardwired for conus nests
 !
-        if(region.eq.'PR') then ! PR is now 1.25 km
-          DX=1250.
-          DY=1250.
-        endif
+! Temporarily comment out  - using PR 2.5 km grid for this upgrade - 04 Sept 2015[AMG]
+!       if(region.eq.'PR') then ! PR is now 1.25 km
+!         DX=1250.
+!         DY=1250.
+!       endif
 
         if(region.eq.'AK3') then 
           DX=3000.
