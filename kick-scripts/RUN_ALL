@@ -181,6 +181,10 @@ elif [ $runreg = ak3 ];then
   pltrun=ak3
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
   bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
+elif [ $runreg = ak_rtmages ];then
+  pltrun=ak_rtmages
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 elif [ $runreg = hi ];then
   pltrun=hi
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
