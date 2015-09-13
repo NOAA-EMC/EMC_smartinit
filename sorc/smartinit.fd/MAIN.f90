@@ -345,7 +345,7 @@
 
 !   Initialize varbs to spval (for nests)
     where (.not. validpt)
-      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;
+      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL
       P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL
     endwhere
 
@@ -876,6 +876,10 @@
         ID(8)=250;ID(9)=1
         DEC=1.0
         TEMP1=real(HAINES)
+! Set special values for undefined areas of domain
+        where (.not. validpt)
+          TEMP1=SPVAL 
+        endwhere 
         CALL GRIBIT(ID,RITEHD,TEMP1,GDIN,70,DEC)
 
 !        ID(2)=2
