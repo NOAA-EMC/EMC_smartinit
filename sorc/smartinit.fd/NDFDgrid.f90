@@ -143,7 +143,8 @@
         if(region.eq.'AK3') then 
           DX=3000.
           DY=3000. 
-        elseif(region.eq.'AK') then 
+!       elseif(region.eq.'AK') then 
+        elseif(region.eq.'AK'.or.region.eq.'AKRT'.or.region.eq.'DGX') then 
           DX=6000.
           DY=6000. 
         endif
