@@ -13,6 +13,7 @@
 set -x
 
 outreg=$1    # mdlgrd used for guam to distinguish arw/nmm
+awpchk=$2    # only create AWIPS files every 3 hours; awpchk=0
 ihindex=0
 case $cyc in 
   00|12) cyctp=on;;
@@ -25,6 +26,19 @@ echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $
 
 if [ $RGIN = AKRT ];then
   outreg=ak_rtmages
+fi
+
+# Change grid id number from 188 to 255
+if [ $outreg = conus2p5 ];then
+ pgm=smartinit_overgridnum_grib
+ export pgm;  . prep_step
+ echo 255 > input
+ rm fort.11 fort.51
+ mv MESO${RGIN}${fhr}.tm00 MESO${RGIN}${fhr}.tm00.grb188
+ ln -s  MESO${RGIN}${fhr}.tm00.grb188 fort.11
+ ln -s MESO${RGIN}${fhr}.tm00.grb255 fort.51
+ $EXECdng/smartinit_overgridnum_grib < input > overgridnum_grib.out${fhr}
+ mv  MESO${RGIN}${fhr}.tm00.grb255  MESO${RGIN}${fhr}.tm00
 fi
 
 #$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
@@ -59,6 +73,8 @@ rm *grb2*
 
 if [ $RGIN != AKRT ];then
 
+if [ $awpchk -eq 0 ];then
+
 # Processing grids for AWIPS
  pgm=tocgrib2
  export pgm;  . prep_step
@@ -86,6 +102,8 @@ else
   echo AWP PARM FILE not found: $awpparm
 fi
 
+fi # awpchk -eq 0
+
 fi # RGIN != AKRT
 
 mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
@@ -97,6 +115,7 @@ fi
 
 # Move grib2 awips file to pcom
 if [ $RGIN != AKRT ];then
+if [ $awpchk -eq 0 ];then
 if [ $outreg = ak3 ];then
   mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
 else
@@ -113,6 +132,7 @@ if [ -s "$awpparm" ];then
   fi
 fi
 
+fi # awpchk -eq 0
 fi # RGIN != AKRT
 
 if [ $SENDDBN_GB2 = YES ];then

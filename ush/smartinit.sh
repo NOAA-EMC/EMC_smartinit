@@ -543,7 +543,8 @@ fi
       if [ $grib = 2 ];then
         $utilexec/grbindex WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
       else
-        $utilexec/grbindex WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
+#       $utilexec/grbindex WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
+        $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       fi
       $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
@@ -1012,6 +1013,10 @@ fi # grib = 1
 
   if [ $mksmart -eq 1 ];then
 
+# Only create awips files every 3 hours [AMG]
+  let awpchk=fhr%3
+  echo $awpchk
+
 #   Run NCO processing to convert output to grib2 and awips
     export RUNTYP
     export RGIN=$RGIN  # Region id (eg: CS, HI, PR,AK..)
@@ -1023,7 +1028,7 @@ fi # grib = 1
     if [ $mdl = "hiresw" ];then
       ${USHdng}/dng_awp.sh $mdlgrd
     else
-      ${USHdng}/dng_awp.sh $outreg
+      ${USHdng}/dng_awp.sh $outreg $awpchk
     fi
   fi
 done  #fhr loop
