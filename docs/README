@@ -765,6 +765,20 @@ Sept 2015 -  smartinit.v3.4.4
 	ush/smartinit.sh (change grid specs)
 	ush/dng_awp.sh (commented out GRIB2 precision change)
 
+* Added local version of overgridnum_grib to change CONUS Nest files from grid number 188 to 255.
+	sorc/smartinit_overgridnum_grib.fd
+        exec/smartinit_overgridnum_grib
+        ush/dng_awp.sh
+
+* Only write out AWIPS files every 3 hours
+	ush/dng_awp	
+	ush/smartinit.sh
+
+* Change DX/DY to 6000 km for *ak_rtmages* and DGEX AK files
+	sorc/smartinit.fd/NDFDgrid.f90
+
+* Set Haines Index and Ceiling Height to SPVAL for bitmap
+	sorc/MAIN.f90
 	
 
 

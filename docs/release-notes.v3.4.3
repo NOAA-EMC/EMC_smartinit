@@ -22,11 +22,12 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
     * Added GRIB2 AWIPS parm files for new expanded CONUS Nest domain (grid 188) and Puerto Rico 1.25 km domain (grid 254).
 
 
-3.  Added local versions of the source codes and executables of cnvgrib, wgrib2 and nam_prdgen.
+3.  Added local versions of the source codes and executables of cnvgrib, wgrib2, nam_prdgen and overgridnum_grib.
 
         sorc/smartinit_cnvgrib.fd
         sorc/smartinit_prdgen.fd
         sorc/smartinit_wgrib2.cd
+        sorc/smartinit_overgridnum_grib.fd
 
     * Added local versions of cnvgrib, wgrib2, nam_prdgen to jobs/JNAM_SMINIT and jobs/JDGEX_SMINIT
 
@@ -78,6 +79,9 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
         cd smartinit.${model_ver}/sorc/smartinit_prdgen.fd
         make
           This will create smartinit_prdgen executable in ../../smartinit.${model_ver}/exec
+        cd smartinit.${model_ver}/sorc/smartinit_overgridnum_grib.fd
+        make
+          This will create smartinit_overgridnum_grib executable in ../../smartinit.${model_ver}/exec
         cd smartinit.${model_ver}/sorc/smartinit_wgrib2.cd
         make
         cp wgrib2/wgrib2 ../../exec/smartinit_wgrib2
