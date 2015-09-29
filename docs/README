@@ -779,6 +779,9 @@ Sept 2015 -  smartinit.v3.4.4
 
 * Set Haines Index and Ceiling Height to SPVAL for bitmap
 	sorc/MAIN.f90
+
+* Changed Conus Nest 2.5 km Terrain & Land/Sea mask to the consensus Terrain & Land/Sea mask (used GRIB1 precision)
+	link topo and mask files to new Terrain & Land/Sea mask files
 	
 
 

@@ -2,14 +2,17 @@ smartinit.v3.4.3  Q1FY16
 December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 
 - Converted to phase 2.
-- Added new grid specifications for expanded CONUS Nest (grid 188) and Puerto Rico 1.25 km domain (grid 254).
-- Added local versions of the source codes and executables of cnvgrib, wgrib2 and nam_prdgen.
+- Added new grid specifications for expanded CONUS Nest (grid 188) and Puerto Rico 1.25 km domain (grid 254). Changed Puerto Rico 
+  domain back to 2.5 km domain (for this implementation only).
+- Added local versions of the source codes and executables of cnvgrib, wgrib2, overgridnum_grib and nam_prdgen.
 - Added ceiling height to the master parm files. Uses ceiling height from OPS *bgdawp* files.
-- Added ceiling height, hourly total cloud cover, land/sea mask for CONUS Nest, new Puerto Rico/expanded CONUS Nest and wind gust      bugfix code changes to smartinit source code.
+- Added ceiling height, hourly total cloud cover, land/sea mask for CONUS Nest, new Puerto Rico/expanded CONUS Nest, wind gust,
+  DX/DY and bitmap bugfix code changes to smartinit source code.
 - Added hours 00 and 10, 11, and 12 to ak_rtmages files.
 - Converted all hourly files and *ak_rtmages* files to GRIB2 for RTMA/URMA.
 - Added GRIB2 option for future implementation using Eric's NAM parallel (this option is not used yet; will be implemented in
   Q2FY16).
+- Added option that writes out AWIPS files every 3 hours (for this implementation only).
 
 ===================================================================================
 1.  Converted to phase 2  
@@ -18,9 +21,9 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 
 2.  Added new grid specifications for expanded CONUS Nest (grid 188) and Puerto Rico 1.25 km domain (grid 254).
 
-    * Added Terrain, Land/Sea Mask, Weight and master parm files for new expanded CONUS Nest domain (grid 188) and Puerto Rico 1.25        km domain (grid 254).
+    * Added Terrain, Land/Sea Mask, Weight and master parm files for new expanded CONUS Nest domain (grid 188) and Puerto Rico 1.25        km domain (grid 254). Expanded CONUS Nest is using consensus Terrain and Land/Sea Mask.
     * Added GRIB2 AWIPS parm files for new expanded CONUS Nest domain (grid 188) and Puerto Rico 1.25 km domain (grid 254).
-
+    * For this implementation, Puerto Rico 1.25 km domain was set back to 2.5 km domain.
 
 3.  Added local versions of the source codes and executables of cnvgrib, wgrib2, nam_prdgen and overgridnum_grib.
 
@@ -37,9 +40,11 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
     * Uses ceiling height from OPS *bgdawp* files.
     * Added hourly total cloud cover
     * CONUS Nest uses land/sea mask to define temps/dewpoint/winds near coastlines 
-    * changed grid spacing in code for Puerto Rico from 2500 km to 1250 km.
+    * changed grid spacing in code for Puerto Rico from 2500 km to 1250 km (changed back to 2500 km).
     * Wind gust is now being read in and used for evaluating wind gust for intermediate hours
     * Added code in smartinit to define expanded CONUS Nest to grid 188 and Puerto Rico 1.25 km to grid 254.
+    * Changed DX/DY to 6000 km for *ak_rtmages* and DGEX AK files.
+    * Set Haines Index and Ceiling Height to SPVAL for bitmap
 
 5.  Added hours 00 and 10, 11, and 12 to *ak_rtmages* files.
 
@@ -60,6 +65,8 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
   * uses parallel 3 km NAM Nests
   * wgrib2 uses nearest neighbor interpolation for 2.5 km CONUS NEst, 3 km Hawaiinest, and 3 km Alaskanest; uses budget for 
     precipitation/snow fields; and bilinear interpolation for all other grids.
+
+9. Added option that writes out AWIPS files every 3 hours (for this implementation only).
 
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
@@ -91,5 +98,5 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 4.  Use ...docs/smartinit.ver file if desired to set
       model_ver=v3.4.3  parameter
 
-NOTE: Details on all changes to nam smartinit are found at docs/README
+NOTE: Details on all changes to nam smartinit are found at docs/README - Search for 3.4.3
 
