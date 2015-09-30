@@ -1,10 +1,10 @@
-#BSUB -J DNG12.aknest3-12
-#BSUB -oo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.aknest3-12
-#BSUB -eo /stmpp1/Jeff.McQueen/smartinit.v3.4.0/12/list/oDNG12.aknest3-12
+#BSUB -J DNG06.aknest3-60
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.4.0/20150930/06/list/oDNG06.aknest3-60
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.4.0/20150930/06/list/oDNG06.aknest3-60
 #BSUB -n 1
 #BSUB -W 1:00
-#BSUB -P RTMA
-#BSUB -q dev
+#BSUB -P RTMA-T2O
+#BSUB -q dev2
 #BSUB -R span[ptile=1]
 #BSUB -R rusage[mem=6000]
 #!/bin/ksh
@@ -162,6 +162,11 @@ export utilscript=${utilscript:-/nwprod/util/ush}
 export utilexec=${utilexec:-/nwprod/util/exec}
 export utilparm=${utilparm:-/nwprod/util/parm}
 export gespath=${gespath:-/nwges/${envir}}
+
+# use local versions of cnvgrib and wgrib2
+#export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
+export WGRIB2=${EXECdng}/smartinit_wgrib2
+export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###############################################################
 # Run setup to initialize working directory and utility scripts
