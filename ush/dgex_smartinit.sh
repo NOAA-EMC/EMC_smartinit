@@ -751,7 +751,8 @@ EOF5
     if [ $mdl = "hiresw" ];then
       ${USHdng}/dng_awp.sh $mdlgrd
     else
-      ${USHdng}/dng_awp.sh $outreg
+      awpchk=0
+      ${USHdng}/dng_awp.sh $outreg $awpchk
     fi
   fi
 done  #fhr loop
