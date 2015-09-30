@@ -773,6 +773,7 @@ Sept 2015 -  smartinit.v3.4.4
 * Only write out AWIPS files every 3 hours
 	ush/dng_awp	
 	ush/smartinit.sh
+	ush/dgex_smartinit.sh
 
 * Change DX/DY to 6000 km for *ak_rtmages* and DGEX AK files
 	sorc/smartinit.fd/NDFDgrid.f90
