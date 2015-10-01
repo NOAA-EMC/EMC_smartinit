@@ -30,6 +30,7 @@ fi
 
 # Change grid id number from 188 to 255
 if [ $outreg = conus2p5 ];then
+ ogrd=184
  pgm=smartinit_overgridnum_grib
  export pgm;  . prep_step
  echo 255 > input
@@ -38,7 +39,11 @@ if [ $outreg = conus2p5 ];then
  ln -s  MESO${RGIN}${fhr}.tm00.grb188 fort.11
  ln -s MESO${RGIN}${fhr}.tm00.grb255 fort.51
  $EXECdng/smartinit_overgridnum_grib < input > overgridnum_grib.out${fhr}
- mv  MESO${RGIN}${fhr}.tm00.grb255  MESO${RGIN}${fhr}.tm00
+ if [ $fhr -le 12 ];then
+   cp  MESO${RGIN}${fhr}.tm00.grb255  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
+ fi
+#mv  MESO${RGIN}${fhr}.tm00.grb255  MESO${RGIN}${fhr}.tm00
+ $utilexec/copygb -g 184 -x MESO${RGIN}${fhr}.tm00.grb255 MESO${RGIN}${fhr}.tm00 
 fi
 
 #$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
