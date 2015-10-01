@@ -13,6 +13,8 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 - Added GRIB2 option for future implementation using Eric's NAM parallel (this option is not used yet; will be implemented in
   Q2FY16).
 - Added option that writes out AWIPS files every 3 hours (for this implementation only).
+- Using copygb changed grid 188 back to grib 184.  CONUS Nest output files are now grid 184.  This was done so the AWIPS 
+  header parm files would not have to be recreated for grid 188.
 
 ===================================================================================
 1.  Converted to phase 2  
@@ -68,6 +70,8 @@ December 2015 NAM/DGEX smartinit upgrade to coincide with RTMA/URMA upgrade
 
 9. Added option that writes out AWIPS files every 3 hours (for this implementation only).
 
+10. Using copygb changed grid 188 back to grib 184.  CONUS Nest output files are now grid 184.  This was done so the AWIPS 
+    header parm files would not have to be recreated for grid 188.
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
 #===============================================================================

@@ -771,7 +771,7 @@ Sept 2015 -  smartinit.v3.4.4
         ush/dng_awp.sh
 
 * Only write out AWIPS files every 3 hours
-	ush/dng_awp	
+	ush/dng_awp.sh	
 	ush/smartinit.sh
 	ush/dgex_smartinit.sh
 
@@ -784,5 +784,7 @@ Sept 2015 -  smartinit.v3.4.4
 * Changed Conus Nest 2.5 km Terrain & Land/Sea mask to the consensus Terrain & Land/Sea mask (used GRIB1 precision)
 	link topo and mask files to new Terrain & Land/Sea mask files
 	
-
+* Using copygb changed grid 188 back to grib 184.  Output files are now grib 184.  This was done so the AWIPS header parm files
+  would not have to be recreated for grid 188.
+	ush/dng_awp.sh
 
