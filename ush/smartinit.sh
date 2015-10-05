@@ -43,6 +43,9 @@
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=91
 #======================================================================
 # Check if this is a nest run
+
+set -x
+
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
 export rg=`echo $RUNTYP |cut -c1-2` 
@@ -619,9 +622,16 @@ EOF5
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
+# Fix error - "ak_rtmages" was accessing "ak" files for maxmin [AMG]
+    if [ $RUNTYP = "ak_rtmages" ];then
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr3}.tm00 MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr6}.tm00 MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr9}.tm00 MAXMIN5
+    else
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
+    fi
     $utilexec/grbindex MAXMIN3 MAXMIN3i
     $utilexec/grbindex MAXMIN4 MAXMIN4i
     $utilexec/grbindex MAXMIN5 MAXMIN5i
