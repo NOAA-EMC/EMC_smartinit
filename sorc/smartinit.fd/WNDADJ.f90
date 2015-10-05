@@ -85,8 +85,12 @@
 ! Divergence is scaled to units of 10e-6/second.
 ! Use grid spacing in 100's of km.  DX/DY are in meters.
       
-      dxs=dx*1.0e-5
-      dys=dy*1.0e-5
+!     dxs=dx*1.0e-5
+!     dys=dy*1.0e-5
+! use 2 dx since not MM5
+      dxs=2.0*dx*1.0e-5
+      dys=2.0*dy*1.0e-5
+
 
       dxi=10.0/dxs
       dyi=10.0/dys
@@ -111,19 +115,28 @@
       print*,'iteration #=',it
       ij=0
       ijc=0
-      do j=1,ny-1
-      do i=1,nx-1
-       if(validpt(i,j).and. validpt(i+1,j).and.validpt(I+1,j+1).and.validpt(i,j+1))then
-         UE=0.5*(U(I+1,J)+U(I+1,J+1))
-         UW=0.5*(U(I,J)  +U(I,J+1))
-         VSO=0.5*(V(I+1,J)+V(I,J))
-         VNO=0.5*(V(I,J+1)+V(I+1,J+1))
+!     do j=1,ny-1
+!     do i=1,nx-1
+!      if(validpt(i,j).and. validpt(i+1,j).and.validpt(I+1,j+1).and.validpt(i,j+1))then
+      do j=2,ny-1
+      do i=2,nx-1
+       if(validpt(i,j).and.validpt(i+1,j).and.validpt(I-1,j).and.validpt(i,j+1).and.validpt(i,j-1))then
+!        UE=0.5*(U(I+1,J)+U(I+1,J+1))
+!        UW=0.5*(U(I,J)  +U(I,J+1))
+!        VSO=0.5*(V(I+1,J)+V(I,J))
+!        VNO=0.5*(V(I,J+1)+V(I+1,J+1))
+         UE=U(I+1,J)
+         UW=U(I-1,J)
+         VSO=V(I,J-1)
+         VNO=V(I,J+1)
          DUE=dxi*(UE-UW)
          DVN=dyi*(VNO-VSO)
          DI(I,J)=DUE+DVN
          CUIJ=0.05*dxs*(DDIJ-DI(I,J))*RA
          CVIJ=0.05*dys*(DDIJ-DI(I,J))*RA
- 
+! remove 1/2 because not converting from cross pt to dot pt
+!        CUIJ=0.1*dxs*(DDIJ-DI(I,J))*RA
+!        CVIJ=0.1*dys*(DDIJ-DI(I,J))*RA
 !  LIMIT CHANGES TO LESS THAN 1 FOR NUMERICAL STABILITY.
  
 !        IF (abs(CUIJ) .gT. 1.0)print*,'i,j,it,cuij=',i,j,it,cuij
@@ -134,14 +147,18 @@
          IF (CVIJ .LT.-1.0) CVIJ=-1.0
          IF (CVIJ .GT. 1.0) CVIJ=1.0
  
+!        U(I+1,J)=U(I+1,J)+CUIJ
+!        U(I+1,J+1)=U(I+1,J+1) +CUIJ
+!        U(I,J)=U(I,J) -CUIJ
+!        U(I,J+1)=U(I,J+1) -CUIJ
+!        V(I+1,J)=V(I+1,J)-CVIJ
+!        V(I,J)=V(I,J)-CVIJ
+!        V(I,J+1)=V(I,J+1)+CVIJ
+!        V(I+1,J+1)=V(I+1,J+1)+CVIJ
          U(I+1,J)=U(I+1,J)+CUIJ
-         U(I+1,J+1)=U(I+1,J+1) +CUIJ
-         U(I,J)=U(I,J) -CUIJ
-         U(I,J+1)=U(I,J+1) -CUIJ
-         V(I+1,J)=V(I+1,J)-CVIJ
-         V(I,J)=V(I,J)-CVIJ
+         U(I-1,J)=U(I-1,J)-CUIJ
          V(I,J+1)=V(I,J+1)+CVIJ
-         V(I+1,J+1)=V(I+1,J+1)+CVIJ
+         V(I,J-1)=V(I,J-1)-CVIJ
          ijc=ijc+1
        else
          ij=ij+1
@@ -153,17 +170,19 @@
       print *,'iteration=', it, 'total number of pts not calculated', ij
       enddo
 
-      diffu=U-usave
-      diffv=V-vsave
+      where(validpt)
+        diffu=U-usave
+        diffv=V-vsave
+      endwhere
 
       iu=0; iv=0
       do j=1,ny-1
       do i=1,nx-1
-      if (abs(diffu(i,j)).gt.10. ) then
+      if (validpt(i,j) .and. abs(diffu(i,j)).gt.10. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iu=iu+1
       endif
-      if (abs(diffv(i,j)).gt.10.)  then
+      if (validpt(i,j) .and. abs(diffv(i,j)).gt.10.)  then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'V ',vsave(i,j), V(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iv=iv+1
       endif
@@ -176,11 +195,11 @@
       iu=0; iv=0
       do j=1,ny-1
       do i=1,nx-1
-      if (abs(diffu(i,j)).gt.5. ) then
+      if (validpt(i,j) .and. abs(diffu(i,j)).gt.5. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iu=iu+1
       endif
-      if (abs(diffv(i,j)).gt.5.)  then
+      if (validpt(i,j) .and. abs(diffv(i,j)).gt.5.)  then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'V ',vsave(i,j), V(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iv=iv+1
       endif
