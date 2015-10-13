@@ -629,4 +629,164 @@ VERS 3.3.2 frozen
                        --> Since it does not help salton sea problem and 
                            the problem with too much wind adjustment over water returned (see 11/01/2014)
 
+******************************************************************
+Smartinit VERS 3.4.3 - Annette Gibbs
+******************************************************************
+
+Jun 2015 v3.4.3
+
+* Changed smartinit to run on phase 2
+
+	-script parm/smart_para_config was changed (ptmpp1/stmpp1 was changed to ptmpp2/stmpp2)
+
+	-script parm/sref_para_config was changed (ptmpp1/stmpp1 was changed to ptmpp2/stmpp2)
+
+* Added new grid specifications for expanded CONUS Nest (grid 188) and Puerto Rico 1.25 km domain (grid 254)
+
+	-Added Terrain, Land/Sea Mask, Weight and master parm files for new expanded CONUS Nest domain (grid 188) and 
+	 Puerto Rico 1.25 km domain (grid 254):
+         
+	 fix/topo/nam_smarttopoconus2p5_EXP.grb2
+	 fix/topo/nam_smarttopoconus2p5_EXP.grb2i
+	 fix/topo/nam_smarttopoconus2p5_EXP.grb
+	 fix/topo/nam_smarttopoconus2p5-EXT.grbi
+	 fix/topo/nam_smarttopopr1p25.grb2
+	 fix/topo/nam_smarttopopr1p25.grb2i
+	 fix/topo/nam_smarttopopr1p25.grb
+	 fix/topo/nam_smarttopopr1p25.grbi
+	 fix/mask/nam_smartmaskconus2p5_EXP.grb2
+	 fix/mask/nam_smartmaskconus2p5_EXP.grb2i
+	 fix/mask/nam_smartmaskconus2p5_EXP.grb
+	 fix/mask/nam_smartmaskconus2p5_EXP.grbi
+	 fix/mask/nam_smartmaskpr1p25.grb2
+	 fix/mask/nam_smartmaskpr1p25.grb2i
+	 fix/mask/nam_smartmaskpr1p25.grb
+	 fix/mask/nam_smartmaskpr1p25.grbi
+	 fix/wgt/nam_wgt_188_conusnest
+	 fix/wgt/nam_wgt_254
+	 fix/wgt/nam_wgt_254_priconest
+
+        -corrected for GRIB2 precision.  When the GRIB2 Terrain was converted to GRIB1, some precision was lost in some of the 
+	 grid specs.
+
+	 ush/dng_awp.sh
+
+	-created links for new Puerto Rico and expanded CONUS nest domains.
+
+	-new grid specifications were added for pr, priconest, and conusnest2p5 to parm/SMINIT.CTL
+
+	-Added GRIB2 AWIPS parm files for new expanded CONUS Nest domain (grid 188) and Puerto Rico 1.25 km domain (grid 254) 
+	 util/parm/*188
+	 util/parm/*254
+         util/cpparm.sh (used to create new GRIB2 AWIPS parm files)
+
+* Added GRIB2 option for future implementation using Eric's NAM parallel (this option is not used yet; will be implemented in
+  Q2FY16).
+	-created GRIB2 master parm files (parm/nam_smartinit_bsmart_grb2.parmlist*, parm/nam_smartinit_bgrd3d_grb2.parmlist*,
+	 parm/nam_smartinit_grb2_budget.parmlist_* and parm/nam_smartinit_grib2_nn.parmlist parameter files)
+	-replaced exec/smartinit_prdgen with exec/smartinit_wgrib2
+	-added parallel wgrib2
+	-added GRIB2 specs for each grid
+	-uses parallel 3 km NAM Nests and 12 km NAM /meso2/noscrub/Eric.Rogers/com/nam/para
+		: changed in parm/smart_para_config
+	-wgrib2 uses nearest neighbor interpolation for 2.5 km CONUS NEst, 3 km Hawaiinest, and 3 km Alaskanest; uses budget for
+	 precipitation/snow fields; and bilinear interpolation for all other grids.
+
+Jul 2015 v3.4.3
+
+* Added GRIB switch to ush/smartinit.sh.
+
+	export grib=1 ; for using OPS NAM GRIB1 data
+	export grib=2 ; for using parallel NAM GRIB2 data
+
+* Added local versions of the source codes and executables of cnvgrib, wgrib2 and nam_prdgen.
+	
+	sorc/smartinit_cnvgrib.fd
+	sorc/smartinit_prdgen.fd
+	sorc/smartinit_wgrib2.cd
+	exec/smartinit_cnvgrib
+	exec/smartinit_prdgen
+	exec/smartinit_wgrib2
+
+	-Added local versions of cnvgrib, wgrib2, nam_prdgen to ush/smartinit.sh, ush/dng_awp.sh, jobs/JNAM_SMINIT 
+	 and jobs/JDGEX_SMINIT
+
+* Added ceiling height to the master parm files. 
+	-ceiling height was added to parm/nam_masterak.ctl, parm/nam_masterconus.ctl, parm/nam_masterhi.ctl, parm/nam_masterpr.ctl,
+         parm/nam_smartmasteraknest3.ctl, parm/nam_smartmasterconusnest2p5.ctl
+* Added ceiling height to smartinit source code:
+	sorc/smartinit.fd/MAIN.f90
+	sorc/smartinit.fd/GETGRIB.f90
+	sorc/smartinit.fd/aset2d.f90
+	sorc/smartinit.fd
+* Uses ceiling height from OPS *bgdawp* files. Ceiling height is not written out in the OPS NAM *bgrd3d* and *bsmart* files, so
+	we need to get the ceiling height from the OPS *bgdawp* files.
+	ush/smartinit.sh
+* CONUS Nest uses land/sea mask instead of vegetation type to define temps/dewpoint/winds near coastlines
+	sorc/smartinit.fd/NDFDgrid.f90
+* Changed grid spacing in code for Puerto Rico from 2500 km to 1250 km.
+	sorc/smartinit.fd/NDFDgrid.f90
+* Added code in smartinit to define expanded CONUS Nest to temporary grid id 188 and Puerto Rico 1.25 km to temporary grid id 254.
+	sorc/smartinit.fd/w3fi71.f
+	sorc/smartinit.fd/w3fi63.f
+
+Aug 2015
+
+* Added hourly total cloud cover to smartinit source code:
+	sorc/smartinit.fd/MAIN.f90
+	sorc/smartinit.fd/GETGRIB.f90
+* Fixed wind gust bug in smartinit code: Wind gust is now being read in and used for evaluating wind gust for intermediate hours
+	sorc/smartinit.fd/MAIN.f90
+	sorc/smartinit.fd/GETGRIB.f90
+* Added hours 00 and 10, 11, and 12 to ak_rtmages files.
+	ush/dng_awp.sh
+	ush/smartinit.sh
+* Converted all hourly files and *ak_rtmages* files to GRIB2 for RTMA/URMA.
+        ush/dng_awp.sh
+        ush/smartinit.sh
+* Use parallel SREF /com2/sref/para
+	- changed in parm/smart_para_config
+
+Sept 2015 -  smartinit.v3.4.4
+
+* Changed Puerto Rico 1.25 km grid back to Puerto Rico 2.5 km grid (3 September 2015)
+	link topo and mask files to PR grid 195
+        link master control file for PR to grid 195 (parm/nam_masterpr.ctl)
+        add ceiling height to parm/nam_masterpr.ctl-195
+	parm/SMINIT.CTL (changed grid specs back to grid 195)
+	ush/smartinit.sh (changed grid specs back to grid 195)
+	ush/dng_awp.sh (commented out GRIB2 precision change)
+        sorc/smartinit.fd/NDFDgrid.f90 (changed DX,DY back to 2500 km)
+
+* Changed Conus Nest 2.5 km Terrain & Land/Sea mask (used GRIB1 precision)
+	link topo and mask files to new Terrain & Land/Sea mask files
+        sorc/smartinit.fd/w3fi71.f (changed grid specs for grid 188)
+	parm/SMINIT.CTL (change grid specs)
+	ush/smartinit.sh (change grid specs)
+	ush/dng_awp.sh (commented out GRIB2 precision change)
+
+* Added local version of overgridnum_grib to change CONUS Nest files from grid number 188 to 255.
+	sorc/smartinit_overgridnum_grib.fd
+        exec/smartinit_overgridnum_grib
+        ush/dng_awp.sh
+
+* Only write out AWIPS files every 3 hours
+	ush/dng_awp.sh	
+	ush/smartinit.sh
+	ush/dgex_smartinit.sh
+
+* Change DX/DY to 6000 km for *ak_rtmages* and DGEX AK files
+	sorc/smartinit.fd/NDFDgrid.f90
+
+* Set Haines Index and Ceiling Height to SPVAL for bitmap
+	sorc/MAIN.f90
+
+* Changed Conus Nest 2.5 km Terrain & Land/Sea mask to the consensus Terrain & Land/Sea mask (used GRIB1 precision)
+	link topo and mask files to new Terrain & Land/Sea mask files
+	
+* Changed grid 188 back to grib 184 (using copygb).  CONUS Nest output files are now grid 184.  This was done so the AWIPS
+  header parm files would not have to be recreated for grid 188. Twelve GRIB1 grid 188 files are added to output directory,
+  for use in RTMA/URMA: nam.t${cyc}z.smartconus2p5${hh}.tm00_wexp
+
+	ush/dng_awp.sh
 

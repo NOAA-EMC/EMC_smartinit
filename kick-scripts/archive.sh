@@ -12,7 +12,7 @@ export mdlver=v3.4.0
 
 # Location of smartinit gif plot files
 #===========================================================
-export pldir=/stmpp1/${USER}/smartplt
+export pldir=/stmpp2/${USER}/smartplt
 #===========================================================
 
 hpssdir=/NCEPDEV/emc-naqfc/2year/Jeff.McQueen
@@ -26,7 +26,7 @@ mkdir -p $wdir
 for mdl in nam;do      
 # Location of smartinit grib files
 #==========================================
-  indir=/ptmpp1/${USER}/${mdlver}/${mdl}.${yyyymmdd}
+  indir=/ptmpp2/${USER}/${mdlver}/${mdl}.${yyyymmdd}
 #==========================================
   case $mdl in 
     nam)

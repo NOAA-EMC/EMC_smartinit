@@ -1,0 +1,17 @@
+set -x
+
+# THIS SCRIPT READ A FORECAST FILE (UNIT 11), MODIFIES PDS OCTET(6)
+# TO CORRECT THE GRIB MODEL ID AND RE-WRITES THE FILE TO UNIT 51.
+
+# STANDARD INPUT IS A 2-DIGIT INTEGER, FOR EXAMPLE 78 (MRF T12628)
+
+mkdir -p /gpfstmp/wx20er/testnum
+cd /gpfstmp/wx20er/testnum
+
+echo 252 > input
+
+rm fort.*
+ln -s -f /emc2/wx20py/FRESHWRF/hi8/output/2004071500/WRFPRS48.tm00   fort.11
+ln -s -f WRFPRS48_mod.tm00  fort.51
+
+/emc2/wx20er/nwprod/sorc/overgridnum_grib.fd/overgridnum_grib < input

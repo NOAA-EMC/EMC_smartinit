@@ -1,0 +1,45 @@
+PRES:58 hybrid level
+TCDC:58 hybrid level
+HGT:58 hybrid level
+TMP:58 hybrid level
+SPFH:58 hybrid level
+UGRD:58 hybrid level
+VGRD:58 hybrid level
+PRES:59 hybrid level
+TCDC:59 hybrid level
+HGT:59 hybrid level
+TMP:59 hybrid level
+SPFH:59 hybrid level
+UGRD:59 hybrid level
+VGRD:59 hybrid level
+PRES:60 hybrid level
+TCDC:60 hybrid level
+HGT:60 hybrid level
+TMP:60 hybrid level
+SPFH:60 hybrid level
+UGRD:60 hybrid level
+VGRD:60 hybrid level
+REFC:entire atmosphere (considered as a single layer)
+VIS:surface
+GUST:surface
+TMP:500 mb
+TMP:700 mb
+RH:700 mb
+TMP:850 mb
+RH:850 mb
+TMP:950 mb
+PRES:surface
+HGT:surface
+TMP:2 m above ground
+SPFH:2 m above ground
+DPT:2 m above ground
+UGRD:10 m above ground
+VGRD:10 m above ground
+HGT:lowest level of the wet bulb zero
+SFCR:surface
+LCDC:low cloud layer
+MCDC:middle cloud layer
+HCDC:high cloud layer
+TCDC:entire atmosphere (considered as a single layer)
+HGT:cloud ceiling
+4LFTX:180-0 mb above ground

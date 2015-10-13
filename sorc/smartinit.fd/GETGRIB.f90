@@ -421,7 +421,43 @@
         JPDS(5) = 020
         JPDS(6) = 001
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,VIS,IRET,ISTAT)
+
+      if (trim(CORE).ne.'dgx') then
+       print*, 'cloud ceiling height', lnest, LHR3
+        JPDS=-1;J=0
+        JPDS(5) = 007
+        JPDS(6) = 215
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,CEIL,IRET,ISTAT)
+        print*,'min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
       endif
+
+      endif
+
+!  sfc wind gust 
+      J=0
+      JPDS=-1
+      JPDS(3) = IGDNUM
+      JPDS(5) = 180 
+      JPDS(6) = 001
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
+
+!     nests already have computed cld fracs...
+      if (lnest .and. trim(CORE).ne.'GFS' .and. .not.lanl) then
+        J=0;JPDS=-1
+        JPDS(3)=IGDNUM
+        JPDS(5) = 71
+        JPDS(6) = 200
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,TCLD,IRET,ISTAT)
+        JPDS(5) = 73
+        JPDS(6) = 214
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,LCLD,IRET,ISTAT)
+        JPDS(5) = 74
+        JPDS(6) = 224
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,MCLD,IRET,ISTAT)
+        JPDS(5) = 75
+        JPDS(6) = 234
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
+       endif
 
 ! 2-m temp
       JPDS=-1;J=0
@@ -720,7 +756,7 @@
       JPDS(3) = IGDNUM
       JPDS(5) = 180 
       JPDS(6) = 001
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
+!     CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
 
 ! composite reflectivity
       if (trim(CORE).NE. 'GFS') then
@@ -731,22 +767,22 @@
       if (lanl) return
 
 !     nests already have computed cld fracs...
-      if (lnest .and. trim(CORE).ne.'GFS') then
-        J=0;JPDS=-1
-        JPDS(3)=IGDNUM
-        JPDS(5) = 71
-        JPDS(6) = 200
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,TCLD,IRET,ISTAT)
-        JPDS(5) = 73
-        JPDS(6) = 214
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,LCLD,IRET,ISTAT)
-        JPDS(5) = 74
-        JPDS(6) = 224
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,MCLD,IRET,ISTAT)
-        JPDS(5) = 75
-        JPDS(6) = 234
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
-       endif  
+!     if (lnest .and. trim(CORE).ne.'GFS') then
+!       J=0;JPDS=-1
+!       JPDS(3)=IGDNUM
+!       JPDS(5) = 71
+!       JPDS(6) = 200
+!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,TCLD,IRET,ISTAT)
+!       JPDS(5) = 73
+!       JPDS(6) = 214
+!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,LCLD,IRET,ISTAT)
+!       JPDS(5) = 74
+!       JPDS(6) = 224
+!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,MCLD,IRET,ISTAT)
+!       JPDS(5) = 75
+!       JPDS(6) = 234
+!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
+!      endif  
 
 !  READ SREF precip
       print*; print *,'READ SREF Precip Probs', LUGB2, IFHR

@@ -114,7 +114,8 @@
 !      All NDFD grids including Extended CONUS csp2 grid, water=0
        ivgid=81 
 !      FOR VEG_NDFD CS2P grid 184, input is Veg type:  water=16
-       if (region .eq. 'CS2P') ivgid=225 
+! Not needed for Expanded CONUS; comment out
+!!     if (region .eq. 'CS2P') ivgid=225 
 
         print*, ' gdin%region: ', gdin%region
         print *, 'READ IN NDFD GRIB  TOPO file'
@@ -132,10 +133,18 @@
 !        DY=JGDS(10)
 
         DX=2500.;DY=2500. ! hardwired for conus nests
+!
+! Temporarily comment out  - using PR 2.5 km grid for this upgrade - 04 Sept 2015[AMG]
+!       if(region.eq.'PR') then ! PR is now 1.25 km
+!         DX=1250.
+!         DY=1250.
+!       endif
+
         if(region.eq.'AK3') then 
           DX=3000.
           DY=3000. 
-        elseif(region.eq.'AK') then 
+!       elseif(region.eq.'AK') then 
+        elseif(region.eq.'AK'.or.region.eq.'AKRT'.or.region.eq.'DGX') then 
           DX=6000.
           DY=6000. 
         endif
@@ -147,14 +156,20 @@
         J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1;JPDS(7)=0;JGDS=-1
         CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
 
-        if (LHIRESW .or. REGION .eq. 'CS2P') then 
-          if (region.eq.'CS2P') lconus=.TRUE.
+! Not needed for Expanded CONUS; comment out
+
+!!      if (LHIRESW .or. REGION .eq. 'CS2P') then 
+        if (LHIRESW ) then
+!!        if (region.eq.'CS2P') lconus=.TRUE.
           lvegtype=.true.     ! or = false, then use veg fraction
           where (veg_ndfd.le.0.) veg_ndfd=16. 
         endif
         DEALLOCATE(GRID,MASK)
       endif
      
+! Still need for Expanded CONUS???  moved out of conditional
+          if (region.eq.'CS2P') lconus=.TRUE.
+
       if(lvegtype) then 
         rghlim=0.05  ! Make consistent with ndfd land fraction 
         veglim=16.

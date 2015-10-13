@@ -11,7 +11,7 @@ endhr=${endhr:-12}
 freq=${freq:-03}
 
 export yyyymmdd=`/nwprod/util/exec/ndate |cut -c 1-8`
-export pldir=/stmpp1/${USER}/smartplt
+export pldir=/stmpp2/${USER}/smartplt
 export wdir=${pldir}/ftpmet
 export rzdmdir=/home/people/emc/ftp/mmb/aq/haines
 export regions="conus2p5 ak3 hi pr"
@@ -22,7 +22,7 @@ cd $wdir
 
 #TEST for mdl in nam dgex;do
 for mdl in nam ;do
-  indir=/ptmpp1/${USER}/${mdl}.${yyyymmdd} 
+  indir=/ptmpp2/${USER}/${mdl}.${yyyymmdd} 
   for REG in ${regions};do
     rm -f temp
     fhr=$strhr

@@ -2474,6 +2474,7 @@ C                 ----- U.S. GRID 187 - MAP SIZE 3425565
               ELSE IF (KPDS(3).EQ.188) THEN
 C                 ----- U.S. GRID 188 - MAP SIZE 563655
 C                 J     = 563655
+C Temporary expanded CONUS 2.5 km nest - 2345 * 1597 = 3744965
                   J     = 3744965
                   GO TO 800
               ELSE IF (KPDS(3).EQ.189) THEN
@@ -2681,7 +2682,9 @@ C                     ----- U.S. NON-STANDARD GRID
                   J = 83552
                   GO TO 800
               ELSE IF (KPDS(3).EQ.254) THEN
-                  J = 110700
+C                 J = 110700
+C Temporary PR 1.25 km grid
+                  J = 76275
                   GO TO 800
               ELSE IF (IAND(KPDS(4),128).EQ.128) THEN
                   GO TO 895

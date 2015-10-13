@@ -1,11 +1,12 @@
 #!/bin/ksh
-### set -xa
+set -xa
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
 . /usrx/local/Modules/3.2.9/init/ksh
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
+module load GrADS/2.0.2
 
 #=======================================================
 # Driving script to run a smartinit domain
@@ -16,6 +17,10 @@ module load ruby emc-utils
 # Uses ${cfgdir}/smart_para_config --> directory config
 # Jeff McQueen       01/29/2013
 # Vertical structure 08/27/2013
+
+#   Jun 2015 Annette Gibbs - Changed smartinit to run on phase 2
+# 7 Jul 2015 Annette Gibbs - Changed smartinit output from /stmpp2/$USER to /ptmpp2/$USER and added $PDY to dir
+# 7 Jul 2015 Annette Gibbs - $PDY is now determined in DRIVcs2p and DRIV-dgex
 #=======================================================
 typeset -Z2 cyc #ffhr fhrnxt ffhrsv HHold strhr
 
@@ -25,6 +30,7 @@ cfgdir=${rootd}/parm
 export wkdir=${rootd}/working
 mkdir -p $wkdir
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
+plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade
 export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
@@ -51,7 +57,7 @@ esac
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/stmpp1/${USER}/${modeld}.${model_ver}/${cyc}
+export DATA_IN=/ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 
@@ -74,8 +80,11 @@ while [ $ffhr -le $ENDHRS ];do
   chmod 755 ${wkdir}/dng_para_config${RUNTYP}
  . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
 
-  export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-#  export PDY=20141031 ###TEST
+# This is now done in DRIVcs2p and DRIV-dgex so I can save 5 days worth of working directory data
+# Annette Gibbs
+
+# export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
+#export PDY=20150629 ###TEST
 
   cp -p ${rootd}/docs/${modeld}.ver ${wkdir}
   echo;echo `date`
@@ -97,9 +106,9 @@ while [ $ffhr -le $ENDHRS ];do
         sleep 10
 
         echo `date +%T` $MDL SUBMIT SMINIT JOB :  $RUNTYP CYCLE $cyc FHRNXT $fhrnxt
+#       ${kickd}/cr8bjob_poe $job $fhrnxt
         ${kickd}/cr8bjob $job $fhrnxt
         bsub < J${MDL}_SMINIT.${RUNTYP}
-
       fi
       ((fhrnxt=fhrnxt+INCR))
       if [ $fhrnxt -lt 10 ];then fhrnxt="0"${fhrnxt};fi
@@ -134,6 +143,7 @@ while [ $ffhr -le $ENDHRS ];do
         . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
         echo  $wait `date +%T` SUBMIT $MDL SMINIT JOB :  $RUNTYP CYCLE $cyc FFHR $ffhr
         sleep 10     
+#       ${kickd}/cr8bjob_poe $job $ffhr
         ${kickd}/cr8bjob $job $ffhr
         bsub -K < J${MDL}_SMINIT.${RUNTYP}
         break
@@ -153,3 +163,36 @@ export RUNTYP=$RUNTYP
 export cyc=$cyc
 export strhr=$fhrstr
 #bsub < $gemdir/plotmet.job
+
+export PDY=$PDY
+export cyc=$cyc
+date
+
+if [ $runreg = conus2p5 ];then
+  pltrun=conusnest
+  bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2
+  bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2_hourly
+  date
+  bsub < ${kickd}/hpss_archive.sh
+# $plotdir/make_DNG_page.sh 
+#  $plotdir/make_DNG_page_region.sh 
+#  bsub < $plotdir/webdiag.bsub
+elif [ $runreg = ak3 ];then
+  pltrun=ak3
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
+elif [ $runreg = ak_rtmages ];then
+  pltrun=ak_rtmages
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
+elif [ $runreg = hi ];then
+  pltrun=hi
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
+elif [ $runreg = pr ];then
+  sleep 360
+  pltrun=pr
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2
+  bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
+fi
+
