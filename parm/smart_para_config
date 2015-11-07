@@ -25,7 +25,8 @@ export envir=dev
 export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
-export nam_ver=v3.1.6
+#export nam_ver=v3.1.6
+export nam_ver=v3.1.8
 export dgex_ver=v3.1.1
 
 export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
