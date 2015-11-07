@@ -74,8 +74,8 @@
 
 ! Save values at start of iteration
 
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
         usave(i,j)=u(i,j)
         vsave(i,j)=v(i,j)
       enddo
@@ -98,8 +98,8 @@
         ij=0
         ijc=0
         do 30 idir=1,4
-          do jj=2,ny-1
-          do ii=2,nx-1
+          do jj=2,ny
+          do ii=2,nx
             SELECT CASE (idir)
              CASE (1)
               I=II
@@ -115,18 +115,26 @@
               J=NY-JJ+1
             END SELECT
 
-            ip1=i+1
-            im1=i-1
-            jp1=j+1
-            jm1=j-1
+            ip1=i
+            im1=i
+            jp1=j
+            jm1=j
+            if(i.lt.nx)ip1=i+1
+            if(i.gt.1)im1=i-1
+            if(j.lt.ny)jp1=j+1
+            if(j.gt.1)jm1=j-1
 
-            if(validpt(ip1,j).and.validpt(im1,j).and.validpt(i,jp1).and.validpt(i,jm1).and.validpt(i,j))then
+            if(validpt(i,j))then
               if(div(i,j) .ne. 0.)then
 
-                uip1=u(ip1,j)
-                uim1=u(im1,j)
-                vjp1=v(i,jp1)
-                vjm1=v(i,jm1)
+                uip1=u(i,j)
+                uim1=u(i,j)
+                vjp1=v(i,j)
+                vjm1=v(i,j)
+                if(validpt(ip1,j))uip1=u(ip1,j)
+                if(validpt(im1,j))uim1=u(im1,j)
+                if(validpt(i,jp1))vjp1=v(i,jp1)
+                if(validpt(i,jm1))vjm1=v(i,jm1)
 
 ! Make adjustment
 
@@ -139,19 +147,19 @@
 !                 print*,'before i,j,uip1,uim1,vjp1,vjm1=', i,j,uip1,uim1,vjp1,vjm1
 !               endif
 
-                uip1=uip1+alpha1*ut
-                uim1=uim1-alpha2*ut
-                vjp1=vjp1+alpha3*vt
-                vjm1=vjm1-alpha4*vt
+                if(validpt(ip1,j))uip1=uip1+alpha1*ut
+                if(validpt(im1,j))uim1=uim1-alpha2*ut
+                if(validpt(i,jp1))vjp1=vjp1+alpha3*vt
+                if(validpt(i,jm1))vjm1=vjm1-alpha4*vt
 
 !               IF (i.eq.572.and.j.eq.387)then
 !                 print*,'after i,j,uip1,uim1,vjp1,vjm1=', i,j,uip1,uim1,vjp1,vjm1
 !               endif
 
-                u(im1,j)=uim1
-                u(ip1,j)=uip1
-                v(i,jm1)=vjm1
-                v(i,jp1)=vjp1
+                if(validpt(im1,j))u(im1,j)=uim1
+                if(validpt(ip1,j))u(ip1,j)=uip1
+                if(validpt(i,jm1))v(i,jm1)=vjm1
+                if(validpt(i,jp1))v(i,jp1)=vjp1
 
 !               IF (abs(ut*alpha1) .gT. 1.0)print*,'i,j,it,ut*alpha1=',i,j,it,ut*alpha1
 !               IF (abs(vt*alpha3) .gT. 1.0)print*,'i,j,it,vt*alpha3=',i,j,it,vt*alpha3
@@ -181,12 +189,14 @@
 20    continue
  
 
-      diffu=U-usave
-      diffv=V-vsave
+      where(validpt)
+        diffu=U-usave
+        diffv=V-vsave
+      endwhere
 
       iu=0; iv=0
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if (abs(diffu(i,j)).gt.10. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
 !         print*,'usave,vsave=',usave(i+1,j),usave(i-1,j),vsave(i,j+1),vsave(i,j-1)
@@ -217,8 +227,8 @@
       print *,'total number (diffv) > 10', iv
 
       iu=0; iv=0
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if (abs(diffu(i,j)).gt.5. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
 !         print*,'usave,vsave=',usave(i+1,j),usave(i-1,j),vsave(i,j+1),vsave(i,j-1)
@@ -285,18 +295,26 @@
 
 ! Compute divergence (div=dudx+dvdy) using center in space differences
 
-      do j=2,ny-1
-      do i=2,nx-1
+      do j=2,ny
+      do i=2,nx
         div(i,j)=0.0
-        ip1=i+1
-        im1=i-1
-        jp1=j+1
-        jm1=j-1
-        if(validpt(ip1,j).and. validpt(im1,j).and.validpt(i,jp1).and.validpt(i,jm1).and.validpt(i,j))then
-          uip1=u(ip1,j)
-          uim1=u(im1,j)
-          vjp1=v(i,jp1)
-          vjm1=v(i,jm1)
+        ip1=i
+        im1=i
+        jp1=j
+        jm1=j
+        if(i.lt.nx)ip1=i+1
+        if(i.gt.1)im1=i-1
+        if(j.lt.ny)jp1=j+1
+        if(j.gt.1)jm1=j-1
+        if(validpt(i,j))then
+          uip1=u(i,j)
+          uim1=u(i,j)
+          vjp1=v(i,j)
+          vjm1=v(i,j)
+          if(validpt(ip1,j))uip1=u(ip1,j)
+          if(validpt(im1,j))uim1=u(im1,j)
+          if(validpt(i,jp1))vjp1=v(i,jp1)
+          if(validpt(i,jm1))vjm1=v(i,jm1)
           dudx=dxi*(uip1-uim1)
           dvdy=dyi*(vjp1-vjm1)
           div(i,j)=dudx+dvdy
