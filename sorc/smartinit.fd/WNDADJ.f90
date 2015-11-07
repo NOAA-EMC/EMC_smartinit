@@ -103,8 +103,8 @@
       ddij=0.0
 
 ! save values at start of iteration
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
         usave(i,j)=u(i,j)
         vsave(i,j)=v(i,j)
       enddo
@@ -118,17 +118,35 @@
 !     do j=1,ny-1
 !     do i=1,nx-1
 !      if(validpt(i,j).and. validpt(i+1,j).and.validpt(I+1,j+1).and.validpt(i,j+1))then
-      do j=2,ny-1
-      do i=2,nx-1
-       if(validpt(i,j).and.validpt(i+1,j).and.validpt(I-1,j).and.validpt(i,j+1).and.validpt(i,j-1))then
+!      if(validpt(i,j).and.validpt(i+1,j).and.validpt(I-1,j).and.validpt(i,j+1).and.validpt(i,j-1))then
 !        UE=0.5*(U(I+1,J)+U(I+1,J+1))
 !        UW=0.5*(U(I,J)  +U(I,J+1))
 !        VSO=0.5*(V(I+1,J)+V(I,J))
 !        VNO=0.5*(V(I,J+1)+V(I+1,J+1))
-         UE=U(I+1,J)
-         UW=U(I-1,J)
-         VSO=V(I,J-1)
-         VNO=V(I,J+1)
+!        UE=U(I+1,J)
+!        UW=U(I-1,J)
+!        VSO=V(I,J-1)
+!        VNO=V(I,J+1)
+      do j=1,ny
+      do i=1,nx
+       if(validpt(i,j))then
+         UE=U(i,j)
+         UW=U(i,j)
+         VSO=V(I,J)
+         VNO=V(I,J)
+         if(i.lt.nx)then
+           if(validpt(i+1,j)) UE=U(I+1,J)
+         endif
+         if(i.gt.1)then
+           if(validpt(i-1,j)) UW=U(I-1,J)
+         endif
+         if(j.gt.1)then
+           if(validpt(i,j-1)) VSO=V(I,J-1)
+         endif
+         if(j.lt.ny)then
+           if(validpt(i,j+1)) VNO=V(I,J+1)
+         endif
+
          DUE=dxi*(UE-UW)
          DVN=dyi*(VNO-VSO)
          DI(I,J)=DUE+DVN
@@ -155,10 +173,22 @@
 !        V(I,J)=V(I,J)-CVIJ
 !        V(I,J+1)=V(I,J+1)+CVIJ
 !        V(I+1,J+1)=V(I+1,J+1)+CVIJ
-         U(I+1,J)=U(I+1,J)+CUIJ
-         U(I-1,J)=U(I-1,J)-CUIJ
-         V(I,J+1)=V(I,J+1)+CVIJ
-         V(I,J-1)=V(I,J-1)-CVIJ
+         if(i.lt.nx)then
+           if(validpt(i+1,j)) U(I+1,J)=U(I+1,J)+CUIJ
+         endif
+         if(i.gt.1)then
+           if(validpt(i-1,j)) U(I-1,J)=U(I-1,J)-CUIJ
+         endif
+         if(j.lt.ny)then
+           if(validpt(i,j+1)) V(I,J+1)=V(I,J+1)+CVIJ
+         endif
+         if(j.gt.1)then
+           if(validpt(i,j-1)) V(I,J-1)=V(I,J-1)-CVIJ
+         endif
+!        U(I+1,J)=U(I+1,J)+CUIJ
+!        U(I-1,J)=U(I-1,J)-CUIJ
+!        V(I,J+1)=V(I,J+1)+CVIJ
+!        V(I,J-1)=V(I,J-1)-CVIJ
          ijc=ijc+1
        else
          ij=ij+1
@@ -166,6 +196,7 @@
       enddo
       enddo
 
+      print*, 'DIVERGENCE=', MINVAL(1.e-6*DI(:,:)),MAXVAL(1.e-6*DI(:,:))
       print *,'iteration=', it, 'total number of pts calculated', ijc
       print *,'iteration=', it, 'total number of pts not calculated', ij
       enddo
@@ -176,8 +207,8 @@
       endwhere
 
       iu=0; iv=0
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if (validpt(i,j) .and. abs(diffu(i,j)).gt.10. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iu=iu+1
@@ -193,8 +224,8 @@
       print *,'total number (diffv) > 10', iv
 
       iu=0; iv=0
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if (validpt(i,j) .and. abs(diffu(i,j)).gt.5. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iu=iu+1
@@ -216,8 +247,8 @@
 
       if(normalize)then
       sum1=0; sum2=0; q1=0
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if(validpt(i,j))then
         u1(i,j)=usave(i,j)-u(i,j)
         v1(i,j)=vsave(i,j)-v(i,j)
@@ -232,8 +263,8 @@
       sum2=sum2/q1
       print*,'sum1,sum2,q1=',sum1,sum2,q1
 
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if(validpt(i,j))then
           u(i,j)=u1(i,j)+sum1
           v(i,j)=v1(i,j)+sum2
@@ -245,8 +276,8 @@
       diffv=V-vsave
 
       iu=0; iv=0
-      do j=1,ny-1
-      do i=1,nx-1
+      do j=1,ny
+      do i=1,nx
       if (abs(diffu(i,j)).gt.10. ) then
         print *, i,j,'DIFFU,DIFFV', diffu(i,j),diffv(i,j),'U ',usave(i,j), U(I,J),'MDL Topo',zsfc(i,j),'NDFD Topo',HTOPO(i,j)
         iu=iu+1
