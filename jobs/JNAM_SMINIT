@@ -33,8 +33,8 @@
 # TEMPORARY SWITCH for DIVMIN nondivergent wind adjustment (IDMADJ - Calmet Method)
 # TEMPORARY SWITCH for WNDADJ nondivergent wind adjustment (IWOXADJ - WOX Method)
 export IVADJ=${IVADJ:-F}
-export IDMADJ=${IDMADJ:-T}
-export IWOXADJ=${IWOXADJ:-F}
+export IDMADJ=${IDMADJ:-F}
+export IWOXADJ=${IWOXADJ:-T}
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
