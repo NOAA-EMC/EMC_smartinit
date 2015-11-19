@@ -974,3 +974,5 @@
 84/196/X/-3.0/mesohi.NDFD/0/0
     7 215   0   0   0   2   1   CEILING
 84/196/X/-5.0/mesohi.NDFD/0/0
+  130 102   0   0   0   2   1   MESINGER MEAN SLP
+84/196/X/-0.1/mesohi.NDFD/0/0
