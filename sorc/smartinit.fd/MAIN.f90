@@ -321,7 +321,7 @@
    ALLOCATE (P6CP01(IM,JM),P6CP10(IM,JM),P6CP50(IM,JM),STAT=kret)
    ALLOCATE (P12CP01(IM,JM),P12CP10(IM,JM),P12CP50(IM,JM),STAT=kret)
    ALLOCATE (HAINES(IM,JM),HLVL(IM,JM),STAT=kret)
-   ALLOCATE (CEIL(IM,JM),STAT=kret)
+   ALLOCATE (CEIL(IM,JM),SLP(IM,JM),SST(IM,JM),STAT=kret)
 !  for nests
    ALLOCATE (VALIDPT(IM,JM),STAT=kret)
    VALIDPT=.TRUE.
@@ -345,7 +345,7 @@
 
 !   Initialize varbs to spval (for nests)
     where (.not. validpt)
-      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL
+      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL;SLP=SPVAL;SST=SPVAL
       P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL
     endwhere
 
@@ -713,6 +713,21 @@
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
       endif
 
+! SLP
+      print*, 'Output SLP', FHR
+      ID(1:25) = 0
+      ID(8)=130;ID(9)=102
+      DEC=-0.1
+      CALL GRIBIT(ID,RITEHD,SLP,GDIN,70,DEC)
+      print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+
+! SST
+      print*, 'Output SST', FHR
+      ID(1:25) = 0
+      ID(8)=11;ID(9)=1
+      DEC=-3.0
+      CALL GRIBIT(ID,RITEHD,SST,GDIN,70,DEC)
+      print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
 
 !==========================================================================
 !  TransWind - the average winds in the layer between the surface
@@ -1462,6 +1477,7 @@
 ! 03-19-13 : Add Gust and visibility to limited files for RTMA
 ! 06-03-15 : Add Cloud Ceiling to limited files for RTMA
 ! 08-12-15 : Add Sky Cover to limited files for RTMA
+! 11-07-15 : Add SLP and SST to limited files for RTMA
       IF (trim(GDIN%CORE) .NE. 'GFS') THEN
         ID(1:25) = 0
         ID(8)=180;ID(9)=1
@@ -1490,6 +1506,22 @@
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
       endif
+
+! SLP
+      print*, 'Output SLP', GDIN%FHR
+      ID(1:25) = 0
+      ID(8)=130;ID(9)=102
+      DEC=-0.1
+      CALL GRIBIT(ID,RITEHD,SLP,GDIN,IUNIT,DEC)
+      print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+
+! SST
+      print*, 'Output SST', GDIN%FHR
+      ID(1:25) = 0
+      ID(8)=11;ID(9)=1
+      DEC=-3.0
+      CALL GRIBIT(ID,RITEHD,SST,GDIN,IUNIT,DEC)
+      print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
 
       ENDIF
 
