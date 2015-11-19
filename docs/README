@@ -790,3 +790,18 @@ Sept 2015 -  smartinit.v3.4.4
 
 	ush/dng_awp.sh
 
+Oct 2015 -  smartinit.v3.5.0
+
+* Added modulefiles and build_smartinit.scr to meet NCO requirement
+	build_smartinit.scr
+	modulefiles
+
+Nov 2015 - smartinit.v3.5.0
+
+* Added membrane SLP (MSLET) and SST (Surface Temp) to the smartinit output.  SLP and SST are currently not in the OPS *bsmart* 
+  files, so need to grab them from the OPS *bgdawp* files.
+	build_smartinit.scr
+	modulefiles
+
+* Changed all copygb to wgrib2
+
