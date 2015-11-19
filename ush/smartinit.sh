@@ -352,7 +352,9 @@ for fhr in $hours; do
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
 ceilmdl=bgdawp
+slpmdl=bgdawp
 case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
+case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
 
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
@@ -371,6 +373,7 @@ case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
           ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
+          slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
         fi
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
@@ -380,6 +383,11 @@ if [ $grib = 1 ];then
         wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
         cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
         mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
+     fi
+     if [ -e $slp_file ];then
+        wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+        cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
+        mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
      fi
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
@@ -416,6 +424,7 @@ fi;;
 # End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
             ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
+            slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
           fi
         fi;;
@@ -427,6 +436,11 @@ if [ $grib = 1 ];then
   wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
   cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
   mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
+  fi
+  if [ -e $slp_file ];then
+     wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+     cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
+     mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
   fi
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 fi
