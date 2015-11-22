@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------
-      subroutine vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
+      subroutine vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,KM,gdin)
 !----------------------------------------------------------------------
 
 ! --- FROM CALMET   Version: 5.8        Level: 050328                 ADJUST
@@ -65,7 +65,18 @@
       do j=2,ny-1
       do i=2,nx-1
        if(validpt(i,j)) then
-         HBAR=HGHT(I,J,1)
+         do k=1,km
+           if(hght(i,j,k) .ge. zsfc(i,j))then
+!          if(pmid(i,j,k) .eq. psfc(i,j))then
+!          print*,'i,j,k,hght,zsfc,pmid,psfc=',i,j,k,hght(i,j,k),zsfc(i,j),pmid(i,j,k),psfc(i,j)
+!          endif
+           goto 777
+           endif
+         enddo
+           
+! Can't use 1 - 1000 mb could be underground [AMG]
+!        HBAR=HGHT(I,J,1)
+777      HBAR=HGHT(I,J,K)
          if (HBAR .LT. 1)HBAR=1.0
          FX=DXI/HBAR
          FY=DYI/HBAR

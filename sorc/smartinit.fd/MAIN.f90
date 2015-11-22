@@ -17,6 +17,7 @@
 ! PROGRAM HISTORY LOG:
 !   07-08-06  G MANIKIN  - COMPLETED ADAPTING CODE TO NAM 
 !   12-11-30  J McQueen  - Converted to f90, unified for different domains
+!   15-10-    A Gibbs - added reanalysis option with NARR
 !========================================================================
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
       INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC
@@ -47,7 +48,7 @@
 
 !  USED in MAIN only
    REAL,    ALLOCATABLE :: DIRTRANS(:,:),MGTRANS(:,:),LAL(:,:),MIXHGT(:,:)
-   REAL,    ALLOCATABLE :: TEMP1(:,:),TEMP2(:,:)
+   REAL,    ALLOCATABLE :: TEMP1(:,:),TEMP2(:,:),DELWIND(:,:)
    INTEGER, ALLOCATABLE :: HAINES(:,:),HLVL(:,:)
 
    LOGICAL, ALLOCATABLE :: VALIDPT(:,:)
@@ -58,7 +59,7 @@
     INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
 !-----------------------------------------------------------------------------------------
     INTERFACE
-    SUBROUTINE GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+    SUBROUTINE GETGRIBP(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
     P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
     S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT)
     use grddef
@@ -85,7 +86,7 @@
    REAL,    INTENT(INOUT) :: S6REF01(:,:),S6REF10(:,:),S6REF50(:,:)
    REAL,    INTENT(INOUT) :: S12REF01(:,:),S12REF10(:,:),S12REF50(:,:)
    LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
-   END SUBROUTINE getgrib
+   END SUBROUTINE getgribp
 !--------------------------------------------------------------------------------------
    SUBROUTINE SKYCVR(SKY,CFR,GDIN)
         use grddef
@@ -104,10 +105,10 @@
         LOGICAL, INTENT(IN)    :: VALIDPT(:,:)
    END SUBROUTINE snowfall
 
-   SUBROUTINE MKPOP(PBLMARK,RH,BLI,PCP01,PCP10,PXCP01,PXCP10,QPF,POP,GDIN,IAHR,VALIDPT)
+   SUBROUTINE MKPOP(PBLMARK,RH,BLI,PCP01,PCP10,PXCP01,PXCP10,QPF,POP,GDIN,IAHR,VALIDPT,PMID,PSFC)
         use grddef
         TYPE (GINFO), INTENT(IN) :: GDIN
-        REAL,    INTENT(IN)    :: PBLMARK(:,:), RH(:,:,:),BLI(:,:),QPF(:,:)
+        REAL,    INTENT(IN)    :: PBLMARK(:,:), RH(:,:,:),BLI(:,:),QPF(:,:),PMID(:,:,:),PSFC(:,:)
         REAL,    INTENT(INOUT) :: PCP01(:,:),PCP10(:,:),PXCP01(:,:),PXCP10(:,:)
         REAL,    INTENT(OUT)   :: POP(:,:)
         REAL,    ALLOCATABLE   :: TMPPCP(:,:)
@@ -167,7 +168,7 @@
       logical ladjland,lconus,lnest,lhiresw,lvegtype
 
  INTERFACE
-    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
+    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,LM,gdin)
     use constants
     use grddef
     use aset2d
@@ -259,6 +260,20 @@
       print *, 'LNEST ',LNEST, ' INPUT FILE FREQ ',INHRFRQ,' HRS'
       print *, 'CORE ', trim(CORE), 'LCYCON ', LCYCON
 
+! specific grid points to print for debugging
+      if (REGION .eq. 'CS2P')then
+        iprt1=649; jprt1=694 ! highest elevation on model grid
+        iprt2=687; jprt2=750 ! highest elevation on topo ndfd grid
+! topo .le. model terrain (zs)
+!       iprt3=1583;jprt3=52 ! k=1 and zs > topo
+        iprt3=2058;jprt3=1126 ! k=1 and zs > topo
+! iprt and jprt ! topo = zs
+!       iprt4=2004; jprt4=35 ! k=1 and zs < topo
+        iprt4=100; jprt4=1000 ! k=1 and zs < topo
+        iprt5=683; jprt5=1 ! zs and topo differ by more than 100 m
+        iprt6=307; jprt6=652 ! topo is negative (-77)
+      endif
+
       FHR3=FHR-3
       FHR6=FHR-6
       FHR12=FHR-12
@@ -292,6 +307,7 @@
     if (lnest) then   
       GDIN%KMAX=40
       if (trim(CORE).eq.'GFS') GDIN%KMAX=64
+      if (trim(core) .eq. 'NARR') GDIN%KMAX=29 ! NARR
     else
       GDIN%KMAX=60       ! HARDWIRE MAXLEVs hybrid level files
       if (.not. LHR3) GDIN%KMAX=35  ! non-nests inbetween hrs after 54/60 hrs
@@ -304,6 +320,7 @@
    ALLOCATE (PSFC(IM,JM),STAT=kret)
    ALLOCATE (ISNOW(IM,JM),IIP(IM,JM),IZR(IM,JM),IRAIN(IM,JM),STAT=kret)
    ALLOCATE (WETFRZ(IM,JM),VIS(IM,JM),T2(IM,JM),Q2(IM,JM),STAT=kret)
+   ALLOCATE (HPBL(IM,JM),STAT=kret)
    ALLOCATE (D2(IM,JM),U10(IM,JM),V10(IM,JM),BLI(IM,JM),STAT=kret)
    ALLOCATE (VEG(IM,JM),VEG_NDFD(IM,JM),STAT=kret)
    ALLOCATE (P03M(IM,JM),SN03(IM,JM),STAT=kret)
@@ -314,6 +331,8 @@
    ALLOCATE (UWND(IM,JM,KMAX),VWND(IM,JM,KMAX),STAT=kret)
    ALLOCATE (CFR(IM,JM,KMAX),CWR(IM,JM),STAT=kret)
    ALLOCATE (T950(IM,JM),T850(IM,JM),T700(IM,JM),T500(IM,JM),STAT=kret)
+   ALLOCATE (T30(IM,JM),T60(IM,JM),T90(IM,JM),T120(IM,JM),STAT=kret)
+   ALLOCATE (T150(IM,JM),T180(IM,JM),STAT=kret)
    ALLOCATE (RH850(IM,JM),RH700(IM,JM),STAT=kret)
    ALLOCATE (GUST(IM,JM),REFC(IM,JM),STAT=kret)
    ALLOCATE (P3CP01(IM,JM),P3CP10(IM,JM),P3CP50(IM,JM),STAT=kret)
@@ -326,9 +345,14 @@
    if(lnest) ALLOCATE (LCLD(IM,JM),MCLD(IM,JM),HCLD(IM,JM),TCLD(IM,JM),STAT=kret)
 
     RH=0.
-    CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
-    P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
-    P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
+!   CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+!   P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
+!   P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
+
+!     NARR on pressure levels
+      CALL GETGRIBP(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
+      P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
+      P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
 
 !!! Reset VEG here (Matt Pyle, 1/14)
         print *,'VEG ',minval(veg),maxval(veg)
@@ -343,7 +367,7 @@
 
 !   Initialize varbs to spval (for nests)
     where (.not. validpt)
-      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;
+      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;HPBL=SPVAL
       P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL
     endwhere
 
@@ -355,20 +379,93 @@
        ALLOCATE (DOWNQ(IM,JM),TOPO(IM,JM),STAT=kret)
        ALLOCATE (DOWNP(IM,JM),STAT=kret)
        ALLOCATE (WGUST(IM,JM),PBLMARK(IM,JM),STAT=kret)
-       ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),STAT=kret)
+       ALLOCATE (TEMP1(IM,JM),TEMP2(IM,JM),DELWIND(IM,JM),STAT=kret)
 
        CALL NDFDgrid(VEG,DOWNT,DOWNDEW,DOWNU,DOWNV,DOWNQ,DOWNP,TOPO,VEG_NDFD,gdin,VALIDPT)
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
+!      Based on CALGUST.f in the NCEP Post
        if (.not.lhiresw) then
          IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
-           WGUST=SPVAL;TEMP1=SPVAL
+           WGUST=SPVAL;TEMP1=SPVAL;TEMP2=SPVAL;DELWIND=SPVAL
+! Downscaled 2 meter winds
            where(validpt)
              TEMP1=SQRT(DOWNU*DOWNU+DOWNV*DOWNV)
-             WGUST=MAX(GUST,TEMP1)
            endwhere
+           km=0
+! Find 1st pressure level above PBL height
+           do j=1,jm
+           do i=1,im
+           do k=1,kmax
+! Must add surface height back in - UPP removes it.
+             pblht=hpbl(i,j)+zsfc(i,j)
+             if(pblht .lt. hght(i,j,k))goto 120
+           enddo
+120    continue
+           if(k.eq.kmax .or. k.eq.kmax-1)then
+           print*,'stopping... PBL height is at ',pmid(i,j,k),' mb, k=',k
+           stop
+           endif
+           km=max(k,km)
+           if(validpt(i,j))then
+!            zfrac=(pblht-hght(i,j,km1)/g0_p)/(hght(i,j,kp1)/g0_p-hght(i,j,km1)/g0_p)
+! PBL Height is at 1000 mb; must use surface values for the bottom value
+             if(k.eq.1)then
+!            print*,'i,j,zsfc,topo,hght(i,j,k)=',i,j,zsfc(i,j),topo(i,j),hght(i,j,k)
+!            zfrac=(pblht-topo(i,j))/(hght(i,j,k)-topo(i,j))
+             zfrac=(pblht-zsfc(i,j))/(hght(i,j,k)-zsfc(i,j))
+             upbl=downu(i,j)+zfrac*(uwnd(i,j,k)-downu(i,j))
+             vpbl=downv(i,j)+zfrac*(vwnd(i,j,k)-downv(i,j))
+             if(i.eq.194.and.j.eq.361)then
+             print*,'i,j,zsfc,topo,hght(i,j,k),psfc=',i,j,zsfc(i,j),topo(i,j),hght(i,j,k),psfc(i,j)
+             print*,'k,upbl,downu,zfrac,uwnd=',k,upbl,downu(i,j),zfrac,uwnd(i,j,k)
+             print*,'k,vpbl,downv,zfrac,uwnd=',k,vpbl,downv(i,j),zfrac,vwnd(i,j,k)
+             endif
+             else
+!            print*,'i,j,hght(i,j,k),hght(i,j,k-1)=',i,j,hght(i,j,k),hght(i,j,k-1)
+             zfrac=(pblht-hght(i,j,k-1))/(hght(i,j,k)-hght(i,j,k-1))
+             upbl=uwnd(i,j,k-1)+zfrac*(uwnd(i,j,k)-uwnd(i,j,k-1))
+             vpbl=vwnd(i,j,k-1)+zfrac*(vwnd(i,j,k)-vwnd(i,j,k-1))
+             if(i.eq.194.and.j.eq.361)then
+             print*,'i,j,hght(i,j,k),hght(i,j,k-1)=',i,j,hght(i,j,k),hght(i,j,k-1)
+             print*,'k,upbl,downu,zfrac,uwnd=',k,upbl,downu(i,j),zfrac,uwnd(i,j,k)
+             print*,'k,vpbl,downv,zfrac,uwnd=',k,vpbl,downv(i,j),zfrac,vwnd(i,j,k)
+             endif
+             endif
+             TEMP2(i,j)=SQRT(UWND(i,j,k)*UWND(i,j,k)+VWND(i,j,k)*VWND(i,j,k))
+             DELWIND(i,j)=TEMP2(i,j)-TEMP1(i,j)
+             DELWIND(i,j)=DELWIND(i,j)*(1-AMIN1(0.5,pblht/2000.))
+!            WGUST=MAX(GUST,TEMP1)
+             WGUST(i,j)=TEMP1(i,j)+DELWIND(i,j)
+!            print*,'i,j,k,hpbl,pblht,wgust=',i,j,k,hpbl(i,j),pblht,wgust(i,j)
+             TEMP2(i,j)=SQRT(upbl*upbl+vpbl*vpbl)
+             DELWIND(i,j)=TEMP2(i,j)-TEMP1(i,j)
+             DELWIND(i,j)=DELWIND(i,j)*(1-AMIN1(0.5,pblht/2000.))
+!            WGUST=MAX(GUST,TEMP1)
+             WGUST(i,j)=TEMP1(i,j)+DELWIND(i,j)
+!            print*,'i,j,wgust=',i,j,k,wgust(i,j)
+!            if(temp1(i,j) .gt. wgust(i,j))print*,'temp1 > wgust=',i,j,temp1(i,j),wgust(i,j)
+             if(wgust(i,j) .gt. 100)then
+                print*,'i,j,high wgust,upbl,vpbl,zfrc=',i,j,wgust(i,j),upbl,vpbl,zfrac
+                print*,'temp2,delwind,temp1=',temp2(i,j),delwind(i,j),temp1(i,j)
+!               print*,'i,j,k,hght(i,j,k),hght(i,j,k-1)=',i,j,k,hght(i,j,k),hght(i,j,k-1)
+                print*,'i,j,k,hght(i,j,k)=',i,j,k,hght(i,j,k)
+                print*,'i,j,zsfc,topo,hpbl(i,j)=',i,j,zsfc(i,j),topo(i,j),hpbl(i,j)
+!               print*,'i,j,k,uwnd(i,j,k),uwnd(i,j,k-1)=',i,j,k,uwnd(i,j,k),uwnd(i,j,k-1)
+!               print*,'i,j,k,vwnd(i,j,k),vwnd(i,j,k-1)=',i,j,k,vwnd(i,j,k),vwnd(i,j,k-1)
+                print*,'i,j,k,uwnd(i,j,k),downu=',i,j,k,uwnd(i,j,k),downu(i,j)
+                print*,'i,j,k,vwnd(i,j,k),downv=',i,j,k,vwnd(i,j,k),downv(i,j)
+             endif
+           endif
+           enddo
+           enddo
+           print*,'maximum km=',km
+           WGUST=MAX(WGUST,TEMP1)
            WGUST=MIN(WGUST,SPVAL)
            print *, 'WGUST',minval(wgust),maxval(wgust)
+           print *, 'TEMP1',minval(temp1),maxval(temp1)
+           print *, 'TEMP2',minval(temp2),maxval(temp2)
+           print *, 'DELWIND',minval(delwind),maxval(delwind)
          ENDIF
        endif
 
@@ -412,6 +509,7 @@
          DEC=3.0 
          print *,'Output Wind Gust',FHR
          CALL GRIBIT(ID,RITEHD,WGUST,GDIN,70,DEC)
+         print *, 'WGUST',minval(wgust),maxval(wgust)
 
          ID(1:25) = 0
          ID(8)=1;ID(9)=1
@@ -440,7 +538,8 @@
 !??? do we need to check for validpt ????
          print *, 'Calculate PBL Levels',FHR
          ktop=kmax
-         if(lnest)ktop=35
+! Comment out as NARR only goes to 29 pressure levels
+!        if(lnest)ktop=35
          DO J=1,JM
          DO I=1,IM
            PBLMARK(I,J)=1
@@ -448,6 +547,30 @@
            DO L=ktop,1,-1
              IF(PMID(I,J,L).GT.TOP)THEN
                PBLMARK(I,J)=L
+        if(i.eq.iprt1 .and. j .eq.jprt1)then
+          print*,'highest elevation on model grid'
+          print*,'pblmark,psfc,top=',pblmark(i,j),psfc(i,j),top
+        endif
+        if(i.eq.iprt2 .and.  j.eq.jprt2)then
+          print*,'highest elevation on topo grid'
+          print*,'pblmark,psfc,top=',pblmark(i,j),psfc(i,j),top
+        endif
+        if(i.eq.iprt3 .and.  j.eq.jprt3)then
+          print*,'k=1 and topo < zs'
+          print*,'pblmark,psfc,top=',pblmark(i,j),psfc(i,j),top
+        endif
+        if(i.eq.iprt4 .and.  j.eq.jprt4)then
+          print*,'k=1 and topo > zs'
+          print*,'pblmark,psfc,top=',pblmark(i,j),psfc(i,j),top
+        endif
+        if(i.eq.iprt5 .and.  j.eq.jprt5)then
+          print*,'zs and topo differ by more than 100 m'
+          print*,'pblmark,psfc,top=',pblmark(i,j),psfc(i,j),top
+        endif
+        if(i.eq.iprt6 .and.  j.eq.jprt6)then
+          print*,'topo is negative (-77)'
+          print*,'pblmark,psfc,top=',pblmark(i,j),psfc(i,j),top
+        endif
                GOTO 60
              ENDIF 
            ENDDO
@@ -464,13 +587,18 @@
            if (validpt(I,J)) then
               DO L=1,ktop
                 RH(I,J,L)=Q(I,J,L)/CalcQ(PMID(I,J,L),T(I,J,L))
+! Specify RH850 and RH700 since they are needed. [AMG]
+                if(PMID(i,j,l).eq.850.00)RH850(i,j)=RH(i,j,l)
+                if(PMID(i,j,l).eq.700.00)RH700(i,j)=RH(i,j,l)
               ENDDO
            endif
         ENDDO
         ENDDO
 
 !  skip precip fields if FHR=0
+!  skip precip fields if doing reanalysis (NARR)
         IF (FHR .EQ. 0) GOTO 444
+!       IF (core .EQ. 'NARR') GOTO 444
 !         CALL OUTPRCP
 !--------------------------------------------------------------------------
 ! QPF - simply take model QPF and change units to inches
@@ -495,7 +623,7 @@
          POP3=SPVAL;POP6=SPVAL;POP12=SPVAL
 
 ! 3-hr POP
-         CALL MKPOP(PBLMARK,RH,BLI,P3CP01,P3CP10,P12CP01,P12CP10,QPF3,POP3,GDIN,3,VALIDPT)
+         CALL MKPOP(PBLMARK,RH,BLI,P3CP01,P3CP10,P12CP01,P12CP10,QPF3,POP3,GDIN,3,VALIDPT,PMID,PSFC)
          CALL BOUND(POP3,0.,100.)
 
          ID(1:25) = 0
@@ -512,7 +640,7 @@
  
 ! 6-hr POP
         IF(MOD(FHR,6).EQ.0) THEN
-          CALL MKPOP(PBLMARK,RH,BLI,P6CP01,P6CP10,P12CP01,P12CP10,QPF6,POP6,GDIN,6,VALIDPT)
+          CALL MKPOP(PBLMARK,RH,BLI,P6CP01,P6CP10,P12CP01,P12CP10,QPF6,POP6,GDIN,6,VALIDPT,PMID,PSFC)
           WHERE(POP6.LT.POP3) POP6=POP3
           CALL BOUND(POP6,0.,100.)
 
@@ -537,7 +665,7 @@
 ! 12-hr POP
        IF (LHR12) THEN
          IF(LCYCON .OR. .NOT.LCYCON.AND.FHR.NE.6) THEN
-           CALL MKPOP(PBLMARK,RH,BLI,P12CP01,P12CP10,P12CP01,P12CP10,QPF12,POP12,GDIN,12,VALIDPT)
+           CALL MKPOP(PBLMARK,RH,BLI,P12CP01,P12CP10,P12CP01,P12CP10,QPF12,POP12,GDIN,12,VALIDPT,PMID,PSFC)
            WHERE (POP12.LT.POP6) POP12=POP6
            CALL BOUND(POP12,0.,100.)
 
@@ -574,17 +702,37 @@
          QPFMAX=0.60    ! QPF value where raw PoP would be 75%
          RHexcess=70.0  ! RH above this can add to PoP and below will subtract
          adjAmount=15.0 ! amount of adjustment allowed
+         if(core .eq. 'NARR')then
+         DO I = 1, IM
+         DO J = 1, JM
+           if(validpt(i,j)) then
+             do k=1,kmax
+               if(psfc(i,j) .ge. pmid(i,j,k))goto 10
+             enddo
+10           lmbl=int(pblmark(i,j))
+!JTM     Corrected  ERROR...Added *100 to compute rhavg 11/25/12
+             rhavg=100*SUM(rh(i,j,k:lmbl))/(lmbl-k+1)
+! No SREF
+!            tmpcwr=calcw(qpf3(i,j),lmbl,rhavg,qpfmax,RHexcess,adjAmount)
+!            CWR(I,J)=(TMPCWR+2*P3CP10(I,J))/3.
+             CWR(I,J)=calcw(qpf3(i,j),lmbl,rhavg,qpfmax,RHexcess,adjAmount)
+           endif
+         ENDDO
+         ENDDO
+         else
          DO I = 1, IM
          DO J = 1, JM
            if(validpt(i,j)) then
              lmbl=int(pblmark(i,j))
 !JTM     Corrected  ERROR...Added *100 to compute rhavg 11/25/12
-             rhavg=100*SUM(rh(i,j,1:lmbl))/lmbl
+             rhavg=100*SUM(rh(i,j,k:lmbl))/lmbl
              tmpcwr=calcw(qpf3(i,j),lmbl,rhavg,qpfmax,RHexcess,adjAmount)
              CWR(I,J)=(TMPCWR+2*P3CP10(I,J))/3.
            endif
          ENDDO
          ENDDO
+         endif ! Narr
+
 !????   nests and HI uses 25 for max limit ???       
          WHERE (validpt)
            WHERE (QPF3.GT. 0.10) CWR=AMAX1(CWR,25.)
@@ -658,6 +806,8 @@
         ENDIF
         DEALLOCATE (TEMP1,TEMP2,STAT=kret)
 
+         print *, 'Skycover',minval(sky),maxval(sky)
+
         IF (MOD(FHR,3).EQ.0 .AND. trim(CORE) .EQ. 'GFS' ) THEN
           ID(1:25) = 0
           ID(8)=71;ID(9)=1
@@ -670,12 +820,14 @@
           CALL GRIBIT(ID,RITEHD,SKY,GDIN,70,DEC)
         ENDIF
         IF (trim(CORE) .NE. 'GFS' ) THEN
+        IF (trim(CORE) .NE. 'NARR') THEN
           ID(1:25) = 0
           ID(2)=129
           ID(8)=212;ID(9)=200
           DEC=3.0
           print *, 'Output Reflectivity',FHR
           CALL GRIBIT(ID,RITEHD,REFC,GDIN,70,DEC)
+        ENDIF
         ENDIF
 
 !========================================================================
@@ -686,11 +838,13 @@
 !   field straight out of the NAM. 
 !========================================================================
 
+      IF (trim(CORE) .NE. 'NARR') THEN
       ID(1:25) = 0
       ID(8)=7;ID(9)=245
       DEC=3.0
       print *, 'Output Snow Level',FHR
       CALL GRIBIT(ID,RITEHD,WETFRZ,GDIN,70,DEC)
+      ENDIF
 
 ! VISIBILITY
       print *, 'Output Visibility',FHR
@@ -710,14 +864,25 @@
       DO J=1,JM
        DO I=1,IM
         if(validpt(i,j)) then
-        MGD=SQRT(DOWNU(I,J)*DOWNU(I,J)+DOWNV(I,J)*DOWNV(I,J)) 
+           if(core .eq. 'NARR')then
+             do k=1,kmax
+               if(psfc(i,j) .ge. pmid(i,j,k))goto 20
+             enddo
+           else
+             k=1
+           endif
+20      MGD=SQRT(DOWNU(I,J)*DOWNU(I,J)+DOWNV(I,J)*DOWNV(I,J)) 
         UTOT=0.
         VTOT=0.
         LMBL=INT(PBLMARK(I,J))
-         UTOT=SUM(UWND(I,J,1:LMBL))
-         VTOT=SUM(VWND(I,J,1:LMBL))
-        UTRANS=UTOT/LMBL
-        VTRANS=VTOT/LMBL
+!        UTOT=SUM(UWND(I,J,1:LMBL))
+         UTOT=SUM(UWND(I,J,k:LMBL))
+!        VTOT=SUM(VWND(I,J,1:LMBL))
+         VTOT=SUM(VWND(I,J,k:LMBL))
+!       UTRANS=UTOT/LMBL
+!       VTRANS=VTOT/LMBL
+        UTRANS=UTOT/(LMBL-k+1)
+        VTRANS=VTOT/(LMBL-k+1)
         MGTRANS(I,J)=SQRT(UTRANS*UTRANS+VTRANS*VTRANS) 
         IF (MGTRANS(I,J).EQ.0.) THEN
          DIRTRANS(I,J)=0.
@@ -750,9 +915,18 @@
       DO J=1,JM
       DO I=1,IM
         if(validpt(i,j)) then
-        BLH=INT(PBLMARK(I,J))
-        RHSUM=SUM(RH(I,J,1:BLH))
-        LEVS=BLH+1
+           if(core .eq. 'NARR')then
+             do k=1,kmax
+               if(psfc(i,j) .ge. pmid(i,j,k))goto 30
+             enddo
+           else
+             k=1
+           endif
+30      BLH=INT(PBLMARK(I,J))
+!       RHSUM=SUM(RH(I,J,1:BLH))
+        RHSUM=SUM(RH(I,J,k:BLH))
+!       LEVS=BLH+1
+        LEVS=BLH-k+2
         BLR(I,J)=(RHSUM/LEVS)*100.
         endif
       ENDDO
@@ -778,19 +952,30 @@
       ALLOCATE (MIXHGT(IM,JM),STAT=kret)
       MIXHGT=SPVAL
       ktop=kmax
-      if(lnest)ktop=40   
+!     if(lnest)ktop=40   
       DO J=1,JM
       DO I=1,IM
        if(validpt(i,j))then
        firetheta=((P1000/PSFC(I,J))**CAPA)*(T2(I,J)+2.0)
        DO L=2,ktop
+         if(pmid(i,j,l) .lt. psfc(i,j).and. hght(i,j,l).gt. zsfc(i,j))then
          theta=((P1000/PMID(I,J,L))**CAPA)*(T(I,J,L))
          IF (theta.gt.firetheta) THEN
            MIXHGT(I,J)=HGHT(I,J,L)-ZSFC(I,J)
+             pblht=hpbl(i,j)+zsfc(i,j)
+!          if(mixhgt(i,j).le.1..or.(mixhgt(i,j)-hpbl(i,j)).gt.1000.)then
+           if((mixhgt(i,j)-hpbl(i,j)).lt.10.)then
+              print*,'i,j,l,mixhgt,hgth,zsfc=',i,j,l,mixhgt(i,j),hght(i,j,l),zsfc(i,j)
+              print*,'theta,pmid,p1000,capa,t=',theta,pmid(i,j,l),p1000,capa,t(i,j,l)
+              print*,'firetheta,psfc,t2=',firetheta,psfc(i,j),t2(i,j)
+              print*,'pblht,hpbl,zsfc=',pblht,hpbl(i,j),zsfc(i,j)
+           endif
            GOTO 321
+         ENDIF
          ENDIF
        ENDDO
        MIXHGT(I,J)=HGHT(I,J,ktop)+300.   ! 07/13: Fix to ensure mixhgt definition
+       print*,'i,j,mixhgt at ktop=',i,j,mixhgt(i,j),hght(i,j,ktop)
        endif
  321  continue
       ENDDO
@@ -823,7 +1008,8 @@
 
 !----------------Make into subroutine lal
        RH1TOT=0.; RH1SUM=0.; RH2TOT=0.;  RH2SUM=0.
-       DO L=1,40
+!      DO L=1,40
+       DO L=1,29
         IF(PSFC(I,J)-PMID(I,J,L).LT.3000.) THEN
           RH1TOT=RH1TOT+RH(I,J,L)
           RH1SUM=RH1SUM+1.
@@ -1210,7 +1396,7 @@
         RETURN 
         END SUBROUTINE snowfall
 
-        SUBROUTINE MKPOP(PBLMARK,RH,BLI,PCP01,PCP10,PXCP01,PXCP10,QPF,POP,GDIN,IAHR,VALIDPT)
+        SUBROUTINE MKPOP(PBLMARK,RH,BLI,PCP01,PCP10,PXCP01,PXCP10,QPF,POP,GDIN,IAHR,VALIDPT,PMID,PSFC)
         use grddef
 !-------------------------------------------------------------------------
 ! PoP - based strongly on QPF (since when model has one inch of precip the
@@ -1248,7 +1434,7 @@
 !--------------------------------------------------------------------------
 
         TYPE (GINFO), INTENT(IN) :: GDIN
-        REAL,    INTENT(IN)    :: PBLMARK(:,:), RH(:,:,:),BLI(:,:),QPF(:,:)
+        REAL,    INTENT(IN)    :: PBLMARK(:,:), RH(:,:,:),BLI(:,:),QPF(:,:),PMID(:,:,:),PSFC(:,:)
         REAL,    INTENT(INOUT) :: PCP01(:,:),PCP10(:,:),PXCP01(:,:),PXCP10(:,:)
         REAL,    INTENT(OUT)   :: POP(:,:)
         REAL,    ALLOCATABLE   :: TMPPCP(:,:)
@@ -1264,10 +1450,31 @@
 !  due to interpolation from coarse to fine grid, the 3-hr pop can end up
 !  higher than the 12-hr pop at the same grid point.  Even it out if this occurs.
 !-------------------------------------------------------------------------------- 
-      IM=GDIN%imax;JM=GDIN%jmax;IFHR=GDIN%FHR
+      IM=GDIN%imax;JM=GDIN%jmax;IFHR=GDIN%FHR;KM=GDIN%kmax
       IFHR6=IFHR-6
 
       print *,'Compute ',IAHR,' HR BUCKET    FHR=',IFHR 
+
+      if (gdin%core .eq. 'NARR')then
+! use original smartinit POP calculation
+      DO I = 1, IM
+      DO J = 1, JM
+       if(validpt(i,j)) then
+       do k=1,kmax
+         if(psfc(i,j) .ge. pmid(i,j,k))goto 10
+       enddo
+10      LMBL=INT(PBLMARK(I,J))
+!       rhavg=100*SUM(rh(i,j,k:lmbl))/lmbl
+        rhavg=100*SUM(rh(i,j,k:lmbl))/(lmbl-k+1)
+        POP(i,j)=calcw(qpf(i,j),lmbl,rhavg,qpfmax,rhexcess,adjAmount)
+        if(qpf(i,j) .gt. 0.)then
+        print *,'POP,QPF,lmbl,k,rhavg,psfc,pmid ', IAHR,POP(i,j),QPF(i,j),lmbl,k,rhavg,psfc(i,j),pmid(i,j,k)
+        endif
+       endif
+      enddo
+      enddo
+
+      else
 
       IF (IAHR.EQ.3 .AND. IFHR .GT. 11) THEN
         ALLOCATE(TMPPCP(IM,JM))
@@ -1342,12 +1549,27 @@
          ENDIF
 
          endif  !alaska domain check
+!     if(pop(i,j) .gt. 0.)then
+      if(qpf(i,j) .gt. 0.)then
+      print *,'POP,POPTMP,QPF,PCP01,PCP10,BLI ', IAHR,POP(i,j),POPTMP,QPF(i,j),PCP01(i,j), &
+               PCP10(i,j),BLI(i,j)
+      endif
         endif  !validpt check
        ENDDO
       ENDDO
 
-      print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(90,65), QPF(90,65),PCP01(90,65), &
-               PCP10(90,65),BLI(90,65)
+      endif ! if core .eq. NARR
+
+!     do j=1,jm
+!     do i=1,im
+!     if(pop(i,j) .gt. 0.)then
+!     print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(90,65), QPF(90,65),PCP01(90,65), &
+!              PCP10(90,65),BLI(90,65)
+!     print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(i,j), QPF(i,j),PCP01(i,j), &
+!              PCP10(i,j),BLI(i,j)
+!     endif
+!     enddo
+!     enddo
       RETURN 
       END SUBROUTINE mkpop
 

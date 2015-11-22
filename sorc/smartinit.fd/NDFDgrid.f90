@@ -34,7 +34,7 @@
       character cvadj*1
 
  INTERFACE
-    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
+    SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,LM,gdin)
     use constants
     use grddef
     use aset2d
@@ -73,7 +73,8 @@
       print *, 'CVADJ for diagnostic wind adjust: ',CVADJ, '   friction adj: ',ispdsfc
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
-      iprt=int(im/2);jprt=int(jm/2)
+      iprt=int(im/2);jprt=int(jm/2);kprt=0;lprt=0;kkprt=0
+      print*,'iprt,jprt=',iprt,jprt
       ITOT=IM*JM
       core=gdin%core  ! For hiresw runs, nmmb core treated differently
       lhiresw=gdin%lhiresw  ! For hiresw runs, nmmb core treated differently
@@ -82,6 +83,24 @@
       lconus=.false.
       lvegtype=.false.
       lnest=gdin%lnest
+
+! specific grid points to print for debugging
+      if (region .eq. 'CS2P')then
+        iprt1=649; jprt1=694 ! highest elevation on model grid
+        iprt2=687; jprt2=750 ! highest elevation on topo ndfd grid
+! topo .le. model terrain (zs)
+!       iprt3=1583;jprt3=52 ! k=1 and zs > topo
+        iprt3=2058;jprt3=1126 ! k=1 and zs > topo
+! iprt and jprt ! topo = zs
+!       iprt4=2004; jprt4=35 ! k=1 and zs < topo
+        iprt4=100; jprt4=1000 ! k=1 and zs < topo
+        iprt5=683; jprt5=1 ! zs and topo differ by more than 100 m
+        iprt6=307; jprt6=652 ! topo is negative (-77)
+      endif 
+
+! For reanalysis, lnest = True
+
+      print*,'core, region,lnest=', core, region, lnest
 
       ALLOCATE (EXN(IM,JM),ROUGH_MOD(IM,JM),STAT=kret)
       ALLOCATE (TTMP(IM,JM),DTMP(IM,JM),STAT=kret)
@@ -183,6 +202,33 @@
 !C ****************************************************************
 ! -- Now let's start reducing to NDFD topo elevation.
 !C ****************************************************************
+      zmax=0
+      tmax=0
+! Find highest point on the grid [AMG]
+      do j=1,jm
+      do i=1,im
+! model
+      if(zsfc(i,j) .lt. 0.)print*, 'i,j,zsfc=',i,j,zsfc(i,j)
+      if(zsfc(i,j).gt.zmax)then
+      zmax=zsfc(i,j)
+      isav=i
+      jsav=j
+      endif
+! NDFD topo
+      if(topo_ndfd(i,j) .lt. 0.)then
+         print*, 'i,j,topo_ndfd,zsfc=',i,j,topo_ndfd(i,j),zsfc(i,j)
+      endif
+      if(topo_ndfd(i,j).gt.tmax)then
+      tmax=topo_ndfd(i,j)
+      itsav=i
+      jtsav=j
+      endif
+      enddo
+      enddo
+      print*,'zmax,isav,jsav=',zmax,isav,jsav
+      print*,'topo at zmax=',topo_ndfd(isav,jsav)
+      print*,'tmax,itsav,jtsav=',tmax,itsav,jtsav
+      print*,'model terrain at tmax=',zsfc(itsav,jtsav)
       where (zsfc .lt. 0.) zsfc=0.0
       tnew=spval;qnew=spval
       dewnew=spval;unew=spval;vnew=spval
@@ -191,6 +237,7 @@
       do 120 j=1,jm
       do 120 i=1,im
         if (.not. validpt(i,j)) goto 120
+! This does not appear to be used [AMG]
         exn(i,j) = cpd_p*(psfc(i,j)/P1000)**rovcp_p
 ! ---   z = surface elevation
         zs = zsfc(i,j)
@@ -200,22 +247,177 @@
         td_orig=d2(i,j)
 
 ! --- dewpoint depression
+! --- at original sfc [AMG]
         tddep = max(0.,t2(i,j) - td_orig )
-        qv= q(i,j,1)
+! I don't think this is actually used at this point; but still setting to q2
+! because q(i,j,1) is q at 1000 mb and could be underground at some gridpoints [AMG]
+!       qv= q(i,j,1)
+        qv= q2(i,j)
         QQ = QV/(1.+QV)
-        tp1=T(I,J,1)
+! Need to reset as tp1 could be underground - tp1 is temp at 1000 mb. [AMG]
+!       tp1=T(I,J,1)
+! T30 is temperature at constant BL pressure layer of 0-30 mb (about 15 mb above ground) [AMG]
+        tp1=T30(I,J)
           
 ! --- Base Td on 2m q
         qv = qq/(1.-qq)
 
-! ---   get values at level 6 for lapse rate calculations
-        QQ = Q(I,J,6)/(1.+Q(i,j,6))
+! ---   get values at level 6 for lapse rate calculations - NAM Nest
+! ---   get values at level 3 for lapse rate calculations - NARR (pressure level data)
+!       QQ = Q(I,J,6)/(1.+Q(i,j,6))
+!       QQ = Q30(I,J)/(1.+Q30(i,j))
 
-        exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
-        T6=T(I,J,6)
-        Z1=HGHT(I,J,1)
-        Z6=HGHT(I,J,6)
-        GAM = (TP1-T6)/(Z6-Z1)
+!       exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
+!       T6=T(I,J,6)
+!       Z1=HGHT(I,J,1)
+!       Z6=HGHT(I,J,6)
+!       GAM = (TP1-T6)/(Z6-Z1)
+! Subtract 165 mb from psfc to get midpoint of boundary layer between 180-150 mb [AMG]
+! Again, I don't think exn is actually used [AMG]
+        p165=psfc(i,j)-16500.
+        exn(i,j) = cpd_p*(p165/P1000)**rovcp_p
+        T6=T180(I,J)
+! No height level for boundary layer; calculate height at boundary layer  pressures
+        p15=psfc(i,j)-1500. ! 15 mb is between 30 and 0 mb above ground
+        do k=1,lm
+          if(p165 .gt. pmid(i,j,k))goto 165
+        enddo
+165       if(k.eq.1)then
+            print*,'k=1 at p165,i,j=',k,i,j
+            tmn = (t6 + t(i,j,k)) * 0.5 
+            h165 = hght(i,j,k) + (RD_P*tmn/G0_P) * log(pmid(i,j,k)/p165)
+!         print*,'i,j,k,t6,p165,tmn,t,pmid,hght=',i,j,k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k=1 @ psfc-165 mb'
+          print*,'i,j,k,h165,psfc,t,pmid,hght=',i,j,k,h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+          else
+            tmn = (t6 + t(i,j,k-1)) * 0.5 
+            h165 = hght(i,j,k-1) + (RD_P*tmn/G0_P) * log(pmid(i,j,k-1)/p165)
+        if(i.eq.iprt1 .and. j .eq.jprt1)then
+          print*,'highest elevation on model grid'
+          print*,'k,t6,p165,tmn,t,pmid,hght=',k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h165,psfc,t,pmid,hght=',h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt2 .and.  j.eq.jprt2)then
+          print*,'highest elevation on topo grid'
+          print*,'k,t6,p165,tmn,t,pmid,hght=',k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h165,psfc,t,pmid,hght=',h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt3 .and.  j.eq.jprt3)then
+          print*,'k=1 and topo < zs'
+          print*,'k,t6,p165,tmn,t,pmid,hght=',k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h165,psfc,t,pmid,hght=',h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt4 .and.  j.eq.jprt4)then
+          print*,'k=1 and topo > zs'
+          print*,'k,t6,p165,tmn,t,pmid,hght=',k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h165,psfc,t,pmid,hght=',h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt5 .and.  j.eq.jprt5)then
+          print*,'zs and topo differ by more than 100 m'
+          print*,'k,t6,p165,tmn,t,pmid,hght=',k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h165,psfc,t,pmid,hght=',h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt6 .and.  j.eq.jprt6)then
+          print*,'topo is negative (-77)'
+          print*,'k,t6,p165,tmn,t,pmid,hght=',k,t6,p165,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h165,psfc,t,pmid,hght=',h165,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+          endif
+        do k=1,lm
+          if(p15 .gt. pmid(i,j,k))goto 166
+        enddo
+166       if(k.eq.1)then
+            tmn = (tp1 + t(i,j,k)) * 0.5 
+            h15 = hght(i,j,k) + (RD_P*tmn/G0_P) * log(pmid(i,j,k)/p15)
+!       if(i.eq.2133 .and.  j.eq.687)then
+!       if(zs .gt. topo_ndfd(i,j))then
+!       if((zs-topo_ndfd(i,j)) .gt. 100.)then
+!         print*,'greater i,j,k,tp1,p15,tmn,t,pmid,hght=',i,j,k,tp1,p15,tmn,t(i,j,k),pmid(i,j,k),hght(i,j,k)
+!         print*,'greater i,j,k,h15,psfc,t,pmid,hght=',i,j,k,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+!       endif
+!       if(zs .lt. topo_ndfd(i,j))then
+!       if((topo_ndfd(i,j)-zs) .gt. 100.)then
+!         print*,'less i,j,k,tp1,p15,tmn,t,pmid,hght=',i,j,k,tp1,p15,tmn,t(i,j,k),pmid(i,j,k),hght(i,j,k)
+!         print*,'less i,j,k,h15,psfc,t,pmid,hght=',i,j,k,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+!       endif
+        if(i.eq.iprt1 .and. j .eq.jprt1)then
+          print*,'highest elevation on model grid'
+!         print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k,tp1,p15,tmn,h15,psfc,t,pmid,hght=',k,tp1,p15,tmn,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt2 .and.  j.eq.jprt2)then
+          print*,'highest elevation on topo grid'
+!         print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k,tp1,p15,tmn,h15,psfc,t,pmid,hght=',k,tp1,p15,tmn,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt3 .and.  j.eq.jprt3)then
+          print*,'k=1 and topo < zs'
+!         print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k,tp1,p15,tmn,h15,psfc,t,pmid,hght=',k,tp1,p15,tmn,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt4 .and.  j.eq.jprt4)then
+          print*,'k=1 and topo > zs'
+!         print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k,tp1,p15,tmn,h15,psfc,t,pmid,hght=',k,tp1,p15,tmn,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt5 .and.  j.eq.jprt5)then
+          print*,'zs and topo differ by more than 100 m'
+          !rint*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k,tp1,p15,tmn,h15,psfc,t,pmid,hght=',k,tp1,p15,tmn,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt6 .and.  j.eq.jprt6)then
+          print*,'topo is negative (-77)'
+!         print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'k,tp1,p15,tmn,h15,psfc,t,pmid,hght=',k,tp1,p15,tmn,h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+          else
+            tmn = (tp1 + t(i,j,k-1)) * 0.5 
+            h15 = hght(i,j,k-1) + (RD_P*tmn/G0_P) * log(pmid(i,j,k-1)/p15)
+        if(i.eq.iprt1 .and. j.eq.jprt1)then
+          print*,'highest elevation on model grid'
+          print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h15,psfc,t,pmid,hght=',h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt2 .and.  j.eq.jprt2)then
+          print*,'highest elevation on topo grid'
+          print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h15,psfc,t,pmid,hght=',h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt3 .and.  j.eq.jprt3)then
+          print*,'k=1 and topo < zs'
+          print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h15,psfc,t,pmid,hght=',h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt4 .and.  j.eq.jprt4)then
+          print*,'k=1 and topo > zs'
+          print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h15,psfc,t,pmid,hght=',h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt5 .and.  j.eq.jprt5)then
+          print*,'zs and topo differ by more than 100 m'
+          print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h15,psfc,t,pmid,hght=',h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+        if(i.eq.iprt6 .and.  j.eq.jprt6)then
+          print*,'topo is negative (-77)'
+          print*,'k,tp1,p15,tmn,t,pmid,hght=',k,tp1,p15,tmn,t(i,j,k-1),pmid(i,j,k-1),hght(i,j,k-1)
+          print*,'h15,psfc,t,pmid,hght=',h15,psfc(i,j),t(i,j,k),pmid(i,j,k),hght(i,j,k)
+        endif
+          endif
+        GAM = (TP1-T6)/(-(p165-p15))
+        if(i.eq.iprt1 .and.  j.eq.jprt1)print*,'dtdp i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,p165,p15
+        if(i.eq.iprt2 .and.  j.eq.jprt2)print*,'dtdp i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,p165,p15
+        if(i.eq.iprt3 .and.  j.eq.jprt3)print*,'dtdp i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,p165,p15
+        if(i.eq.iprt4 .and.  j.eq.jprt4)print*,'dtdp i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,p165,p15
+        if(i.eq.iprt5 .and.  j.eq.jprt5)print*,'dtdp i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,p165,p15
+        if(i.eq.iprt6 .and.  j.eq.jprt6)print*,'dtdp i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,p165,p15
+        GAM = (TP1-T6)/(h165-h15)
+        if(i.eq.iprt1 .and.  j.eq.jprt1)print*,'dtdz i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,h165,h15
+        if(i.eq.iprt2 .and.  j.eq.jprt2)print*,'dtdz i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,h165,h15
+        if(i.eq.iprt3 .and.  j.eq.jprt3)print*,'dtdz i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,h165,h15
+        if(i.eq.iprt4 .and.  j.eq.jprt4)print*,'dtdz i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,h165,h15
+        if(i.eq.iprt5 .and.  j.eq.jprt5)print*,'dtdz i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,h165,h15
+        if(i.eq.iprt6 .and.  j.eq.jprt6)print*,'dtdz i,j,gam,tp1,t6,p165,p15=',i,j,gam,tp1,t6,h165,h15
 
 !============================================
         if (topo_ndfd(i,j).le.zs ) then
@@ -226,6 +428,12 @@
 ! -- again, use 2m T at NAM regular terrain from similarity
 !      theory for derivation of 2m T at topomini elevation
           tsfc = t2(i,j) + (zs-topo_ndfd(i,j))*gam
+        if(i.eq.iprt1 .and.  j.eq.jprt1)print*,'3i,j,gam,gamd,gami,tsfc,t2,td_orig=',i,j,gam,gamd,gami,tsfc,t2(i,j),td_orig
+        if(i.eq.iprt2 .and.  j.eq.jprt2)print*,'3i,j,gam,gamd,gami,tsfc,t2,td_orig=',i,j,gam,gamd,gami,tsfc,t2(i,j),td_orig
+        if(i.eq.iprt3 .and.  j.eq.jprt3)print*,'3i,j,gam,gamd,gami,tsfc,t2,td_orig=',i,j,gam,gamd,gami,tsfc,t2(i,j),td_orig
+        if(i.eq.iprt4 .and.  j.eq.jprt4)print*,'3i,j,gam,gamd,gami,tsfc,t2,td_orig=',i,j,gam,gamd,gami,tsfc,t2(i,j),td_orig
+        if(i.eq.iprt5 .and.  j.eq.jprt5)print*,'3i,j,gam,gamd,gami,tsfc,t2,td_orig=',i,j,gam,gamd,gami,tsfc,t2(i,j),td_orig
+        if(i.eq.iprt6 .and.  j.eq.jprt6)print*,'3i,j,gam,gamd,gami,tsfc,t2,td_orig=',i,j,gam,gamd,gami,tsfc,t2(i,j),td_orig
 
 !  Don't let reduced valley temps be
 !     any lower than NAM 2m temp minus 10K.
@@ -240,8 +448,17 @@
 
 ! --- temperature
           tnew(i,j) = tsfc
-          if (i.eq.iprt.and.j.eq.jprt)print *,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j), &
-          topo_ndfd(i,j),zs
+        if(i.eq.iprt1 .and.  j.eq.jprt1)print*,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+        if(i.eq.iprt2 .and.  j.eq.jprt2)print*,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+        if(i.eq.iprt3 .and.  j.eq.jprt3)print*,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+        if(i.eq.iprt4 .and.  j.eq.jprt4)print*,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+        if(i.eq.iprt5 .and.  j.eq.jprt5)print*,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+        if(i.eq.iprt6 .and.  j.eq.jprt6)print*,'NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+!         if (i.lt.iprt.and.j.lt.jprt.and.lprt.eq.0.and.topo_ndfd(i,j).lt.zs.and. (zs-topo_ndfd(i,j).gt.100.))then
+!         if (lprt.eq.0.and.topo_ndfd(i,j).lt.zs.and. (zs-topo_ndfd(i,j).gt.100.))then
+!           print *,'50NDFD < MDL topo ',i,j,validpt(i,j),tnew(i,j),t2(i,j),topo_ndfd(i,j),zs,psfc(i,j),pnew(i,j)
+!           lprt=1
+!         endif
 
 ! Set dewpoint depression to that at original sfc
 
@@ -254,6 +471,12 @@
           unew(i,j) = u10(i,j)
           vnew(i,j) = v10(i,j)
 
+          if (i.eq.iprt1.and.j.eq.jprt1)print *,'NDFD < MDL topo ',i,j,dewnew(i,j),d2(i,j),topo_ndfd(i,j),zs,unew(i,j),vnew(i,j)
+          if (i.eq.iprt2.and.j.eq.jprt2)print *,'NDFD < MDL topo ',i,j,dewnew(i,j),d2(i,j),topo_ndfd(i,j),zs,unew(i,j),vnew(i,j)
+          if (i.eq.iprt3.and.j.eq.jprt3)print *,'NDFD < MDL topo ',i,j,dewnew(i,j),d2(i,j),topo_ndfd(i,j),zs,unew(i,j),vnew(i,j)
+          if (i.eq.iprt4.and.j.eq.jprt4)print *,'NDFD < MDL topo ',i,j,dewnew(i,j),d2(i,j),topo_ndfd(i,j),zs,unew(i,j),vnew(i,j)
+          if (i.eq.iprt5.and.j.eq.jprt5)print *,'NDFD < MDL topo ',i,j,dewnew(i,j),d2(i,j),topo_ndfd(i,j),zs,unew(i,j),vnew(i,j)
+          if (i.eq.iprt6.and.j.eq.jprt6)print *,'NDFD < MDL topo ',i,j,dewnew(i,j),d2(i,j),topo_ndfd(i,j),zs,unew(i,j),vnew(i,j)
 !============================================
         ELSE if (topo_ndfd(i,j).gt.zs) then
 !============================================
@@ -265,11 +488,43 @@
           GAM = MIN(GAMD,MAX(GAM,GAMsubj))
 
           DO K=1,LM
-           if (hght(i,j,k) .gt. topo_ndfd(i,j)) goto 781
+!          if (hght(i,j,k) .gt. topo_ndfd(i,j)) goto 781
+!          if (hght(i,j,k) .gt. topo_ndfd(i,j) .and. hght(i,j,k-1) .lt. zs)then
+!          if (hght(i,j,k) .gt. topo_ndfd(i,j) .and. hght(i,j,k-1) .ge. zs) goto 781
+!          if (hght(i,j,k) .gt. topo_ndfd(i,j) .and. hght(i,j,k) .ge. zs .and. k.eq.1) goto 781
+           if (hght(i,j,k) .gt. topo_ndfd(i,j) .and. hght(i,j,k) .ge. zs .and. pmid(i,j,k) .ne. psfc(i,j))then
+           if (i.eq.iprt1 .and. j.eq.jprt1 ) then
+             print*,'i,j,k,pmid,zs,topo,hght=',i,j,k,pmid(i,j,k),zs,topo_ndfd(i,j),hght(i,j,k)
+             print*,'i,j,k,gam,gamd,gamsubj=',i,j,k,gam,gamd,gamsubj
+           endif
+           if (i.eq.iprt2 .and. j.eq.jprt2 ) then
+             print*,'i,j,k,pmid,zs,topo,hght=',i,j,k,pmid(i,j,k),zs,topo_ndfd(i,j),hght(i,j,k)
+             print*,'i,j,k,gam,gamd,gamsubj=',i,j,k,gam,gamd,gamsubj
+           endif
+           if (i.eq.iprt3 .and. j.eq.jprt3 ) then
+             print*,'i,j,k,pmid,zs,topo,hght=',i,j,k,pmid(i,j,k),zs,topo_ndfd(i,j),hght(i,j,k)
+             print*,'i,j,k,gam,gamd,gamsubj=',i,j,k,gam,gamd,gamsubj
+           endif
+           if (i.eq.iprt4 .and. j.eq.jprt4 ) then
+             print*,'i,j,k,pmid,zs,topo,hght=',i,j,k,pmid(i,j,k),zs,topo_ndfd(i,j),hght(i,j,k)
+             print*,'i,j,k,gam,gamd,gamsubj=',i,j,k,gam,gamd,gamsubj
+           endif
+           if (i.eq.iprt5 .and. j.eq.jprt5 ) then
+             print*,'i,j,k,pmid,zs,topo,hght=',i,j,k,pmid(i,j,k),zs,topo_ndfd(i,j),hght(i,j,k)
+             print*,'i,j,k,gam,gamd,gamsubj=',i,j,k,gam,gamd,gamsubj
+           endif
+           if (i.eq.iprt6 .and. j.eq.jprt6 ) then
+             print*,'i,j,k,pmid,zs,topo,hght=',i,j,k,pmid(i,j,k),zs,topo_ndfd(i,j),hght(i,j,k)
+             print*,'i,j,k,gam,gamd,gamsubj=',i,j,k,gam,gamd,gamsubj
+           endif
+             if(pmid(i,j,k) .eq.  psfc(i,j))print*,'i,j,k,pmid,psfc,hght,zs=',i,j,k,pmid(i,j,k),psfc(i,j),hght(i,j,k),zs
+             goto 781
+           endif
           ENDDO 
   781     continue
 
           if (k .eq. 1) then
+!           print*,'k=1,i,j,zs,topo_ndfd(i,j)=',k,i,j,zs,topo_ndfd(i,j)
             zbot=zs
             pbot=psfc(i,j)
             tbot=t2(i,j)
@@ -311,9 +566,41 @@
           tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam
 
           if (tnew(i,j) .gt. t2(i,j))  tnew(i,j) = min(tnew(i,j),tsfc)
-          if (i.eq.iprt.and. j.eq.jprt) then 
-           print *,'NDFD > MDL topo',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
-           print *,' pnew ',pnew(i,j),' thetavc ',thetavc
+           if (i.eq.iprt1 .and. j.eq.jprt1 ) then
+           print *,'NDFD > MDL topo,tnew,topo,zs',i,j,tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),'psfc ', psfc(i,j),' thetavc ',thetavc, 't2', t2(i,j)
+           print*,'pbot,zbot,tbot,qbot=',k,pbot,zbot,tbot,qbot
+           print*,'frac,T,tup,tp1,tsfc,tnew=',frac,T(i,j,k),tup,tp1,tsfc,tnew(i,j)
+          endif
+           if (i.eq.iprt2 .and. j.eq.jprt2 ) then
+           print *,'NDFD > MDL topo,tnew,topo,zs',i,j,tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),'psfc ', psfc(i,j),' thetavc ',thetavc, 't2', t2(i,j)
+           print*,'pbot,zbot,tbot,qbot=',k,pbot,zbot,tbot,qbot
+           print*,'frac,T,tup,tp1,tsfc,tnew=',frac,T(i,j,k),tup,tp1,tsfc,tnew(i,j)
+          endif
+           if (i.eq.iprt3 .and. j.eq.jprt3 ) then
+           print *,'NDFD > MDL topo,validpt,tnew,topo,zs',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),'psfc ', psfc(i,j),' thetavc ',thetavc, 't2', t2(i,j)
+           print*,'pbot,zbot,tbot,qbot=',k,pbot,zbot,tbot,qbot
+           print*,'frac,T,tup,tp1,tsfc,tnew=',frac,T(i,j,k),tup,tp1,tsfc,tnew(i,j)
+          endif
+           if (i.eq.iprt4 .and. j.eq.jprt4 ) then
+           print *,'NDFD > MDL topo,validpt,tnew,topo,zs',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),'psfc ', psfc(i,j),' thetavc ',thetavc, 't2', t2(i,j)
+           print*,'pbot,zbot,tbot,qbot=',k,pbot,zbot,tbot,qbot
+           print*,'frac,T,tup,tp1,tsfc,tnew=',frac,T(i,j,k),tup,tp1,tsfc,tnew(i,j)
+          endif
+           if (i.eq.iprt5 .and. j.eq.jprt5 ) then
+           print *,'NDFD > MDL topo,validpt,tnew,topo,zs',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),'psfc ', psfc(i,j),' thetavc ',thetavc, 't2', t2(i,j)
+           print*,'pbot,zbot,tbot,qbot=',k,pbot,zbot,tbot,qbot
+           print*,'frac,T,tup,tp1,tsfc,tnew=',frac,T(i,j,k),tup,tp1,tsfc,tnew(i,j)
+          endif
+           if (i.eq.iprt6 .and. j.eq.jprt6 ) then
+           print *,'NDFD > MDL topo,validpt,tnew,topo,zs',validpt(i,j),tnew(i,j),topo_ndfd(i,j),zs
+           print *,' pnew ',pnew(i,j),'psfc ', psfc(i,j),' thetavc ',thetavc, 't2', t2(i,j)
+           print*,'pbot,zbot,tbot,qbot=',k,pbot,zbot,tbot,qbot
+           print*,'frac,T,tup,tp1,tsfc,tnew=',frac,T(i,j,k),tup,tp1,tsfc,tnew(i,j)
           endif
 
 
@@ -325,7 +612,10 @@
 !---> Alaska, Choose q at 1st level for more realistic output 
 !     Also for CONUS....others ???
 !TEST      if (gdin%region .eq. 'AK' .or. lnest) qv=q(i,j,1)
-          qv=q(i,j,1)
+!         qv=q(i,j,1)
+! Use q2, since q at 1st level could be underground [AMG]
+! look at q2 to make sure it looks good
+          qv=q2(i,j)
 
           e=pnew(i,j)/100.*qv/(0.62197+qv)
 ! --- dew-point temperature at original sfc
@@ -337,9 +627,51 @@
           if (k .eq. 1) then
             uc = u10(i,j)+frac * (uwnd(i,j,k)-u10(i,j))
             vc = v10(i,j)+frac * (vwnd(i,j,k)-v10(i,j))
+           if (i.eq.iprt1 .and. j.eq.jprt1 ) then
+             print*,'i,j,k,uc,vc,u10,v10,frac,uwnd(i,j,k)=',i,j,k,uc,vc,u10(i,j),v10(i,j),frac,uwnd(i,j,k),vwnd(i,j,k)
+           endif
+           if (i.eq.iprt2 .and. j.eq.jprt2 ) then
+             print*,'i,j,k,uc,vc,u10,v10,frac,uwnd(i,j,k)=',i,j,k,uc,vc,u10(i,j),v10(i,j),frac,uwnd(i,j,k),vwnd(i,j,k)
+           endif
+           if (i.eq.iprt3 .and. j.eq.jprt3 ) then
+             print*,'i,j,k,uc,vc,u10,v10,frac,uwnd(i,j,k)=',i,j,k,uc,vc,u10(i,j),v10(i,j),frac,uwnd(i,j,k),vwnd(i,j,k)
+           endif
+           if (i.eq.iprt4 .and. j.eq.jprt4 ) then
+             print*,'i,j,k,uc,vc,u10,v10,frac,uwnd(i,j,k)=',i,j,k,uc,vc,u10(i,j),v10(i,j),frac,uwnd(i,j,k),vwnd(i,j,k)
+           endif
+           if (i.eq.iprt5 .and. j.eq.jprt5 ) then
+             print*,'i,j,k,uc,vc,u10,v10,frac,uwnd(i,j,k)=',i,j,k,uc,vc,u10(i,j),v10(i,j),frac,uwnd(i,j,k),vwnd(i,j,k)
+           endif
+           if (i.eq.iprt6 .and. j.eq.jprt6 ) then
+             print*,'i,j,k,uc,vc,u10,v10,frac,uwnd(i,j,k)=',i,j,k,uc,vc,u10(i,j),v10(i,j),frac,uwnd(i,j,k),vwnd(i,j,k)
+           endif
           else
             uc = uwnd(i,j,k-1)+frac * (uwnd(i,j,k)-uwnd(i,j,k-1))
             vc = vwnd(i,j,k-1)+frac * (vwnd(i,j,k)-vwnd(i,j,k-1))
+           if (i.eq.iprt1 .and. j.eq.jprt1 ) then
+             print*,'i,j,k,uc,u10,frac,uwnd(k),uwnd(k-1)=',i,j,k,uc,u10(i,j),frac,uwnd(i,j,k),uwnd(i,j,k-1)
+             print*,'i,j,k,vc,v10,frac,vwnd(k),vwnd(k-1)=',i,j,k,vc,v10(i,j),frac,vwnd(i,j,k),vwnd(i,j,k-1)
+           endif
+           if (i.eq.iprt2 .and. j.eq.jprt2 ) then
+             print*,'i,j,k,uc,u10,frac,uwnd(k),uwnd(k-1)=',i,j,k,uc,u10(i,j),frac,uwnd(i,j,k),uwnd(i,j,k-1)
+             print*,'i,j,k,vc,v10,frac,vwnd(k),vwnd(k-1)=',i,j,k,vc,v10(i,j),frac,vwnd(i,j,k),vwnd(i,j,k-1)
+           endif
+           if (i.eq.iprt3 .and. j.eq.jprt3 ) then
+             print*,'i,j,k,uc,u10,frac,uwnd(k),uwnd(k-1)=',i,j,k,uc,u10(i,j),frac,uwnd(i,j,k),uwnd(i,j,k-1)
+             print*,'i,j,k,vc,v10,frac,vwnd(k),vwnd(k-1)=',i,j,k,vc,v10(i,j),frac,vwnd(i,j,k),vwnd(i,j,k-1)
+           endif
+           if (i.eq.iprt4 .and. j.eq.jprt4 ) then
+             print*,'i,j,k,uc,u10,frac,uwnd(k),uwnd(k-1)=',i,j,k,uc,u10(i,j),frac,uwnd(i,j,k),uwnd(i,j,k-1)
+             print*,'i,j,k,vc,v10,frac,vwnd(k),vwnd(k-1)=',i,j,k,vc,v10(i,j),frac,vwnd(i,j,k),vwnd(i,j,k-1)
+           endif
+           if (i.eq.iprt5 .and. j.eq.jprt5 ) then
+             print*,'i,j,k,uc,u10,frac,uwnd(k),uwnd(k-1)=',i,j,k,uc,u10(i,j),frac,uwnd(i,j,k),uwnd(i,j,k-1)
+             print*,'i,j,k,vc,v10,frac,vwnd(k),vwnd(k-1)=',i,j,k,vc,v10(i,j),frac,vwnd(i,j,k),vwnd(i,j,k-1)
+           endif
+           if (i.eq.iprt6 .and. j.eq.jprt6 ) then
+             print*,'i,j,k,uc,u10,frac,uwnd(k),uwnd(k-1)=',i,j,k,uc,u10(i,j),frac,uwnd(i,j,k),uwnd(i,j,k-1)
+             print*,'i,j,k,vc,v10,frac,vwnd(k),vwnd(k-1)=',i,j,k,vc,v10(i,j),frac,vwnd(i,j,k),vwnd(i,j,k-1)
+           endif
           endif
 
 ! -- 0.7 factor is a wag at surface effects on wind speed
@@ -361,7 +693,7 @@
 
 !      Adjust  winds to topography
       if (CVADJ.eq.'T')                           &
-      call vadjust(validpt,veg_ndfd,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+      call vadjust(validpt,veg_ndfd,unew,vnew,topo_ndfd,dx,dy,im,jm,lm,gdin)
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
@@ -377,6 +709,30 @@
        utmp=unew
        vtmp=vnew 
        rough_mod = veg_nam_ndfd
+
+       do j=1,jm
+       do i=1,im
+           if (i.eq.iprt1 .and. j.eq.jprt1 ) then
+             print*,'i,j,unew,vnew=',i,j,unew(i,j),vnew(i,j)
+           endif
+           if (i.eq.iprt2 .and. j.eq.jprt2 ) then
+             print*,'i,j,unew,vnew=',i,j,unew(i,j),vnew(i,j)
+           endif
+           if (i.eq.iprt3 .and. j.eq.jprt3 ) then
+             print*,'i,j,unew,vnew=',i,j,unew(i,j),vnew(i,j)
+           endif
+           if (i.eq.iprt4 .and. j.eq.jprt4 ) then
+             print*,'i,j,unew,vnew=',i,j,unew(i,j),vnew(i,j)
+           endif
+           if (i.eq.iprt5 .and. j.eq.jprt5 ) then
+             print*,'i,j,unew,vnew=',i,j,unew(i,j),vnew(i,j)
+           endif
+           if (i.eq.iprt6 .and. j.eq.jprt6 ) then
+             print*,'i,j,unew,vnew=',i,j,unew(i,j),vnew(i,j)
+           endif
+       if(tnew(i,j).ge.spval)print*,'i,j,tnew=',i,j,tnew(i,j)
+       enddo
+       enddo
 
        print*, ' min/max of rough_mod:  ', minval(rough_mod),maxval(rough_mod)
 
@@ -504,5 +860,33 @@
          where (dewnew.lt.spval) &
          qnew=PQ0/PSFC*EXP(A2*(dewnew-A3)/(dewnew-A4))
        endwhere
+       do j=1,jm
+       do i=1,im
+           if (i.eq.iprt1 .and. j.eq.jprt1 ) then
+             print*,'i,j,u10,v10,t2,d2,q2=',i,j,u10(i,j),v10(i,j),t2(i,j),d2(i,j),q2(i,j)
+             print*,'i,j,unew,vnew,tnew,dewnew,qnew=',i,j,unew(i,j),vnew(i,j),tnew(i,j),dewnew(i,j),qnew(i,j)
+           endif
+           if (i.eq.iprt2 .and. j.eq.jprt2 ) then
+             print*,'i,j,u10,v10,t2,d2,q2=',i,j,u10(i,j),v10(i,j),t2(i,j),d2(i,j),q2(i,j)
+             print*,'i,j,unew,vnew,tnew,dewnew,qnew=',i,j,unew(i,j),vnew(i,j),tnew(i,j),dewnew(i,j),qnew(i,j)
+           endif
+           if (i.eq.iprt3 .and. j.eq.jprt3 ) then
+             print*,'i,j,u10,v10,t2,d2,q2=',i,j,u10(i,j),v10(i,j),t2(i,j),d2(i,j),q2(i,j)
+             print*,'i,j,unew,vnew,tnew,dewnew,qnew=',i,j,unew(i,j),vnew(i,j),tnew(i,j),dewnew(i,j),qnew(i,j)
+           endif
+           if (i.eq.iprt4 .and. j.eq.jprt4 ) then
+             print*,'i,j,u10,v10,t2,d2,q2=',i,j,u10(i,j),v10(i,j),t2(i,j),d2(i,j),q2(i,j)
+             print*,'i,j,unew,vnew,tnew,dewnew,qnew=',i,j,unew(i,j),vnew(i,j),tnew(i,j),dewnew(i,j),qnew(i,j)
+           endif
+           if (i.eq.iprt5 .and. j.eq.jprt5 ) then
+             print*,'i,j,u10,v10,t2,d2,q2=',i,j,u10(i,j),v10(i,j),t2(i,j),d2(i,j),q2(i,j)
+             print*,'i,j,unew,vnew,tnew,dewnew,qnew=',i,j,unew(i,j),vnew(i,j),tnew(i,j),dewnew(i,j),qnew(i,j)
+           endif
+           if (i.eq.iprt6 .and. j.eq.jprt6 ) then
+             print*,'i,j,u10,v10,t2,d2,q2=',i,j,u10(i,j),v10(i,j),t2(i,j),d2(i,j),q2(i,j)
+             print*,'i,j,unew,vnew,tnew,dewnew,qnew=',i,j,unew(i,j),vnew(i,j),tnew(i,j),dewnew(i,j),qnew(i,j)
+           endif
+        enddo
+        enddo
        return
        end
