@@ -972,3 +972,13 @@
 84/184/X/-3.0/mesocon.NDFD/0/0
    71 200   0   0   0   2   1   TOTAL CLD FRACTION
 84/184/X/-3.0/mesocon.NDFD/0/0
+   11 116  30   0   0   2   1   TEMP IN BNDRY LYR
+84/184/X/-3.0/mesocon.NDFD/0/0
+   11 116  60  30   0   2   1   TEMP IN BNDRY LYR
+84/184/X/-3.0/mesocon.NDFD/0/0
+   11 116  90  60   0   2   1   TEMP IN BNDRY LYR
+84/184/X/-3.0/mesocon.NDFD/0/0
+   11 116 120  90   0   2   1   TEMP IN BNDRY LYR
+84/184/X/-3.0/mesocon.NDFD/0/0
+   11 116 150 120   0   2   1   TEMP IN BNDRY LYR
+84/184/X/-3.0/mesocon.NDFD/0/0
