@@ -686,8 +686,6 @@
 84/91/X/-3.0/mesoak.NDFD/0/0
    34 109   0  60   0   2   1   V WIND ON MDL SFCS
 84/91/X/-3.0/mesoak.NDFD/0/0
-    1 109   0   5   0   2   1   PRESS ON MDL SFCS
-84/91/X/2.7/mesoak.NDFD/0/0
     1 109   0   6   0   2   1   PRESS ON MDL SFCS
 84/91/X/2.7/mesoak.NDFD/0/0
     1 109   0   7   0   2   1   PRESS ON MDL SFCS
