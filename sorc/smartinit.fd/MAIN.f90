@@ -711,7 +711,6 @@
       DEC=-5.0
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,70,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
-      endif
 
 ! SLP
       print*, 'Output SLP', FHR
@@ -721,13 +720,18 @@
       CALL GRIBIT(ID,RITEHD,SLP,GDIN,70,DEC)
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
 
-! SST
+! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
+! since Skin T/SST is already being used (per Geoff DiMego).
+! Disable for this implementation - revisit for next implementation
       print*, 'Output SST', FHR
       ID(1:25) = 0
-      ID(8)=11;ID(9)=1
-      DEC=-3.0
-      CALL GRIBIT(ID,RITEHD,SST,GDIN,70,DEC)
+      ID(8)=11;ID(9)=105
+      ID(11)=2
+      DEC=-2.0
+!     CALL GRIBIT(ID,RITEHD,SST,GDIN,70,DEC)
       print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+
+      endif ! dgx
 
 !==========================================================================
 !  TransWind - the average winds in the layer between the surface
@@ -1505,7 +1509,6 @@
       DEC=-5.0
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
-      endif
 
 ! SLP
       print*, 'Output SLP', GDIN%FHR
@@ -1515,14 +1518,18 @@
       CALL GRIBIT(ID,RITEHD,SLP,GDIN,IUNIT,DEC)
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
 
-! SST
+! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
+! since Skin T/SST is already being used (per Geoff DiMego).
+! Disable for this implementation - revisit for next implementation
       print*, 'Output SST', GDIN%FHR
       ID(1:25) = 0
-      ID(8)=11;ID(9)=1
-      DEC=-3.0
-      CALL GRIBIT(ID,RITEHD,SST,GDIN,IUNIT,DEC)
+      ID(8)=11;ID(9)=105
+      ID(11)=2
+      DEC=-2.0
+!     CALL GRIBIT(ID,RITEHD,SST,GDIN,IUNIT,DEC)
       print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
 
+      endif ! dgx
       ENDIF
 
        return
