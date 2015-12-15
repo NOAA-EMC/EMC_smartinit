@@ -30,7 +30,7 @@ cfgdir=${rootd}/parm
 export wkdir=${rootd}/working
 mkdir -p $wkdir
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
-plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade
+plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade.v3.5.0
 export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
