@@ -429,7 +429,6 @@
         JPDS(6) = 215
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,CEIL,IRET,ISTAT)
         print*,'min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
-      endif
 
 ! Membrane SLP MSLET
        print*, 'SLP', lnest, LHR3
@@ -447,6 +446,7 @@
         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,SST,IRET,ISTAT)
         print*,'min/max SST ', minval(SST),MAXVAL(SST)
 
+      endif ! dgx 
       endif
 
 !  sfc wind gust 
