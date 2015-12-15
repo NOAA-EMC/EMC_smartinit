@@ -18,8 +18,8 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.4.0
-export code_ver=v3.4.0
+export model_ver=v3.5.0
+export code_ver=v3.5.0
 export which_nam=prod
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${model_ver}
