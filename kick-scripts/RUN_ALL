@@ -183,14 +183,14 @@ elif [ $runreg = ak3 ];then
   bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 elif [ $runreg = ak_rtmages ];then
   pltrun=ak_rtmages
-  bsub < $plotdir/run_webpage00_${pltrun}_grib2
   bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 elif [ $runreg = hi ];then
+  sleep 1080
   pltrun=hi
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
   bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
 elif [ $runreg = pr ];then
-  sleep 360
+  sleep 560
   pltrun=pr
   bsub < $plotdir/run_webpage00_${pltrun}_grib2
   bsub < $plotdir/run_webpage00_${pltrun}_grib2_hourly
