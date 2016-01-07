@@ -439,12 +439,13 @@
         print*,'min/max SLP ', minval(SLP),MAXVAL(SLP)
 
 ! Skin Temperature/Sfc Temperature
+! Comment out - no SST for reanalysis work at this time.
        print*, 'SST', lnest, LHR3
         JPDS=-1;J=0
         JPDS(5) = 11
         JPDS(6) = 1
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,SST,IRET,ISTAT)
-        print*,'min/max SST ', minval(SST),MAXVAL(SST)
+!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,SST,IRET,ISTAT)
+!       print*,'min/max SST ', minval(SST),MAXVAL(SST)
 
       endif ! dgx 
       endif
@@ -688,7 +689,28 @@
 
 ! note points that are within bitmap
        VALIDPT=.TRUE.
-         WHERE(T(:,:,1).LE.10.) VALIDPT = .FALSE.
+!        WHERE(T(:,:,1).LE.10.) VALIDPT = .FALSE.
+! Since SLP has different bitmap, we have to check both SLP and T for setting
+! validpt.
+         WHERE(T(:,:,1).LE.10. .or. SLP(:,:).LE.10.) VALIDPT = .FALSE.
+
+        islp=0; itmp=0; itotal=0
+        do i=1,imax
+        do j=1,jmax
+          if(T(i,j,1).le.10. .or. slp(i,j).le.10.) then 
+             if(slp(i,j).gt.10.)then
+               islp=islp+1
+               print *,'i,j,T,slp=',i,j,T(i,j,1),slp(i,j)
+             endif
+             if(T(i,j,1).gt.10.)then
+               itmp=itmp+1
+               print *,'i,j,T,slp=',i,j,T(i,j,1),slp(i,j)
+             endif
+             if(T(i,j,1).le.10.)itotal=itotal+1
+          endif
+        enddo
+        enddo
+        print*,'islp,itmp,itotal=',islp,itmp,itotal
 
 ! JTM 01-28-13: Added check for where previous temps are not at validpts
 !       do i=1,imax

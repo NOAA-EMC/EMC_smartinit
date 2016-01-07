@@ -154,6 +154,11 @@ esac
  
 typeset -Z2 srefcyc gefscyc pcphrl
 text=".tm00"
+
+# For expanded conus nest 2.5 km
+exptext=""
+case $RUNTYP in conusnest2p5) exptext="_grb188";; esac
+
 #EXT natgrd=`echo $natgrd |cut -d. -f2`
 
 # Define core (nmmb, arw, nems) needed for hiresw veg initialization
@@ -352,9 +357,11 @@ for fhr in $hours; do
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
 ceilmdl=bgdawp
-slpmdl=bgdawp
+#slpmdl=bgdawp
+slpmdl=hiresf
 case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
-case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
+#case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
+case $RUNTYP in conusnest|conusnest2p5) slpmdl=hiresf;; esac
 
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
@@ -385,9 +392,10 @@ if [ $grib = 1 ];then
         mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
      fi
      if [ -e $slp_file ];then
-        wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-        cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
-        mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
+#       wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+        wgrib -s $slp_file | egrep ":MSLET:" | wgrib -i -grib $slp_file -o slp.grb
+#       cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
+#       mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
      fi
         ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
@@ -438,9 +446,10 @@ if [ $grib = 1 ];then
   mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
   fi
   if [ -e $slp_file ];then
-     wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-     cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
-     mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
+#    wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+     wgrib -s $slp_file | egrep ":MSLET:" | wgrib -i -grib $slp_file -o slp.grb
+#    cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
+#    mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
   fi
   $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 fi
@@ -856,6 +865,33 @@ fi # grib = 1
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
+
+# slp file
+  prdgfl_slp=slp.NDFD
+  cat >inputslp${fhr}.prd <<EOF5
+slp.grb
+EOF5
+  
+  export pgm=smartinit_prdgen; . prep_step
+  ln -sf $FIXdng/wgt/${mdl}_wgt_g227_to_${ogrd}_${mdlgrd} fort.21
+  ln -sf $PARMdng/nam_smartmasterconusnest2p5_hiresf.ctl-188 fort.10
+#  ln -sf master${fhr}.ctl            fort.10
+  ln -sf inputslp${fhr}.prd          fort.621   #WCOSS CHANGE
+  $EXECdng/smartinit_prdgen < inputslp${fhr}.prd > prdgen.slp.out${fhr}
+  export err=$?;  err_chk
+
+   if [ -s ${prdgfl_slp} ];then
+     mv ${prdgfl_slp} ${prdgfl_slp}${fhr}
+     cat meso${rg}.NDFDf${fhr} ${prdgfl_slp}${fhr}  >> meso${rg}.NDFDf${fhr}.tmp
+     mv meso${rg}.NDFDf${fhr}.tmp  meso${rg}.NDFDf${fhr}
+   elif [ -s ${prdgfl_slp}${fhr} ];then    # check for hawaii ???
+    echo ${prdgfl_slp}${fhr} FOUND FOR FORECAST HOUR ${fhr}
+    cat meso${rg}.NDFDf${fhr} ${prdgfl_slp}${fhr} >> meso${rg}.NDFDf${fhr}.tmp
+    mv meso${rg}.NDFDf${fhr}.tmp  meso${rg}.NDFDf${fhr}
+   else
+    echo $prdgfl_slp NOT FOUND FOR FORECAST HOUR ${fhr}
+    exit
+   fi
   $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 #=================================================================
 #   DECLARE INPUTS and RUN SMARTINIT 
@@ -913,9 +949,9 @@ fi # grib = 1
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
     $utilexec/grbindex MAXMIN3 MAXMIN3i
     $utilexec/grbindex MAXMIN4 MAXMIN4i
     $utilexec/grbindex MAXMIN5 MAXMIN5i

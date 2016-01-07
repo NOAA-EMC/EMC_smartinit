@@ -42,6 +42,10 @@ if [ $outreg = conus2p5 ];then
  if [ $fhr -le 12 ];then
    cp  MESO${RGIN}${fhr}.tm00.grb255  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
  fi
+ cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_grb188
+ if [ $fhr -eq 60 ];then
+   rm $COMOUT/${mdl}.t${cyc}z.smart*_grb188
+ fi
 #mv  MESO${RGIN}${fhr}.tm00.grb255  MESO${RGIN}${fhr}.tm00
  $utilexec/copygb -g 184 -x MESO${RGIN}${fhr}.tm00.grb255 MESO${RGIN}${fhr}.tm00 
 fi

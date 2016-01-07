@@ -344,6 +344,17 @@
     print *,'MAIN VALIDPT, Temperature ',validpt(50,50),T(50,50,1)
 
 !   Initialize varbs to spval (for nests)
+         DO J=1,JM
+         DO I=1,IM
+           if(.not. validpt(i,j))then
+!            print*,'i,j,SLP,T,validpt=',i,j,SLP(i,j),T(i,j,1),validpt(i,j)
+           endif
+           if(validpt(i,j).and. SLP(i,j) .lt.10.)then
+!            print*,'True i,j,SLP,T,validpt=',i,j,SLP(i,j),T(i,j,1),validpt(i,j)
+           endif
+         enddo
+         enddo
+ 
     where (.not. validpt)
       PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL;SLP=SPVAL;SST=SPVAL
       P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL
@@ -709,7 +720,8 @@
       ID(1:25) = 0
       ID(8)=7;ID(9)=215
       DEC=-5.0
-      CALL GRIBIT(ID,RITEHD,CEIL,GDIN,70,DEC)
+! Not available for reanalysis pilot 2
+!     CALL GRIBIT(ID,RITEHD,CEIL,GDIN,70,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
 
 ! SLP
@@ -719,17 +731,28 @@
       DEC=-0.1
       CALL GRIBIT(ID,RITEHD,SLP,GDIN,70,DEC)
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+         do isn=1,im
+         do jsn=1,jm
+           if(SLP(isn,jsn) .lt. 10.0)then
+!            print*,'i,j,SLP,validpt=',isn,jsn,SLP(isn,jsn),validpt(isn,jsn)
+           endif
+           if(.not. validpt(isn,jsn))then
+!            print*,'2i,j,SLP,validpt=',isn,jsn,SLP(isn,jsn),validpt(isn,jsn)
+           endif
+         enddo
+         enddo
 
 ! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
 ! since Skin T/SST is already being used (per Geoff DiMego).
 ! Disable for this implementation - revisit for next implementation
+! Disable for reanalysis work
       print*, 'Output SST', FHR
       ID(1:25) = 0
       ID(8)=11;ID(9)=105
       ID(11)=2
       DEC=-2.0
 !     CALL GRIBIT(ID,RITEHD,SST,GDIN,70,DEC)
-      print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+!     print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
 
       endif ! dgx
 
@@ -1507,7 +1530,8 @@
       ID(1:25) = 0
       ID(8)=7;ID(9)=215
       DEC=-5.0
-      CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
+! Not available for reanalysis pilot 2
+!     CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
 
 ! SLP
@@ -1521,13 +1545,14 @@
 ! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
 ! since Skin T/SST is already being used (per Geoff DiMego).
 ! Disable for this implementation - revisit for next implementation
+! Disable for reanalysis work
       print*, 'Output SST', GDIN%FHR
       ID(1:25) = 0
       ID(8)=11;ID(9)=105
       ID(11)=2
       DEC=-2.0
 !     CALL GRIBIT(ID,RITEHD,SST,GDIN,IUNIT,DEC)
-      print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+!     print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
 
       endif ! dgx
       ENDIF

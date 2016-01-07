@@ -168,6 +168,9 @@ export PDY=$PDY
 export cyc=$cyc
 date
 
+# Do not need to run plotting routines or hpss script
+exit
+
 if [ $runreg = conus2p5 ];then
   pltrun=conusnest
   bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2

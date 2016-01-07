@@ -38,7 +38,10 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 #TEST WITH Dana's GFS changes
 #export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
 
-export COMROOT=/com
+# Set to Perry's reanalysis directory
+export COMROOT=/gpfs/gp2/storage/usfs_reanl/com
+
+#export COMROOT=/com
 export gespath=/nwges/prod          
 export COM_IN=${COMROOT}/${mdl}/prod 
 
@@ -52,9 +55,10 @@ export COM_IN=${COMROOT}/${mdl}/prod
 ## End Test
 
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
-#export COM_SREF=${COMROOT}/sref/prod   
+# Must use this directory for reanalysis work
+export COM_SREF=${COMROOT}/sref/prod   
 # new location of SREF
-export COM_SREF=/com2/sref/prod
+#export COM_SREF=/com2/sref/prod
 
 
 export DATA_IN=/ptmpp2/$USER/smartinit.${model_ver}/$PDY/$cyc

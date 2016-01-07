@@ -12,9 +12,9 @@ jfhr=$2
   echo "#BSUB -n 1"                >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -W ${WALLCLK}"       >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -P RTMA-T2O"             >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -q dev2"              >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -R "span[ptile=1]""    >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -R "rusage[mem=6000]"" >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -q dev2_shared"              >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -R affinity[core]"    >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -R "rusage[mem=8000]"" >>bjobcards-dev${RUNTYP}-$jfhr
  
 #cat bjobcards-dev${RUNTYP}-$jfhr  ${jobd}/J${MDL}_SMINIT.test  > J${MDL}_SMINIT.${RUNTYP}
 cat bjobcards-dev${RUNTYP}-$jfhr  ${jobd}/J${MDL}_SMINIT  > J${MDL}_SMINIT.${RUNTYP}
