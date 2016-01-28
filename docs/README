@@ -803,5 +803,19 @@ Nov 2015 - smartinit.v3.5.0
 	build_smartinit.scr
 	modulefiles
 
-* Changed all copygb to wgrib2
+* Corrected bug in parm/*ctl files where pressure level 5 was defined twice.
+* Added Mesinger Mean SLP
+	parm/dgex_masterak.ctl
+        parm/dgex_masterconus.ctl
+        parm/nam_masterak.ctl
+	parm/nam_masterconus.ctl
+	parm/nam_masterhi.ctl
+	parm/nam_masterpr.ctl 
+	parm/nam_smartmasteraknest3.ctl
+	parm/nam_smartmasterconusnest2p5.ctl-184
+	parm/nam_smartmasterconusnest2p5.ctl-188
 
+* Changed locations of COM_SREF
+	jobs/JDGEX_SMINIT
+	jobs/JNAM_SMINIT
+        parm/smart_para_config
