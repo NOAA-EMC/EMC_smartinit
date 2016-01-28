@@ -5,14 +5,14 @@ SRCS=	ADD_WMO.f PRDGEN.f CTL_RDR.f \
 	FNDBIT.f GET_PDS.f MAK_WMO.f PUT_GB.f \
 	SET_O11.f SET_O14.f SET_O23.f SET_O56.f SET_TBL.f SET_WMO.f \
         EXTEND.f FILTER_SC.f FILTER_UV.f GRIB_IN.f GRIB_OUT.f INTERP_PPT.f \
-        xmovex.f \
+        w3fi63.f w3fi71.f xmovex.f \
         INTERP_SC.f INTERP_UV.f READ_SORT_CTL.f READ_SORT_GRIB.f TILE_OUT.f
 
 OBJS=	ADD_WMO.o PRDGEN.o CTL_RDR.o \
 	FNDBIT.o GET_PDS.o MAK_WMO.o PUT_GB.o \
 	SET_O11.o SET_O14.o SET_O23.o SET_O56.o SET_TBL.o SET_WMO.o \
         EXTEND.o FILTER_SC.o FILTER_UV.o GRIB_IN.o GRIB_OUT.o INTERP_PPT.o \
-        xmovex.o \
+        w3fi63.o w3fi71.o xmovex.o \
         INTERP_SC.o INTERP_UV.o READ_SORT_CTL.o READ_SORT_GRIB.o TILE_OUT.o
 
 # Tunable parameters
