@@ -715,7 +715,7 @@
 ! SLP
       print*, 'Output SLP', FHR
       ID(1:25) = 0
-      ID(8)=130;ID(9)=102
+      ID(8)=130;ID(9)=102 ! MSLET (Mesinger/Membrane)
       DEC=-0.1
       CALL GRIBIT(ID,RITEHD,SLP,GDIN,70,DEC)
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
@@ -1513,7 +1513,7 @@
 ! SLP
       print*, 'Output SLP', GDIN%FHR
       ID(1:25) = 0
-      ID(8)=130;ID(9)=102
+      ID(8)=130;ID(9)=102 ! MSLET (Mesinger/Membrane)
       DEC=-0.1
       CALL GRIBIT(ID,RITEHD,SLP,GDIN,IUNIT,DEC)
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
