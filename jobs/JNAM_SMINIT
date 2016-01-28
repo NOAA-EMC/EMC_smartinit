@@ -227,7 +227,8 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com/sref/prod}
+#export COM_SREF=${COM_SREF:-/com/sref/prod}
+export COM_SREF=${COM_SREF:-/com2/sref/prod}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
