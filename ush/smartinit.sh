@@ -154,6 +154,11 @@ esac
  
 typeset -Z2 srefcyc gefscyc pcphrl
 text=".tm00"
+
+# For expanded conus nest 2.5 km
+exptext=""
+case $RUNTYP in conusnest2p5) exptext="_grb188";; esac
+
 #EXT natgrd=`echo $natgrd |cut -d. -f2`
 
 # Define core (nmmb, arw, nems) needed for hiresw veg initialization
@@ -913,9 +918,9 @@ fi # grib = 1
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
     $utilexec/grbindex MAXMIN3 MAXMIN3i
     $utilexec/grbindex MAXMIN4 MAXMIN4i
     $utilexec/grbindex MAXMIN5 MAXMIN5i
