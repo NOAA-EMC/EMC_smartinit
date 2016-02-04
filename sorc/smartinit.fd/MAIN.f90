@@ -363,7 +363,8 @@
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
        if (.not.lhiresw) then
-         IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
+!        IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
+         IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0 .or. (FHR .LE. 36 .and.  TRIM(REGION).EQ.'CS2P' ))THEN
            WGUST=SPVAL;TEMP1=SPVAL
            where(validpt)
              TEMP1=SQRT(DOWNU*DOWNU+DOWNV*DOWNV)
