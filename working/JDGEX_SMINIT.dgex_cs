@@ -1,12 +1,12 @@
-#BSUB -J DNG18.dgex_cs-189
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.4.0/20150929/18/list/oDNG18.dgex_cs-189
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.4.0/20150929/18/list/oDNG18.dgex_cs-189
+#BSUB -J DNG06.dgex_cs-192
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.0/20160204/06/list/oDNG06.dgex_cs-192
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.0/20160204/06/list/oDNG06.dgex_cs-192
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA-T2O
-#BSUB -q dev2
-#BSUB -R span[ptile=1]
-#BSUB -R rusage[mem=6000]
+#BSUB -q dev2_shared
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=10000]
 #!/bin/ksh
 ####NCO set -xa   #NCO preferred setting
 
@@ -225,7 +225,8 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com/sref/${envir}}
+#export COM_SREF=${COM_SREF:-/com/sref/${envir}}
+export COM_SREF=${COM_SREF:-/com2/sref/${envir}}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 

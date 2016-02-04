@@ -1033,7 +1033,8 @@ fi # grib = 1
   if [ $mksmart -eq 1 ];then
 
 # Only create awips files every 3 hours [AMG]
-  let awpchk=fhr%3
+# let awpchk=fhr%3 # 3-hourly
+  let awpchk=0 # hourly
   echo $awpchk
 
 #   Run NCO processing to convert output to grib2 and awips

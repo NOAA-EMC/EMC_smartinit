@@ -642,6 +642,7 @@ Jun 2015 v3.4.3
 	-script parm/sref_para_config was changed (ptmpp1/stmpp1 was changed to ptmpp2/stmpp2)
 
 * Added new grid specifications for expanded CONUS Nest (grid 188) and Puerto Rico 1.25 km domain (grid 254)
+	(new Puerto Rico 1.25 km grid is currently not being used)
 
 	-Added Terrain, Land/Sea Mask, Weight and master parm files for new expanded CONUS Nest domain (grid 188) and 
 	 Puerto Rico 1.25 km domain (grid 254):
@@ -649,7 +650,7 @@ Jun 2015 v3.4.3
 	 fix/topo/nam_smarttopoconus2p5_EXP.grb2
 	 fix/topo/nam_smarttopoconus2p5_EXP.grb2i
 	 fix/topo/nam_smarttopoconus2p5_EXP.grb
-	 fix/topo/nam_smarttopoconus2p5-EXT.grbi
+	 fix/topo/nam_smarttopoconus2p5-EXP.grbi
 	 fix/topo/nam_smarttopopr1p25.grb2
 	 fix/topo/nam_smarttopopr1p25.grb2i
 	 fix/topo/nam_smarttopopr1p25.grb
@@ -667,21 +668,17 @@ Jun 2015 v3.4.3
 	 fix/wgt/nam_wgt_254_priconest
 
         -corrected for GRIB2 precision.  When the GRIB2 Terrain was converted to GRIB1, some precision was lost in some of the 
-	 grid specs.
+	 grid specs. (2 Feb 2016 - not currently being used.)
 
 	 ush/dng_awp.sh
 
 	-created links for new Puerto Rico and expanded CONUS nest domains.
+	(links for Puerto Rico are currently set back to 2.5 km domain)
 
 	-new grid specifications were added for pr, priconest, and conusnest2p5 to parm/SMINIT.CTL
 
-	-Added GRIB2 AWIPS parm files for new expanded CONUS Nest domain (grid 188) and Puerto Rico 1.25 km domain (grid 254) 
-	 util/parm/*188
-	 util/parm/*254
-         util/cpparm.sh (used to create new GRIB2 AWIPS parm files)
-
 * Added GRIB2 option for future implementation using Eric's NAM parallel (this option is not used yet; will be implemented in
-  Q2FY16).
+  Q4FY16).
 	-created GRIB2 master parm files (parm/nam_smartinit_bsmart_grb2.parmlist*, parm/nam_smartinit_bgrd3d_grb2.parmlist*,
 	 parm/nam_smartinit_grb2_budget.parmlist_* and parm/nam_smartinit_grib2_nn.parmlist parameter files)
 	-replaced exec/smartinit_prdgen with exec/smartinit_wgrib2
@@ -696,7 +693,7 @@ Jul 2015 v3.4.3
 
 * Added GRIB switch to ush/smartinit.sh.
 
-	export grib=1 ; for using OPS NAM GRIB1 data
+	export grib=1 ; for using OPS NAM GRIB1 data (currently using grib=1)
 	export grib=2 ; for using parallel NAM GRIB2 data
 
 * Added local versions of the source codes and executables of cnvgrib, wgrib2 and nam_prdgen.
@@ -718,17 +715,19 @@ Jul 2015 v3.4.3
 	sorc/smartinit.fd/MAIN.f90
 	sorc/smartinit.fd/GETGRIB.f90
 	sorc/smartinit.fd/aset2d.f90
-	sorc/smartinit.fd
 * Uses ceiling height from OPS *bgdawp* files. Ceiling height is not written out in the OPS NAM *bgrd3d* and *bsmart* files, so
 	we need to get the ceiling height from the OPS *bgdawp* files.
 	ush/smartinit.sh
 * CONUS Nest uses land/sea mask instead of vegetation type to define temps/dewpoint/winds near coastlines
 	sorc/smartinit.fd/NDFDgrid.f90
 * Changed grid spacing in code for Puerto Rico from 2500 km to 1250 km.
-	sorc/smartinit.fd/NDFDgrid.f90
+	sorc/smartinit.fd/NDFDgrid.f90 
 * Added code in smartinit to define expanded CONUS Nest to temporary grid id 188 and Puerto Rico 1.25 km to temporary grid id 254.
 	sorc/smartinit.fd/w3fi71.f
 	sorc/smartinit.fd/w3fi63.f
+* Added date and cycle to ptmpp2 directory ($PDY and $cyc); changed COM_OUT (output directory) to /meso2/noscrub/$USER/${model_ver} 
+	for parallel runs
+	parm/smart_para_config
 
 Aug 2015
 
@@ -799,9 +798,12 @@ Oct 2015 -  smartinit.v3.5.0
 Nov 2015 - smartinit.v3.5.0
 
 * Added membrane SLP (MSLET) and SST (Surface Temp) to the smartinit output.  SLP and SST are currently not in the OPS *bsmart* 
-  files, so need to grab them from the OPS *bgdawp* files.
-	build_smartinit.scr
-	modulefiles
+  files, so need to grab them from the OPS *bgdawp* files. (For this Q3FY16 implementation, SST is not written out).
+
+	sorc/smartinit.fd/aset2d.mod
+        sorc/smartinit.fd/GETGRIB.f90
+        sorc/smartinit.fd/MAIN.f90
+	ush/smartinit.sh
 
 * Corrected bug in parm/*ctl files where pressure level 5 was defined twice.
 * Added Mesinger Mean SLP
@@ -819,3 +821,40 @@ Nov 2015 - smartinit.v3.5.0
 	jobs/JDGEX_SMINIT
 	jobs/JNAM_SMINIT
         parm/smart_para_config
+
+Dec 2015 - smartinit.v3.5.0
+
+* Added new consensus Terrain and Land/Sea Mask for expanded CONUS Nest (grid 188). These files corrected DY bug.
+
+        fix/topo/nam_smarttopoconus2p5_EXP_consensus.grb
+        fix/topo/nam_smarttopoconus2p5_EXP_consensus.grbi
+        fix/mask/nam_smartmaskconus2p5_EXP_consensus.grb
+        fix/mask/nam_smartmaskconus2p5_EXP_consensus.grbi
+
+* Added subroutines in smartinit_prdgen to define expanded CONUS Nest to temporary grid id 188.
+	sorc/smartinit_prdgen.fd/w3fi71.f
+	sorc/smartinit_prdgen.fd/w3fi63.f
+        sorc/smartinit_prdgen.fd/makefile
+
+Jan 2016 - smartinit.v3.5.0
+
+* Need to keep all grid 188 files until smartinit was completed (conus nest only).  This is because these files are used
+  for calculating 12-hourly TMAX/TMIN and RHMAX/RHMIN. Remove *grb188 files when fhr = 60.
+
+	ush/smartinit.sh
+	ush/dng_awp.sh
+
+* Changed AWIPS output to hourly
+
+	ush/smartinit.sh
+
+* Fixed wind gust bug - for conus nest, wind gust was 0.0 for intermediate hours between 13-34 hours.
+
+	sorc/smartinit.fd/MAIN.f90
+
+* Updated README and created release-notes, changed smartinit.ver to reflect version 3.5.0
+
+	docs/README
+	docs/release-notes.v3.5.0
+	docs/smartinit.ver
+
