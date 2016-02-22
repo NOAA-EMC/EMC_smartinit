@@ -340,3 +340,6 @@ CDCON:atmos col
 PRES:convect-cld top
 HPBL:sfc
 GUST:sfc
+HGT:cloud ceiling
+MSLET:MSL
+TMP:sfc
