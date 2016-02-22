@@ -2,11 +2,13 @@
 set -xa
 export PATH=${PATH}:.
 export stutil=/hwrf/noscrub/soft/modulefiles
-. /usrx/local/Modules/3.2.9/init/ksh
+. /usrx/local/Modules/default/init/ksh
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
 module load GrADS/2.0.2
+#module load prod_util
+#module load /nwpara2/modulefiles/util_shared/v1.0.3 
 
 #=======================================================
 # Driving script to run a smartinit domain
@@ -30,7 +32,7 @@ cfgdir=${rootd}/parm
 export wkdir=${rootd}/working
 mkdir -p $wkdir
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
-plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade.v3.5.0
+plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade.v3.5.1
 export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
@@ -57,7 +59,7 @@ esac
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}
+export DATA_IN=/ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 
