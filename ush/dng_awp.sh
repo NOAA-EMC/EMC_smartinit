@@ -47,7 +47,7 @@ if [ $outreg = conus2p5 ];then
    rm $COMOUT/${mdl}.t${cyc}z.smart*_grb188
  fi
 #mv  MESO${RGIN}${fhr}.tm00.grb255  MESO${RGIN}${fhr}.tm00
- $utilexec/copygb -g 184 -x MESO${RGIN}${fhr}.tm00.grb255 MESO${RGIN}${fhr}.tm00 
+ $COPYGB -g 184 -x MESO${RGIN}${fhr}.tm00.grb255 MESO${RGIN}${fhr}.tm00 
 fi
 
 #$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
@@ -105,7 +105,7 @@ else
 fi
 
 if [ -s "$awpparm" ];then
-  $utilexec/tocgrib2 < ${awpparm} 1 >> $pgmout 2>> errfile
+  $TOCGRIB2 < ${awpparm} 1 >> $pgmout 2>> errfile
   echo " error from tocgrib="  $err
 else 
   echo AWP PARM FILE not found: $awpparm
