@@ -1,6 +1,6 @@
 module purge
 
-module load SMARTINIT/v3.5.0
+module load SMARTINIT/v3.5.1
 
 module list
 

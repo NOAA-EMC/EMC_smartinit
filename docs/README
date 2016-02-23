@@ -858,3 +858,20 @@ Jan 2016 - smartinit.v3.5.0
 	docs/release-notes.v3.5.0
 	docs/smartinit.ver
 
+Feb 2016 - smartinit.v3.5.1
+
+* Added changes to meet NCO's phase 2 standards:
+
+	removed all unused J-jobs in the /jobs directory
+	removed all files in exec/ directory
+	modified jobs/JNAM_SMINIT and jobs/JDGEX_SMINIT to reflect NCO standards
+	modified ush/smartinit.sh, ush/dgex_smartinit.sh, and ush/dng_awp.sh to reflect NCO standards
+	updated docs/README, docs/smartinit.ver
+	modified parm/smart_para_config to reflect NCO standards
+	updated modulefiles and build_smartinit.scr
+
+* Added ceiling, mslp, and sfc temp to GDAS option
+
+        ush/smartinit.sh
+
+
