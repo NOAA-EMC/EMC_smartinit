@@ -1,6 +1,6 @@
-#BSUB -J DNG12.aknest3-24
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160223/12/list/oDNG12.aknest3-24
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160223/12/list/oDNG12.aknest3-24
+#BSUB -J DNG06.aknest3-60
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.aknest3-60
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.aknest3-60
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA-T2O

@@ -1,6 +1,6 @@
 #BSUB -J DNG00.dgex_ak-192
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160223/00/list/oDNG00.dgex_ak-192
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160223/00/list/oDNG00.dgex_ak-192
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/00/list/oDNG00.dgex_ak-192
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/00/list/oDNG00.dgex_ak-192
 #BSUB -n 1
 #BSUB -W 1:00
 #BSUB -P RTMA-T2O
