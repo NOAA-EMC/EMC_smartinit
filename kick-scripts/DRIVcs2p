@@ -1,9 +1,11 @@
 #!/bin/ksh
 export stutil=/hwrf/noscrub/soft/modulefiles
-. /usrx/local/Modules/3.2.9/init/ksh
+. /usrx/local/Modules/default/init/ksh
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
+#module load prod_util
+#module load /nwpara2/modulefiles/util_shared/v1.0.3 
 
 #==========================================
 # Submit several nam_smartinit domain runs
@@ -18,11 +20,12 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.4.0
-export code_ver=v3.4.0
+#export model_ver=v3.5.1
+export nam_smartinit_ver=v3.5.1
+export code_ver=v3.5.1
 export which_nam=prod
 export modeld=smartinit
-export rootd=/meso/save/${USER}/${modeld}.${model_ver}
+export rootd=/meso/save/${USER}/${modeld}.${nam_smartinit_ver}
 export RUN_ENVIR=emc
 export envir=emc
 
@@ -43,7 +46,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#export cyc=00  #TEST
+#export cyc=06  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -93,14 +96,16 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
   D=$(echo $dayrm | cut  -c 7-8 )
   wdayd=$Y$M$D
   rm -rf /meso2/noscrub/${USER}/${code_ver}/${mdl}.${wdayd}
+  rm -rf /meso2/noscrub/${USER}/figs/dng_para/${wdayd}${cyc}
+  rm -rf /meso2/noscrub/${USER}/figs/dng_rtma/${wdayd}${cyc}
   rm /meso2/noscrub/${USER}/${code_ver}/jlogfile.${wdayd}
-  rm -r /ptmpp2/${USER}/${modeld}.${model_ver}/${wdayd}
+  rm -r /ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${wdayd}
 
 # Create and submit JNAM_SMINIT job
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}
-  mkdir -p /ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}/list
-  ${kickd}/RUN_ALL >/ptmpp2/$USER/${modeld}.${model_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
+  mkdir -p /ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
+  mkdir -p /ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list
+  ${kickd}/RUN_ALL >/ptmpp2/$USER/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done

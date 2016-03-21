@@ -42,6 +42,9 @@
 # dgex_cs      :  SREF-GRID=212  DGEXGRID=dgex_conus.tCCz.bsmart  NDFD-GRD=197
 # dgex_ak      :  SREF-GRID=216  DGEXGRID=dgex_alaska.tCCz.bsmart NDFD-GRD=198
 #======================================================================
+
+set -xa
+
 # Check if this is a nest run
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
@@ -239,7 +242,7 @@ if [ $ffhr -gt ${fhrstr} ]; then
   else
     cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
   fi
-  $utilexec/grbindex SREFPROB SREFPROBI
+  $GRBINDEX SREFPROB SREFPROBI
  
   let IP=0
   if [ $ffhr -lt 6 ]; then pcphr6=;pcphr12=;fi
@@ -250,27 +253,27 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
   for PHR in $pcphr3 $pcphr6 $pcphr12;do 
 #   prob of pcp > 0.01
-    $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 64 64 0 0"|grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
+    $WGRIB -PDS10 SREFPROB |grep "${grbpre} 64 64 0 0"|grep "0 1 $PHR $pcphr 4"|$WGRIB -i -grib -o dump SREFPROB
     let IP=IP+1
     mv dump srefpcp$IP
 
 #   prob of pcp > 0.05
-    $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 20 81 236"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
+    $WGRIB -PDS10 SREFPROB |grep "${grbpre} 65 20 81 236"| grep "0 1 $PHR $pcphr 4"|$WGRIB -i -grib -o dump SREFPROB
     let IP=IP+1
     mv dump srefpcp$IP
 
 #   prob of pcp > 0.10
-    $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 40 163 215"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
+    $WGRIB -PDS10 SREFPROB |grep "${grbpre} 65 40 163 215"| grep "0 1 $PHR $pcphr 4"|$WGRIB -i -grib -o dump SREFPROB
     let IP=IP+1
     mv dump srefpcp$IP
 
 #   prob of pcp > 0.25
-    $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 101 153 154"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
+    $WGRIB -PDS10 SREFPROB |grep "${grbpre} 65 101 153 154"| grep "0 1 $PHR $pcphr 4"|$WGRIB -i -grib -o dump SREFPROB
     let IP=IP+1
     mv dump srefpcp$IP
 
 #   prob of pcp > 0.50
-    $utilexec/wgrib -PDS10 SREFPROB |grep "${grbpre} 65 203 51 51"| grep "0 1 $PHR $pcphr 4"|$utilexec/wgrib -i -grib -o dump SREFPROB
+    $WGRIB -PDS10 SREFPROB |grep "${grbpre} 65 203 51 51"| grep "0 1 $PHR $pcphr 4"|$WGRIB -i -grib -o dump SREFPROB
     let IP=IP+1
     mv dump srefpcp$IP
   done
@@ -284,8 +287,8 @@ set +x
     cat srefpcp11 srefpcp12 srefpcp13 srefpcp14 srefpcp15 >> srefallpcp
   fi
 
-  $utilexec/copygb -g "$grid" -x srefallpcp srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl}
-  $utilexec/grbindex srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
+  $COPYGB -g "$grid" -x srefallpcp srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl}
+  $GRBINDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
 
 fi #fhr -ge 0
 
@@ -328,6 +331,7 @@ for fhr in $hours; do
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           ln -fs ${mdlin}${pcfhr}.tm00 fort.11
           ln -fs WRFPRS${fhr}.tm00 fort.51
+#         echo ${PDY}${cyc} | $OVERDATEGRIB
           echo ${PDY}${cyc} | ${utilexec}/overdate.grib
         else
           echo;echo $mdl GUESS= $GUESS
@@ -335,9 +339,9 @@ for fhr in $hours; do
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
         fi
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
-        ${utilexec}/wgrib -s WRFPRS${fhr}.tm00 | \
+        $WGRIB -s WRFPRS${fhr}.tm00 | \
         grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
-        ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
+        $WGRIB -i -grib -o temp WRFPRS${fhr}.tm00 > wgrib.out
         mv temp WRFPRS${fhr}.tm00;;
 
       wrfprs)  
@@ -353,7 +357,7 @@ for fhr in $hours; do
         fi;;
     esac
 
-  $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+  $GRBINDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
   inhrfrq=1
 
   if [ $fhr -gt ${fhrstr} ];then
@@ -447,7 +451,7 @@ for fhr in $hours; do
             ppgm=addsub
             pfhr1=$fhr6;pfhr2=$fhr3;pfhr3=$fhr         # fhr + (fhr3-fhr6)
             cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
-            $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+            $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
             ln -sf "WRFPRS${fhr3}.tm00"     fort.15    # Will contain 6 hr precip
             ln -sf "WRFPRS${fhr3}i.tm00"    fort.16
             ln -sf "WRFPRS${fhr}.tm00"     fort.17
@@ -471,11 +475,11 @@ for fhr in $hours; do
       esac
       cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
       case $natgrd in bgrd3d) 
-        ${utilexec}/wgrib -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
-        ${utilexec}/wgrib -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
+        $WGRIB -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
+        $WGRIB -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
         mv temp WRFPRS${FHRFRQ}.tm00;;
       esac
-      $utilexec/grbindex WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+      $GRBINDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
       export pgm=${mdl}_smartprecip; . prep_step
       ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
@@ -487,19 +491,19 @@ for fhr in $hours; do
       if [ $MKPCP -eq $mk12p -a $pfhr4 -gt 0 ];then
         cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
         case $natgrd in bgrd3d) 
-          ${utilexec}/wgrib -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
-          ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
+          $WGRIB -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
+          $WGRIB -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
           mv temp WRFPRS${fhr3}.tm00;;
         esac
-        $utilexec/grbindex WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+        $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
         cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
         case $natgrd in bgrd3d) 
-          ${utilexec}/wgrib -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
-          ${utilexec}/wgrib -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
+          $WGRIB -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
+          $WGRIB -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
           mv temp WRFPRS${fhr6}.tm00;;
         esac
-        $utilexec/grbindex WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+        $GRBINDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
         ln -sf "WRFPRS${fhr3}.tm00"      fort.17
         ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
@@ -526,17 +530,17 @@ EOF
       cpgbgrd=$grid
       if [ $inest -gt 0 ];then cpgbgrd=$ogrd;fi
       if [ $RUNTYP = aknest3 ];then cpgbgrd=$grid;fi
-      $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}precip.${fhr} ${freq}precip
-      $utilexec/grbindex ${freq}precip ${freq}precipi
-      $utilexec/copygb -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
-      $utilexec/grbindex ${freq}snow ${freq}snowi
+      $COPYGB -g "$cpgbgrd" -i3 -x ${freq}precip.${fhr} ${freq}precip
+      $GRBINDEX ${freq}precip ${freq}precipi
+      $COPYGB -g "$cpgbgrd" -i3 -x ${freq}snow.${fhr} ${freq}snow
+      $GRBINDEX ${freq}snow ${freq}snowi
     fi #MKPCP>0
   done #MKPCP loop
 
 #=================================================================
 #  RUN PRODUCT GENERATOR
 #=================================================================
-  $utilexec/grbindex WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+  $GRBINDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
   echo creating $prdgfl file for fhr $fhr
   cat >input${fhr}.prd <<EOF5
 WRFPRS${fhr}.tm00
@@ -576,7 +580,7 @@ EOF5
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
-  $utilexec/grbindex meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+  $GRBINDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 
 #=================================================================
 #   DECLARE INPUTS and RUN SMARTINIT 
@@ -587,8 +591,8 @@ EOF5
   ln -sf TOPONDFD     fort.46
   ln -sf LANDNDFD     fort.48
   if [ $ext = grb ];then
-    $utilexec/grbindex TOPONDFD TOPONDFDi
-    $utilexec/grbindex LANDNDFD LANDNDFDi
+    $GRBINDEX TOPONDFD TOPONDFDi
+    $GRBINDEX LANDNDFD LANDNDFDi
     ln -sf TOPONDFDi  fort.47
     ln -sf LANDNDFDi  fort.49
   fi
@@ -605,8 +609,8 @@ EOF5
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi
-    $utilexec/grbindex MAXMIN1 MAXMIN1i
-    $utilexec/grbindex MAXMIN2 MAXMIN2i
+    $GRBINDEX MAXMIN1 MAXMIN1i
+    $GRBINDEX MAXMIN2 MAXMIN2i
   fi
   freq=6;fmx=21   #fmx =  maxmin unit number for 1st maxmin file
   if [ $rg = dgx -a $check6 -eq 0 ];then freq=3;fi  #dgx created 3 hr precip file at 6 hr times
@@ -636,9 +640,9 @@ EOF5
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
-    $utilexec/grbindex MAXMIN3 MAXMIN3i
-    $utilexec/grbindex MAXMIN4 MAXMIN4i
-    $utilexec/grbindex MAXMIN5 MAXMIN5i
+    $GRBINDEX MAXMIN3 MAXMIN3i
+    $GRBINDEX MAXMIN4 MAXMIN4i
+    $GRBINDEX MAXMIN5 MAXMIN5i
 
     if [ $cycon -eq 1 -a inest -eq 0 ];then
 #     READ 3/6 hr precip from special files created by makeprecip

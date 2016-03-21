@@ -321,7 +321,7 @@
    ALLOCATE (P6CP01(IM,JM),P6CP10(IM,JM),P6CP50(IM,JM),STAT=kret)
    ALLOCATE (P12CP01(IM,JM),P12CP10(IM,JM),P12CP50(IM,JM),STAT=kret)
    ALLOCATE (HAINES(IM,JM),HLVL(IM,JM),STAT=kret)
-   ALLOCATE (CEIL(IM,JM),STAT=kret)
+   ALLOCATE (CEIL(IM,JM),SLP(IM,JM),SST(IM,JM),STAT=kret)
 !  for nests
    ALLOCATE (VALIDPT(IM,JM),STAT=kret)
    VALIDPT=.TRUE.
@@ -345,7 +345,7 @@
 
 !   Initialize varbs to spval (for nests)
     where (.not. validpt)
-      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL
+      PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL;SLP=SPVAL;SST=SPVAL
       P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL
     endwhere
 
@@ -363,7 +363,8 @@
 
 !      Compute WGUST at all forecast hours to write out for RTMA 
        if (.not.lhiresw) then
-         IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
+!        IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0)THEN
+         IF (FHR .LE. 12 .or. MOD(FHR,3).EQ.0 .or. (FHR .LE. 36 .and.  TRIM(REGION).EQ.'CS2P' ))THEN
            WGUST=SPVAL;TEMP1=SPVAL
            where(validpt)
              TEMP1=SQRT(DOWNU*DOWNU+DOWNV*DOWNV)
@@ -711,8 +712,27 @@
       DEC=-5.0
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,70,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
-      endif
 
+! SLP
+      print*, 'Output SLP', FHR
+      ID(1:25) = 0
+      ID(8)=130;ID(9)=102 ! MSLET (Mesinger/Membrane)
+      DEC=-0.1
+      CALL GRIBIT(ID,RITEHD,SLP,GDIN,70,DEC)
+      print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+
+! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
+! since Skin T/SST is already being used (per Geoff DiMego).
+! Disable for this implementation - revisit for next implementation
+      print*, 'Output SST', FHR
+      ID(1:25) = 0
+      ID(8)=11;ID(9)=105
+      ID(11)=2
+      DEC=-2.0
+!     CALL GRIBIT(ID,RITEHD,SST,GDIN,70,DEC)
+      print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+
+      endif ! dgx
 
 !==========================================================================
 !  TransWind - the average winds in the layer between the surface
@@ -1462,6 +1482,7 @@
 ! 03-19-13 : Add Gust and visibility to limited files for RTMA
 ! 06-03-15 : Add Cloud Ceiling to limited files for RTMA
 ! 08-12-15 : Add Sky Cover to limited files for RTMA
+! 11-07-15 : Add SLP and SST to limited files for RTMA
       IF (trim(GDIN%CORE) .NE. 'GFS') THEN
         ID(1:25) = 0
         ID(8)=180;ID(9)=1
@@ -1489,8 +1510,27 @@
       DEC=-5.0
       CALL GRIBIT(ID,RITEHD,CEIL,GDIN,IUNIT,DEC)
       print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
-      endif
 
+! SLP
+      print*, 'Output SLP', GDIN%FHR
+      ID(1:25) = 0
+      ID(8)=130;ID(9)=102 ! MSLET (Mesinger/Membrane)
+      DEC=-0.1
+      CALL GRIBIT(ID,RITEHD,SLP,GDIN,IUNIT,DEC)
+      print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+
+! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
+! since Skin T/SST is already being used (per Geoff DiMego).
+! Disable for this implementation - revisit for next implementation
+      print*, 'Output SST', GDIN%FHR
+      ID(1:25) = 0
+      ID(8)=11;ID(9)=105
+      ID(11)=2
+      DEC=-2.0
+!     CALL GRIBIT(ID,RITEHD,SST,GDIN,IUNIT,DEC)
+      print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+
+      endif ! dgx
       ENDIF
 
        return

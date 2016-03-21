@@ -7,8 +7,8 @@ job=$1
 jfhr=$2
 # Create J{MDL}_SMINIT job
   echo "#BSUB -J ${job}"             >bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -oo /stmpp2/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -eo /stmpp2/${USER}/${modeld}.${model_ver}/${cyc}/list/o${job}" >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -oo /stmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${cyc}/list/o${job}" >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -eo /stmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${cyc}/list/o${job}" >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -n 12"                >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -W ${WALLCLK}"       >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -P RTMA-T2O"             >>bjobcards-dev${RUNTYP}-$jfhr

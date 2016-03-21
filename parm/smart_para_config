@@ -2,6 +2,8 @@
 # nam_smartinit configuration
 # Jeff McQueen 01/2013 
 
+. /usrx/local/Modules/default/init/ksh
+module load prod_util
 
 # OUTPUT REGION TO DOWNSCALE TO
 # valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
@@ -25,10 +27,12 @@ export envir=dev
 export SENDECF=NO
 export SENDDBN=NO
 export SENDDBN_GB2=NO
+export DBNROOT=/nwprod/spa_util/para_dbn
+export KEEPDATA=${KEEPDATA:-%KEEPDATA:YES%}
 export nam_ver=v3.1.6
 export dgex_ver=v3.1.1
 
-export HOMEdng=/meso/save/$USER/smartinit.${model_ver}             # dng software root dir
+export HOMEdng=/meso/save/$USER/smartinit.${nam_smartinit_ver}             # dng software root dir
 echo HOMEdng $HOMEdng
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
@@ -38,8 +42,15 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 #TEST WITH Dana's GFS changes
 #export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
 
+export COMROOTp1=${COMROOTp1:-/com}
+export GESROOTp1=${GESROOTp1:-/nwges}
+export NWROOTp1=/nwprod
+export NWROOT=/nw${envir}2
+export PCOMROOT=${PCOMROOT:-/pcom2/${envir}}
+
 export COMROOT=/com
 export gespath=/nwges/prod          
+export GESIN=/nwges/prod          
 export COM_IN=${COMROOT}/${mdl}/prod 
 
 #TEST WITH Eric's NAM PARA     
@@ -52,14 +63,16 @@ export COM_IN=${COMROOT}/${mdl}/prod
 ## End Test
 
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
-export COM_SREF=${COMROOT}/sref/prod   
+#export COM_SREF=${COMROOT}/sref/prod   
+# new location of SREF
+export COM_SREF=/com2/sref/prod
 
-# Use parallel SREF
-#export COM_SREF=/com2/sref/para
 
-export DATA_IN=/ptmpp2/$USER/smartinit.${model_ver}/$PDY/$cyc
+export DATA_IN=/ptmpp2/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
+export DATAROOT=/ptmpp2/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 
-export COM_OUT=/meso2/noscrub/$USER/${model_ver}
+export COM_OUT=/meso2/noscrub/$USER/${nam_smartinit_ver}
 #TEST export COM_OUT=/ptmpp2/$USER
 export pcom=${pcom:-${COM_OUT}/pcom/nam}
+export PCOM=${PCOM:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`

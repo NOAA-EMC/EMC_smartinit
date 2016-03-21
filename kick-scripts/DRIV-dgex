@@ -1,9 +1,10 @@
 #!/bin/ksh
 export stutil=/hwrf/noscrub/soft/modulefiles
-. /usrx/local/Modules/3.2.9/init/ksh
+. /usrx/local/Modules/default/init/ksh
 module load ibmpe lsf ics
 module use $stutil
 module load ruby emc-utils
+#module load prod_util
 
 #==========================================
 # Submit several mdl_smartinit domain runs
@@ -18,10 +19,10 @@ module load ruby emc-utils
 #==========================================
 
 # set job directory needed if running from cron
-export model_ver=v3.4.0 
-export code_ver=v3.4.0
+export nam_smartinit_ver=v3.5.1 
+export code_ver=v3.5.1
 export modeld=smartinit
-export rootd=/meso/save/${USER}/${modeld}.${model_ver}
+export rootd=/meso/save/${USER}/${modeld}.${nam_smartinit_ver}
 export RUN_ENVIR=emc
 export envir=emc
 
@@ -32,7 +33,7 @@ cd $kickd
 
 # Determine date
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-#export PDY=20150629 ###TEST
+#export PDY=20160215 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -42,7 +43,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#export cyc=00  #TEST
+#export cyc=06  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -85,8 +86,8 @@ for RUNTYP in $dgexrun;do
 
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}
-  mkdir -p /ptmpp2/${USER}/${modeld}.${model_ver}/${PDY}/${cyc}/list
-  ${kickd}/RUN_ALL >/ptmpp2/$USER/${modeld}.${model_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
+  mkdir -p /ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
+  mkdir -p /ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list
+  ${kickd}/RUN_ALL >/ptmpp2/$USER/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done

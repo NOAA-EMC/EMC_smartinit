@@ -1,5 +1,5 @@
 #!/bin/ksh
-####NCO set -xa   #NCO preferred setting
+set -xa   #NCO preferred setting
 
 ########################################
 # NAM SMARTINIT JOB   
@@ -23,6 +23,7 @@
 # 2011-07-22  Geoff Manikin - Can't use nest output for F00
 # 2012-12-03  Jeff McQueen  - Adapted for unified smartinit
  # 2013-08-27  Jeff McQueen  - Put in vertical structure     
+# 2016-02-12  Annette Gibbs - Added NCO phase 2 standards
 
 #  NOTE: cyc, ffhr, RUNTYP must be set from controlling ECFlow script
 #   export cyc = 00,06,12,18
@@ -39,7 +40,7 @@ export IVADJ=${IVADJ:-T}
 echo cyc is ${cyc:?}
 echo envir is ${envir:?}
 echo modeld is ${modeld:?}
-echo model_ver is ${model_ver:?}
+echo model_ver is ${nam_smartinit_ver:?}
 echo nam_ver is ${nam_ver:?}
 
 ######################################################
@@ -48,7 +49,7 @@ echo nam_ver is ${nam_ver:?}
 # not they will take the default values which is set
 # for the NCO running enviroment
 #######################################################
-export RUN_ENVIR=${RUN_ENVIR:-prod}
+export RUN_ENVIR=${RUN_ENVIR:-nco}
 
 export SENDECF=${SENDECF:-YES}
 
@@ -81,15 +82,7 @@ export mdl=${mdl:-dgex}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
-if [ "$RUN_ENVIR" = prod ];then
- if [ "$envir" != prod ]; then
-   export DBNROOT=/nwprod/spa_util/para_dbn
-   export SENDDBN=${SENDDBN:-NO}
-   export SENDDBN_GB2=${SENDDBN_GB2:-YES}   #NCO preference
-   export pcom=${pcom:-/pcom/${envir}/${NET}}
-   export jlogfile=/com/logs/${envir}/jlogfile
- fi
-else
+if [ "$RUN_ENVIR" != nco ];then
  dng_para_config${RUNTYP}   #EMC User set
 fi
 
@@ -100,9 +93,8 @@ date
 # obtain unique process id (pid) and make temp directory
 ####################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd2}
-#NCO export DATA=$DATA_IN/${job}.${pid}
-export DATA=${DATA:-$DATA_IN/${job}.${pid}}  #DEV
+export DATAROOT=${DATAROOT:-/tmpnwprd_p2}
+export DATA=${DATA:-$DATAROOT/${job}.${pid}}
 mkdir -p $DATA
 cd $DATA
 
@@ -118,10 +110,9 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-if [ "$envir" = 'prod' ] ; then
-  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.${job}.$$}
-else
-  export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
+if [ "$envir" != 'prod' ] ; then
+  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
 fi
 
 ####################################
@@ -131,20 +122,19 @@ fi
 export SENDECF=${SENDECF:-YES}
 export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
-#XXW export SENDDBN_GB2=${SENDDBN_GB2:-YES}
 
 ####################################
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-/nw${envir}}  # or /meso/save/${USER}
-export HOMEdng=${HOMEdng:-/nw${envir}/${modeld}.$model_ver}  # NCO preferred
-export HOMEnam=${HOMEnam:-/nw${envir}/nam.${nam_ver}}
-export HOMEdgex=${HOMEdgex:-/nw${envir}/dgex.${dgex_ver}}
+export ROOTdng=${ROOTdng:-$NWROOT}  # or /meso/save/${USER}
+export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.$model_ver}  # NCO preferred
+export HOMEnam=${HOMEnam:-$NWROOTp1/nam.${nam_ver}}
+export HOMEdgex=${HOMEdgex:-$NWROOTp1/dgex.${dgex_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
-export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen until nam is in vert structure
-export EXECdgex=${EXECdgex:-${HOMEdgex}/exec}   #Point to dgex_prdgen until dgex is in vert structure
+export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen
+export EXECdgex=${EXECdgex:-${HOMEdgex}/exec}   #Point to dgex_prdgen
 export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
@@ -152,38 +142,36 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 ###################################
 # Set up the UTILITIES
 ###################################
-export utilscript=${utilscript:-/nwprod/util/ush}
-export utilexec=${utilexec:-/nwprod/util/exec}
-export utilparm=${utilparm:-/nwprod/util/parm}
-export gespath=${gespath:-/nwges/${envir}}
+#export utilscript=${utilscript:-/nwprod/util/ush}
+#export utilexec=${utilexec:-/nwprod/util/exec}
+#export utilparm=${utilparm:-/nwprod/util/parm}
+#export gespath=${gespath:-/nwges/${envir}}
+export GESIN=${GESIN:-$GESROOTp1/${envir}}
+
+. /usrx/local/Modules/default/init/ksh
+module load grib_util
 
 # use local versions of cnvgrib and wgrib2
 #export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
 export WGRIB2=${EXECdng}/smartinit_wgrib2
 export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
-###############################################################
-# Run setup to initialize working directory and utility scripts
-###############################################################
-sh $utilscript/setup.sh
-
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-sh $utilscript/setpdy.sh  
-. ${DATA}/PDY    # set local dir for crontab
+setpdy.sh
+. PDY  # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
-sh  ${gespath}/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
+sh  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold start export GUESS=GDAS   #TEST
 
 ##############################################
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
-export COMROOT=${COMROOT:-/com}    #location of DATE file
-export COM_IN=${COM_IN:-/com/${NET}/${envir}}
-export COM_OUT=${COM_OUT:-/com/${NET}/${envir}}
+export COM_IN=${COM_IN:-$COMROOTp1/${NET}/${envir}}
+export COM_OUT=${COM_OUT:-$COMROOTp1/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
@@ -216,17 +204,17 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com/sref/${envir}}
+export COM_SREF=${COM_SREF:-/com2/sref/${envir}}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
-export pcom=${pcom:-/pcom/${NET}}
-mkdir -p $pcom
+export PCOM=${PCOM:-$PCOMROOT/${NET}}
+mkdir -p $PCOM
 
 ####NCO SET env  
 
 msg="JOB $job HAS BEGUN"
-./postmsg "$jlogfile" "$msg"
+postmsg "$jlogfile" "$msg"
 
 ########################################################
 # Execute the script.
@@ -235,13 +223,13 @@ ${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
 cat $pgmout
 
 msg="ENDED NORMALLY."
-./postmsg "$jlogfile" "$msg"
+postmsg "$jlogfile" "$msg"
 
 ##############################
 # Remove the Temporary working directory
 ##############################
-cd $DATA_IN
-if [ ${RM_TMPDIR:-YES} = YES ] ; then rm -rf $DATA ; fi
+cd $DATAROOT
+if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi
 
 date
 
