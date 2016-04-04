@@ -49,6 +49,7 @@ set -xa
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
 export grib=1
+export grib=2
 
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
@@ -374,13 +375,17 @@ case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
           slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${slpmdl}${pcfhr}${text}
           echo MDLIN $mdlin
           cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-          if [ -e $ceil_file ];then
+          if [ -e $ceil_file -a $grib = 1 ];then
              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
              cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
              mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
           fi
           if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+             wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
              cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
              mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
           fi
@@ -394,13 +399,17 @@ case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
           ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
           slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
-          if [ -e $ceil_file ];then
+          if [ -e $ceil_file -a $grib = 1 ];then
              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
              cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
              mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
           fi
           if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+             wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
              cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
              mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
           fi
@@ -434,13 +443,17 @@ fi;;
             slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${slpmdl}${pcfhr}${text}
             echo MDLIN $mdlin
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-            if [ -e $ceil_file ];then
+            if [ -e $ceil_file -a $grib = 1 ];then
                wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
                cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
                mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
             fi
             if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
                wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+               wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
                cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
                mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
             fi
@@ -458,13 +471,17 @@ fi;;
             ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
             slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
-            if [ -e $ceil_file ];then
+            if [ -e $ceil_file -a $grib = 1 ];then
                wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
                cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
                mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
             fi
             if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
                wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+               wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
                cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
                mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
             fi

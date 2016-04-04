@@ -59,7 +59,7 @@ export COM_IN=${COMROOT}/${mdl}/prod
 #TEST export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
 
 ## Test with Eric's NAM PARA
-##export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
+export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
 ## End Test
 
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
