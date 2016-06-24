@@ -37,6 +37,7 @@ cd $kickd
 # Determine date
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
 #export PDY=20150629 ###TEST
+export PDY=20160621 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -63,7 +64,6 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
 #domains="hi ak pr conus aknest3 ak_rtmages"
 #domains="conusnest2p5 hi pr aknest3 conus"
-#domains="conusnest2p5 "
 #domains="conus"
 #domains="aknest3 "
 #domains="hi "
@@ -74,15 +74,19 @@ domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
 #====================================================================
 
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=12
-  export mdl=nam
+  export ENDHRS=84
+# export mdl=nam
+  export mdl=namrr
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                          ak_rtmages) ENDHRS=12;;
-                            aknest3) export ENDHRS=12;; 
-                       conusnest2p5) export ENDHRS=12;; 
+                            aknest3) export ENDHRS=60;; 
+                       conusnest2p5) export ENDHRS=60;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
- 
+
+# Hourly forecasts to 18-h for the parent 12 km, 3 km DONUS nest and 3km Alaska
+   if [ $cyc -ne 00 -a $cyc -ne 06 -a $cyc -ne 12 -a $cyc -ne 18 ];then export ENDHRS=18;fi 
+
   export NET=$mdl
   export RUN=$NET
   export RUNTYP=$RUNTYP

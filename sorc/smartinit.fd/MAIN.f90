@@ -19,7 +19,7 @@
 !   12-11-30  J McQueen  - Converted to f90, unified for different domains
 !========================================================================
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
-      INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC
+      INTEGER IMAX,JMAX,KMAX,FHR,CYC,DATE,HOUR,ITOT,OGRD,NARGC,HAVESREF
 
       LOGICAL RITEHD,LCYCON,LHR3,LHR12,LNEST,LHIRESW
       CHARACTER*4 CTMP,REGION,CORE
@@ -60,7 +60,8 @@
     INTERFACE
     SUBROUTINE GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
     P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
-    S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT)
+    S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT, &
+    HAVESREF)
     use grddef
     use aset3d
     use aset2d
@@ -69,7 +70,7 @@
 
     TYPE (GINFO) :: GDIN
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR
+    INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR,HAVESREF
     PARAMETER(MBUF=2000000)
     CHARACTER CBUF(MBUF)
     CHARACTER*80 FNAME
@@ -251,6 +252,12 @@
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
       CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
+      if (cyc .ne. 00 .and. cyc .ne. 06 .and. cyc .ne. 12 .and. cyc .ne.18)then
+        HAVESREF=0
+      else
+        HAVESREF=1
+      endif
+      print*,'CYC, HAVESREF=',cyc, havesref
       if (CORE.eq.'nmmb'.or. CORE.eq.'arw') GDIN%LHIRESW=.true.
       LHIRESW=GDIN%LHIRESW
       print *,  nargc,' Running Smartinit for FHR', FHR,' IFHRSTR ',IFHRSTR
@@ -328,9 +335,11 @@
    if(lnest) ALLOCATE (LCLD(IM,JM),MCLD(IM,JM),HCLD(IM,JM),TCLD(IM,JM),STAT=kret)
 
     RH=0.
+    print*,'CALL GETGRIB with HAVESREF: ', HAVESREF
     CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
-    P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT)
+    P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT, &
+    HAVESREF)
 
 !!! Reset VEG here (Matt Pyle, 1/14)
         print *,'VEG ',minval(veg),maxval(veg)
@@ -476,6 +485,9 @@
 
 !  skip precip fields if FHR=0
         IF (FHR .EQ. 0) GOTO 444
+! Skip POP fields for off-cycles of NAMRR
+!       if (cyc .ne. 00 .and. cyc .ne. 06 .and. cyc .ne. 12 .and. cyc .ne.18)goto 444 
+        if (HAVESREF .eq. 0)goto 444
 !         CALL OUTPRCP
 !--------------------------------------------------------------------------
 ! QPF - simply take model QPF and change units to inches

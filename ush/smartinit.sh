@@ -48,7 +48,7 @@ set -xa
 
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
-export grib=1
+#export grib=1
 export grib=2
 
 export rg=`echo $RUNTYP |cut -c1-2` 
@@ -142,6 +142,7 @@ case $RUNTYP in
    hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
 # old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
    priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
+   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
 # new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
 # new priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
 # new   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
@@ -274,6 +275,9 @@ let pcphr3=pcphr-3
 # fhr should be gt 0 since precip is not available at initial time
 if [ $ffhr -gt ${fhrstr} ]; then
 
+# SREF is only available at these cycles
+if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
+
 # Get the sref precip fields that we need
   if [ $rg = gm -o $rg = dgx ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
@@ -327,6 +331,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
   $GRBINDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
 
 fi #fhr -ge 0
+
+fi #$cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18
 
 let ffhr1=ffhr-1
 let ffhr2=ffhr-2
@@ -923,8 +929,10 @@ fi # grib = 1
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
-    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
-    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
+      cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
+      cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    fi
     if [ -s MAXMIN${fhr1}.tm00 ];then
       echo MAXMIN${fhr1}.tm00 FOUND
       cp MAXMIN${fhr2}.tm00 MAXMIN2
