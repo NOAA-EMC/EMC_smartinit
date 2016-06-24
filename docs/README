@@ -874,4 +874,36 @@ Feb 2016 - smartinit.v3.5.1
 
         ush/smartinit.sh
 
+Apr 2016 - smartinit.v4.0.0
 
+* Setup to run with either GRIB1 or GRIB2
+	To run, do the following:
+		- set grib to 1 or 2; if GRIB1 or GRIB2 respectively
+		- set the NAM directory in parm/smart_para_config ($COM_IN)
+		- set cr8bjob or cr8bjob_poe in kick-scripts/RUN_ALL; if GRIB1 or GRIB2 respectively
+
+June 2016 - smartinit.v4.0.0
+
+* Setup DGEX to run with the new parallel
+	- added new script with parallel wgrib2 changes: ush/dgex_smartinit_g2.sh	
+        - added call to new script in scripts/exdgex_smartinit.sh.ecf
+
+* Added NAMRR changes
+
+	- renamed terrain and land/sea mask files to namrr.  These are the same files, just renamed so the script
+	  can use them.
+
+	fix/topo/namrr*
+	fix/mask/namrr*
+
+	- added a new script
+
+	jobs/JNAMRR_SMINIT
+		
+	- added changes to code and script that deals with not having the SREF data for the hourly forecasts to 18 hours
+
+	sorc/smartinit.fd/GETGRIB.f90
+	sorc/smartinit.fd/MAIN.f90
+	ush/smartinit.sh
+	kick-scripts/DRIVcs2p
+        scripts/exnamrr_smartinit.sh.ecf

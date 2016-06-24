@@ -2,8 +2,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         exdgex_smartinit.sh
-# Script description:  Run DGDEX smartinit downscaling jobs
+# Script name:         exnamrr_smartinit.sh
+# Script description:  Run NAM smartiniti downscaling jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
@@ -21,50 +21,37 @@
 # 2013-07-02  Jeff McQueen  - Modified to create all 00 hour downscaling from NAM parent
 #                             While 03 --> 54/60 created from NAM Nests
 # 2013-08-27  JTM           - Put in vertical structure
-# 2013-11-25h JTM           - added option to downscale dgex to 192 forecast hours
 #
 # NCO SUBMISSION  HRS       RUNTYP
-#   NAM  all cycs
 #                 00-12     ak_rtmages
 #                 00-84     conus,ak,hi,pr
 #                 00-60     aknest3,conusnest2p5
-#  dgex  00/12Z   84-192    dgex_ak   * run jgefstosref beforehand
-#        06/18Z   78-192    dgex_cs
 
 # NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #
 
-set -xa
+#NCO set -xa
 msg="JOB $job HAS BEGUN"
 #NCO postmsg "$jlogfile" "$msg"
 
 cd $DATA
 
-
-if [ $RUNTYP = dgex_cs ];then  # 06/18 UTC Cycle 
-  export fhrstr=${fhrstr:-78}
-  export ENDHR=${ENDHR:-192}
-elif [ $RUNTYP = dgex_ak ];then  #00/12 UTC cycle
-  export fhrstr=${fhrstr:-84}
-  export ENDHR=${ENDHR:-192}
-else 
 # 00/12 UTC CYCLE smartinit CONFIGURE
-  export fhrstr=00
   export ENDHR=60
-fi
+  export fhrstr=00
 
 # For Off-Cycles must stop nest at 54 hours, so that 12-hr totals at
 # f66 aren't split between nest and parent
-#NOT for DGEX  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=`expr $ENDHR - 6`;fi
+  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=54;fi
   case $RUNTYP in
               ak_rtmages) export ENDHR=12;;
                  gm|guam) export ENDHR=48;;       
     conusnest2p5|aknest3) export ENDHR=60;;
   esac
 
-# For 5 km NDFD output grids:
+# For 5 km NAM downscaled NDFD output grids:
 #   Downscale from NAM nest for forecast hrs 03-->54/60
-#   Downscale from NAM parent for forecast hrs=0 and > ENDHR (54/60)
+#   Downscale from MDL NAM parent for forecast hrs=0 and > ENDHR (54/60)
  
   case $RUNTYP in gm|guam) export RUNTYP=guamnest;; esac
   if [ $ffhr -gt $fhrstr -a $ffhr -le $ENDHR ];then
@@ -75,10 +62,9 @@ fi
          ak) export RUNTYP=alaskanest;;
       esac
   fi
+  echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
+  ${SMINIT_SSH:-$USHdng/smartinit.sh}
 
-  ${SMINIT_SSH:-$USHdng/dgex_smartinit_g2.sh}
-
-#NCO set -x
 #####################################################################
 
 echo EXITING $0

@@ -275,9 +275,6 @@ let pcphr3=pcphr-3
 # fhr should be gt 0 since precip is not available at initial time
 if [ $ffhr -gt ${fhrstr} ]; then
 
-# SREF is only available at these cycles
-if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
-
 # Get the sref precip fields that we need
   if [ $rg = gm -o $rg = dgx ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
@@ -331,8 +328,6 @@ if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
   $GRBINDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
 
 fi #fhr -ge 0
-
-fi #$cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18
 
 let ffhr1=ffhr-1
 let ffhr2=ffhr-2
@@ -929,10 +924,8 @@ fi # grib = 1
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
-    if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
-      cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
-      cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
-    fi
+    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
+    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
     if [ -s MAXMIN${fhr1}.tm00 ];then
       echo MAXMIN${fhr1}.tm00 FOUND
       cp MAXMIN${fhr2}.tm00 MAXMIN2
