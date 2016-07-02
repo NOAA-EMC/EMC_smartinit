@@ -1,14 +1,3 @@
-#BSUB -J DNG18.dgex_cs-81
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v4.0.0/20160613/18/list/oDNG18.dgex_cs-81
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v4.0.0/20160613/18/list/oDNG18.dgex_cs-81
-#BSUB -n 12
-#BSUB -W 0:30
-#BSUB -P RTMA-T2O
-#BSUB -q debug
-#BSUB -R span[ptile=12]
-#BSUB -R affinity[core(1)]
-#BSUB -x
-#BSUB -a poe
 #!/bin/ksh
 set -xa   #NCO preferred setting
 
@@ -19,8 +8,8 @@ set -xa   #NCO preferred setting
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Job name:         J{MDL}_SMINIT
-# Job description:  Run dgex smartinit jobs
+# Job name:         nam_smartinitconus.job
+# Job description:  Run nam smartinit jobs
 #
 # Author:        Bradley Mabe       Org: NP11         Date: 2007-08-23
 #
@@ -33,26 +22,24 @@ set -xa   #NCO preferred setting
 # 2011-07-06  Geoff Manikin - Adapted to use nested output
 # 2011-07-22  Geoff Manikin - Can't use nest output for F00
 # 2012-12-03  Jeff McQueen  - Adapted for unified smartinit
- # 2013-08-27  Jeff McQueen  - Put in vertical structure     
+# 2013-08-27  Jeff McQueen  - Put in vertical structure     
 # 2016-02-12  Annette Gibbs - Added NCO phase 2 standards
 
 #  NOTE: cyc, ffhr, RUNTYP must be set from controlling ECFlow script
 #   export cyc = 00,06,12,18
 #   export ffhr = 00,03,06...84
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
- 
-#Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
-export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
 
 # TEMPORARY SWITCH for VADJUST wind terrain adjustment
 export IVADJ=${IVADJ:-T}
 
+#Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
+export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
 
 echo cyc is ${cyc:?}
 echo envir is ${envir:?}
 echo modeld is ${modeld:?}
 echo model_ver is ${nam_smartinit_ver:?}
-echo nam_ver is ${nam_ver:?}
 
 ######################################################
 # The following two variable could be defined in the
@@ -67,17 +54,18 @@ export SENDECF=${SENDECF:-YES}
 ###################################
 # Specify NET and RUN Name and model
 ####################################
-#NCO set NET = nam, dgex or hiresw for GUAM run
-export NET=${NET:-dgex}
-export RUN=${RUN:-dgex}
-export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export mdl=${mdl:-dgex}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+#NCO set NET = namrr, nam, dgex or hiresw for GUAM run
+export NET=${NET:-namrr}
+export RUN=${RUN:-namrr}
+export GUESS=${GUESS:-NAMRR} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export mdl=${mdl:-namrr}   # Delineates parent model (namrr,nam,hiresw,rap,gfs..>)
+export KEEPDATA=${KEEPDATA:-NO}
 
 #####################################################################################
 # This block is for Developer's test run:
 # Run config file to get input parameters
 # This config file should define the following variables
-# DATA_IN: Location of working directory, default to /tmpnwprd
+# DATA_IN: Location of working directory, default to /tmpnwprd2
 # SENDECF: If the job is to be running using ECF, default to YES
 # SENDDBN: Set to NO for developers, default to YES
 # COM_IN:  Directory for input files, default to /com/$NET/${envir}
@@ -93,6 +81,8 @@ export mdl=${mdl:-dgex}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
+
+if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" != nco ];then
  dng_para_config${RUNTYP}   #EMC User set
 fi
@@ -138,14 +128,11 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export ROOTdng=${ROOTdng:-$NWROOT}  # or /meso/save/${USER}
-export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.$model_ver}  # NCO preferred
+export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
 export HOMEnam=${HOMEnam:-$NWROOTp1/nam.${nam_ver}}
-export HOMEdgex=${HOMEdgex:-$NWROOTp1/dgex.${dgex_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen
-export EXECdgex=${EXECdgex:-${HOMEdgex}/exec}   #Point to dgex_prdgen
 export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
@@ -160,6 +147,7 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 export GESIN=${GESIN:-$GESROOTp1/${envir}}
 
 . /usrx/local/Modules/default/init/ksh
+module load /nwpara2/modulefiles/util_shared/v1.0.3
 module load grib_util
 
 # use local versions of cnvgrib and wgrib2
@@ -174,8 +162,18 @@ setpdy.sh
 . PDY  # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
-sh  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh 
 #   For testing cold start export GUESS=GDAS   #TEST
+if [ -s $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
+.  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+else
+   echo  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
+   export GUESS=NDAS
+fi
+echo GUESS=$GUESS
+export pcfhr=06
+export pcdate=`$NDATE -${pcfhr} $PDY$cyc |cut -c 1-8`
+export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
+
 
 ##############################################
 # Define COM directories
@@ -208,21 +206,24 @@ fi
 
 export srefcyc
 let srefcyc2=$srefcyc
+###typeset -Z2 srefcyc2
 
 export gefscyc
 let gefscyc2=$gefscyc
+###typeset -Z2 gefscyc2
 
+#DEV TEST typeset problem
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com2/sref/${envir}}
+export COM_SREF=${COM_SREF:-/com2/sref/prod}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
 export PCOM=${PCOM:-$PCOMROOT/${NET}}
 mkdir -p $PCOM
 
-####NCO SET env  
+####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
 postmsg "$jlogfile" "$msg"

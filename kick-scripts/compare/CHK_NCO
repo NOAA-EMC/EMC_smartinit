@@ -3,9 +3,9 @@
 # Driving script to check differences between nam or smartinit grib files
 # Jeff McQueen   02/25/2013
 #=======================================================
-#set -x 
+set -x 
 typeset -Z2 cyc ffhr
-
+cp /global/save/Hui-Ya.Chuang/bin/diffgb .
 #===============================================================
 # RUNTYP for GRID smart : conus ak hi pr conus2p5 ak3
 # RUNTYP for GRID bsmart: conusnest, alaskanest,hawaiinest,priconest
@@ -15,12 +15,12 @@ export RUNTYP=${1:-conus2p5}
 GRID=smart        #smart, bgrd3d, bsmart
 mdl=nam           # nam, dgex, hiresw, gfs...
 
-yymmdd=20140616
+yymmdd=20160328
 export cyc=12       
 
 export ffhr=00     # Starting forecast hour
-export ENDHRS=84   # Ending forecast hour
-INCR=03            # Forecast hour increment
+export ENDHRS=12   # Ending forecast hour
+INCR=01            # Forecast hour increment
 fhrstr=$ffhr       # hr to start comparisons
 
 ioff=0
@@ -39,8 +39,10 @@ esac
 # location of smartinit files
 #===============================================================
 ncodir=/com/${mdl}/test/${mdl}.${yymmdd}  #NCO 
+ncodir=/meso2/noscrub/Annette.Gibbs/v4.0.0/nam.20160328
 ###devdir=/com/${mdl}/para/${mdl}.${yymmdd} #NCO PARA 
 devdir=/ptmpp1/${USER}/${mdl}.${yymmdd}   #EMC PARA 
+devdir=/meso2/noscrub/Annette.Gibbs/v4.0.0/nam.20160328.opsnam.bench
 
 #===============================================================
 # GRIB1 FILE PREFIX NAME FORMAT (eg: nam.t12z.bgrd3d42.tm00)

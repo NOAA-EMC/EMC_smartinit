@@ -5,6 +5,8 @@
      use aset2d             ! Define 2-d grids
      use asetdown           ! Define downscaled output grids 
      use rdgrib             ! Define grib read routines rdhdrs, setvar
+     USE GRIB_MOD
+     USE pdstemplates
 !========================================================================
 !$$$  SUBPROGRAM DOCUMENTATION BLOCK
 !                .      .    .
@@ -25,6 +27,7 @@
       CHARACTER*4 CTMP,REGION,CORE
 
       CHARACTER*50, ALLOCATABLE :: WXSTRING(:,:)
+      CHARAcTER(LEN=80) :: FNAMEOUT, FNAME2OUT
 !-----------------------------------------------------------------------------------
 !  TYPE(ISET), INTENT(IN) :: iprcp(,:,)
    INTEGER, ALLOCATABLE :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
@@ -54,6 +57,7 @@
 !
 !   REAL,    ALLOCATABLE   :: GRID(:)
    TYPE (GINFO) :: GDIN
+   TYPE (GRIBFIELD):: GFLD, GFLD8
 
     INCLUDE 'DEFGRIBINT.INC'   ! interface statements for gribit subroutines
 !-----------------------------------------------------------------------------------------
@@ -61,14 +65,17 @@
     SUBROUTINE GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
     P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
     S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT, &
-    HAVESREF)
+    GFLD,GFLD8,HAVESREF)
     use grddef
     use aset3d
     use aset2d
     use rdgrib
     use constants
+    USE GRIB_MOD
+    USE pdstemplates
 
     TYPE (GINFO) :: GDIN
+      TYPE (GRIBFIELD):: GFLD, GFLD8
     INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
     INTEGER YEAR,MON,DAY,IHR,DATE,FHR,IFHR,IFHRIN,IFHRSTR,HAVESREF
     PARAMETER(MBUF=2000000)
@@ -203,10 +210,12 @@
       use grddef
       use aset2d
       use asetdown
+      USE GRIB_MOD
        INTEGER ID(25)
        LOGICAL RITEHD
        TYPE (GINFO) :: GDIN
        REAL,    INTENT(INOUT)  :: SKY(:,:)
+   TYPE (GRIBFIELD):: GFLD, GFLD8
    END SUBROUTINE griblimited
 
    SUBROUTINE HINDEX (IM,JM,HAINES,HLVL,VALIDPT)
@@ -231,7 +240,8 @@
 !-----------------------------------------------------------------------------------------
       LNEST=.FALSE.
       LHIRESW=.FALSE.
-      LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+!     LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+      LCYCON=.FALSE.;LHR12=.FALSE.;LHR3=.FALSE.
       nargc=iargc()
       call getarg(1,CTMP)
       READ (ctmp,*) GDIN%CYC
@@ -252,6 +262,7 @@
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
       CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
+      INHRFRQ=GDIN%INHRFRQ
       if (cyc .ne. 00 .and. cyc .ne. 06 .and. cyc .ne. 12 .and. cyc .ne.18)then
         HAVESREF=0
       else
@@ -295,7 +306,9 @@
 !     READ INDEX FILE TO GET GRID SPECS
 !==========================================================
     LUGB=11;LUGI=12
-    CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+!   CALL RDHDRS(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
+      write(0,*) 'to RDHDRS_g2 call'
+      CALL RDHDRS_g2(LUGB,LUGI,IGDNUM,GDIN,NUMVAL)
     IM=GDIN%IMAX;JM=GDIN%JMAX;ITOT=NUMVAL
     if (lnest) then   
       GDIN%KMAX=40
@@ -339,7 +352,9 @@
     CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
     P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT, &
-    HAVESREF)
+    GFLD,GFLD8,HAVESREF)
+        write(0,*) 'GFLD%igdtmpl(8): ', GFLD%igdtmpl(8)
+        write(0,*) 'GFLD%igdtmpl(9): ', GFLD%igdtmpl(9)
 
 !!! Reset VEG here (Matt Pyle, 1/14)
         print *,'VEG ',minval(veg),maxval(veg)

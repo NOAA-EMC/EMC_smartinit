@@ -1,13 +1,11 @@
    SUBROUTINE GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
    P03M,P06M,P12M,SN03,SN06,S3REF01,S3REF10,S3REF50,S6REF01,  &
-   S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT, &
-   HAVESREF)
+   S6REF10,S6REF50,S12REF01,S12REF10,S12REF50, THOLD,DHOLD,GDIN,VALIDPT)
 
     use grddef
     use aset3d
     use aset2d
     use rdgrib
-    use constants
 
 !$$$  SUBPROGRAM DOCUMENTATION BLOCK
 !                .      .    .
@@ -25,7 +23,8 @@
 !   06-09-14  G MANIKIN  - ADAPT CODE TO NAM 
 !   12-10-01  J.MCQUEEN  - Reduced code thru use of rdhdrs,setvar
 !   subrountines
-!   12-10-01             - Combined on and off-cycle reads into getgrib
+!   12-10-01  J.McQueen - Combined on and off-cycle reads into getgrib
+!   13-07-15  J.McQueen - Modified to read pressure level fields over GM (non nam, hiresw model)
 
 ! USAGE:    CALL SMARTINIT 
 !   INPUT ARGUMENT LIST:
@@ -38,13 +37,13 @@
 
       TYPE (GINFO) :: GDIN
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200)
-      INTEGER YEAR,MON,DAY,IHR,DATE,IFHR,HAVESREF
+      INTEGER YEAR,MON,DAY,IHR,DATE,IFHR
 
       PARAMETER(MBUF=2000000)
       CHARACTER CBUF(MBUF)
       CHARACTER*80 FNAME
-      CHARACTER*4 DUM1, REGION, CORE
-      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED, LHIRESW
+      CHARACTER*4 DUM1, REGION
+      LOGICAL*1 LCYCON,LHR3,LHR6,LHR12,LFULL,LANL,LLIMITED
       LOGICAL LNEST   ! for nests
       INTEGER JENS(200),KENS(200),CYC
 
@@ -81,12 +80,10 @@
       IHROFF=0;LHR12=.FALSE.; LHR6=.FALSE.; LHR3=.FALSE.
       LFULL=.FALSE.;LANL=.FALSE.;LLIMITED=.FALSE.;LCYCON=.FALSE.
 
-      FHR=GDIN%FHR;IFHR=FHR;CYC=GDIN%CYC;LNEST=GDIN%LNEST;INHRFRQ=GDIN%INHRFRQ
-      REGION=GDIN%REGION;IFHRSTR=GDIN%IFHRSTR
-      CORE=GDIN%CORE        !arw or nmmb for hiresw runs or dgex
-      LHIRESW=GDIN%LHIRESW  !For hiresw runs
-      print *, 'CORE',CORE, 'REGION=', GDIN%REGION, GDIN%IFHRSTR
-      IF (IFHR.EQ.IFHRSTR) THEN
+      FHR=GDIN%FHR;IFHR=FHR;CYC=GDIN%CYC;LNEST=GDIN%LNEST
+      REGION=GDIN%REGION
+      print *, 'REGION=', GDIN%REGION
+      IF (IFHR.EQ.0) THEN
         LANL=.TRUE.
       ELSE
         IF (MOD(IFHR,3).EQ.0) THEN 
@@ -120,37 +117,19 @@
        LUGP12=11; LUGP12i=12
 
        IF(MOD(IFHR,3).EQ.0) LHR3=.TRUE.  
-       IF((IFHR-IFHRSTR).GE.6.and.MOD(IFHR,6).EQ.0) LHR6=.TRUE.
+       IF(MOD(IFHR,6).EQ.0) LHR6=.TRUE.
        IF(LCYCON) THEN
          IF(MOD(IFHR,12).EQ.9)  LHR9=.TRUE.
-         IF(MOD((IFHR-IFHRSTR),12).EQ.0) LHR12=.TRUE.
+         IF(MOD(IFHR,12).EQ.0) LHR12=.TRUE.
        ELSE
-         IF((IFHR-IFHRSTR).GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
+         IF(IFHR.GT.6 .AND. MOD(IFHR-6,12).EQ.0) LHR12=.TRUE.
        ENDIF
       
 !     Set precip unit numbers for nests
        IF (lnest) THEN
-!        DGEX std file has 3 or  6 hr precip only 
-         if (trim(CORE) .EQ. 'dgx'.and. LHR6) THEN
-           LUGP6=11;LUGP6i=12
-           LUGS6=11;LUGS6i=12
-           LUGP3=15;  LUGP3i=16
-           LUGS3=17;  LUGS3i=18
-         elseif (trim(CORE) .EQ. 'GFS' .and. LHR6) THEN
-           LUGP3=15; LUGP3i=16
-           LUGS3=17; LUGS3i=18
-           LUGP6=19; LUGP6i=20
-           LUGS6=21; LUGS6i=22
-           IF (trim(CORE) .EQ. 'GFS' .and. LHR12) THEN
-             LUGP12=23; LUGP12i=24
-           ENDIF
-         else
-           LUGP6=15;LUGP6i=16
-           LUGS6=17;LUGS6i=18
-         endif
-         IF (trim(CORE).NE.'GFS') THEN
-           LUGP12=19;LUGP12i=20
-         ENDIF
+         LUGP6=15;LUGP6i=16
+         LUGS6=17;LUGS6i=18
+         LUGP12=19;LUGP12i=20
          LHR9=.FALSE.   ! nests have 3 hour precip in std parent grid (01-28-13, JTM)
        else
          IF(LCYCON) THEN 
@@ -183,7 +162,6 @@
       IF(LHR12) THEN
        LUGT1=23
        IF (.not.LCYCON .or. lnest) LUGT1=21
-       IF (trim(CORE) .EQ. 'GFS') LUGT1=25
        LUGT2=LUGT1+1
        LUGT3=LUGT1+2
        LUGT4=LUGT1+3
@@ -203,13 +181,10 @@
       ELSE IF(LHR6.OR.LHR9) THEN
 !      However Off-Hour cycle runs do not have 6 hour buckets
          LUGT1=19; LUGT2=20; LUGT1I=21; LUGT2I=22
-         IF(trim(CORE) .EQ. 'GFS') THEN
-           LUGT1=23;LUGT2=24; LUGT1I=25; LUGT2I=26
-         ENDIF
        print *,'======================================================='
        print *, 'Read previous 2 hrs of  MAX,MIN TEMP', IFHR, lugt1,lugt2
        print *, 'Read  3 hr precip from unit',lugp3,lugs3
-       if(lhr6) print *,'Read 6 hr precip from unit',lugp6,lugs6
+       if(lhr6)  print *,'Read 6 hr precip from unit',lugp6,lugs6
        print *,'======================================================='
 
       ELSE IF(LHR3) THEN
@@ -244,15 +219,13 @@
       IMAX=GDIN%IMAX;JMAX=GDIN%JMAX;KMAX=GDIN%KMAX
       NUMLEV=GDIN%KMAX
       ITOT=IMAX*JMAX
-      print *,'imax,jmax,kmax,numlev,itot,core,lhiresw'
-      print *,gdin%imax,jmax,kmax,numlev,itot,core,lhiresw
+      print *,gdin%imax,jmax,kmax,numlev,itot
 
       if (lfull) then
-      if (HAVESREF .eq. 1)then
-      print *, ' READING SREF HDRS',LUGB2,LUGI2
-      CALL RDHDRS(LUGB2,LUGI2,IGDNUM2,GDIN,NUMVAL2)
-      endif ! HAVESREF
-
+      if (REGION .ne. 'GM') then
+        print *, ' READING SREF HDRS',LUGB2,LUGI2
+        CALL RDHDRS(LUGB2,LUGI2,IGDNUM2,GDIN,NUMVAL2)
+      endif
 ! GSM  READ 3-HR PRECIP AND SNOW FILES WHICH ARE NEEDED
 !      IF NOT A 3-HR ACCUMULATION TIME (F15,F27,F39...) 
 !      OR AN "OFF-TIME" (F13,F14,F16....)
@@ -416,87 +389,28 @@
       endif !lfull
     
 ! visibility 
-! Moved to hourly reads for hourly writes for RTMA (03-19-2013) from 00-12 hours
-! visibility from NAM parent only available every 3 hours (09-24-2013)
-       print *, 'visibility read', lnest, LHR3
-      if (lnest .or. LHR3 .or. REGION.EQ.'AKRT') then
-        JPDS=-1;J=0
-        JPDS(5) = 020
-        JPDS(6) = 001
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,VIS,IRET,ISTAT)
-
-      if (trim(CORE).ne.'dgx') then
-       print*, 'cloud ceiling height', lnest, LHR3
-        JPDS=-1;J=0
-        JPDS(5) = 007
-        JPDS(6) = 215
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,CEIL,IRET,ISTAT)
-        print*,'min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
-
-! Membrane SLP MSLET
-       print*, 'SLP', lnest, LHR3
-        JPDS=-1;J=0
-        JPDS(5) = 130
-        JPDS(6) = 102
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,SLP,IRET,ISTAT)
-        print*,'min/max SLP ', minval(SLP),MAXVAL(SLP)
-
-! Skin Temperature/Sfc Temperature
-       print*, 'SST', lnest, LHR3
-        JPDS=-1;J=0
-        JPDS(5) = 11
-        JPDS(6) = 1
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,SST,IRET,ISTAT)
-        print*,'min/max SST ', minval(SST),MAXVAL(SST)
-
-      endif ! dgx 
-      endif
-
-!  sfc wind gust 
-      J=0
-      JPDS=-1
-      JPDS(3) = IGDNUM
-      JPDS(5) = 180 
+! Moved to hourly reads for hourly writes for RTMA (03-19-2013)
+      JPDS=-1;J=0
+      JPDS(5) = 020
       JPDS(6) = 001
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
-
-!     nests already have computed cld fracs...
-      if (lnest .and. trim(CORE).ne.'GFS' .and. .not.lanl) then
-        J=0;JPDS=-1
-        JPDS(3)=IGDNUM
-        JPDS(5) = 71
-        JPDS(6) = 200
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,TCLD,IRET,ISTAT)
-        JPDS(5) = 73
-        JPDS(6) = 214
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,LCLD,IRET,ISTAT)
-        JPDS(5) = 74
-        JPDS(6) = 224
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,MCLD,IRET,ISTAT)
-        JPDS(5) = 75
-        JPDS(6) = 234
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
-       endif
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,VIS,IRET,ISTAT)
 
 ! 2-m temp
       JPDS=-1;J=0
       JPDS(5) = 11 
       JPDS(6) = 105 
-      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T2,IRET,ISTAT)
 
 ! 2-m spec hum
       JPDS=-1;J=0
       JPDS(5) = 51 
       JPDS(6) = 105
-      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,Q2,IRET,ISTAT)
 
 ! 2-m dew point 
       JPDS=-1;J=0
       JPDS(5) = 17 
       JPDS(6) = 105
-      JPDS(7) = 2   
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,D2,IRET,ISTAT)
 
 ! 10-m U
@@ -514,28 +428,28 @@
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,V10,IRET,ISTAT)
 
 ! vegetation TYPE or Land Mask(0-1)
-! Veg type Not available in some HIRESW domains ??
-! Read land fraction instead (id 81)
-! id 225 = Veg Type (0-16)
+! Veg type Not available in HIRESW domains
+! Read land mask instead (id 81)
 ! to use in NDFDgrid to perform land adjustment
+        JPDS=-1;J=0;JPDS(3) = IGDNUM
+        JPDS(5) = 225
+        if (GDIN%REGION.EQ.'GM') JPDS(5)=81
+        JPDS(6) = 001
 
-      JPDS=-1;J=0;JPDS(3) = IGDNUM
-      JPDS(5) = 225
-      JPDS(6) = 001
-      if (lhiresw .or. trim(CORE).eq.'GFS') JPDS(5)=81  
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VEG,IRET,ISTAT)
 
       if (lfull.or.lanl) then
 ! lowest wet bulb zero level
+      if (REGION .ne. 'GM') then
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 7 
       JPDS(6) = 245 
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,WETFRZ,IRET,ISTAT)
+      endif
 
 ! Best Liftex Index 
       JPDS=-1;J=0;JPDS(3) = IGDNUM
       JPDS(5) = 132 
-      if(trim(CORE) .eq. 'GFS') JPDS(5) = 24
       JPDS(6) = 116 
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,BLI,IRET,ISTAT)
       endif
@@ -602,29 +516,25 @@
       ENDIF
 
 !  READ min/max temperature values for previous 2 hours
-      print *, 'Reading temperature for previous 2 hours',LUGT1,LUGT2,IGDNUMT
+      print *, 'Reading max/min for previous 2 hours',LUGT1,LUGT2,IGDNUMT
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT1,LUGT1I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 11
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,THOLD(:,:,3),IRET,ISTAT)
 
       JPDS=-1;J=0;JPDS(3) = IGDNUMT
       JPDS(5) = 17
       JPDS(6) = 001
-      if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       CALL SETVAR(LUGT2,LUGT2I,NUMVALT,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),IRET,ISTAT)
 
 ! Get min/max temperature values for full 12-hr period for F12,24...
@@ -667,84 +577,87 @@
       print *,'READ UPPER LEVEL fields from unit ', LUGB,'KMAX',KMAX
       J=0
       KLTYP=109   !Hybrid vertical levels
-        DO LL=1,KMAX
+      DO LL=1,KMAX
+        IF (REGION.EQ.'GM') THEN
+          KLTYP=100  !Pressure level file
+          do ii=1,IMAX
+          do jj=1,JMAX
+          PMID(ii,jj,1)=1000;PMID(ii,jj,2)=925;PMID(ii,jj,3)=900;PMID(ii,jj,4)=850;PMID(ii,jj,5)=750
+          PMID(ii,jj,6)=700;PMID(ii,jj,7)=600;PMID(ii,jj,8)=500;PMID(ii,jj,9)=400;PMID(ii,jj,10)=300
+! ADD COMPUTE SPEC HUM
+          enddo
+          enddo
+
+! Set pressure level to read
+         J=0
+         JPDS(7)=PMID(1,1,LL)
+        ELSE
+
+!  Vertical profile of pressure on hybrid sfcs
           JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=001; JPDS(6)=KLTYP
-          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT)
-          J=K
-        ENDDO
+          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,PMID(:,:,LL),IRET,ISTAT) 
+
+!   get the vertical profile of q on hybrid sfcs
+          JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=051; JPDS(6)=KLTYP
+          CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,Q(:,:,LL),IRET,ISTAT)
+
+        ENDIF !PRES Chk
 
 !   get the vertical profile of height 
-      J=0
-      DO LL=1,KMAX  
-       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=007; JPDS(6)=KLTYP
-       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HGHT(:,:,LL),IRET,ISTAT)
-       J=K
-      ENDDO
+         JPDS(3)=IGDNUM; JPDS(5)=007; JPDS(6)=KLTYP
+         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HGHT(:,:,LL),IRET,ISTAT)
 
 !   get the vertical profile of temperature
-      J=0
-      DO LL=1,KMAX  
-       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=011; JPDS(6)=KLTYP
-       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T(:,:,LL),IRET,ISTAT)
-       J=K
-      ENDDO
+         JPDS(3)=IGDNUM; JPDS(5)=011; JPDS(6)=KLTYP
+         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T(:,:,LL),IRET,ISTAT)
 
 ! note points that are within bitmap
-       VALIDPT=.TRUE.
+         VALIDPT=.TRUE.
          WHERE(T(:,:,1).LE.10.) VALIDPT = .FALSE.
 
 ! JTM 01-28-13: Added check for where previous temps are not at validpts
-!       do i=1,imax
-!       do j=1,jmax
-!         if(.not.validpt(i,j)) then 
-!            print *,' NOT Valid pt at :', i,j,' Temperature=',T(i,j,1)
-!         endif
-!       enddo
-!       enddo
-       print *,'VALIDPT=',validpt(20,20),'max/min Temp at lvl 1',maxval(T),minval(T)
-
-!   get the vertical profile of q
-      J=0
-      DO LL=1,KMAX   
-       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=051; JPDS(6)=KLTYP
-       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,Q(:,:,LL),IRET,ISTAT)
-       J=K
-      ENDDO
+         do ii=1,imax
+         do jj=1,jmax
+           if(validpt(ii,jj).and.T(ii,jj,1).le.10) then 
+            print *,' Inconsistent valid pt at :', ii,jj,' Temperature=',T(ii,jj,1)
+            validpt(ii,jj)=.false.
+           endif
+         enddo
+         enddo
+         print *,'VALIDPT=',validpt(20,20),'max/min Temp at lvl 1',maxval(T),minval(T)
 
 !   get the vertical profile of u 
-      J=0
-      DO LL=1,KMAX  
-       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=033; JPDS(6)=KLTYP
-       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,UWND(:,:,LL),IRET,ISTAT)
-       J=K
-      ENDDO
+         JPDS(3)=IGDNUM; JPDS(5)=033; JPDS(6)=KLTYP
+         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,UWND(:,:,LL),IRET,ISTAT)
 
 !   get the vertical profile of v
-      J=0
-      DO LL=1,KMAX  
-       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=034; JPDS(6)=KLTYP
-       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VWND(:,:,LL),IRET,ISTAT)
-       J=K
-      ENDDO
+         JPDS(3)=IGDNUM; JPDS(5)=034; JPDS(6)=KLTYP
+         CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,VWND(:,:,LL),IRET,ISTAT)
+
+         IF (REGION.NE.'GM')  J=K
+      ENDDO  !LL LOOP
       if (llimited) return
 
 !   get the vertical profile of cloud fraction for non-nests
-      if (.not. lnest .or. trim(CORE) .eq. 'GFS') then
-      J=0
-      DO LL=1,KMAX  
-       JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=071; JPDS(6)=KLTYP
-       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,CFR(:,:,LL),IRET,ISTAT)
-       J=K
-      ENDDO
+      if (.not. lnest) then
+       J=0
+       DO LL=1,KMAX  
+        JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=071; JPDS(6)=KLTYP
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,CFR(:,:,LL),IRET,ISTAT)
+        J=K
+       ENDDO
       endif
+
 
 !   950 mb temperature
       J=0
       JPDS(3) = IGDNUM
       JPDS(5) = 011
       JPDS(6) = 100
-      JPDS(7) = 950
-      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T950,IRET,ISTAT)
+      if (REGION.NE.'GM')then
+        JPDS(7) = 950
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,T950,IRET,ISTAT)
+      endif
 
 !   850 mb temperature
       JPDS(7) = 850
@@ -769,43 +682,43 @@
       JPDS(7) = 700
       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,RH700,IRET,ISTAT)
 
+      if (REGION.EQ.'GM') RETURN     !HI RES WINDOW FILES 
+
 !  sfc wind gust 
       J=0
       JPDS=-1
       JPDS(3) = IGDNUM
       JPDS(5) = 180 
       JPDS(6) = 001
-!     CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,GUST,IRET,ISTAT)
 
 ! composite reflectivity
-      if (trim(CORE).NE. 'GFS') then
-        JPDS(5) = 212
-        JPDS(6) = 200
-        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
-      endif
+      JPDS(5) = 212
+      JPDS(6) = 200
+      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
+
       if (lanl) return
 
 !     nests already have computed cld fracs...
-!     if (lnest .and. trim(CORE).ne.'GFS') then
-!       J=0;JPDS=-1
-!       JPDS(3)=IGDNUM
-!       JPDS(5) = 71
-!       JPDS(6) = 200
-!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,TCLD,IRET,ISTAT)
-!       JPDS(5) = 73
-!       JPDS(6) = 214
-!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,LCLD,IRET,ISTAT)
-!       JPDS(5) = 74
-!       JPDS(6) = 224
-!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,MCLD,IRET,ISTAT)
-!       JPDS(5) = 75
-!       JPDS(6) = 234
-!       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
-!      endif  
-
-      if (HAVESREF .eq. 1)then
+      if (lnest) then
+        J=0;JPDS=-1
+        JPDS(3)=IGDNUM
+        JPDS(5) = 71
+        JPDS(6) = 200
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,TCLD,IRET,ISTAT)
+        JPDS(5) = 73
+        JPDS(6) = 214
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,LCLD,IRET,ISTAT)
+        JPDS(5) = 74
+        JPDS(6) = 224
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,MCLD,IRET,ISTAT)
+        JPDS(5) = 75
+        JPDS(6) = 234
+        CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,HCLD,IRET,ISTAT)
+       endif 
 !  READ SREF precip
-      print*; print *,'READ SREF Precip Probs', LUGB2, IFHR
+      print*; print *,'READ SREF Precip Probs', LUGB2
+
 
 ! 3-hr probability of .01"
       J=0     !J= number of records to skip in SREFPCP file
@@ -816,7 +729,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S3REF01,IRET,ISTAT)
 
 ! probability of .1"
-      J = 1
+      J = 2
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -825,7 +738,7 @@
       IF(IRET .NE. 0 )RETURN
 
 ! probability of 0.5"
-      J = 3
+      J = 4
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -846,9 +759,8 @@
        RETURN
       ENDIF
 
-
 ! 6-hr probability of 0.01"
-       J = 5     
+      J = 5
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -856,7 +768,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S6REF01,IRET,ISTAT)
 
 ! 6-hr probability of 0.1"
-      J = 6
+      J = J+2
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -864,7 +776,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S6REF10,IRET,ISTAT)
 
 ! 6-hr probability of 0.5"
-      J = 8
+      J = J+2
       JPDS=-1;JGDS=-1
       JPDS(3) = IGDNUM2
       JPDS(5) = 191 
@@ -872,7 +784,7 @@
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S6REF50,IRET,ISTAT)
 
 ! 12-hr probability of 0.01"
-      J = 10  
+      J = 10
         IF (IFHR .EQ. 6 .OR. IFHR .EQ. 9) THEN
         print *, 'FHR=6 or 9 so 12-hr sref probabilities not available'
           S12REF01 = 0.0
@@ -883,16 +795,13 @@
 
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S12REF01,IRET,ISTAT) 
 ! 12-hr probability of 0.1"
-       J = 11
+      J = J+2 
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S12REF10,IRET,ISTAT)
 
 ! 12-hr probability of 0.5"
-      J = 13
+      J = J+2
       CALL SETVAR(LUGB2,LUGI2,NUMVAL2,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,S12REF50,IRET,ISTAT)
 
-      else
-      write(6,*) 'SKIPPED SREF READS'
-      endif
 
       RETURN 
       END SUBROUTINE getgrib

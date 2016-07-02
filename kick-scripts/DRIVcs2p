@@ -21,8 +21,8 @@ module load ruby emc-utils
 
 # set job directory needed if running from cron
 #export model_ver=v3.5.1
-export nam_smartinit_ver=v3.5.1
-export code_ver=v3.5.1
+export nam_smartinit_ver=v4.0.0
+export code_ver=v4.0.0
 export which_nam=prod
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${nam_smartinit_ver}
@@ -37,6 +37,7 @@ cd $kickd
 # Determine date
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
 #export PDY=20150629 ###TEST
+export PDY=20160702 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -46,7 +47,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#export cyc=06  #TEST
+export cyc=00  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -60,29 +61,33 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
 
 #====================================================================
-domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
+#domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
+#domains="conusnest2p5  hi ak conus aknest3 ak_rtmages"
 #domains="hi ak pr conus aknest3 ak_rtmages"
 #domains="conusnest2p5 hi pr aknest3 conus"
-#domains="conusnest2p5 "
 #domains="conus"
-#domains="aknest3 "
+#domains="aknest3 conusnest2p5"
 #domains="hi "
-#domains="pr "
+domains="pr "
 #domains="pr aknest3 conusnest2p5"
 #domains="hi pr aknest3 "
 #domains="conusnest2p5 pr "
 #====================================================================
 
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=84
-  export mdl=nam
+  export ENDHRS=12
+# export mdl=nam
+  export mdl=namrr
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
-                         ak_rtmages) ENDHRS=12;;
-                            aknest3) export ENDHRS=60;; 
-                       conusnest2p5) export ENDHRS=60;; 
+                         ak_rtmages) ENDHRS=03;;
+                            aknest3) export ENDHRS=03;; 
+                       conusnest2p5) export ENDHRS=03;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
- 
+
+# Hourly forecasts to 18-h for the parent 12 km, 3 km DONUS nest and 3km Alaska
+   if [ $cyc -ne 00 -a $cyc -ne 06 -a $cyc -ne 12 -a $cyc -ne 18 ];then export ENDHRS=18;fi 
+
   export NET=$mdl
   export RUN=$NET
   export RUNTYP=$RUNTYP
