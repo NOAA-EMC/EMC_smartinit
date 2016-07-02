@@ -756,7 +756,8 @@ else
 # ak_rtmages uses bilinear -> going from 3 km to 6 km; 
 # the rest use nearest neighbor (conusnest2p5, hawaiinest, aknest3)
 
-interp="-new_grid_interpolation neighbor"
+#interp="-new_grid_interpolation neighbor"
+interp="-new_grid_interpolation bilinear"
 case $RUNTYP in conus|conusnest|priconest|pr|hi) interp="-new_grid_interpolation bilinear";; esac
 case $RUNTYP in ak|alaskanest|ak_rtmages) interp="-new_grid_interpolation bilinear";; esac
 
