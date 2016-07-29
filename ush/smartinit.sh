@@ -971,9 +971,17 @@ fi # grib = 1
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
+# Fix bug - ak_rtmages was using files from the ak grid, which is initialized with bsmart and has a bitmap.
+# A. Gibbs 3-15-16
+    if [ $RUNTYP = ak_rtmages ];then
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr3}.tm00${exptext} MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr6}.tm00${exptext} MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr9}.tm00${exptext} MAXMIN5
+    else
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
+    fi
     $GRBINDEX MAXMIN3 MAXMIN3i
     $GRBINDEX MAXMIN4 MAXMIN4i
     $GRBINDEX MAXMIN5 MAXMIN5i
