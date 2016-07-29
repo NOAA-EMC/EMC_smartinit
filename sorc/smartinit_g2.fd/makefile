@@ -8,7 +8,8 @@ OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VAD
 OBJS3= w3fi71.o w3fi63.o
 
 ## FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format -O -debug all -fp-model strict
-FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format
+###FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format
+FC =   ifort -convert big_endian -g -traceback 
 #FC =   ifort -convert big_endian -g -traceback -assume noold_ldout_format -debug all -fp-model strict -ftrapuv -check all -fp-stack-check -fstack-protector
 
 LIBS = -L/usr/local/lib   \
@@ -19,12 +20,12 @@ INC = -I/nwprod/lib/incmod/g2_4 -I/nwprod/lib/incmod/g2tmpl
 # FFLAGS = -O -fp-model strict -list 
 # LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused  
 
-#FFLAGS = -O2   ## -debug all  ## -fp-model strict -list 
-FFLAGS = -O -fp-model strict -list
+FFLAGS = -O2   ## -debug all  ## -fp-model strict -list 
+###FFLAGS = -O -fp-model strict -list
 #LDFLAGS =-FR -assume byterecl # -check all -debug all -warn nounused  
 LDFLAGS =-FR -assume byterecl # -check all -debug all -warn nounused
 
-CMD =	../../exec/smartinit_g2
+CMD =	../../exec/smartinit_g2_rw
 
 PROFLIB =	-lprof
 

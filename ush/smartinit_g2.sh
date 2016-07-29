@@ -158,7 +158,7 @@ typeset -Z2 srefcyc gefscyc pcphrl
 text=".tm00"
 
 # For expanded conus nest 2.5 km
-exptext=""
+exptext=".grib2"
 case $RUNTYP in conusnest2p5) exptext="_grb188";; esac
 
 #EXT natgrd=`echo $natgrd |cut -d. -f2`
@@ -933,7 +933,8 @@ fi # grib = 1
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
     exit
   fi
-  $GRBINDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+# $GRBINDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
+  $GRB2INDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
 #=================================================================
 #   DECLARE INPUTS and RUN SMARTINIT 
 #=================================================================
@@ -963,8 +964,10 @@ fi # grib = 1
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
       ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi
-    $GRBINDEX MAXMIN1 MAXMIN1i
-    $GRBINDEX MAXMIN2 MAXMIN2i
+#   $GRBINDEX MAXMIN1 MAXMIN1i
+#   $GRBINDEX MAXMIN2 MAXMIN2i
+    $GRB2INDEX MAXMIN1 MAXMIN1i
+    $GRB2INDEX MAXMIN2 MAXMIN2i
   fi
   freq=6;fmx=21   #fmx =  maxmin unit number for 1st maxmin file
   if [ $cycon -eq 1 ];then 
@@ -990,12 +993,23 @@ fi # grib = 1
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
-    $GRBINDEX MAXMIN3 MAXMIN3i
-    $GRBINDEX MAXMIN4 MAXMIN4i
-    $GRBINDEX MAXMIN5 MAXMIN5i
+# Fix bug - ak_rtmages was using files from the ak grid, which is initialized with bsmart and has a bitmap.
+# A. Gibbs 3-15-16
+    if [ $RUNTYP = ak_rtmages ];then
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr3}.tm00${exptext} MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr6}.tm00${exptext} MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr9}.tm00${exptext} MAXMIN5
+    else
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
+    fi
+#   $GRBINDEX MAXMIN3 MAXMIN3i
+#   $GRBINDEX MAXMIN4 MAXMIN4i
+#   $GRBINDEX MAXMIN5 MAXMIN5i
+    $GRB2INDEX MAXMIN3 MAXMIN3i
+    $GRB2INDEX MAXMIN4 MAXMIN4i
+    $GRB2INDEX MAXMIN5 MAXMIN5i
 
     if [ $cycon -eq 1 -a inest -eq 0 ];then
 #     READ 3/6 hr precip from special files created by makeprecip
@@ -1085,7 +1099,7 @@ fi # grib = 1
    esac
 
   export pgm=smartinit; . prep_step
-  ${EXECdng}/smartinit_g2 $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
+  ${EXECdng}/smartinit_g2_rw $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
   export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
@@ -1118,9 +1132,9 @@ fi # grib = 1
     export ogrd 
     export mdl
     if [ $mdl = "hiresw" ];then
-      ${USHdng}/dng_awp.sh $mdlgrd
+      ${USHdng}/dng_awp_g2.sh $mdlgrd
     else
-      ${USHdng}/dng_awp.sh $outreg $awpchk
+      ${USHdng}/dng_awp_g2.sh $outreg $awpchk
     fi
   fi
 done  #fhr loop
