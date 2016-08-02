@@ -613,9 +613,17 @@ fi;;
 #     fi
 # End wgrib2
       case $natgrd in bgrd3d) 
-        $WGRIB -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
-        $WGRIB -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
-        mv temp WRFPRS${FHRFRQ}.tm00;;
+#       $WGRIB -s WRFPRS${FHRFRQ}.tm00 |grep -f ${PARMdng}/${mdl}_smartinit.parmlist | \
+#       $WGRIB -i -grib -o temp WRFPRS${FHRFRQ}.tm00 > wgrib.out
+#       mv temp WRFPRS${FHRFRQ}.tm00;;
+        cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_1 inventoryb.txt1
+        cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_2 inventoryb.txt2
+        $WGRIB2 WRFPRS${FHRFRQ}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputsb.grb2_1 WRFPRS${FHRFRQ}.tm00
+        $WGRIB2 WRFPRS${FHRFRQ}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${FHRFRQ}.tm00
+#       $WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1
+#       $WGRIB2 inputsb.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b2
+#       cat model.ndfd_b1 model.ndfd_b2 > WRFPRS${FHRFRQ}.tm00
+        cat inputsb.grb2_2 inputsb.grb2_1 > WRFPRS${FHRFRQ}.tm00
       esac
       if [ $grib = 2 ];then
 #       $GRBINDEX WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
@@ -651,9 +659,17 @@ fi;;
 #       fi
 # End wgrib2
         case $natgrd in bgrd3d) 
-          $WGRIB -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
-          $WGRIB -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
-          mv temp WRFPRS${fhr3}.tm00;;
+#         $WGRIB -s WRFPRS${fhr3}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
+#         $WGRIB -i -grib -o temp WRFPRS${fhr3}.tm00 > wgrib.out
+#         mv temp WRFPRS${fhr3}.tm00;;
+          cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_1 inventoryb.txt1
+          cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_2 inventoryb.txt2
+          $WGRIB2 WRFPRS${fhr3}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputsb.grb2_1 WRFPRS${fhr3}.tm00
+          $WGRIB2 WRFPRS${fhr3}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${fhr3}.tm00
+#         $WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1
+#         $WGRIB2 inputsb.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b2
+#         cat model.ndfd_b1 model.ndfd_b2 > WRFPRS${fhr3}.tm00
+          cat inputsb.grb2_2 inputsb.grb2_1 > WRFPRS${fhr3}.tm00
         esac
 #       $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
         $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
@@ -667,9 +683,18 @@ fi;;
 #       fi
 # End wgrib2
         case $natgrd in bgrd3d) 
-          $WGRIB -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
-          $WGRIB -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
-          mv temp WRFPRS${fhr6}.tm00;;
+#         $WGRIB -s WRFPRS${fhr6}.tm00 |grep -f ${PARMdng}/nam_smartinit.parmlist | \
+#         $WGRIB -i -grib -o temp WRFPRS${fhr6}.tm00 > wgrib.out
+#         mv temp WRFPRS${fhr6}.tm00;;
+          cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_1 inventoryb.txt1
+          cp -p $PARMdng/nam_smartinit_grb2_budget.parmlist_2 inventoryb.txt2
+          $WGRIB2 WRFPRS${fhr6}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputsb.grb2_1 WRFPRS${fhr6}.tm00
+          $WGRIB2 WRFPRS${fhr6}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${fhr6}.tm00
+          cat inputsb.grb2_2 inputsb.grb2_1 > WRFPRS${fhr6}.tm00
+#         $WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1
+#         $WGRIB2 inputsb.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b2
+#         cat model.ndfd_b1 model.ndfd_b2 > WRFPRS${fhr3}.tm00
+#         cat model.ndfd_b2 model.ndfd_b1 > WRFPRS${fhr3}.tm00
         esac
 #       $GRBINDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
         $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
@@ -1098,7 +1123,7 @@ fi # grib = 1
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 
-  export pgm=smartinit; . prep_step
+  export pgm=smartinit_g2_rw; . prep_step
   ${EXECdng}/smartinit_g2_rw $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
   export err=$?; err_chk
 
