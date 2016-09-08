@@ -74,6 +74,7 @@
 
       MK3P=.FALSE.; MK6P=.FALSE.; MK12P=.FALSE.
       LRD3=.FALSE.;LRD4=.FALSE.
+      IGDNUM=0
 !==>  Make 3 hour buckets by subtracting the 1st file from the 2nd
       LSUB=.FALSE.
 
@@ -232,9 +233,11 @@
         write(0,*) 'size(gfld%fld): ', size(gfld%fld)
 
         APCP1=gfld%fld
+        print*,'apcp1=',maxval(apcp1),minval(apcp1)
 
 
         do K=1,29
+!       do K=1,200
         PDS_RAIN_HOLD_EARLY(K)=gfld%ipdtmpl(K)
         enddo
 
@@ -318,6 +321,7 @@
         call getgb2(LUGB2,0,0,0,JIDS,JPDTN,JPDT,JGDTN,JGDT, &
                     UNPACK,K,GFLD,IRET)
         APCP2=gfld%fld
+        print*,'apcp2=',maxval(apcp2),minval(apcp2)
 
 
 !       do K=1,200
@@ -393,6 +397,7 @@
         call getgb2(LUGB3,0,0,0,JIDS,JPDTN,JPDT,JGDTN,JGDT, &
                     UNPACK,K,GFLD,IRET)
         APCP3=gfld%fld
+        print*,'apcp3=',maxval(apcp3),minval(apcp3)
 
 
 !       do K=1,200
@@ -541,6 +546,7 @@
           IF (LADDSUB) THEN   
             KPDS(15)=FHR1
             APCPOUT=APCP3+(APCP2-APCP1)
+!           APCPOUT=APCP1
 !           CAPCOUT=CAPC3+(CAPC2-CAPC1)
             SNOWOUT=SNOW3+(SNOW2-SNOW1)
             print *, 'OUTPUT 06 HR PRECIP: ADDSUB',FHR1,FHR2,FHR3,maxval(apcpout)
@@ -548,6 +554,24 @@
             KPDS(15)=FHR2
             print *,'OUTPUT 6 HR PRECIP: ADD', FHR1,FHR2,maxval(apcpout)
           ENDIF
+        ENDIF
+
+!       12 hr precip
+        IF (MK12P) THEN
+          KPDS(14)=SHR1
+          KPDS(15)=FHR4
+          IF (LRD4) THEN
+            APCPOUT=APCPOUT+APCP3+APCP4
+!           CAPCPOUT=CAPCPOUT+CAPCP3+CAPCP4
+            SNOWOUT=SNOWOUT+SNOW3+SNOW4
+            print *, ' OUTPUT 12 HR PRECIP: ADD 4 ',FHR1,FHR2,FHR3,FHR4,maxval(apcpout)
+          ELSE
+            print *, ' OUTPUT 12 HR PRECIP: ADD 2 ',FHR1,FHR2,maxval(apcpout)
+          ENDIF
+        ENDIF
+
+      ENDIF
+
 ! Grib2
         if (IRET_EARLY .ne. 0) then
           gfld%ipdtmpl=PDS_RAIN_HOLD
@@ -556,7 +580,7 @@
         endif
 
 !       gfld%ipdtmpl(9)=ihrs1
-        gfld%ipdtmpl(9)=1
+        gfld%ipdtmpl(9)=0
 
         do J=16,21
         gfld%ipdtmpl(J)=PDS_RAIN_HOLD(J)
@@ -568,8 +592,10 @@
         write(0,*) 'here FHR3, FHR2: ', FHR3, FHR2
 !        if (LSUB) then
 
-        gfld%ipdtmpl(27)= FHR1-FHR2 ! 3 hr accum
-        gfld%ipdtmpl(9)=FHR2
+!       gfld%ipdtmpl(27)= FHR1-FHR2 ! 3 hr accum
+!       gfld%ipdtmpl(9)=FHR2
+        gfld%ipdtmpl(27)= FHR2-FHR1 ! 3 hr accum
+        gfld%ipdtmpl(9)=FHR1
 
 
 !! use of (27) here looks wrong!
@@ -589,46 +615,52 @@
 
 !        endif
 
+        IF (MK6P .and. .not.(LSUB)) THEN
         gfld%ipdtmpl(27)=6
-        gfld%ipdtmpl(9)=FHR3
+!       gfld%ipdtmpl(9)=FHR3
+        gfld%ipdtmpl(9)=SHR1
 
        write(0,*) 'gfld%ipdtmpl(27) aft: ', &
                    gfld%ipdtmpl(27)
        write(0,*) 'gfld%ipdtmpl(9) aft: ', &
                    gfld%ipdtmpl(9)
-
-! Grib2
-
         ENDIF
+! Grib2
  
 !       12 hr precip
         IF (MK12P) THEN
-          KPDS(14)=SHR1
-          KPDS(15)=FHR4
-          IF (LRD4) THEN
-            APCPOUT=APCPOUT+APCP3+APCP4
+!         KPDS(14)=SHR1
+!         KPDS(15)=FHR4
+!         IF (LRD4) THEN
+!           APCPOUT=APCPOUT+APCP3+APCP4
 !           CAPCPOUT=CAPCPOUT+CAPCP3+CAPCP4
-            SNOWOUT=SNOWOUT+SNOW3+SNOW4
-            print *, ' OUTPUT 12 HR PRECIP: ADD 4 ',FHR1,FHR2,FHR3,FHR4,maxval(apcpout)
-          ELSE
-            print *, ' OUTPUT 12 HR PRECIP: ADD 2 ',FHR1,FHR2,maxval(apcpout)
-          ENDIF
+!           SNOWOUT=SNOWOUT+SNOW3+SNOW4
+!           print *, ' OUTPUT 12 HR PRECIP: ADD 4 ',FHR1,FHR2,FHR3,FHR4,maxval(apcpout)
+!         ELSE
+!           print *, ' OUTPUT 12 HR PRECIP: ADD 2 ',FHR1,FHR2,maxval(apcpout)
+!         ENDIF
         gfld%ipdtmpl(27)=12
         gfld%ipdtmpl(9)=SHR1
 
         ENDIF
 
-      ENDIF
+!     ENDIF
 
 
       KPDS(5)=61
-      print *, 'writing precip', KPDS(5),KPDS(14),KPDS(15),LUGB5,MAXVAL(APCPOUT)
+      print *, 'writing precip', KPDS(5),KPDS(14),KPDS(15),LUGB5,MINVAL(APCPOUT),MAXVAL(APCPOUT)
       WRITE(FNAME(6:7),FMT='(I2)')LUGB5
+      print*,'fname,lugb5=',fname,lugb5
       CALL BAOPEN(LUGB5,FNAME,IRETGB)
+      print*,'opened file'
 !     CALL PUTGB(LUGB5,NUMVAL,KPDS,KGDS,MASK,APCPOUT,IRET)
+!     print*,'apcpout=',apcpout
         gfld%ipdtmpl(2)=8
         gfld%fld=APCPOUT
+!       gfld%fld=SNOWOUT
+      print*,'calling putgb2'
       call putgb2(LUGB5,GFLD,IRET)
+      print*,'calling baclose'
       CALL BACLOSE(LUGB5,IRET)
 
 ! SKIP CONVECTIVE ACCUMULATED PRECIP
@@ -640,7 +672,7 @@
 !     CALL BACLOSE(LUGB6,IRET)
 
       KPDS(5)=65
-      print *, 'writing SNOW', KPDS(5),KPDS(14),KPDS(15),LUGB7, MAXVAL(SNOWOUT)
+      print *, 'writing SNOW', KPDS(5),KPDS(14),KPDS(15),LUGB7,MINVAL(SNOWOUT),MAXVAL(SNOWOUT)
       WRITE(FNAME(6:7),FMT='(I2)')LUGB7
       CALL BAOPEN(LUGB7,FNAME,IRET)
 !     CALL PUTGB(LUGB7,NUMVAL,KPDS,KGDS,MASK,SNOWOUT,IRET)
