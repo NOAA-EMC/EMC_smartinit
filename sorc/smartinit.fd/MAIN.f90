@@ -231,7 +231,8 @@
 !-----------------------------------------------------------------------------------------
       LNEST=.FALSE.
       LHIRESW=.FALSE.
-      LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+!     LCYCON=FALSE;LHR12=.FALSE.;LHR3=.FALSE.
+      LCYCON=.FALSE.;LHR12=.FALSE.;LHR3=.FALSE.
       nargc=iargc()
       call getarg(1,CTMP)
       READ (ctmp,*) GDIN%CYC
@@ -252,6 +253,7 @@
       
       FHR=GDIN%FHR;IFHR=FHR;IFHRIN=FHR;REGION=GDIN%REGION;OGRD=GDIN%OGRD
       CYC=GDIN%CYC;LNEST=GDIN%LNEST;IFHRSTR=GDIN%IFHRSTR;CORE=GDIN%CORE
+      INHRFRQ=GDIN%INHRFRQ
       if (cyc .ne. 00 .and. cyc .ne. 06 .and. cyc .ne. 12 .and. cyc .ne.18)then
         HAVESREF=0
       else
