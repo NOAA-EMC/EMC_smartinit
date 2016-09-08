@@ -63,7 +63,9 @@ cd $DATA
       esac
   fi
   echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
-  ${SMINIT_SSH:-$USHdng/smartinit.sh}
+#${SMINIT_SSH:-$USHdng/smartinit.sh}
+${SMINIT_SSH:-$USHdng/smartinit_g2.sh}
+#${SMINIT_SSH:-$USHdng/smartinit_g2_ro.sh}
 
 #####################################################################
 
