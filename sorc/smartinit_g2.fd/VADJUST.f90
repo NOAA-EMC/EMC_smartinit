@@ -51,7 +51,8 @@
       NX=IM;NY=JM
       ALLOCATE (PHI(NX,NY,2),STAT=kret)
       print *,'============================================================'
-      print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY,stat
+!     print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY,stat
+      print *,'VADJUST:  DX  DY  NX NY', DX,DY,NX,NY
 
 !     COMPUTE TERRAIN GRADIENTS from "obs" ndfd topo AND INITIAL POTENTIAL
       PHI=0.1
@@ -200,7 +201,11 @@
           ZMAX=AMAX1(ZMDL,ZNDFD)
           DZTOPO=ABS(ZMDL - ZNDFD)
           
+          if(zmax .eq. 0.)then
+          dscale=0.
+          else
           DSCALE=DZTOPO/ZMAX
+          endif
 
 !        Do not change winds over water  02/15
          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16)  DSCALE=0.0
