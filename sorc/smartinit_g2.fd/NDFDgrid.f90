@@ -95,7 +95,10 @@
       DX=5000.;DY=5000.  ! HARD WIRED for 5 km output grids (Conus,hi,pr)
 !Check if hi/pr grids are reduced to 2.5 km
       if (region .eq. 'CS' ) then
-        lconus=.TRUE.;lvegtype=.true.
+! Add ivgid definition for CONUS 5 km grid - even though it's only used for
+! print statement
+!       lconus=.TRUE.;lvegtype=.true.;ivgid=81
+        lconus=.TRUE.;lvegtype=.true.;ivgid=81
         print *, 'read in Binary topo and veg files '
         open (46, file='TOPONDFD', form='unformatted')
         read (46) topo_ndfd
@@ -124,7 +127,7 @@
         print *, 'IGDNUM',IGDNUM,' NUMVAL',NUMVAL
         DEALLOCATE(GRID,MASK)
         ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
-        print *,'GRID, MASK Allocated  STAT=',STAT,NUMVAL
+!       print *,'GRID, MASK Allocated  STAT=',STAT,NUMVAL
         J=-1;JPDS=-1;JGDS=-1
         JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
          
@@ -195,6 +198,8 @@
       zdif_max = -1000.
       n_rough_yes=0
       n_rough_no =0
+      m_rough_yes=0
+      m_rough_no =0
 !C ****************************************************************
 ! -- Now let's start reducing to NDFD topo elevation.
 !C ****************************************************************
