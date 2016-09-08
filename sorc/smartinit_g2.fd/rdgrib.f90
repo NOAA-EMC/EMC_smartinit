@@ -153,7 +153,7 @@ contains
 ! 01-29-13 JTM : past hour 60 nam output onli to level 35
        if (JPDT(10).ne.105) then
         write(0,*) 'JPDT(1:12): ' , JPDT(1:12)
-                STOP 'ABORT: GRIB VARB READ ERROR'
+!               STOP 'ABORT: GRIB VARB READ ERROR'
        endif
       ENDIF
 
@@ -312,7 +312,7 @@ contains
       IF(IRGI .NE. 0) THEN
         WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE SO ABORT'
         ISTAT = IRGI
-        STOP 'ABORT RDHDRS: GRIB INDEX FILE READ ERROR '
+!       STOP 'ABORT RDHDRS: GRIB INDEX FILE READ ERROR '
       ENDIF
 
 !!! why retrieve for all records???
