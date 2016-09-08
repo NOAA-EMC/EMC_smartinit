@@ -118,7 +118,8 @@ text=".tm00"
 
 # Begin wgrib2
 
-compress="c3 -set_bitmap 1"
+#compress="c3 -set_bitmap 1"
+compress="jpeg -set_bitmap 1"
 
 case $RUNTYP in
 
@@ -317,7 +318,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
 ### budget maybe not correct for probabilities here
 ###  $WGRIB2  srefallpcp -set_grib_type ${compress} -new_grid_interpolation budget -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
   $WGRIB2  srefallpcp -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl}
-  $GRB2INDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
+# $GRB2INDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
+  $GRB2INDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f${pcphrl}
 
 fi #fhr -ge 0
 
@@ -847,7 +849,8 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
   ln -sf "SREFPCP"                  fort.13
   ln -sf "SREFPCPi"                 fort.14
   ln -sf "${freq}precip"            fort.15
-  ln -sf "${freq}precipi"           fort.16
+# ln -sf "${freq}precipi"           fort.16
+  ln -sf "${freq}precipi"           fort.18
 
 # At 12-hr times, input 12-hr max/min temps and 3 and 6-hr buckets
   case $fhr in 
@@ -878,8 +881,10 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
     else     
 #     READ 6/12 hr precip from special files created by makeprecip
       ln -sf "${freq}snow"      fort.17       # For DGEX, read 3hr special precip file at check6=0
-      ln -sf "${freq}snowi"     fort.18
-      ln -sf "12precip"   fort.19
+#     ln -sf "${freq}snowi"     fort.18
+      ln -sf "${freq}snowi"     fort.19
+#     ln -sf "12precip"   fort.19
+      ln -sf "12precip"   fort.18
       ln -sf "12precipi"  fort.20
     fi   
     ln -sf "MAXMIN1"   fort.$fmx
