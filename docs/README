@@ -858,6 +858,10 @@ Jan 2016 - smartinit.v3.5.0
 	docs/release-notes.v3.5.0
 	docs/smartinit.ver
 
+******************************************************************
+DELIVERED to NCO - 08 February 2016
+******************************************************************
+
 Feb 2016 - smartinit.v3.5.1
 
 * Added changes to meet NCO's phase 2 standards:
@@ -873,6 +877,17 @@ Feb 2016 - smartinit.v3.5.1
 * Added ceiling, mslp, and sfc temp to GDAS option
 
         ush/smartinit.sh
+
+******************************************************************
+DELIVERED to NCO - 23 February 2016
+IMPLEMENTED - 23 August 2016
+******************************************************************
+
+******************************************************************
+Smartinit VERS 4.0.0 - Annette Gibbs
+******************************************************************
+
+***  GRIB2 smartinit: to read GRIB2 NAM and DGEX
 
 Apr 2016 - smartinit.v4.0.0
 
@@ -907,3 +922,82 @@ June 2016 - smartinit.v4.0.0
 	ush/smartinit.sh
 	kick-scripts/DRIVcs2p
         scripts/exnamrr_smartinit.sh.ecf
+
+August 2016
+
+* Changed from reading NAMRR to NAM files.  Simple change in the kick-scripts/DRIVcs2p script to toggle back and forth 
+  between nam and namrr.
+	kick-scripts/DRIVcs2p
+
+* Removed the GRIB1 mods that copied the MSLET, CEIL and Skin temperature (TMP:surface) from the smartinit_g2.sh script. These 
+  are no longer needed since these 3 fields are available in the NAMv4 bmsart/bgrd3d files. 
+	ush/smartinit_g2.sh
+
+* Changed packing option for SREF and PR/HI from c3 (complex) to jpeg in wgrib2.  
+        ush/smartinit_g2.sh
+
+* Changed packing option for DGEX and SREF to jpeg, fixed bug in GRIB2INDEX command for SREF, changed links for special
+  files created by makeprecip
+	ush/dgex_smartinit_g2.sh
+
+* Make u/v part of one record and use WGRIB2 to interpolate grid 188 to grid 184.
+	ush/dng_awp_g2.sh
+
+* Added calls to read-only grib2 and read-write grib2 smartinit in the dgex, nam, and namrr scripts.
+	scripts/exdgex_smartinit.sh.ecf
+	scripts/exnam_smartinit.sh.ecf
+	scripts/exnamrr_smartinit.sh.ecf
+
+* Initialize ivgid, m_rough_yes, and m_rough_no in NDFDgrid.f90.  Error found while running bounds checking.
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+
+* Remove stat from print statement (not defined) and set dscale to 0. if zmax = 0. (can't have divide by zero).
+	sorc/smartinit_g2.fd/VADJUST.f90
+
+* Commented out some STOP statements. Should I comment out the rest?
+	sorc/smartinit_g2.fd/rdgrib.f90
+
+* Fixed bug (ELSE IF (PROB.LT.75.) THEN should be  ELSE IF (PROBWX.LT.75.) THEN).
+	sorc/smartinit_g2.fd/MAKESTRING.f90
+
+* Fixed or added the following: 
+   	-print whether gfld8 is associated
+	-print if large or small values of DOWNT and DOWNQ (should we change resetting if too large or small?)
+        -initialize RH to 0 after allocating
+	-add print statements of POP3
+   	-calculate RH if dhold and thold are greater than 1.0 (RHMAX3/RHMIN3 calculations)
+    	-set DEC=3.0 for RHMAX3 
+    	-replace where/elsewhere/endwhere with do loops for SNOWAMT calculations 
+    	-add print precip-type print statements
+    	-comment out the writing of skin temperature
+    	-added AMAX1(RHMOIS,1.0) because RHMOIS can be zero (from Matt's code)
+    	-changed END to END SUBROUTINE HINDEX
+        -Initialized LCYCON to .FALSE., not FALSE and initialized INHRFRQ to GDIN%INHRFRQ.
+	sorc/smartinit_g2.fd/MAIN.f90
+
+* Initialized LCYCON to .FALSE., not FALSE and initialized INHRFRQ to GDIN%INHRFRQ.
+	sorc/smartinit.fd/MAIN.f90
+
+* Added changes for DGEX at analyis/start time
+	-set unit numbers for dgx and lanl
+	-initialized 3, 6, and 12-hourly precip and snow and SREF fields
+	-fixed LUGP6I bug in print statement
+	-added code to read 3-hour precip and snow at analysis time for dgex
+	-read in vertical profile of cloud fraction at in the limited portion as we want to write out total cloud for
+	 ak_rtmages at the intermediate hours
+	sorc/smartinit_g2.fd/GETGRIB.f90
+
+* Added temporary changes for DGEX
+	sorc/smartprecip_g2.fd/SMARTPRECIP.f90
+
+* Added code for 7-hour delay of 18z DGEX parallel
+	kick-scripts/DRIV-dgex
+
+* Changed mdl from namrr to nam and changed the run order of the domains so that the plotting would finish
+	kick-scripts/DRIVcs2p
+
+* Changed the name of the plotdir so it wouldn't be dependent on the smartinit version and commented out the hpss archive script
+	kick-scripts/RUN_ALL
+
+* Added new parallel location of NAMx
+	parm/smart_para_config
