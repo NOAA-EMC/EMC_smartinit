@@ -33,10 +33,12 @@ cd $kickd
 
 # Determine date
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-#export PDY=20160215 ###TEST
+  export PDY=`/nwprod/util/exec/ndate -7 |cut -c 1-8`
+#export PDY=20160905 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
+let HH=`date +%H -d "7 hours ago"`
 if [ $HH -ge 01 -a $HH -le 07 ];then export cyc=00;
 elif [ $HH -le 13 ];then export cyc=06;
 elif [ $HH -le 19 ];then export cyc=12;
