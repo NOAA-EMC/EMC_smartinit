@@ -353,12 +353,15 @@
    VALIDPT=.TRUE.
    if(lnest) ALLOCATE (LCLD(IM,JM),MCLD(IM,JM),HCLD(IM,JM),TCLD(IM,JM),STAT=kret)
 
-    RH=0.
+!   RH=0.
     print*,'CALL GETGRIB with HAVESREF: ', HAVESREF
     CALL GETGRIB(ISNOW,IZR,IIP,IRAIN,VEG,WETFRZ,  &
     P03M,P06M,P12M,SN03,SN06,P3CP01,P3CP10,P3CP50,P6CP01,  &
     P6CP10,P6CP50,P12CP01,P12CP10,P12CP50, THOLD,DHOLD,GDIN,VALIDPT, &
     GFLD,GFLD8,HAVESREF)
+        write(0,*) 'after GETGRIB...associated(gfld8%fld): ', associated(gfld8%fld)
+!       write(0,*) 'after GETGRIB...allocated(gfld8%fld): ', allocated(gfld8%fld)
+
         write(0,*) 'GFLD%igdtmpl(8): ', GFLD%igdtmpl(8)
         write(0,*) 'GFLD%igdtmpl(9): ', GFLD%igdtmpl(9)
 
@@ -445,25 +448,25 @@
 
         NUMV=IM*JM
 
-!       do J=1,JM
-!       do I=1,IM
+        do J=1,JM
+        do I=1,IM
 
-!       if (validpt(I,J)) then
+        if (validpt(I,J)) then
 
-!       if (DOWNT(I,J) .le. 200.) then
-!       write(0,*) 'bad small DOWNT: ', I,J, DOWNT(I,J)
+        if (DOWNT(I,J) .le. 200.) then
+        write(0,*) 'bad small DOWNT: ', I,J, DOWNT(I,J)
 !       DOWNT(I,J)=230.
-!       endif
+        endif
 
-!       if (DOWNT(I,J) .ge. 330.) then
-!       write(0,*) 'bad large DOWNT: ', I,J, DOWNT(I,J)
+        if (DOWNT(I,J) .ge. 330.) then
+        write(0,*) 'bad large DOWNT: ', I,J, DOWNT(I,J)
 !       DOWNT(I,J)=310.
-!       endif
+        endif
 
-!       endif
+        endif
 
-!       enddo
-!       enddo
+        enddo
+        enddo
 
         CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNT)
 
@@ -511,27 +514,27 @@
        DEC=3.0
 !      DEC=6.0
 
-!       do J=1,JM
-!       do I=1,IM
+        do J=1,JM
+        do I=1,IM
 
-!       if (validpt(I,J)) then
+        if (validpt(I,J)) then
 
 ! Due to precision, sometimes Q is set to zero.
 
-!       if (DOWNQ(I,J) .le. 1.e-12) then
-!       write(0,*) 'bad DOWNQ: ', I,J, DOWNQ(I,J)
+        if (DOWNQ(I,J) .le. 1.e-12) then
+        write(0,*) 'bad DOWNQ: ', I,J, DOWNQ(I,J)
 !       DOWNQ(I,J)=1.e-8
-!       endif
+        endif
 
-!       if (DOWNQ(I,J) .ge. 50.e-3) then
-!       write(0,*) 'bad large DOWNQ: ', I,J, DOWNQ(I,J)
+        if (DOWNQ(I,J) .ge. 50.e-3) then
+        write(0,*) 'bad large DOWNQ: ', I,J, DOWNQ(I,J)
 !       DOWNQ(I,J)=10.e-3
-!       endif
+        endif
 
-!       endif
+        endif
 
-!       enddo
-!       enddo
+        enddo
+        enddo
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNQ)
 
@@ -679,6 +682,7 @@
 !  Compute RH
          print *, 'Calculate RH',FHR
          ALLOCATE (RH(IM,JM,KMAX),STAT=kret)
+         RH=0.
          ktop=kmax
 
         write(0,*) 'kmax, ktop: ', kmax, ktop
@@ -730,6 +734,9 @@
          IF (trim(CORE) .NE. 'GFS') THEN
            print *, 'Output 03 hr POP and precip',FHR
 
+        write(0,*) 'maxval(POP3) at write: ', maxval(POP3)
+        write(0,*) 'minval(POP3) at write: ', minval(POP3)
+        write(0,*) 'im,jm,numv: ',im,jm,numv
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,POP3)
 
        GFLD8%idrtnum=40 ! 40 = JPEG
@@ -1738,11 +1745,14 @@
              TMAX3(I,J)=THOLD(I,J,L)
            IF(THOLD(I,J,L).LT.TMIN3(I,J).AND.THOLD(I,J,L).GT.1.0) &
              TMIN3(I,J)=THOLD(I,J,L)
+! Make sure dhold and thold are greater than zero
+           if(dhold(i,j,l).gt.1.0 .and. thold(i,j,l) .gt.1.0)then
            QX=CalcQ(psfc(i,j),dhold(i,j,l))
            QSX=CalcQ(psfc(i,j),thold(i,j,l))
            RELH=100*QX/QSX
            IF(RELH.GT.RHMAX3(I,J)) RHMAX3(I,J)=RELH
            IF(RELH.LT.RHMIN3(I,J)) RHMIN3(I,J)=RELH
+           endif
           ENDDO
 
 ! switch back the thold and dhold values since we need 
@@ -1802,6 +1812,7 @@
        CALL set_scale(gfld8, DEC)
        CALL PUTGB2(70,GFLD8,IRET) ! TMIN3
 
+       DEC=3.0
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMAX3)
 
        GFLD8%discipline=0
@@ -1930,7 +1941,7 @@
        CALL set_scale(gfld8, DEC)
        CALL PUTGB2(70,GFLD8,IRET) ! TMIN12
 
-         DEC=3.0
+       DEC=3.0
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMAX12)
 
@@ -2084,19 +2095,45 @@
          idiv=1
          IF (avg.gt.3.) idiv=2    !for 6 hr snow depths
         
-         WHERE (validpt) 
-         WHERE (SN0.GT.0.) 
-           TEMP1=(DOWNT(:,:)+THOLD(:,:,2)+idiv*THOLD(:,:,3))/AVG  !TAVG
-           WHERE (TEMP1.LT.264.)     ! using newwer nest codes
-             TEMP2=20.
-           ELSEWHERE
-             TEMP2=(273.15-TEMP1)+8.   !SNOWR using newer nest codes 
-           ENDWHERE
-         END WHERE
+        write(0,*) 'what is SN0: ', maxval(SN0)
+        write(0,*) 'avg: ', avg
+
+        do J=1,JM
+        do I=1,IM
+        if(validpt(i,j))then
+        if (SN0(I,J) .gt. 0) then
+          TEMP1(I,J)=(DOWNT(I,J)+THOLD(I,J,2)+idiv*THOLD(I,J,3))/AVG  !TAVG
+          IF (TEMP1(I,J) .LT.264.) THEN     ! using newwer nest codes
+             TEMP2(I,J)=20.
+          ELSE
+             TEMP2(I,J)=(273.15-TEMP1(I,J))+8.   !SNOWR using newer nest codes
+          ENDIF
+
+          SNOWAMT(I,J)=SN0(I,J)*TEMP2(I,J)*0.001            !Convert to m
+
+        else
+          SNOWAMT(I,J)=0.
+        endif
+
+        IF (SNOWAMT(I,J).LT.0) SNOWAMT(I,J)=0.    ! Added for alaskanest for non-valid pt
         
-         SNOWAMT=SN0*TEMP2*0.001            !Convert to m
-         WHERE (SNOWAMT.LT.0) SNOWAMT=0.    ! Added for alaskanest for non-valid pt
-         endwhere
+        endif
+        enddo
+        enddo
+
+!        WHERE (validpt) 
+!        WHERE (SN0.GT.0.) 
+!          TEMP1=(DOWNT(:,:)+THOLD(:,:,2)+idiv*THOLD(:,:,3))/AVG  !TAVG
+!          WHERE (TEMP1.LT.264.)     ! using newwer nest codes
+!            TEMP2=20.
+!          ELSEWHERE
+!            TEMP2=(273.15-TEMP1)+8.   !SNOWR using newer nest codes 
+!          ENDWHERE
+!        END WHERE
+        
+!        SNOWAMT=SN0*TEMP2*0.001            !Convert to m
+!        WHERE (SNOWAMT.LT.0) SNOWAMT=0.    ! Added for alaskanest for non-valid pt
+!        endwhere
           
          DEALLOCATE (TEMP1,TEMP2,STAT=kret)
  
@@ -2162,6 +2199,19 @@
 
       print *,'Compute ',IAHR,' HR BUCKET    FHR=',IFHR 
 
+        if (IM .ge. 139 .and. JM .ge. 154) then
+        write(0,*) 'PBLMARK: ', PBLMARK(139,154)
+!       write(0,*) 'RH: ', RH(139,154,1:6)
+        write(0,*) 'BLI: ', BLI(139,154)
+        write(0,*) 'QPF: ', QPF(139,154)
+        write(0,*) 'PCP01: ', PCP01(139,154)
+        write(0,*) 'PCP10: ', PCP10(139,154)
+        write(0,*) 'PXCP01: ', PXCP01(139,154)
+        write(0,*) 'PXCP10: ', PXCP10(139,154)
+        endif
+
+!     print*,'pcp01=',pcp01
+!     print*,'pxcp01=',pxcp01
       IF (IAHR.EQ.3 .AND. IFHR .GT. 11) THEN
         ALLOCATE(TMPPCP(IM,JM))
         WHERE (validpt .and. PCP01 .GT. PXCP01)
@@ -2170,6 +2220,8 @@
           PXCP01 = TMPPCP
         END WHERE
 
+!     print*,'pcp10=',pcp10
+!     print*,'pxcp10=',pxcp10
         WHERE (validpt .and. PCP10 .GT. PXCP10)
           TMPPCP=(PCP10+PXCP10)/2.      ! ERROR FOUND 09/26/13
           PCP10  = TMPPCP
@@ -2241,6 +2293,13 @@
 
       print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(90,65), QPF(90,65),PCP01(90,65), &
                PCP10(90,65),BLI(90,65)
+!     do i=1,im
+!     do j=1,jm
+!       if(pop(i,j).ne.0.0 )then
+!         print *,'POP,QPF,PCP01,PCP10,BLI ', IAHR,POP(i,j),QPF(i,j),PCP01(i,j),PCP10(i,j),BLI(i,j)
+!       endif
+!     enddo
+!     enddo
       RETURN 
       END SUBROUTINE mkpop
 
@@ -2496,7 +2555,7 @@
        GFLD%ipdtmpl(12)=2
 
        CALL set_scale(gfld, DEC)
-       CALL PUTGB2(70,GFLD,IRET)  ! SST
+!      CALL PUTGB2(70,GFLD,IRET)  ! SST
         write(0,*) 'IRET for SST: ', IRET
         write(0,*) 'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
 
@@ -2597,6 +2656,8 @@
        ENDIF
 
 !      Compute Dew point depression
+! Added because RH can be zero (from Matt's code)
+       RHMOIS=AMAX1(RHMOIS,1.0)
        RHMOIS=RHMOIS/100.
        TERM=log10(RHMOIS) / 7.5 + (TMOIS / (TMOIS + 237.3))
        DPMOIS=(TERM * 237.3) / (1.0 - TERM)
@@ -2641,7 +2702,7 @@
       ENDDO
       ENDDO
       RETURN
-      END     
+      END SUBROUTINE HINDEX    
 ! -------------------------
         SUBROUTINE FILL_FLD(GFLD,NUMV,IM,JM,ARRAY2D)
         USE GRIB_MOD
@@ -2650,6 +2711,7 @@
         INTEGER :: NUMV, IM, JM, KK
         REAL :: ARRAY2D(IM,JM)
 
+!         print*,'numv,array2d=',numv,array2d
         DO KK = 1, NUMV
           IF(MOD(KK,IM).EQ.0) THEN
             M=IM
@@ -2658,7 +2720,9 @@
             M=MOD(KK,IM)
             N=INT(KK/IM) + 1
           ENDIF
+!         print*,'numv,kk,m,n,array2d=',numv,kk,m,n,array2d(m,n)
           GFLD%FLD(KK)=ARRAY2D(M,N)
+!         print*,'gfld%fld(kk)=',gfld%fld(kk)
 !        if (mod(KK,25000) .eq. 0) then
 !        write(0,*) 'M,N, ARRAY2D from gfld: ', M,N, GFLD%FLD(KK)
 !        endif
