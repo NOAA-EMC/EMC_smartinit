@@ -32,7 +32,7 @@ cfgdir=${rootd}/parm
 export wkdir=${rootd}/working
 mkdir -p $wkdir
 gemdir=/meso/save/$USER/gempak/sfcplot/smart
-plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_upgrade.v3.5.1
+plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_para
 export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
@@ -108,8 +108,8 @@ while [ $ffhr -le $ENDHRS ];do
         sleep 10
 
         echo `date +%T` $MDL SUBMIT SMINIT JOB :  $RUNTYP CYCLE $cyc FHRNXT $fhrnxt
-        ${kickd}/cr8bjob_poe $job $fhrnxt
-#        ${kickd}/cr8bjob $job $fhrnxt
+       ${kickd}/cr8bjob_poe $job $fhrnxt
+#      ${kickd}/cr8bjob $job $fhrnxt
         bsub < J${MDL}_SMINIT.${RUNTYP}
       fi
       ((fhrnxt=fhrnxt+INCR))
@@ -146,7 +146,7 @@ while [ $ffhr -le $ENDHRS ];do
         echo  $wait `date +%T` SUBMIT $MDL SMINIT JOB :  $RUNTYP CYCLE $cyc FFHR $ffhr
         sleep 10     
         ${kickd}/cr8bjob_poe $job $ffhr
-#        ${kickd}/cr8bjob $job $ffhr
+#       ${kickd}/cr8bjob $job $ffhr
         bsub -K < J${MDL}_SMINIT.${RUNTYP}
         break
       fi
@@ -170,14 +170,12 @@ export PDY=$PDY
 export cyc=$cyc
 date
 
-exit
-
 if [ $runreg = conus2p5 ];then
   pltrun=conusnest
   bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2
   bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2_hourly
   date
-  bsub < ${kickd}/hpss_archive.sh
+# bsub < ${kickd}/hpss_archive.sh
 # $plotdir/make_DNG_page.sh 
 #  $plotdir/make_DNG_page_region.sh 
 #  bsub < $plotdir/webdiag.bsub
