@@ -18,6 +18,7 @@
 # 2013-08-27  JTM : Put in Vertical Structure
 # 2013-11-20  JTM : Added option to downscale DGEX 3 hrly files beyond 84 hrs w/ 6 hr precip
 # 2014-01-20  JTM : completed option to downscale hiresw guamnmmb, guamarw to 48 hours 
+# 2016-08-24  Annette Gibbs : converted smartinit from GRIB1 to GRIB2; coincide with NAM upgrade
 #======================================================================
 #  Set Defaults fcst hours,cycle,model,region in smart_config_para called in parent job
 
@@ -121,6 +122,14 @@ done
 # Begin wgrib2
 
 compress="c3 -set_bitmap 1"
+compress_sref="jpeg -set_bitmap 1"
+
+case $RUNTYP in
+    hawaiinest ) compress="jpeg -set_bitmap 1";;
+    priconest ) compress="jpeg -set_bitmap 1";;  
+    hi ) compress="jpeg -set_bitmap 1";;
+    pr ) compress="jpeg -set_bitmap 1";;  
+esac
 
 # if [ $RUNTYP = hi ];then
 #   export RUNTYP=hawaiinest
@@ -336,7 +345,9 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
 ### budget maybe not correct for probabilities here
 ###  $WGRIB2  srefallpcp -set_grib_type ${compress} -new_grid_interpolation budget -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
-  $WGRIB2  srefallpcp -set_grib_type ${compress} -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
+
+# use bilinear interpolation since that is what was done with copygb and grib1
+  $WGRIB2  srefallpcp -set_grib_type ${compress_sref} -new_grid_winds grid -new_grid ${wgrib2def} srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl}
   $GRB2INDEX srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl}
 
 fi #fhr -ge 0
@@ -371,10 +382,10 @@ for fhr in $hours; do
   fi
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
-ceilmdl=bgdawp
-slpmdl=bgdawp
-case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
-case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
+#ceilmdl=bgdawp
+#slpmdl=bgdawp
+#case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
+#case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
 
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
@@ -384,24 +395,24 @@ case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
-          ceil_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${ceilmdl}${pcfhr}${text}
-          slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${slpmdl}${pcfhr}${text}
+#         ceil_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${ceilmdl}${pcfhr}${text}
+#         slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${slpmdl}${pcfhr}${text}
           echo MDLIN $mdlin
           cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-          if [ -e $ceil_file -a $grib = 1 ];then
-             wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
-             cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
-             mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
-          fi
-          if [ -e $slp_file ];then
-             if [ $grib = 1 ];then
-             wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-             else
-             wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
-             fi
-             cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
-             mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
-          fi
+#         if [ -e $ceil_file -a $grib = 1 ];then
+#            wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
+#            cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
+#            mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
+#         fi
+#         if [ -e $slp_file ];then
+#            if [ $grib = 1 ];then
+#            wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+#            else
+#            wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+#            fi
+#            cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
+#            mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
+#         fi
           rm -f WRFPRS${fhr}.tm00
           ln -fs WRFPRS${pcfhr}.tm00 fort.11
           ln -fs WRFPRS${fhr}.tm00 fort.51
@@ -409,23 +420,23 @@ case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-          ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
-          slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
+#         ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
+#         slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
-          if [ -e $ceil_file -a $grib = 1 ];then
-             wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
-             cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
-             mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
-          fi
-          if [ -e $slp_file ];then
-             if [ $grib = 1 ];then
-             wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-             else
-             wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
-             fi
-             cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
-             mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
-          fi
+#         if [ -e $ceil_file -a $grib = 1 ];then
+#            wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
+#            cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
+#            mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
+#         fi
+#         if [ -e $slp_file ];then
+#            if [ $grib = 1 ];then
+#            wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+#            else
+#            wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+#            fi
+#            cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
+#            mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
+#         fi
         fi
 #       Reduce the input model file size for prdgen on wcoss 32 bit limited machines
 # Begin wgrib2
@@ -452,24 +463,24 @@ fi;;
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
             mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
-            ceil_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${ceilmdl}${pcfhr}${text}
-            slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${slpmdl}${pcfhr}${text}
+#           ceil_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${ceilmdl}${pcfhr}${text}
+#           slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${slpmdl}${pcfhr}${text}
             echo MDLIN $mdlin
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-            if [ -e $ceil_file -a $grib = 1 ];then
-               wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
-               cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
-               mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
-            fi
-            if [ -e $slp_file ];then
-             if [ $grib = 1 ];then
-               wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-             else
-               wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
-             fi
-               cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
-               mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
-            fi
+#           if [ -e $ceil_file -a $grib = 1 ];then
+#              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
+#              cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
+#              mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
+#           fi
+#           if [ -e $slp_file ];then
+#            if [ $grib = 1 ];then
+#              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+#            else
+#              wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+#            fi
+#              cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
+#              mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
+#           fi
             rm -f WRFPRS${fhr}.tm00
             ln -fs WRFPRS${pcfhr}.tm00 fort.11
             ln -fs WRFPRS${fhr}.tm00 fort.51
@@ -481,23 +492,23 @@ fi;;
 #            fi
 # End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
-            ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
-            slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
+#           ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
+#           slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
-            if [ -e $ceil_file -a $grib = 1 ];then
-               wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
-               cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
-               mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
-            fi
-            if [ -e $slp_file ];then
-             if [ $grib = 1 ];then
-               wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-             else
-               wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
-             fi
-               cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
-               mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
-            fi
+#           if [ -e $ceil_file -a $grib = 1 ];then
+#              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
+#              cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
+#              mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
+#           fi
+#           if [ -e $slp_file ];then
+#            if [ $grib = 1 ];then
+#              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+#            else
+#              wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+#            fi
+#              cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
+#              mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
+#           fi
           fi
         fi;;
     esac
