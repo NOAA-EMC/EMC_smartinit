@@ -144,6 +144,12 @@
 !     Set full, sref and special precip file unit numbers
       LUGB=11; LUGI=12   !DEFAULT MODEL FULL GRIB FILE UNITS
       LUGB2=13; LUGI2=14 !DEFAULT SREF POP GRIB FILE UNITS
+
+      if (trim(CORE) .EQ. 'dgx'.and. lanl) THEN
+        LUGP3=11;LUGP3i=12
+        LUGS3=11;LUGS3i=12
+      endif
+
       if (.not.lanl) then
        LUGP3=11;  LUGP3i=12
        LUGS3=11;  LUGS3i=12
@@ -207,7 +213,7 @@
       endif  !lanl
 
       print *, 'IFHR',IFHR,'LHR3',LHR3,'LHR6',LHR6,'LHR12',LHR12
-      P06M=0.0;S06M=0.0; P12M=0.0
+      P03M=0.0; P06M=0.0; S03M=0.0; S06M=0.0; P12M=0.0
 
 !     SET MAX/MIN FILE UNIT NUMBERS
 !     FOR 12-hr on-cycle TIMES, WE NEED 3 AND 6-HR BUCKETS AND MAX/MIN TEMP
@@ -310,7 +316,8 @@
 !     READ 6-HR PRECIP/SNOW FILES AT F12,F24,F36.....
 !     OR 12-hr PRECIP FOR OFF-CYCLE RUNS
       IF (LHR6.OR.LHR9.OR.LHR12) THEN
-        print *, 'READING 6 hr precip HDR from Unit ', LUGP6,LUG6PI
+!       print *, 'READING 6 hr precip HDR from Unit ', LUGP6,LUG6PI
+        print *, 'READING 6 hr precip HDR from Unit ', LUGP6,LUGP6I
 !       CALL RDHDRS(LUGP6,LUGP6I,IGDNUM6,GDIN,NUMVAL6)
         CALL RDHDRS_g2(LUGP6,LUGP6I,IGDNUM6,GDIN,NUMVAL6)
         write(0,*) 'here gb - '
@@ -925,6 +932,40 @@
 !      For on-Cycles it will have either a 3-hr, 6-hr, 9-hr, or 12-hr accumulation
 !      For off-Cycles,  3 and 12 hr accumulations are in full grib file
 !====================================================================
+      if (lanl .and. trim(CORE) .eq. 'dgx')then
+       print *, 'FHR ',IFHR,'  READ 3 hr PRECIP from file unit',LUGP3,LUGS3
+
+! Initialize to zero
+       THOLD=0.
+       DHOLD=0.
+
+      JPDS=-1;J=0
+      NUMVP=NUMVAL;NUMVS=NUMVAL
+
+! Read 3-hr Precip 
+       JDISC=0
+       JPDTN=8
+       JPDT(1) = 1
+       JPDT(2) = 8
+       JPDT(10) = -9999
+       JPDT(12) = -9999
+        J=0
+      CALL SETVAR_g2(LUGP3,LUGP3I,NUMVP,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,P03M,GFLD8_S,ISSREF,IRET,ISTAT)
+
+! 3-hr Snow 
+
+       JDISC=0
+       JPDTN=8
+       JPDT(1) = 1
+       JPDT(2) = 13
+       JPDT(10) = -9999
+        J=0
+      CALL SETVAR_g2(LUGS3,LUGS3I,NUMVS,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,SN03,GFLD,ISSREF,IRET,ISTAT)
+
+      ENDIF  ! (lanl .and. trim(CORE) .eq. 'dgx')
+
       if (lfull) then
       JPDS=-1;J=0
       NUMVP=NUMVAL;NUMVS=NUMVAL
@@ -1062,6 +1103,7 @@
        JPDT(12) = 0
 !     if (inhrfrq .gt.1 ) JPDS(6)=105 ! Read 3 hrly file instead of hrly temperature file
       if (inhrfrq .gt.1 ) then ! Read 3 hrly file instead of hrly temperature file
+       write(0,*)'dhold inhrfrq=',inhrfrq
        JPDT(10) = 103
        JPDT(12) = 2
       endif
@@ -1098,6 +1140,7 @@
        JPDT(10) = 1
        JPDT(12) = 0
       if (inhrfrq .gt.1 ) then ! Read 3 hrly file instead of hrly temperature file
+       write(0,*)'dhold inhrfrq=',inhrfrq
        JPDT(10) = 103
        JPDT(12) = 2
       endif
@@ -1317,9 +1360,9 @@
         write(0,*) 'min/max of VWND: ',LL, minval(VWND(:,:,LL)), maxval(VWND(:,:,LL))
 
       ENDDO
-        write(0,*) 'is llimited true....will avoid T850, etc: ', llimited
-      if (llimited) return
 
+! Move to inside the limited portion as we want to write out total cloud for
+! ak_rtmages at the intermediate hours. [AMG Aug 2016]
 !   get the vertical profile of cloud fraction for non-nests
       if (.not. lnest .or. trim(CORE) .eq. 'GFS') then
       J=0
@@ -1341,6 +1384,31 @@
 
       ENDDO
       endif
+
+        write(0,*) 'is llimited true....will avoid T850, etc: ', llimited
+      if (llimited) return
+
+!   get the vertical profile of cloud fraction for non-nests
+!     if (.not. lnest .or. trim(CORE) .eq. 'GFS') then
+!     J=0
+!     DO LL=1,KMAX  
+!      JPDS=-1; JPDS(3)=IGDNUM; JPDS(5)=071; JPDS(6)=KLTYP
+!      CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,CFR(:,:,LL),IRET,ISTAT)
+!      J=K
+
+!       write(0,*) 'vertical column of cloud fraction'
+!      JPDT(1) = 006
+!      JPDT(2) = 032
+!      JPDT(2) = 001
+!      JPDT(10) = 105
+!      JPDT(12) = LL
+
+!     CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+!                    KPDS,KGDS,MASK,GRID,CFR(:,:,LL),GFLD,ISSREF,IRET,ISTAT)
+!      J=K
+
+!     ENDDO
+!     endif
 
 !   950 mb temperature
 !     J=0
@@ -1454,6 +1522,20 @@
         write(0,*) 'here good'
 
       endif
+
+      if (trim(CORE).eq.'dgx' .and. lanl) then
+          print*,'trim(CORE),lanl,ifhr,ifhrstr=',trim(CORE),lanl,ifhr,ifhrstr
+          S3REF01(:,:) = 0.0
+          S3REF10(:,:) = 0.0
+          S3REF50(:,:) = 0.0
+          S6REF01(:,:) = 0.0
+          S6REF10(:,:) = 0.0
+          S6REF50(:,:) = 0.0
+          S12REF01(:,:) = 0.0
+          S12REF10(:,:) = 0.0
+          S12REF50(:,:) = 0.0
+      endif
+
       if (lanl) return
 
 !     nests already have computed cld fracs...
