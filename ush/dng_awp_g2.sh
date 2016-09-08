@@ -49,17 +49,23 @@ if [ $outreg = conus2p5 ];then
 #  rm $COMOUT/${mdl}.t${cyc}z.smart*_grb188
 #fi
 #mv  MESO${RGIN}${fhr}.tm00.grb255  MESO${RGIN}${fhr}.tm00
-#w2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540"
-#$WGRIB2 MESO${RGIN}${fhr}.tm00.grb188 -set_grib_type c3 -set_bitmap 1 -new_grid_winds grid -new_grid_interpolation bilinear -new_grid ${w2def} MESO${RGIN}${fhr}.tm00
-cnvgrib -g21 MESO${RGIN}${fhr}.tm00.grb188 MESO${RGIN}${fhr}.tm00.grib1
-$COPYGB -g 184 -x MESO${RGIN}${fhr}.tm00.grib1 MESO${RGIN}${fhr}.tm00 
-$CNVGRIB -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-cp MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00 
+w2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540"
+$WGRIB2 MESO${RGIN}${fhr}.tm00.grb188 -set_grib_type c3 -set_bitmap 1 -new_grid_winds grid -new_grid_interpolation bilinear -new_grid ${w2def} MESO${RGIN}${fhr}.tm00.uv
+$WGRIB2 MESO${RGIN}${fhr}.tm00.uv -new_grid_vectors "UGRD:VGRD" -submsg_uv MESO${RGIN}${fhr}.tm00
+#$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00.grb188 MESO${RGIN}${fhr}.tm00.grib1
+#$COPYGB -g 184 -x MESO${RGIN}${fhr}.tm00.grib1 MESO${RGIN}${fhr}.tm00 
+#$CNVGRIB -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+cp MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 
 fi
 
 #$utilexec/cnvgrib -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 #$CNVGRIB -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 if [ $outreg != conus2p5 ];then
+# Make u/v part of one record [AMG - Aug 2016]
+cp MESO${RGIN}${fhr}.tm00 MESO${RGIN}${fhr}.tm00.uv
+$WGRIB2 MESO${RGIN}${fhr}.tm00.uv -new_grid_vectors "UGRD:VGRD" -submsg_uv MESO${RGIN}${fhr}.tm00
+# End make u/v part of one record
 $CNVGRIB -g21 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
 mv MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi
