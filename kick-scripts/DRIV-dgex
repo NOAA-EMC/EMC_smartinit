@@ -34,7 +34,7 @@ cd $kickd
 # Determine date
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
   export PDY=`/nwprod/util/exec/ndate -7 |cut -c 1-8`
-#export PDY=20160905 ###TEST
+#export PDY=20161005 ###TEST
 
 # Determine cycle
 let HH=`date +%H`

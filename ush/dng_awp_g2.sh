@@ -43,6 +43,7 @@ if [ $outreg = conus2p5 ];then
 #  cp  MESO${RGIN}${fhr}.tm00.grb255  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
  $CNVGRIB -g21 MESO${RGIN}${fhr}.tm00.grb188 MESO${RGIN}${fhr}.tm00.grb188.grib1
  cp MESO${RGIN}${fhr}.tm00.grb188.grib1 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
+ cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp.grib2
  fi
  cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_grb188
 #if [ $fhr -eq 60 ];then

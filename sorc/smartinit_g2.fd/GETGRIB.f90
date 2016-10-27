@@ -1177,6 +1177,7 @@
        JPDT(2) = 000
 !      JPDT(10) = 103
 !      JPDT(12) = 2
+       JPDT(9) = IIH
        JPDT(10) = 1
        JPDT(12) = 0
         J=0
@@ -1195,6 +1196,7 @@
        JPDT(2) = 006
 !      JPDT(10) = 103
 !      JPDT(12) = 2
+       JPDT(9) = IIH
        JPDT(10) = 1
        JPDT(12) = 0
         J=0

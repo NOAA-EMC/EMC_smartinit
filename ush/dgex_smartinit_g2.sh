@@ -123,7 +123,7 @@ compress="jpeg -set_bitmap 1"
 
 case $RUNTYP in
 
-  dgex_cs) natgrd=.bsmart; mdlgrd=conus; rg=dgx; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
+  dgex_cs) natgrd=.bsmart; mdlgrd=conus; rg=dgx; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
   dgex_ak) natgrd=.bsmart; mdlgrd=alaska; rg=dgx; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
 
 esac
@@ -391,6 +391,9 @@ for fhr in $hours; do
 # Begin wgrib2 - comment out
 # $GRBINDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 # End wgrib2
+# Simple packing for smartprecip
+  $WGRIB2 WRFPRS${fhr}.tm00 -inv /dev/null -set_grib_type s -grib_out WRFPRS${fhr}.tm00.simple
+  cp WRFPRS${fhr}.tm00.simple WRFPRS${fhr}.tm00
   $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
 
   inhrfrq=1
@@ -493,11 +496,16 @@ for fhr in $hours; do
             ppgm=addsub
             pfhr1=$fhr6;pfhr2=$fhr3;pfhr3=$fhr         # fhr + (fhr3-fhr6)
 # Begin wgrib2
-            cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+            if [ ! -e WRFPRS${fhr3}.tm00.simple ];then cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00; fi
 #           cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00.grb2
 #           $CNVGRIB -g21 WRFPRS${fhr3}.tm00.grb2 WRFPRS${fhr3}.tm00
 #           $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+# Simple packing for smartprecip
+        if [ ! -e WRFPRS${fhr3}.tm00.simple ];then
+            $WGRIB2 WRFPRS${fhr3}.tm00 -inv /dev/null -set_grib_type s -grib_out WRFPRS${fhr3}.tm00.simple
+            cp WRFPRS${fhr3}.tm00.simple WRFPRS${fhr3}.tm00
             $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+        fi
 #           cp WRFPRS${fhr}.tm00 WRFPRS${fhr}.tm00.grb2
 #           $CNVGRIB -g21 WRFPRS${fhr}.tm00.grb2 WRFPRS${fhr}.tm00.grb
 #           $GRBINDEX WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
@@ -515,10 +523,15 @@ for fhr in $hours; do
           pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr
 # Begin wgrib2
 #         cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00.grb2
-          cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
+          if [ ! -e WRFPRS${fhr6}.tm00.simple ];then cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00; fi
 #         $CNVGRIB -g21 WRFPRS${fhr6}.tm00.grb2 WRFPRS${fhr6}.tm00
 #         $GRBINDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr3}i.tm00
-          $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr3}i.tm00
+# Simple packing for smartprecip
+        if [ ! -e WRFPRS${fhr6}.tm00.simple ];then
+          $WGRIB2 WRFPRS${fhr6}.tm00 -inv /dev/null -set_grib_type s -grib_out WRFPRS${fhr6}.tm00.simple
+          cp WRFPRS${fhr6}.tm00.simple WRFPRS${fhr6}.tm00
+          $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+        fi
 # End wgrib2
           ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
           ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
@@ -535,7 +548,7 @@ for fhr in $hours; do
           fi;;  
       esac
 # Begin wgrib2
-      cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
+      if [ ! -e WRFPRS${FHRFRQ}.tm00.simple ];then cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00; fi
 #     cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00.grb2
 #     $CNVGRIB -g21 WRFPRS${FHRFRQ}.tm00.grb2 WRFPRS${FHRFRQ}.tm00
 # End wgrib2
@@ -545,7 +558,12 @@ for fhr in $hours; do
         mv temp WRFPRS${FHRFRQ}.tm00;;
       esac
 #     $GRBINDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
-      $GRB2INDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+# Simple packing for smartprecip
+      if [ ! -e WRFPRS${FHRFRQ}.tm00.simple ];then
+        $WGRIB2 WRFPRS${FHRFRQ}.tm00 -inv /dev/null -set_grib_type s -grib_out WRFPRS${FHRFRQ}.tm00.simple
+        cp WRFPRS${FHRFRQ}.tm00.simple WRFPRS${FHRFRQ}.tm00
+        $GRB2INDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+      fi
 
 #     export pgm=${mdl}_smartprecip; . prep_step
       export pgm=${mdl}_smartprecip_g2; . prep_step
@@ -557,7 +575,7 @@ for fhr in $hours; do
 
       if [ $MKPCP -eq $mk12p -a $pfhr4 -gt 0 ];then
 # Begin wgrib2
-        cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+        if [ ! -e WRFPRS${fhr3}.tm00.simple ];then cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00; fi
 #       cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00.grb2
 #       $CNVGRIB -g21 WRFPRS${fhr3}.tm00.grb2 WRFPRS${fhr3}.tm00
 # End wgrib2
@@ -567,10 +585,15 @@ for fhr in $hours; do
           mv temp WRFPRS${fhr3}.tm00;;
         esac
 #       $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
-        $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+# Simple packing for smartprecip
+        if [ ! -e WRFPRS${fhr3}.tm00.simple ];then
+          $WGRIB2 WRFPRS${fhr3}.tm00 -inv /dev/null -set_grib_type s -grib_out WRFPRS${fhr3}.tm00.simple
+          cp WRFPRS${fhr3}.tm00.simple WRFPRS${fhr3}.tm00
+          $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+        fi
 
 # Begin wgrib2
-        cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
+        if [ ! -e WRFPRS${fhr6}.tm00.simple ];then cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00; fi
 #       cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00.grb2
 #       $CNVGRIB -g21 WRFPRS${fhr6}.tm00.grb2 WRFPRS${fhr6}.tm00
 # End wgrib2
@@ -580,7 +603,12 @@ for fhr in $hours; do
           mv temp WRFPRS${fhr6}.tm00;;
         esac
 #       $GRBINDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
-        $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+# Simple packing for smartprecip
+        if [ ! -e WRFPRS${fhr6}.tm00.simple ];then
+          $WGRIB2 WRFPRS${fhr6}.tm00 -inv /dev/null -set_grib_type s -grib_out WRFPRS${fhr6}.tm00.simple
+          cp WRFPRS${fhr6}.tm00.simple WRFPRS${fhr6}.tm00
+          $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+        fi
 
 # link 6hr?
         ln -sf "WRFPRS${fhr3}.tm00"      fort.17
@@ -701,8 +729,10 @@ echo "#! /bin/ksh" > j.poe
 echo "$WGRIB2 inputs.grb2_10 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_10" >> j.poe
 
 # always use budget interpolation for precip and snow 
+# GRIB1 smartinit uses bilinear
 
-interp="-new_grid_interpolation budget"
+#interp="-new_grid_interpolation budget"
+interp="-new_grid_interpolation bilinear"
 echo "#! /bin/ksh" > k.poe
 echo "$WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1" >> k.poe
 echo "#! /bin/ksh" > l.poe
@@ -849,8 +879,9 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
   ln -sf "SREFPCP"                  fort.13
   ln -sf "SREFPCPi"                 fort.14
   ln -sf "${freq}precip"            fort.15
+  ln -sf "${freq}precipi"           fort.16
 # ln -sf "${freq}precipi"           fort.16
-  ln -sf "${freq}precipi"           fort.18
+# ln -sf "${freq}precipi"           fort.18
 
 # At 12-hr times, input 12-hr max/min temps and 3 and 6-hr buckets
   case $fhr in 
@@ -860,9 +891,9 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00 MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00 MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00 MAXMIN5
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00.grib2 MAXMIN3
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00.grib2 MAXMIN4
+    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00.grib2 MAXMIN5
 #   $GRBINDEX MAXMIN3 MAXMIN3i
 #   $GRBINDEX MAXMIN4 MAXMIN4i
 #   $GRBINDEX MAXMIN5 MAXMIN5i
@@ -881,10 +912,10 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
     else     
 #     READ 6/12 hr precip from special files created by makeprecip
       ln -sf "${freq}snow"      fort.17       # For DGEX, read 3hr special precip file at check6=0
-#     ln -sf "${freq}snowi"     fort.18
-      ln -sf "${freq}snowi"     fort.19
-#     ln -sf "12precip"   fort.19
-      ln -sf "12precip"   fort.18
+      ln -sf "${freq}snowi"     fort.18
+#      ln -sf "${freq}snowi"     fort.19
+      ln -sf "12precip"   fort.19
+#      ln -sf "12precip"   fort.18
       ln -sf "12precipi"  fort.20
     fi   
     ln -sf "MAXMIN1"   fort.$fmx

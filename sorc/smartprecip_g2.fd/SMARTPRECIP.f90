@@ -288,6 +288,7 @@
         else
 
         SNOW1=gfld%fld
+        print*,'snow1=',maxval(snow1),minval(snow1)
 
 !       do K=1,200
         do K=1,29
@@ -360,6 +361,7 @@
                     UNPACK,K,GFLD,IRET)
 
         SNOW2=gfld%fld
+        print*,'snow2=',maxval(snow2),minval(snow2)
 
 !       do K=1,200
         do K=1,29
@@ -433,6 +435,7 @@
         call getgb2(LUGB3,0,0,0,JIDS,JPDTN,JPDT,JGDTN,JGDT, &
                     UNPACK,K,GFLD,IRET)
         SNOW3=gfld%fld
+        print*,'snow3=',maxval(snow3),minval(snow3)
 
 
 !       do K=1,200
@@ -471,6 +474,7 @@
         call getgb2(LUGB4,0,0,0,JIDS,JPDTN,JPDT,JGDTN,JGDT, &
                     UNPACK,K,GFLD,IRET)
         APCP4=gfld%fld
+        print*,'apcp4=',maxval(apcp4),minval(apcp4)
 
 
 !       do K=1,200
@@ -505,6 +509,8 @@
         call getgb2(LUGB4,0,0,0,JIDS,JPDTN,JPDT,JGDTN,JGDT, &
                     UNPACK,K,GFLD,IRET)
         SNOW4=gfld%fld
+        print*,'snow4=',maxval(snow4),minval(snow4)
+
 
 
 !       do K=1,200
@@ -618,7 +624,13 @@
         IF (MK6P .and. .not.(LSUB)) THEN
         gfld%ipdtmpl(27)=6
 !       gfld%ipdtmpl(9)=FHR3
-        gfld%ipdtmpl(9)=SHR1
+!       gfld%ipdtmpl(9)=SHR1
+!       gfld%ipdtmpl(9)=FHR1
+        if(laddsub)then
+          gfld%ipdtmpl(9)=FHR1
+        else
+          gfld%ipdtmpl(9)=SHR1
+        endif
 
        write(0,*) 'gfld%ipdtmpl(27) aft: ', &
                    gfld%ipdtmpl(27)

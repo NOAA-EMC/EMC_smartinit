@@ -1771,6 +1771,7 @@
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMAX3)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1793,6 +1794,7 @@
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMIN3)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1815,6 +1817,7 @@
        DEC=3.0
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMAX3)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1836,6 +1839,7 @@
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMIN3)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1893,6 +1897,7 @@
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,TMAX12)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1921,6 +1926,7 @@
         write(0,*) 'minval(TMIN12): ', minval(TMIN12)
         write(0,*) 'maxval(TMIN12): ', maxval(TMIN12)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1945,6 +1951,7 @@
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMAX12)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 
@@ -1966,6 +1973,7 @@
 
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,RHMIN12)
 
+       gfld8%bmap=gfld%bmap
        GFLD8%discipline=0
        GFLD8%ipdtnum=8     ! should be superfluous
 

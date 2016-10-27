@@ -153,7 +153,8 @@ module load grib_util
 
 # use local versions of cnvgrib and wgrib2
 #export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export WGRIB2=${EXECdng}/smartinit_wgrib2
+#export WGRIB2=${EXECdng}/smartinit_wgrib2
+export WGRIB2=${EXECdng}/wgrib2
 export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###########################################

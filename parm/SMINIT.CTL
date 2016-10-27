@@ -1,7 +1,9 @@
 RUNTYP       rg   outreg   mdlgrd   SREF-GRD	GRDTYP 	 ogrd   gtyp nx  ny   lat1  lon1 gdt tlon   dx  dy
 ------------------------------------------------------------------------------------------------------------------
-conus  	     con  conus    ""         212       bgrd3d   197     3  1073 689 20192 238446 8 265000 5079 5079
-conusnest    con  conus    conusnest  212      .bsmart   197     3  1073 689 20192 238446 8 265000 5079 5079
+#conus  	     con  conus    ""         212       bgrd3d   197     3  1073 689 20192 238446 8 265000 5079 5079
+#conusnest    con  conus    conusnest  212      .bsmart   197     3  1073 689 20192 238446 8 265000 5079 5079
+ conus  	     con  conus    ""         212       bgrd3d   197     3  1073 689 20192 238450 8 265000 5079 5079
+ conusnest    con  conus    conusnest  212      .bsmart   197     3  1073 689 20192 238450 8 265000 5079 5079
 ak           ak   ak       ""         216       bgrd3d   198     5   825 553 40530 181429 8 210000 5953 5953 
 ak_rtmages   ak   ak       ""         216       bgrd3d   198     5   825 553 40530 181429 8 210000 5953 5953 
 alaskanest   ak   ak       alaskanest 216      .bsmart   198     198

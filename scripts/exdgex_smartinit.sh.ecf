@@ -76,8 +76,8 @@ fi
       esac
   fi
 
-#  ${SMINIT_SSH:-$USHdng/dgex_smartinit_g2.sh}
- ${SMINIT_SSH:-$USHdng/dgex_smartinit_g2g1.sh}
+   ${SMINIT_SSH:-$USHdng/dgex_smartinit_g2.sh}
+#  ${SMINIT_SSH:-$USHdng/dgex_smartinit_g2g1.sh}
 
 #NCO set -x
 #####################################################################

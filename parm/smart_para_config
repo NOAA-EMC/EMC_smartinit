@@ -52,8 +52,8 @@ export COMROOT=/com
 export gespath=/nwges/prod          
 ## Test with Eric's NAMRR PARA
 #export GESIN=/nwges/prod          
-#export GESIN=/ptmpd3/Eric.Rogers/nwges/para
-export GESIN=/meso2/noscrub/Eric.Rogers/nwges/para
+export GESIN=/ptmpd3/Eric.Rogers/nwges/para
+#export GESIN=/meso2/noscrub/Eric.Rogers/nwges/para
 export COM_IN=${COMROOT}/${mdl}/prod 
 
 #TEST WITH Eric's NAM PARA     

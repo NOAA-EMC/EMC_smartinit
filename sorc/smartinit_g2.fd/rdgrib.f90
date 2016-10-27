@@ -309,6 +309,7 @@ contains
 
         CALL GETIDX(LUB,LUI,CBUF,NLEN,NNUM,IRGI)
         write(0,*) 'NLEN, NNUM from GETIDX: ', NLEN, NNUM
+        if(nlen.eq.0.or.nnum.eq.0)return
       IF(IRGI .NE. 0) THEN
         WRITE(6,*)' PROBLEMS READING GRIB INDEX FILE SO ABORT'
         ISTAT = IRGI

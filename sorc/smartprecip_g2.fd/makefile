@@ -1,17 +1,18 @@
 SHELL=/bin/sh
 #
-###SRCS=SMARTPRECIP.f90
 OBJS=SMARTPRECIP.o
 
-FC =   ifort -convert big_endian -g -traceback	
+FC =   ifort -convert big_endian -g -traceback 
 
-LIBS = -L/usr/local/lib   \
-	-L/nwprod/lib  -lip_4 -lw3nco_4 -lw3emc_4 -lbacio_4 -lg2_4 -lg2tmpl -lpng -lz -ljasper
-NCEP_LIB_DIR = 
-INC = -I/nwprod/lib/incmod/g2_4 -I/nwprod/lib/incmod/g2tmpl
+LIBS = ${G2TMPL_LIB} ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB} \
+       ${IP_LIB4} ${W3NCO_LIB4} ${W3EMC_LIB4} ${BACIO_LIB4}
+
+INCG2=-I${G2_INC4} -I${G2TMPL_INC}
+
+NCEP_LIB_DIR =
 
 FFLAGS = -O -fp-model strict -list
-LDFLAGS =-FR -assume byterecl -check all -debug all -warn nounused 
+LDFLAGS =-FR -assume byterecl # -check -check all -check bounds -g -debug all -warn nounused -warn interface
 
 CMD =	../../exec/smartprecip_g2    
 PROFLIB =	-lprof
@@ -19,8 +20,7 @@ PROFLIB =	-lprof
 all:		$(CMD)
 
 $(OBJS): %.o: %.f90
-	$(FC) $(INC) -c $*.f90
-
+	$(FC) $(INCG2) -c $*.f90
 
 $(CMD):		$(OBJS) 
 	$(FC) $(FFLAGS) $(LDFLAGS) -o $(@) $(OBJS) $(LIBS)

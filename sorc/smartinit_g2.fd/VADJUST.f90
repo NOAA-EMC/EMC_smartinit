@@ -201,11 +201,11 @@
           ZMAX=AMAX1(ZMDL,ZNDFD)
           DZTOPO=ABS(ZMDL - ZNDFD)
           
-          if(zmax .eq. 0.)then
-          dscale=0.
-          else
+!         if(zmax .eq. 0.)then
+!         dscale=0.
+!         else
           DSCALE=DZTOPO/ZMAX
-          endif
+!         endif
 
 !        Do not change winds over water  02/15
          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16)  DSCALE=0.0

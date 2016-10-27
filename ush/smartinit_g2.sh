@@ -145,8 +145,8 @@ case $RUNTYP in
 #  conusnest2p5) natgrd=.bsmart; ogrd=188; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
 #  conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
    conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
-   conus) natgrd=bgrd3d; mdlgrd=""; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
-   conusnest) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.446:1073:5079 20.192:689:5079";;
+   conus) natgrd=bgrd3d; mdlgrd=""; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
+   conusnest) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
    hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
    hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
 # old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
@@ -382,10 +382,6 @@ for fhr in $hours; do
   fi
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
-#ceilmdl=bgdawp
-#slpmdl=bgdawp
-#case $RUNTYP in conusnest|conusnest2p5) ceilmdl=bgdaw2;; esac
-#case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
 
 # Check that 00 hr analysis is from NDAS or GDAS
     case $natgrd in 
@@ -395,28 +391,21 @@ for fhr in $hours; do
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
-#         ceil_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${ceilmdl}${pcfhr}${text}
-#         slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${slpmdl}${pcfhr}${text}
           echo MDLIN $mdlin
           cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-#         if [ -e $ceil_file -a $grib = 1 ];then
-#            wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
-#            cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
-#            mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
-#         fi
-#         if [ -e $slp_file ];then
-#            if [ $grib = 1 ];then
-#            wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-#            else
-#            wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
-#            fi
-#            cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
-#            mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
-#         fi
-          rm -f WRFPRS${fhr}.tm00
-          ln -fs WRFPRS${pcfhr}.tm00 fort.11
-          ln -fs WRFPRS${fhr}.tm00 fort.51
-          echo ${PDY}${cyc} | $OVERDATEGRIB
+          cat > itag <<EOF
+${PDY}${cyc}
+EOF
+
+          export pgm=overdateg2
+          . prep_step
+
+          export FORT11=WRFPRS${pcfhr}.tm00
+          export FORT51=WRFPRS${fhr}.tm00
+          /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
+          export err=$?;err_chk
+          rm WRFPRS${pcfhr}.tm00
+          unset pgm
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
@@ -463,28 +452,23 @@ fi;;
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
             mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
-#           ceil_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${ceilmdl}${pcfhr}${text}
-#           slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${slpmdl}${pcfhr}${text}
             echo MDLIN $mdlin
+
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-#           if [ -e $ceil_file -a $grib = 1 ];then
-#              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
-#              cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
-#              mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
-#           fi
-#           if [ -e $slp_file ];then
-#            if [ $grib = 1 ];then
-#              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
-#            else
-#              wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
-#            fi
-#              cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
-#              mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
-#           fi
-            rm -f WRFPRS${fhr}.tm00
-            ln -fs WRFPRS${pcfhr}.tm00 fort.11
-            ln -fs WRFPRS${fhr}.tm00 fort.51
-            echo ${PDY}${cyc} | $OVERDATEGRIB
+          cat > itag <<EOF
+${PDY}${cyc}
+EOF
+
+          export pgm=overdateg2
+          . prep_step
+
+          export FORT11=WRFPRS${pcfhr}.tm00
+          export FORT51=WRFPRS${fhr}.tm00
+          /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
+          export err=$?;err_chk
+          rm WRFPRS${pcfhr}.tm00
+          unset pgm
+
           else
 # Begin wgrib2
 #            if [ $grib = 2 ];then
@@ -638,12 +622,18 @@ fi;;
       esac
       if [ $grib = 2 ];then
 #       $GRBINDEX WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
+# Simple packing for smartprecip
+        $WGRIB2 WRFPRS${fhr}.tm00 -set_grib_type s -grib_out WRFPRS${fhr}.tm00.simple
+        mv WRFPRS${fhr}.tm00.simple WRFPRS${fhr}.tm00
         $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       else
         $GRBINDEX WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
 #       $GRBINDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       fi
 #     $GRBINDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+# Simple packing for smartprecip
+      $WGRIB2 WRFPRS${FHRFRQ}.tm00 -set_grib_type s -grib_out WRFPRS${FHRFRQ}.tm00.simple
+      mv WRFPRS${FHRFRQ}.tm00.simple WRFPRS${FHRFRQ}.tm00
       $GRB2INDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 
       export pgm=smartprecip_g2; . prep_step
@@ -683,6 +673,9 @@ fi;;
           cat inputsb.grb2_2 inputsb.grb2_1 > WRFPRS${fhr3}.tm00
         esac
 #       $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+# Simple packing for smartprecip
+        $WGRIB2 WRFPRS${fhr3}.tm00 -set_grib_type s -grib_out WRFPRS${fhr3}.tm00.simple
+        mv WRFPRS${fhr3}.tm00.simple WRFPRS${fhr3}.tm00
         $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 
 # Begin wgrib2
@@ -708,7 +701,10 @@ fi;;
 #         cat model.ndfd_b2 model.ndfd_b1 > WRFPRS${fhr3}.tm00
         esac
 #       $GRBINDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
-        $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+# Simple packing for smartprecip
+          $WGRIB2 WRFPRS${fhr6}.tm00 -set_grib_type s -grib_out WRFPRS${fhr6}.tm00.simple
+          mv WRFPRS${fhr6}.tm00.simple WRFPRS${fhr6}.tm00
+          $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 
         ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
         ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
@@ -727,7 +723,7 @@ fi;;
 # smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
       echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-      $EXECdng/smartprecip_g2 <<EOF > ${ppgm}precip${fhr}.out
+      $EXECdng/smartprecip_g2 <<EOF > ${ppgm}precip${freq}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk
@@ -888,8 +884,10 @@ echo "$WGRIB2 inputs.grb2_10 -set_grib_type ${compress} -new_grid_winds grid ${i
 #$WGRIB2 inputs.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1
 
 # always use budget interpolation for precip and snow
+# but GRIB1 smartinit uses bilinear interpolation
 
-interp="-new_grid_interpolation budget"
+#interp="-new_grid_interpolation budget"
+interp="-new_grid_interpolation bilinear"
 echo "#! /bin/ksh" > k.poe
 echo "$WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1" >> k.poe
 echo "#! /bin/ksh" > l.poe
