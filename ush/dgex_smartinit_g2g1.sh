@@ -118,7 +118,8 @@ text=".tm00"
 
 # Begin wgrib2
 
-compress="c3 -set_bitmap 1"
+#compress="c3 -set_bitmap 1"
+compress="jpeg -set_bitmap 1"
 
 case $RUNTYP in
 
@@ -756,7 +757,12 @@ $CNVGRIB -g21 ${prdgfl}.grb2 ${prdgfl}
 # export err=$?;  err_chk
 
 # cp /com/date/t${cyc}z DATE
-  cp ${COMROOT}/date/t${cyc}z DATE
+# cp ${COMROOT}/date/t${cyc}z DATE
+  if [ $PDY = $today ];then
+    cp ${COMROOT}/date/t${cyc}z DATE
+  else
+    echo "DATE  "${PDY}${cyc}"00WASHINGTON" >DATE
+  fi
   if [ -s $prdgfl ];then  
     mv ${prdgfl} meso${rg}.NDFDf${fhr}  
     echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}

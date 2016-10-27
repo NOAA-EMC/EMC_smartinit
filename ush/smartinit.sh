@@ -679,7 +679,7 @@ fi;;
 # smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
       echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-      $EXECdng/smartprecip <<EOF > ${ppgm}precip${fhr}.out
+      $EXECdng/smartprecip <<EOF > ${ppgm}precip${freq}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk
