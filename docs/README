@@ -930,7 +930,7 @@ August 2016
 	kick-scripts/DRIVcs2p
 
 * Removed the GRIB1 mods that copied the MSLET, CEIL and Skin temperature (TMP:surface) from the smartinit_g2.sh script. These 
-  are no longer needed since these 3 fields are available in the NAMv4 bmsart/bgrd3d files. 
+  are no longer needed since these 3 fields are available in the NAMv4 bsmart/bgrd3d files. 
 	ush/smartinit_g2.sh
 
 * Changed packing option for SREF and PR/HI from c3 (complex) to jpeg in wgrib2.  
@@ -1001,3 +1001,96 @@ August 2016
 
 * Added new parallel location of NAMx
 	parm/smart_para_config
+
+October 2016
+
+* changed lon1 for conus, conusnest and dgex_cs; it was incorrect
+	parm/SMINIT.CTL
+        ush/smartinit_g2.sh
+        ush/dgex_smartinit_g2.sh
+
+* changed location of GESIN for parallel NAMx
+	parm/smart_para_config
+
+* added GRIB2 *wexp files
+	ush/dng_awp_g2.sh
+
+* converted GRIB2 files to simple packing for smartprecip (to prevent random crashes in smartprecip)
+	ush/dgex_smartinit_g2.sh
+	ush/smartinit_g2.sh
+
+* changed budget interpolation to bilinear interpolation for snow and total precip in the bsmart files only.  The snow 
+  and precip coming out of smartprecip will still be interpolated using budget (this follows GRIB1 smartinit convention).
+        ush/dgex_smartinit_g2.sh
+        ush/smartinit_g2.sh
+
+* changed links back for special files created by makeprecip and smartprecip
+        ush/dgex_smartinit_g2.sh
+
+* copied grib2 files (rather than grib1 files) from smartinit archive to MAXMIN3, MAXMIN4, and MAXMIN5
+        ush/dgex_smartinit_g2.sh
+
+* removed or commented out special ceiling, SLP and SST mods leftover from GRIB1 version (in the GDAS portion of script)
+	ush/smartinit_g2.sh
+
+* replaced overdategrib with overdateg2
+        ush/smartinit_g2.sh
+
+* changed name of output for smartprecip output (replace fhr with freq)
+        ush/smartinit_g2.sh
+
+* Added delay in starting DGEX script for 18z CONUS
+	kick-scripts/DRIV-dgex
+
+* Added sorc/wgrib2 temporarily until NCO gets wgrib2 updated or added.
+	sorc/wgrib2
+	sorc/build_smartinit.scr
+
+* replaced smartprecip and smartinit with the GRIB2 directories in build_smartinit.scr
+	sorc/build_smartinit.scr
+
+* Added max/min print statements; changed begin time for accumulated precip
+	sorc/smartprecip_g2.fd/SMARTPRECIP.f90
+
+* Cleaned up makefiles
+	sorc/smartprecip_g2.fd/makefile
+	sorc/smartinit_g2.fd/makefile
+	sorc/smartinit_cnvgrib.fd/makefile
+
+* Added the correct hour to the reads of MAX/MIN Temperature and Dewpoint Temperature (was reading incorrect hours)
+	sorc/smartinit_g2.fd/GETGRIB.f90
+
+* Reset accumulated fields bitmap to non-accumulated fields bitmap
+	sorc/smartinit_g2.fd/MAIN.f90
+
+* Added a return if the file does not exist so smartinit will not crash (subroutine rdhdrs_g2)
+	sorc/smartinit_g2.fd/rdgrib.f90
+
+* Took out change to DSCALE - will investigate more later.  It was causing Salton Sea winds to be extremely large again
+	sorc/smartinit_g2.fd/VADJUST.f90
+
+* Added subroutine w3fi71.f to smartinit_cnvgrib.fd because converting GRIB2 files to GRIB1 did not change the GRID ID. 
+  This was because the resolution flag is incorrect for the CONUS and Alaska grids.  Changing w3fi71.f corrected 
+  the GRID ID problem, but the resolution flag is still incorrect. If users have trouble reading the GRIB1 output, we
+  may have to investigate fixing cnvgrib so it will output the correct resolution flag.
+	sorc/smartinit_cnvgrib.fd/makefile
+	sorc/smartinit_cnvgrib.fd/w3fi71.f
+
+* Added new release notes and updated README file
+	docs/release-notes.v4.0.0
+	docs/README
+
+* Changed WGRIB2 to point to my version of wgrib2 (will need to change when NCO has new version) and set CNVGRIB to point
+  to my version of smartinit_cnvgrib
+	jobs/JDGEX_SMINIT
+	jobs/JNAM_SMINIT
+
+* Changed module load /nwpara2/modulefiles/util_shared/v1.0.3 to module load prod_util; set GUESS to $GUESStm00
+	jobs/JNAM_SMINIT
+
+* Added changes to the following scripts that allow you to run GRIB1 smartinit with GRIB2 data converted to GRIB1. Changed 
+  name of output for smartprecip output (replace fhr with freq) (nam); changed compress to jpeg (dgex), changed setting of DATE to 
+  "${PDY}${cyc}"00WASHINGTON" if $PDY != $today (dgex)
+	ush/smartinit.sh
+	ush/dgex_smartinit_g2g1.sh
+
