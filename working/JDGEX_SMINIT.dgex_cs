@@ -1,12 +1,14 @@
 #BSUB -J DNG06.dgex_cs-192
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.dgex_cs-192
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.dgex_cs-192
-#BSUB -n 1
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v4.0.0/20161030/06/list/oDNG06.dgex_cs-192
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v4.0.0/20161030/06/list/oDNG06.dgex_cs-192
+#BSUB -n 12
 #BSUB -W 1:00
 #BSUB -P RTMA-T2O
-#BSUB -q dev2_shared
-#BSUB -R affinity[core]
-#BSUB -R rusage[mem=10000]
+#BSUB -q dev2
+#BSUB -R span[ptile=12]
+#BSUB -R affinity[core(1)]
+#BSUB -x
+#BSUB -a poe
 #!/bin/ksh
 set -xa   #NCO preferred setting
 
@@ -162,7 +164,8 @@ module load grib_util
 
 # use local versions of cnvgrib and wgrib2
 #export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export WGRIB2=${EXECdng}/smartinit_wgrib2
+#export WGRIB2=${EXECdng}/smartinit_wgrib2
+export WGRIB2=${EXECdng}/wgrib2
 export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###########################################
