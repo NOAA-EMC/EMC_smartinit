@@ -388,11 +388,24 @@ for fhr in $hours; do
       bgrd3d) 
 #     Check that 00 hr analysis is from NDAS or GDAS (08/2013)
         if [ $fhr -eq 00 -a $GUESS = GDAS ];then
+# Backup 6 hours
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
           mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           echo MDLIN $mdlin
-          cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
+          if [ -s ${mdlin}${pcfhr}.tm00 ];then
+            cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
+          else
+# Backup 12 hours
+            export pcfhr=12
+            export pcdate=`$NDATE -${pcfhr} $PDY$cyc |cut -c 1-8`
+            export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
+            echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
+            echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
+            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            echo MDLIN $mdlin
+            cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
+          fi
           cat > itag <<EOF
 ${PDY}${cyc}
 EOF
@@ -402,7 +415,8 @@ EOF
 
           export FORT11=WRFPRS${pcfhr}.tm00
           export FORT51=WRFPRS${fhr}.tm00
-          /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
+#         /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
+          $OVERDATEG2 < itag >> $pgmout 2> errfile
           export err=$?;err_chk
           rm WRFPRS${pcfhr}.tm00
           unset pgm
@@ -449,12 +463,25 @@ fi;;
 #         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
 # NDAS = NAM Data Assimilation System; GDAS = Global Data Assimilation System (GFS)
           if [ $fhr -eq 00 -a $GUESS = GDAS ];then
+# Backup 6 hours
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
             mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
 
-            cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
+            if [ -s ${mdlin}${pcfhr}.tm00 ];then
+              cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
+            else
+# Backup 12 hours
+              export pcfhr=12
+              export pcdate=`$NDATE -${pcfhr} $PDY$cyc |cut -c 1-8`
+              export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
+              echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
+              echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
+              mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+              echo MDLIN $mdlin
+              cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
+            fi
           cat > itag <<EOF
 ${PDY}${cyc}
 EOF
@@ -464,7 +491,8 @@ EOF
 
           export FORT11=WRFPRS${pcfhr}.tm00
           export FORT51=WRFPRS${fhr}.tm00
-          /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
+#         /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
+          $OVERDATEG2 < itag >> $pgmout 2> errfile
           export err=$?;err_chk
           rm WRFPRS${pcfhr}.tm00
           unset pgm
