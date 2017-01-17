@@ -53,6 +53,7 @@ export gespath=/nwges/prod
 ## Test with Eric's NAMRR PARA
 #export GESIN=/nwges/prod          
 export GESIN=/ptmpd3/Eric.Rogers/nwges/para
+#export GESIN=/com2/nam/para
 #export GESIN=/meso2/noscrub/Eric.Rogers/nwges/para
 export COM_IN=${COMROOT}/${mdl}/prod 
 
@@ -63,6 +64,7 @@ export COM_IN=${COMROOT}/${mdl}/prod
 
 ## Test with Eric's NAM PARA
 export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
+export COM_IN=/com2/${mdl}/para 
 #export COM_IN=/ptmpd3/Eric.Rogers/com/${mdl}/para 
 #export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/para
 #export COM_IN=/meso2/noscrub/Jacob.Carley/com/${mdl}/rt
