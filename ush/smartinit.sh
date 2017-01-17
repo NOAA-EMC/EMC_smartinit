@@ -48,7 +48,8 @@ set -xa
 
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
-export grib=1
+#export grib=1
+export grib=2
 
 export rg=`echo $RUNTYP |cut -c1-2` 
 tempvar=$(echo EXEC$mdl)
@@ -141,6 +142,7 @@ case $RUNTYP in
    hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
 # old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
    priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
+   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
 # new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
 # new priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
 # new   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
@@ -273,6 +275,9 @@ let pcphr3=pcphr-3
 # fhr should be gt 0 since precip is not available at initial time
 if [ $ffhr -gt ${fhrstr} ]; then
 
+# SREF is only available at these cycles
+if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
+
 # Get the sref precip fields that we need
   if [ $rg = gm -o $rg = dgx ]; then
     cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
@@ -327,6 +332,8 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
 fi #fhr -ge 0
 
+fi #$cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18
+
 let ffhr1=ffhr-1
 let ffhr2=ffhr-2
 hours="${ffhr}"
@@ -374,13 +381,17 @@ case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
           slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${slpmdl}${pcfhr}${text}
           echo MDLIN $mdlin
           cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-          if [ -e $ceil_file ];then
+          if [ -e $ceil_file -a $grib = 1 ];then
              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
              cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
              mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
           fi
           if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+             wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
              cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
              mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
           fi
@@ -394,13 +405,17 @@ case $RUNTYP in conusnest|conusnest2p5) slpmdl=bgdaw1;; esac
           ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
           slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
-          if [ -e $ceil_file ];then
+          if [ -e $ceil_file -a $grib = 1 ];then
              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
              cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
              mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
           fi
           if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
              wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+             wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
              cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
              mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
           fi
@@ -434,13 +449,17 @@ fi;;
             slp_file=$COM_IN/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}.${slpmdl}${pcfhr}${text}
             echo MDLIN $mdlin
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
-            if [ -e $ceil_file ];then
+            if [ -e $ceil_file -a $grib = 1 ];then
                wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
                cat WRFPRS${pcfhr}.tm00 ceiling.grb > WRFPRS${pcfhr}.tm00_withceiling
                mv  WRFPRS${pcfhr}.tm00_withceiling  WRFPRS${pcfhr}.tm00
             fi
             if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
                wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+               wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
                cat WRFPRS${pcfhr}.tm00 slp.grb > WRFPRS${pcfhr}.tm00_withslp
                mv  WRFPRS${pcfhr}.tm00_withslp  WRFPRS${pcfhr}.tm00
             fi
@@ -458,13 +477,17 @@ fi;;
             ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
             slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
-            if [ -e $ceil_file ];then
+            if [ -e $ceil_file -a $grib = 1 ];then
                wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
                cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
                mv  WRFPRS${fhr}.tm00_withceiling  WRFPRS${fhr}.tm00
             fi
             if [ -e $slp_file ];then
+             if [ $grib = 1 ];then
                wgrib -s $slp_file | egrep "(:TMP:sfc:|:MSLET:)" | wgrib -i -grib $slp_file -o slp.grb
+             else
+               wgrib2 -s $slp_file | egrep "(:TMP:surface:|:MSLET:)" | wgrib2 -i $slp_file -grib slp.grb
+             fi
                cat WRFPRS${fhr}.tm00 slp.grb > WRFPRS${fhr}.tm00_withslp
                mv  WRFPRS${fhr}.tm00_withslp  WRFPRS${fhr}.tm00
             fi
@@ -656,7 +679,7 @@ fi;;
 # smartprecip : Create Precip Buckets for smartinit 
 #===============================================================
       echo MAKE $freq HR PRECIP BUCKET FILE from fhrs $pfhr1 to $pfhr2 $pfhr3
-      $EXECdng/smartprecip <<EOF > ${ppgm}precip${fhr}.out
+      $EXECdng/smartprecip <<EOF > ${ppgm}precip${freq}.out
 $pfhr1 $pfhr2 $pfhr3 $pfhr4 
 EOF
       export err=$?;  err_chk
@@ -733,7 +756,8 @@ else
 # ak_rtmages uses bilinear -> going from 3 km to 6 km; 
 # the rest use nearest neighbor (conusnest2p5, hawaiinest, aknest3)
 
-interp="-new_grid_interpolation neighbor"
+#interp="-new_grid_interpolation neighbor"
+interp="-new_grid_interpolation bilinear"
 case $RUNTYP in conus|conusnest|priconest|pr|hi) interp="-new_grid_interpolation bilinear";; esac
 case $RUNTYP in ak|alaskanest|ak_rtmages) interp="-new_grid_interpolation bilinear";; esac
 
@@ -906,8 +930,10 @@ fi # grib = 1
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
-    cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
-    cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
+      cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
+      cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    fi
     if [ -s MAXMIN${fhr1}.tm00 ];then
       echo MAXMIN${fhr1}.tm00 FOUND
       cp MAXMIN${fhr2}.tm00 MAXMIN2
@@ -945,9 +971,17 @@ fi # grib = 1
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
-    cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
+# Fix bug - ak_rtmages was using files from the ak grid, which is initialized with bsmart and has a bitmap.
+# A. Gibbs 3-15-16
+    if [ $RUNTYP = ak_rtmages ];then
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr3}.tm00${exptext} MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr6}.tm00${exptext} MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr9}.tm00${exptext} MAXMIN5
+    else
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
+      cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
+    fi
     $GRBINDEX MAXMIN3 MAXMIN3i
     $GRBINDEX MAXMIN4 MAXMIN4i
     $GRBINDEX MAXMIN5 MAXMIN5i

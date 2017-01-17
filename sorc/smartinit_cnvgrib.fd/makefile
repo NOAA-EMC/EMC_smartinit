@@ -1,8 +1,8 @@
 SHELL=/bin/sh
 #
-SRCS=	gds2gdt.f pds2pdt.f pds2pdtens.f cnvgrib.f cnv12.f cnv22.f \
+SRCS=	gds2gdt.f pds2pdt.f pds2pdtens.f cnvgrib.f cnv12.f cnv22.f w3fi71.f \
         w3fi63.f cnv21.f gdt2gds.f makepds.f putgbexn.f makepdsens.f setbit.f
-OBJS=	gds2gdt.o pds2pdt.o pds2pdtens.o cnvgrib.o cnv12.o cnv22.o \
+OBJS=	gds2gdt.o pds2pdt.o pds2pdtens.o cnvgrib.o cnv12.o cnv22.o w3fi71.o \
         w3fi63.o cnv21.o gdt2gds.o makepds.o putgbexn.o makepdsens.o setbit.o
 
 # Tunable parameters
@@ -15,9 +15,9 @@ OBJS=	gds2gdt.o pds2pdt.o pds2pdtens.o cnvgrib.o cnv12.o cnv22.o \
 #
 FC =		ifort
 
-INC= /nwprod/lib/incmod/g2_4
-LIBS= -L/nwprod/lib -lg2_4 -lw3nco_4 -lbacio_4 \
-	-ljasper -lpng -lz
+INCG2=-I${G2_INC4}
+LIBS = ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB} \
+	${W3NCO_LIB4} ${BACIO_LIB4}
 
 CMD =		../../exec/smartinit_cnvgrib
 PROFLIB =	-lprof
@@ -26,7 +26,7 @@ PROFLIB =	-lprof
 # To compile with flowtracing turned on, use the second line
 # To compile giving profile additonal information, use the third line
 # WARNING:  SIMULTANEOUSLY PROFILING AND FLOWTRACING IS NOT RECOMMENDED 
-FFLAGS =        -O3 -g -I $(INC)
+FFLAGS =        -O3 -g $(INCG2)
 #FFLAGS =	 -F
 #FFLAGS =	 -Wf"-ez"
 

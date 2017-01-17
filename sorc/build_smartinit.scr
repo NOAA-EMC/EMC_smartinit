@@ -1,0 +1,35 @@
+module purge
+
+module load /u/Annette.Gibbs/modulefiles/SMARTINIT/v4.0.0
+
+module list
+
+sleep 1
+
+BASE=`pwd`
+
+##############################
+
+cd ${BASE}/smartinit_g2.fd
+make clean
+make 
+
+##############################
+
+cd ${BASE}/smartprecip_g2.fd
+make clean
+make 
+
+##############################
+
+cd ${BASE}/smartinit_cnvgrib.fd
+make clean
+make 
+
+##############################
+
+cd ${BASE}/wgrib2
+make
+cp wgrib2/wgrib2 ${BASE}/../exec/wgrib2
+
+##############################

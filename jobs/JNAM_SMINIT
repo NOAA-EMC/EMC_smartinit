@@ -147,12 +147,11 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 export GESIN=${GESIN:-$GESROOTp1/${envir}}
 
 . /usrx/local/Modules/default/init/ksh
-module load /nwpara2/modulefiles/util_shared/v1.0.3
+module load prod_util
 module load grib_util
 
 # use local versions of cnvgrib and wgrib2
-#export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export WGRIB2=${EXECdng}/smartinit_wgrib2
+export WGRIB2=${EXECdng}/wgrib2
 export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###########################################
@@ -165,6 +164,7 @@ setpdy.sh
 #   For testing cold start export GUESS=GDAS   #TEST
 if [ -s $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
 .  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+export GUESS=$GUESStm00
 else
    echo  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
    export GUESS=NDAS
