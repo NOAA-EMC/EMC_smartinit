@@ -12,7 +12,7 @@ jfhr=$2
   echo "#BSUB -n 12"                >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -W ${WALLCLK}"       >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -P RTMA-T2O"             >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#BSUB -q dev2"              >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "#BSUB -q devhigh2"              >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -R "span[ptile=12]""    >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -R affinity[core(1)]"    >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#BSUB -x"                       >>bjobcards-dev${RUNTYP}-$jfhr

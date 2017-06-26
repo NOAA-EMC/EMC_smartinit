@@ -21,8 +21,8 @@ module load ruby emc-utils
 
 # set job directory needed if running from cron
 #export model_ver=v3.5.1
-export nam_smartinit_ver=v4.0.0
-export code_ver=v4.0.0
+export nam_smartinit_ver=v4.1.0
+export code_ver=v4.1.0
 export which_nam=prod
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${nam_smartinit_ver}
@@ -36,9 +36,7 @@ cd $kickd
 
 # Determine date
   export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
-#export PDY=20150629 ###TEST
-#export PDY=20160716 ###TEST
-#export PDY=20160825 ###TEST
+#export PDY=20170614 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -48,7 +46,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#export cyc=00  #TEST
+#export cyc=18  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -62,19 +60,20 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 #domains="conusnest2p5  hi ak pr conus aknest3 ak_rtmages"
 
 #====================================================================
-domains="pr ak conus aknest3 ak_rtmages conusnest2p5 hi"
+#domains="pr aknest3 ak_rtmages conusnest2p5 hi"
+domains="pr aknest3 conusnest2p5 hi"
 #domains="conusnest2p5  hi ak conus aknest3 ak_rtmages"
 #domains="ak_rtmages"
-#domains="conusnest2p5 hi pr aknest3 conus"
+#domains="conusnest2p5"
 #domains="conus"
 #domains="ak"
-#domains="aknest3"
+#domains="aknest3 ak_rtmages"
 #domains="aknest3 conusnest2p5"
 #domains="hi pr"
 #domains="pr"
 #domains="pr aknest3 conusnest2p5"
 #domains="hi pr aknest3 "
-#domains="conusnest2p5 "
+#domains="conusnest2p5 pr hi"
 #====================================================================
 
 for RUNTYP in $domains  $domhrw $domdgx ;do

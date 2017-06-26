@@ -124,7 +124,7 @@ while [ $ffhr -le $ENDHRS ];do
   while [ $wait -le 3600 -a $ffhr -ge $((fhrstr+06)) ];do
     ((HHold=ffhr-6))
     if [ $HHold -lt 10 ];then HHold="0"${HHold};fi
-    smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00
+    smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00.grib2
 
     if [ ! -s $smflold ];then
       echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr
@@ -133,7 +133,7 @@ while [ $ffhr -le $ENDHRS ];do
     else
       ((HHold=ffhr-3))
       if [ $HHold -lt 10 ];then HHold="0"${HHold};fi
-      smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00
+      smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00.grib2
       if [ ! -s $smflold ];then
         echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr
         sleep 60
@@ -170,6 +170,7 @@ export PDY=$PDY
 export cyc=$cyc
 date
 
+exit
 if [ $runreg = conus2p5 ];then
   pltrun=conusnest
   bsub -K < $plotdir/run_webpage00_${pltrun}_exp_grib2
