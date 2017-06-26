@@ -41,8 +41,8 @@ if [ $outreg = conus2p5 ];then
 #$EXECdng/smartinit_overgridnum_grib < input > overgridnum_grib.out${fhr}
  if [ $fhr -le 12 ];then
 #  cp  MESO${RGIN}${fhr}.tm00.grb255  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
- $CNVGRIB -g21 MESO${RGIN}${fhr}.tm00.grb188 MESO${RGIN}${fhr}.tm00.grb188.grib1
- cp MESO${RGIN}${fhr}.tm00.grb188.grib1 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
+## $CNVGRIB -g21 MESO${RGIN}${fhr}.tm00.grb188 MESO${RGIN}${fhr}.tm00.grb188.grib1
+## cp MESO${RGIN}${fhr}.tm00.grb188.grib1 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp
  cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp.grib2
  fi
  cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_grb188
@@ -56,7 +56,7 @@ $WGRIB2 MESO${RGIN}${fhr}.tm00.uv -new_grid_vectors "UGRD:VGRD" -submsg_uv MESO$
 #$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00.grb188 MESO${RGIN}${fhr}.tm00.grib1
 #$COPYGB -g 184 -x MESO${RGIN}${fhr}.tm00.grib1 MESO${RGIN}${fhr}.tm00 
 #$CNVGRIB -g12 -p40 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+##$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
 cp MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 
 fi
 
@@ -67,7 +67,7 @@ if [ $outreg != conus2p5 ];then
 cp MESO${RGIN}${fhr}.tm00 MESO${RGIN}${fhr}.tm00.uv
 $WGRIB2 MESO${RGIN}${fhr}.tm00.uv -new_grid_vectors "UGRD:VGRD" -submsg_uv MESO${RGIN}${fhr}.tm00
 # End make u/v part of one record
-$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+##$CNVGRIB -g21 MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
 mv MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi
 #cp ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 old.grb2
