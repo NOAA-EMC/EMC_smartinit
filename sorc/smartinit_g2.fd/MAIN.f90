@@ -151,6 +151,8 @@
     use aset2d
     use aset3d
     use rdgrib     ! GRID and MASK defined in rdgrib
+    USE GRIB_MOD
+    USE pdstemplates
 
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
@@ -158,6 +160,10 @@
     LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
     TYPE (GINFO)        :: GDIN
 
+    INTEGER :: JDISC,JPDTN,JGDTN
+    TYPE(GRIBFIELD):: GFLD, GFLD8, GFLD_S, GFLD8_S
+
+    INTEGER,DIMENSION(:) :: JIDS(200),JPDT(200),JGDT(200)
     REAL, ALLOCATABLE   :: EXN(:,:)
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
     REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:)
@@ -511,8 +517,8 @@
 ! ----------------------------------------
 
 ! original smartinit has DEC=3.0 - should I keep it? Matt set precision to 6.0
-       DEC=3.0
-!      DEC=6.0
+!      DEC=3.0
+       DEC=6.0
 
         do J=1,JM
         do I=1,IM
