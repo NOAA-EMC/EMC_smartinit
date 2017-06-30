@@ -1,12 +1,14 @@
-#BSUB -J DNG06.hi-84
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.hi-84
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.hi-84
-#BSUB -n 1
+#BSUB -J DNG12.hi-84
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v4.1.0/20170630/12/list/oDNG12.hi-84
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v4.1.0/20170630/12/list/oDNG12.hi-84
+#BSUB -n 12
 #BSUB -W 1:00
 #BSUB -P RTMA-T2O
-#BSUB -q dev2_shared
-#BSUB -R affinity[core]
-#BSUB -R rusage[mem=10000]
+#BSUB -q devhigh2
+#BSUB -R span[ptile=12]
+#BSUB -R affinity[core(1)]
+#BSUB -x
+#BSUB -a poe
 #!/bin/ksh
 set -xa   #NCO preferred setting
 
@@ -156,12 +158,11 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 export GESIN=${GESIN:-$GESROOTp1/${envir}}
 
 . /usrx/local/Modules/default/init/ksh
-module load /nwpara2/modulefiles/util_shared/v1.0.3
+module load prod_util
 module load grib_util
 
 # use local versions of cnvgrib and wgrib2
-#export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export WGRIB2=${EXECdng}/smartinit_wgrib2
+export WGRIB2=${EXECdng}/wgrib2
 export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###########################################
@@ -174,6 +175,7 @@ setpdy.sh
 #   For testing cold start export GUESS=GDAS   #TEST
 if [ -s $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
 .  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+export GUESS=$GUESStm00
 else
    echo  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
    export GUESS=NDAS

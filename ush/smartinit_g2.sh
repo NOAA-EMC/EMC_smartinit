@@ -141,24 +141,19 @@ esac
 
 
 case $RUNTYP in
-# old conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540";;
-#  conusnest2p5) natgrd=.bsmart; ogrd=188; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
-#  conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
-   conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723:2345:2540 19.229:1597:2540";;
+   conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723448:2345:2539.703 19.228976:1597:2539.703";;
    conus) natgrd=bgrd3d; mdlgrd=""; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
    conusnest) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
-   hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
-   hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.475:321:2500:206.131 18.073:225:2500:23.088";;
-# old priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
-   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
-   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804:177:2500:296.028 16.829:129:2500:19.747";;
-# new wrong? priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972167:339:1250:296.0156 16.977485:225:1250:19.52200";;
-# new priconest) inest=1; natgrd=.bsmart; mdlgrd=priconest; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
-# new   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.972:339:1250:296.015 16.977:225:1250:19.522";;
-  aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976 40.53:1105:2976";;
-  ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
-  alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
-  ak_rtmages) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
+   hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
+   hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
+#  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
+#  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
+   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+   aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976.563 40.530101:1105:2976.563";;
+   ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
+   alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
+   ak_rtmages) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
 esac
 
 # End wgrib2
@@ -248,7 +243,7 @@ fi
 # Set NDFD output grid topo and land mask filenames
 maskpre=${mdl}_smartmask${outreg}
 topopre=${mdl}_smarttopo${outreg}
-ext=grb
+ext=grb2
 case $RUNTYP in conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
 topofl=${topopre}.${ext}
@@ -1011,6 +1006,12 @@ fi # grib = 1
     ln -sf TOPONDFDi  fort.47
     ln -sf LANDNDFDi  fort.49
   fi
+  if [ $ext = grb2 ];then
+    $GRB2INDEX TOPONDFD TOPONDFDi
+    $GRB2INDEX LANDNDFD LANDNDFDi
+    ln -sf TOPONDFDi  fort.47
+    ln -sf LANDNDFDi  fort.49
+  fi
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
@@ -1168,11 +1169,11 @@ fi # grib = 1
   if [ $fhr -le $hrlyfhr ];then
     case $RUNTYP in
      ak_rtmages) 
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
+#      cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${RUNTYP}${fhr}.tm00
 #       mksmart=0;;
        mksmart=1;;
      hawaiinest|priconest|conusnest2p5|aknest3)
-       cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
+#      cp MESO${RGIN}${fhr}.tm00  $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00
        mksmart=1
        if [ $RUNTYP = conusnest2p5 ];then mksmart=1;fi;;  #make grib2 files for wave group
    esac
