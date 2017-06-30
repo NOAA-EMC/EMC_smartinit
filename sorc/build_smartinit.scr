@@ -21,15 +21,3 @@ make clean
 make 
 
 ##############################
-
-cd ${BASE}/smartinit_cnvgrib.fd
-make clean
-make 
-
-##############################
-
-cd ${BASE}/wgrib2
-make
-cp wgrib2/wgrib2 ${BASE}/../exec/wgrib2
-
-##############################
