@@ -1094,3 +1094,66 @@ October 2016
 	ush/smartinit.sh
 	ush/dgex_smartinit_g2g1.sh
 
+******************************************************************
+DELIVERED to NCO - 31 October 2016
+IMPLEMENTED - 21 March 2017
+******************************************************************
+
+******************************************************************
+Smartinit VERS 4.1.0 - Annette Gibbs
+******************************************************************
+
+March 2017
+
+* added updated GRIB2 Terrain and Land/Sea Mask files for CONUS, Hawaii, and Puerto Rico
+
+	fix/topo/nam_smarttopopr.grb2 
+	fix/topo/nam_smarttopohi.grb2 
+	fix/topo/nam_smarttopoconus2p5.grb2
+	fix/mask/nam_smartmaskpr.grb2
+	fix/mask/nam_smartmaskhi.grb2
+	fix/mask/nam_smartmaskconus2p5.grb2
+
+* changed Alaska Terrain and Land/Sea Mask files from GRIB1 to GRIB2
+
+	fix/topo/nam_smarttopoak3.grb2 
+	fix/topo/nam_smarttopoak.grb2 
+	fix/mask/nam_smartmaskak3.grb2
+	fix/mask/nam_smartmaskak.grb2
+
+* removed symbolic links from mask and topo files
+
+* changed scripts to remove GRIB1 files, added higher precision grid specs, and new GRIB2 terrain and land/ses mask filenames.
+
+	ush/smartinit_g2.sh 
+	ush/dng_awp_g2.sh
+
+* changed pathnames in config file
+
+	parm/smart_para_config
+
+* added GRIB2 changes and changed project from dev2 to devhigh2; stop running ak_rtmages, conus (5km) and alaska (6km)
+
+	kick-scripts/DRIVcs2p
+	kick-scripts/RUN_ALL
+	kick-scripts/cr8bjob_poe
+
+* changed code to read GRIB2 Terrain and Land/Sea Mask files; changed decimal scaling (DEC) from 3.0 to 6.0 for 
+  increased precision of specific humidity (to prevent zero q from being written out); 
+  corrected bug in downscaled specific humidity (downscaled specific humidity was using PSFC (surface pressure from NAM Nest)
+  rather than the downscaled surface pressure (pnew)).
+
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+
+* added new datacards (hourly and MSLP/Cloud Ceiling Height), if approved by the SREC committee.
+
+June 2017
+
+* added NCO changes from /nwprod2/smartinit.v4.0.0
+
+	ush/dng_awp_g2.sh 
+	kick-scripts/cr8bjob_poe  
+	scripts/exnawips_nam_smartinit.sh.ecf 
+	jobs/JNAM_SMINIT
+
