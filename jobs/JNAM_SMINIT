@@ -111,10 +111,10 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
-if [ "$envir" != 'prod' ] ; then
-  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
-fi
+#export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
+#if [ "$envir" != 'prod' ] ; then
+#  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
+#fi
 
 ####################################
 # SENDECF  - Flag Events on ECF
@@ -129,13 +129,15 @@ export SENDDBN=${SENDDBN:-YES}
 # dng = downscaled gridding
 ####################################
 export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
-export HOMEnam=${HOMEnam:-$NWROOTp1/nam.${nam_ver}}
+export HOMEnam=${HOMEnam:-$NWROOT/nam.${nam_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen
 export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
+
+export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
 ###################################
 # Set up the UTILITIES
@@ -144,15 +146,15 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 #export utilexec=${utilexec:-/nwprod/util/exec}
 #export utilparm=${utilparm:-/nwprod/util/parm}
 #export gespath=${gespath:-/nwges/${envir}}
-export GESIN=${GESIN:-$GESROOTp1/${envir}}
+export GESIN=${GESIN:-$GESROOT/${envir}}
 
-. /usrx/local/Modules/default/init/ksh
-module load prod_util
-module load grib_util
+#. /usrx/local/Modules/default/init/ksh
+#module load prod_util
+#module load grib_util
 
 # use local versions of cnvgrib and wgrib2
-export WGRIB2=${EXECdng}/wgrib2
-export CNVGRIB=${EXECdng}/smartinit_cnvgrib
+#export WGRIB2=${EXECdng}/wgrib2
+#export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###########################################
 # Run setpdy and initialize PDY variables
@@ -179,8 +181,8 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
-export COM_IN=${COM_IN:-$COMROOTp1/${NET}/${envir}}
-export COM_OUT=${COM_OUT:-$COMROOTp1/${NET}/${envir}}
+export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
+export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
@@ -220,8 +222,10 @@ export COM_SREF=${COM_SREF:-/com2/sref/prod}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
-export PCOM=${PCOM:-$PCOMROOT/${NET}}
-mkdir -p $PCOM
+#export PCOM=${PCOM:-$PCOMROOT/${NET}}
+#mkdir -p $PCOM
+export pcom=${pcom:-$PCOMROOT/${NET}}
+mkdir -p $pcom
 
 ####NCO-SET env  
 
