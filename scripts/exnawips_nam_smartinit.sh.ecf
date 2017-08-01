@@ -125,7 +125,7 @@ EOF
   if [ $SENDCOM = "YES" ] ; then
     mv $GEMGRD $COMOUT/$GEMGRD
     if [ $SENDDBN = "YES" ] ; then
-       $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE}_PARA $job \
+       $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job \
           $COMOUT/$GEMGRD
     else
     echo "##### DBN_ALERT_TYPE is: ${DBN_ALERT_TYPE} #####"

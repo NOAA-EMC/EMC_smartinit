@@ -5,6 +5,8 @@
     use aset2d
     use aset3d 
     use rdgrib     ! GRID and MASK defined in rdgrib
+    USE GRIB_MOD
+    USE pdstemplates
     
     REAL, INTENT(INOUT) :: TNEW(:,:),DEWNEW(:,:),UNEW(:,:),VNEW(:,:),PNEW(:,:)
     REAL, INTENT(INOUT) :: QNEW(:,:)
@@ -12,6 +14,10 @@
     LOGICAL, INTENT(INOUT) :: VALIDPT(:,:)
     TYPE (GINFO)        :: GDIN
 
+    INTEGER :: JDISC,JPDTN,JGDTN
+    TYPE(GRIBFIELD):: GFLD, GFLD8, GFLD_S, GFLD8_S
+
+    INTEGER,DIMENSION(:) :: JIDS(200),JPDT(200),JGDT(200)
     REAL, ALLOCATABLE   :: EXN(:,:) 
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
     REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:)
@@ -123,15 +129,35 @@
         print*, ' gdin%region: ', gdin%region
         print *, 'READ IN NDFD GRIB  TOPO file'
         JGDS=-1
-        CALL RDHDRS(46,47,IGDNUM,GDIN,NUMVAL)
+!       CALL RDHDRS(46,47,IGDNUM,GDIN,NUMVAL)
+        CALL RDHDRS_g2(46,47,igdnum,gdin,numval)
         print *, 'IGDNUM',IGDNUM,' NUMVAL',NUMVAL
         DEALLOCATE(GRID,MASK)
         ALLOCATE (GRID(NUMVAL),MASK(NUMVAL),STAT=kret)
 !       print *,'GRID, MASK Allocated  STAT=',STAT,NUMVAL
-        J=-1;JPDS=-1;JGDS=-1
-        JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
-         
-        CALL SETVAR(46,47,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,topo_ndfd,IRET,ISTAT)
+!       J=-1;JPDS=-1;JGDS=-1
+!       JPDS(3)=IGDNUM;JPDS(5)=8;JPDS(6)=1
+        jids=-9999
+        jpdtn=-1
+        jpdt=-9999
+        jgdtn=-1
+        jgdt=-9999
+        issref=0 ! not SREF data
+
+        jdisc=0
+        jpdt(1)=3
+        jpdt(2)=6
+        jpdt(10)=1
+        jpdt(12)=0
+        jpdtn=0
+        j=0
+
+        CALL SETVAR_g2(46,47,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K, &
+                       KPDS,KGDS,MASK,GRID,topo_ndfd,GFLD_S,ISSREF,IRET,ISTAT)
+
+        print*,'minval(topo_ndfd),maxval(topo_ndfd):',minval(topo_ndfd),maxval(topo_ndfd)
+
+!       CALL SETVAR(46,47,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,topo_ndfd,IRET,ISTAT)
 !        DX=JGDS(9)
 !        DY=JGDS(10)
 
@@ -155,9 +181,34 @@
         print *,REGION,'  DX DY ',DX,DY,im,jm,NUMVAL
 
         print *, 'READ IN NDFD GRIB LAND COVER file'
-        CALL RDHDRS(48,49,IGDNUM,GDIN,NUMVAL)
-        J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1;JPDS(7)=0;JGDS=-1
-        CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
+!       CALL RDHDRS(48,49,IGDNUM,GDIN,NUMVAL)
+        CALL RDHDRS_g2(48,49,igdnum,gdin,numval)
+!       J=0;JPDS=-1;JPDS(3)=IGDNUM;JPDS(5)=ivgid;JPDS(6)=1;JPDS(7)=0;JGDS=-1
+!       CALL SETVAR(48,49,NUMVAL,J,JPDS,JGDS,KF,K,KPDS,KGDS,MASK,GRID,veg_ndfd,IRET,ISTAT)
+        jids=-9999
+        jpdtn=-1
+        jpdt=-9999
+        jgdtn=-1
+        jgdt=-9999
+        issref=0
+
+        jdisc=2
+        jpdt(1)=0
+        jpdt(2)=0
+        jpdt(10)=1
+        jpdt(12)=0
+        jpdtn=0
+        j=0
+        CALL SETVAR_g2(48,49,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,veg_ndfd,GFLD,ISSREF,IRET,ISTAT)
+
+        print*,'minval(veg_ndfd),maxval(veg_ndfd):',minval(veg_ndfd),maxval(veg_ndfd)
+
+! New land/sea mask has inland water as 3 and land as 9.  Change to 0 and 1
+        where (veg_ndfd .eq. 3.) veg_ndfd=0.
+        where (veg_ndfd .eq. 9.) veg_ndfd=1.
+
+        print*,'minval(veg_ndfd),maxval(veg_ndfd):',minval(veg_ndfd),maxval(veg_ndfd)
 
 ! Not needed for Expanded CONUS; comment out
 
@@ -522,7 +573,8 @@
 !      Adjust dewpoint to downscaled  sfc pressure
        where(validpt)  
          where (dewnew.lt.spval) &
-         qnew=PQ0/PSFC*EXP(A2*(dewnew-A3)/(dewnew-A4))
+! Correct bug - PSFC should really be the downscaled surface pressure (PNEW)
+         qnew=PQ0/PNEW*EXP(A2*(dewnew-A3)/(dewnew-A4))
        endwhere
        return
        end
