@@ -21,6 +21,7 @@
     REAL, ALLOCATABLE   :: EXN(:,:) 
     REAL, ALLOCATABLE   :: ROUGH_MOD(:,:)
     REAL, ALLOCATABLE   :: TTMP(:,:),DTMP(:,:),UTMP(:,:),VTMP(:,:)
+    REAL, ALLOCATABLE   :: dudz(:,:),dvdz(:,:),dspddz(:,:)
 
 !    LOGICAL*1,   ALLOCATABLE   :: MASK(:)
 !    REAL,        ALLOCATABLE   :: GRID(:)
@@ -37,7 +38,7 @@
       real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
       real tmean,dz,theta1,theta6,dx,dy
       logical ladjland,lconus,lnest,lhiresw,lvegtype
-      character cvadj*1
+      character cvadj*1, dmadj*1, woxadj*1
 
  INTERFACE
     SUBROUTINE vadjust(VALIDPT,VEG_NDFD,U,V,HTOPO,DX,DY,IM,JM,gdin)
@@ -68,15 +69,69 @@
     END INTERFACE
 
     END SUBROUTINE vadjust
+
+    SUBROUTINE wndadj(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE    :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: di(:,:)
+      INTEGER niter,it
+      REAL dxs,dys,ra,dxi,dyi,ddij
+    END SUBROUTINE wndadj
+
+    SUBROUTINE divmin(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE   :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: div(:,:)
+      INTEGER niter,it
+      REAL dxi,dyi
+
+      INTERFACE
+        SUBROUTINE divcel(validpt,u,v,div,nx,ny,dxm,dym,divmax)
+!----------------------------------------------------------------------
+        LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+        REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+        REAL, INTENT(INOUT) :: DIV(:,:)
+        REAL, INTENT(IN) :: DXM,DYM
+        INTEGER, INTENT(IN) :: NX,NY
+        REAL dxi,dyi
+        END SUBROUTINE divcel
+      END INTERFACE
+
+      END SUBROUTINE divmin
+
  END INTERFACE
 
       print *, '***********************************'
       print *, 'Into NDFDgrid'
       print *, '***********************************'
 
-      ispdsfc=1     ! Turn off/on friction adjustment for terrain
+      ispdsfc=0     ! Turn off/on friction adjustment for terrain
+!     ispdsfc=2     ! Use 10-m winds from NAM Nest
+!     ispdsfc=3     ! Use shear for adjustment to winds
       call get_environment_variable("IVADJ",cvadj)  !turn on/off diagnostic wind adjustment
       print *, 'CVADJ for diagnostic wind adjust: ',CVADJ, '   friction adj: ',ispdsfc
+      call get_environment_variable("IDMADJ",dmadj)  !turn on/off diagnostic wind adjustment
+      print *, 'DMADJ for nondivergent wind adjustment (Calmet method): ',DMADJ, '   friction adj: ',ispdsfc
+      call get_environment_variable("IWOXADJ",woxadj)  !turn on/off diagnostic wind adjustment
+      print *, 'WOXADJ for nondivergent wind adjustment (WOX method): ',WOXADJ, '   friction adj: ',ispdsfc
 
       IM=gdin%IMAX;JM=gdin%JMAX;LM=gdin%KMAX
       iprt=int(im/2);jprt=int(jm/2)
@@ -92,6 +147,7 @@
       ALLOCATE (EXN(IM,JM),ROUGH_MOD(IM,JM),STAT=kret)
       ALLOCATE (TTMP(IM,JM),DTMP(IM,JM),STAT=kret)
       ALLOCATE (UTMP(IM,JM),VTMP(IM,JM),STAT=kret)
+      ALLOCATE (dudz(IM,JM),dvdz(IM,JM),dspddz(im,jm),STAT=kret)
 
 !  read in 5 km topography
 !  changed name for consistency with non-conus region names
@@ -286,7 +342,26 @@
         T6=T(I,J,6)
         Z1=HGHT(I,J,1)
         Z6=HGHT(I,J,6)
+!       Z3=HGHT(I,J,2)
+        Z3=HGHT(I,J,1)
+        U3=UWND(I,J,1)
+        V3=VWND(I,J,1)
+!       U3=UWND(I,J,2)
+!       V3=VWND(I,J,2)
+        U1=U10(i,j)
+        V1=V10(i,j)
+!       U1=UWND(I,J,1)
+!       V1=VWND(I,J,1)
         GAM = (TP1-T6)/(Z6-Z1)
+! Shear
+!       dudz(i,j) = (U3-U1)/(Z3-Z1)
+!       dvdz(i,j) = (V3-V1)/(Z3-Z1)
+        dudz(i,j) = (U3-U1)/(Z3-Zs)
+        dvdz(i,j) = (V3-V1)/(Z3-Zs)
+        if((z3-zs) .le. 0.)print*,'i,j,z3-zs=',i,j,z3,zs
+        spd6=sqrt(u3*u3 + v3*v3)
+        spd1=sqrt(u1*u1 + v1*v1)
+        dspddz(i,j) = (spd6-spd1)/(z6-z10)
 
 !============================================
         if (topo_ndfd(i,j).le.zs ) then
@@ -418,8 +493,51 @@
 !     the NDFD topo.
           if (ispdsfc .eq. 1) then
             speedc = 0.7*sqrt(uc*uc+vc*vc)
-            speed = sqrt(uc**2 + vc**2)
+!           speed = sqrt(uc**2 + vc**2)
+            speed = sqrt(uwnd(i,j,1)**2 + vwnd(i,j,1)**2)
             ratio = max(1.,speedc/(max(0.001,speed)) )
+            unew(i,j) = ratio*uwnd(i,j,1)
+            vnew(i,j) = ratio*vwnd(i,j,1)
+          elseif (ispdsfc.eq.2) then
+            unew(i,j)=u10(i,j)
+            vnew(i,j)=v10(i,j)
+          elseif (ispdsfc.eq.3) then
+            zndfd=amax1(topo_ndfd(i,j),0.)
+            zmdl=amax1(zs,0.)
+            zmax=amax1(zmdl,zndfd)
+            dztopo=abs(zmdl-zndfd)
+            dscale=dztopo/zmax
+            if((topo_ndfd(i,j)-zs) .le. 40.0)then
+              unew(i,j) = u10(i,j)
+              vnew(i,j) = v10(i,j)
+            else
+              unew(i,j) = u10(i,j) + (topo_ndfd(i,j)-zs)*dudz(i,j)
+              vnew(i,j) = v10(i,j) + (topo_ndfd(i,j)-zs)*dvdz(i,j)
+            endif
+            usav=unew(i,j)
+            vsav=vnew(i,j)
+            diffi=unew(i,j)-u10(i,j)
+            diffj=vnew(i,j)-v10(i,j)
+            if (abs(diffi).gt.10. ) then
+              if(diffi.gt.10) diffi=10
+              if(diffi.lt.-10) diffi=-10
+              unew(I,J)=u10(i,j)+diffi
+              print *, i,j,'DIFFU', diffi,diffj,'U ',U10(i,j),usav, Unew(I,J)
+              print *, dudz(i,j), dvdz(i,j), zs, topo_ndfd(i,j),hght(i,j,2),hght(i,j,1)
+              print*,'u3,u1,z3,z1,v3,v1=',u3,u1,z3,z1,v3,v1
+            endif
+            if (abs(diffj).gt.10.)  then
+              if(diffj.gt.10) diffj=10
+              if(diffj.lt.-10) diffj=-10
+              vnew(I,J)=v10(i,j)+diffj
+              print *, i,j,'DIFFV', diffi,diffj,'V ',V10(i,j),vsav, Vnew(I,J)
+              print *, dudz(i,j), dvdz(i,j), zs, topo_ndfd(i,j),hght(i,j,2),hght(i,j,1)
+              print*,'u3,u1,z3,z1,v3,v1=',u3,u1,z3,z1,v3,v1
+            endif
+
+!           unew(i,j) = u10(i,j) + dscale*(topo_ndfd(i,j)-zs)*dudz(i,j)
+!           vnew(i,j) = v10(i,j) + dscale*(topo_ndfd(i,j)-zs)*dvdz(i,j)
+          else
             unew(i,j) = uc
             vnew(i,j) = vc
           endif
@@ -433,6 +551,13 @@
 !      Adjust  winds to topography
       if (CVADJ.eq.'T')                           &
       call vadjust(validpt,veg_ndfd,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+
+!      Remove divergence so winds adjust to terrain using calmet method
+      if (DMADJ.eq.'T') call divmin(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+
+!      Remove divergence so winds adjust to terrain using wocss method
+      if (WOXADJ.eq.'T') call wndadj(validpt,unew,vnew,topo_ndfd,dx,dy,im,jm,gdin)
+
 
 !============================================
 ! -- use land mask to get better temps/dewpoint/winds
