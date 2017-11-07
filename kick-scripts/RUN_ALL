@@ -54,6 +54,8 @@ case $RUNTYP in
          aknest3 ) runreg=ak3;;
          dgex_ak ) runreg=ak;;
          dgex_cs ) runreg=conus;;
+         priconest ) runreg=pr;;
+         hawaiinest ) runreg=hi;;
 esac
 
 #================END User Sets=======================================
