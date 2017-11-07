@@ -705,7 +705,8 @@
       endif
 
 !     nests already have computed cld fracs...
-      if (lnest .and. trim(CORE).ne.'GFS' .and. .not.lanl) then
+!     if (lnest .and. trim(CORE).ne.'GFS' .and. .not.lanl) then
+      if (lnest .and. trim(CORE).ne.'GFS') then
 !       J=0;JPDS=-1
 !       JPDS(3)=IGDNUM
 !       JPDS(5) = 71
