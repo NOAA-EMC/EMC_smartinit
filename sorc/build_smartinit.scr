@@ -1,6 +1,6 @@
 module purge
 
-module load /u/Annette.Gibbs/modulefiles/SMARTINIT/v4.1.0
+module load /meso/save/Annette.Gibbs/smartinit.v4.2.0/modulefiles/SMARTINIT/v4.2.0
 
 module list
 

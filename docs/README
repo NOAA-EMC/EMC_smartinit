@@ -1157,3 +1157,53 @@ June 2017
 	scripts/exnawips_nam_smartinit.sh.ecf 
 	jobs/JNAM_SMINIT
 
+******************************************************************
+DELIVERED to NCO - 14 July 2017
+IMPLEMENTED - 
+******************************************************************
+
+******************************************************************
+Smartinit VERS 4.2.0 - Annette Gibbs
+******************************************************************
+
+September 2017
+
+* Updated GRIB2 Terrain and Land/Sea Mask files for Alaska.
+
+        fix/topo/nam_smarttopoak3.grb2
+        fix/topo/nam_smarttopoak.grb2
+        fix/mask/nam_smartmaskak3.grb2
+        fix/mask/nam_smartmaskak.grb2
+
+* NAM nest will be used at 00 H instead of NAM parent for Puerto Rico and Hawaii.
+
+	scripts/exnam_smartinit.sh.ecf
+	kick-scripts/DRIVcs2p	<- changed pr and hi to priconest and hawaiinest for domains (which is set to RUNTYP)
+	kick-scripts/RUN-ALL	<- changed runreg to pr and hi from priconest and hawaiinest
+
+  Note: NCO must do something similar in their job submittal scripts, so it calls exnam_smartinit.sh.ecf with 
+	RUNTYPE = priconest and hawaiinest, not pr and hi.  In their prod${cyc}.def.yyyymmdd file, NCO should 
+	set RUNTYP to 'hawaiinest' and 'priconest' under family hi and family pr. (email from Wojciech Cencek - 24 Aug 2017)
+
+* Surface pressure bugfix - at off hours (1,2,4,5, etc...) surface pressure from the NAM nest was written out
+  rather than the downscaled surface pressure.
+
+	sorc/smartinit_g2.fd/MAIN.f90
+
+* Total cloud cover bugfix - at 00 H, the total cloud cover field is written out for CONUS and Alaska.  Previously,
+  0.0's were written for total cloud cover.
+
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/GETGRIB.f90
+
+* Added 4 different wind downscaling routines
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/makefile
+	sorc/smartinit_g2.fd/DIVMIN.f90
+	sorc/smartinit_g2.fd/WNDADJ.f90
+
+* Added option to change hbar from height at model level 1 to 4500.
+
+	sorc/smartinit_g2.fd/VADJUST.f90
