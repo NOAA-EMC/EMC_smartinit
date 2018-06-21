@@ -862,6 +862,21 @@
 
         write(0,*) 'U10(1,1),V10(1,1): ', U10(1,1),V10(1,1)
 
+! SFCR (Surface Roughness)
+
+       JDISC = 2
+       JPDT(1) = 0
+       JPDT(2) = 001
+       JPDT(10) = 001
+       JPDT(12) = 000
+       J=0
+
+      CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
+                     KPDS,KGDS,MASK,GRID,SFCR,GFLD,ISSREF,IRET,ISTAT)
+
+        write(0,*) 'SFCR(1,1): ', SFCR(1,1)
+        print*,'minval(sfcr),maxval(sfcr):',minval(sfcr),maxval(sfcr)
+
 ! vegetation TYPE or Land Mask(0-1)
 ! Veg type Not available in some HIRESW domains ??
 ! Read land fraction instead (id 81)

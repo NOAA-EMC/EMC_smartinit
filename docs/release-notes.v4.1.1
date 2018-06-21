@@ -1,40 +1,30 @@
-smartinit.v4.2.0
+smartinit.v4.1.1  Q3FY18 
 
-June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see docs/README for more details on changes)
+January 2018 NAM smartinit changes to coincide with RAPv4/HRRRv3 upgrade (see docs/README for more details on changes)
 
-* NAM nest will be used at 00 H instead of NAM parent for Puerto Rico and Hawaii.
+* Updated GRIB2 Terrain and Land/Sea Mask files for Alaska.
 
-* Total cloud cover bugfix - at 00 H, the total cloud cover field is written out for CONUS and Alaska.  Previously,
-  0.0's were written for total cloud cover.
-
-* Added fields needed for VIIRS land surface temperature data assimilation in RTMA/URMA for Alaska only.
-        -pressure, temperature, mixing ratio, u, v, height at model level 1
-        -pressure, temperature, and mixing ratio at model level 2
-        -surface roughness
-
-* Changed the decimal precision of downscaled specific humidity to 6.0
-* Changed the decimal precision of downscaled surface pressure to 6.0
-* Changed the decimal precision of wind gust to -4.0
-* Changed the decimal precision of visibility to 3.0
+* Surface pressure bugfix - at off hours (1,2,4,5, etc...) surface pressure from the NAM nest was written out
+  rather than the downscaled surface pressure. Need to write out the downscaled surface pressure every hour.
 
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
 #===============================================================================
-1.  svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v4.2.0 smartinit.v4.2.0
+1.  svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v4.1.1 smartinit.v4.1.1
 
     to set up and run on WCOSS phase 2.
 
 2.  Build sorc codes smartinit_g2.fd, smartprecip_g2.fd
        
-	The modulefile used for the build is in modulefiles/SMARTINIT/v4.2.0.  Copy it to a location from which it can
+	The modulefile used for the build is in modulefiles/SMARTINIT/v4.1.1.  Copy it to a location from which it can
 	be loaded (/nwprod2/modulefiles/SMARTINIT or something similar). 
 
-	In the smartinit sorc directory "smartinit.v4.2.0/sorc" type
+	In the smartinit sorc directory "smartinit.v4.1.1/sorc" type
 		./build_smartinit.scr
 	to compile the codes sequentially.  All executables will be copied over to the smartinit "exec" directory.
 
 4.  Use ...docs/smartinit.ver file if desired to set
-      model_ver=v4.2.0  parameter
+      model_ver=v4.1.1  parameter
 
 5.  I recommend you remove the following directories, as they are no longer needed or used:
 
@@ -64,8 +54,8 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
      Downstream: RTMA, URMA
      Downstream links(J-Jobs that use NAM smartinit files): 
 
-     /nwprod2/rtma.v2.7.0/jobs/JRTMA_GETGUESS
-     /nwprod2/urma.v2.7.0/jobs/JURMA_GETGUESS
+     /nwprod2/rtma.v2.6.3/jobs/JRTMA_GETGUESS
+     /nwprod2/urma.v2.6.5/jobs/JURMA_GETGUESS
 
 7.  Test plan: 
 
@@ -75,15 +65,15 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 	Runtime: ~3 hours, 30 minutes wallclock
 	Nodes: 12
 	Tasks per node: 12
-	Consumable memory: 4916 mb
+	Consumable memory: 4916 MB
 	Serial vs parallel: Parallel (wgrib2 only)
-	Disk Storage: Has decreased by 21.4 GB total (removed all GRIB1, conus (5km), alaska (6km), and ak_rtmages (6km) files)
+	Disk Storage: 47 GB per day (/com2/nam/prod/nam.$PDY); 5.6 GB per day (/pcom2/nam)
 
 7.  New output files: None
 
-8.  Flow Diagram:
+8.  Flow Diagram (same flow diagram as smartinit.v4.1.0):
 
     https://drive.google.com/a/noaa.gov/file/d/0B7IqRnJWIYHlaVhCcUdaQ1RaZzQ/view?usp=sharing
 
-NOTE: Details on all changes to nam smartinit are found at docs/README - Search for 4.2.0 for changes related to this implemenation.
+NOTE: Details on all changes to nam smartinit are found at docs/README - Search for 4.1.1 for changes related to this implemenation.
 
