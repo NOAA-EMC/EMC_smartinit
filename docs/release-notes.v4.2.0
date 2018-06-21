@@ -20,9 +20,14 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
 #===============================================================================
-1.  svn checkout https://svnemc.ncep.noaa.gov/projects/smartinit/tags/RB-v4.2.0 smartinit.v4.2.0
+
+1.  git clone -b tags/RB-v4.2.0 ssh://${USER}@vlab.ncep.noaa.gov:29418/EMC_smartinit smartinit.v4.2.0
 
     to set up and run on WCOSS phase 2.
+
+2.  Copy fixed files to the fix directory
+
+    cp -r /meso2/noscrub/Annette.Gibbs/emc-binaries/smartinit/fix smartinit.v4.2.0
 
 2.  Build sorc codes smartinit_g2.fd, smartprecip_g2.fd
        
