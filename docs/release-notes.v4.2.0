@@ -21,7 +21,7 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
  IMPLEMENTATION INSTRUCTIONS 
 #===============================================================================
 
-1.  git clone -b tags/RB-v4.2.0 ssh://${USER}@vlab.ncep.noaa.gov:29418/EMC_smartinit smartinit.v4.2.0
+1.  git clone -b RB-v4.2.0 ssh://${USER}@vlab.ncep.noaa.gov:29418/EMC_smartinit smartinit.v4.2.0
 
     to set up and run on WCOSS phase 2.
 
