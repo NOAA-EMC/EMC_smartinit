@@ -1238,7 +1238,15 @@ April 2018
 
 	sorc/smartinit_g2.fd/MAIN.f90
 
+July 2018
+
+* replaced build_smartinit.scr with 3 new build scripts
+
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
 ******************************************************************
-DELIVERED to NCO -
+DELIVERED to NCO - 09 July 2018
 IMPLEMENTED -
 ******************************************************************

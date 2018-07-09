@@ -17,6 +17,12 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 * Changed the decimal precision of wind gust to -4.0
 * Changed the decimal precision of visibility to 3.0
 
+* replaced build_smartinit.scr with 3 new build scripts
+
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
 #===============================================================================
@@ -35,7 +41,7 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 	be loaded (/nwprod2/modulefiles/SMARTINIT or something similar). 
 
 	In the smartinit sorc directory "smartinit.v4.2.0/sorc" type
-		./build_smartinit.scr
+		./build_smartinit_all.sh
 	to compile the codes sequentially.  All executables will be copied over to the smartinit "exec" directory.
 
 4.  Use ...docs/smartinit.ver file if desired to set
@@ -88,7 +94,7 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 
 8.  Flow Diagram:
 
-    https://drive.google.com/a/noaa.gov/file/d/0B7IqRnJWIYHlaVhCcUdaQ1RaZzQ/view?usp=sharing
+    https://drive.google.com/file/d/19R7SNibR4JCJXaSmZOVrlXn3lbvhmys9/view?usp=sharing
 
 NOTE: Details on all changes to nam smartinit are found at docs/README - Search for 4.2.0 for changes related to this implemenation.
 
