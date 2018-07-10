@@ -57,11 +57,10 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
     The CONUS (5km), Alaska (6km) and ak_rtmages (6 km) and DGEX smartinits are no longer needed or used.
 
 6.  Job Dependencies: 
-     Upstream: NAM/NAM Nest, SREF; 
+     Upstream: NAM Nest, SREF; 
      Upstream links:
 
      NAM/NAM Nest 
-     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.bgrd3d${hh}.tm00
      /com2/nam/prod/nam.$PDY/nam.t${cyc}z.priconest.bsmart${hh}.tm00
      /com2/nam/prod/nam.$PDY/nam.t${cyc}z.hawaiinest.bsmart${hh}.tm00
      /com2/nam/prod/nam.$PDY/nam.t${cyc}z.conusnest.bsmart${hh}.tm00
@@ -88,7 +87,7 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 	Tasks per node: 12
 	Consumable memory: 4916 mb
 	Serial vs parallel: Parallel (wgrib2 only)
-	Disk Storage: Has decreased by 21.4 GB total (removed all GRIB1, conus (5km), alaska (6km), and ak_rtmages (6km) files)
+	Disk Storage: Has increased by 1.4 GB total
 
 7.  New output files: None
 
