@@ -56,10 +56,11 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
     The CONUS (5km), Alaska (6km) and ak_rtmages (6 km) and DGEX smartinits are no longer needed or used.
 
 6.  Job Dependencies: 
-     Upstream: NAM Nest, SREF; 
+     Upstream: NAM/NAM Nest, SREF; 
      Upstream links:
 
      NAM/NAM Nest 
+     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.bgrd3d${hh}.tm00
      /com2/nam/prod/nam.$PDY/nam.t${cyc}z.priconest.bsmart${hh}.tm00
      /com2/nam/prod/nam.$PDY/nam.t${cyc}z.hawaiinest.bsmart${hh}.tm00
      /com2/nam/prod/nam.$PDY/nam.t${cyc}z.conusnest.bsmart${hh}.tm00
@@ -92,7 +93,7 @@ June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see doc
 
 8.  Flow Diagram:
 
-    https://drive.google.com/file/d/19R7SNibR4JCJXaSmZOVrlXn3lbvhmys9/view?usp=sharing
+    https://drive.google.com/file/d/1ACk-M4VxM6cp2Z1ku9baAlo0JRmmRv_b/view?usp=sharing
 
 NOTE: Details on all changes to nam smartinit are found at docs/README - Search for 4.2.0 for changes related to this implemenation.
 
