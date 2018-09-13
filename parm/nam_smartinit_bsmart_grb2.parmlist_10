@@ -25,7 +25,6 @@ DPT:2 m above ground
 UGRD:10 m above ground
 VGRD:10 m above ground
 HGT:lowest level of the wet bulb zero
-SFCR:surface
 LCDC:low cloud layer
 MCDC:middle cloud layer
 HCDC:high cloud layer

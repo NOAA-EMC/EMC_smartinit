@@ -63,8 +63,9 @@ export COM_IN=${COMROOT}/${mdl}/prod
 #TEST export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
 
 ## Test with Eric's NAM PARA
-export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
+#export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
 export COM_IN=/com2/${mdl}/prod 
+##export COM_IN=/meso2/noscrub/Annette.Gibbs/com2/${mdl}/prod
 #export COM_IN=/ptmpd3/Eric.Rogers/com/${mdl}/para 
 #export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/para
 #export COM_IN=/meso2/noscrub/Jacob.Carley/com/${mdl}/rt
@@ -79,7 +80,7 @@ fi
 #export COM_SREF=${COMROOT}/sref/prod   
 # new location of SREF
 export COM_SREF=/com2/sref/prod
-#export COM_SREF=/meso2/noscrub/Annette.Gibbs/com2/sref/prod
+##export COM_SREF=/meso2/noscrub/Annette.Gibbs/com2/sref/prod
 
 
 export DATA_IN=/ptmpp2/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc

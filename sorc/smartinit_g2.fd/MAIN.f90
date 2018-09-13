@@ -212,13 +212,61 @@
      END SUBROUTINE setphibnd
     END INTERFACE
     END SUBROUTINE vadjust
-    END INTERFACE
+
+    SUBROUTINE wndadj(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE    :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: di(:,:)
+      INTEGER niter,it
+      REAL dxs,dys,ra,dxi,dyi,ddij
+    END SUBROUTINE wndadj
+
+    SUBROUTINE divmin(validpt,u,v,htopo,dx,dy,im,jm,gdin)
+      use constants
+      use grddef
+      use aset2d
+      use aset3d
+
+      LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+      REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+      REAL, INTENT(IN) :: HTOPO(:,:),DX,DY
+      TYPE (GINFO)        :: GDIN
+      REAL, ALLOCATABLE   :: usave(:,:), vsave(:,:)
+      REAL, ALLOCATABLE   :: diffu(:,:), diffv(:,:)
+      REAL, ALLOCATABLE   :: div(:,:)
+      INTEGER niter,it
+      REAL dxi,dyi
+
+      INTERFACE
+        SUBROUTINE divcel(validpt,u,v,div,nx,ny,dxm,dym,divmax)
+!----------------------------------------------------------------------
+        LOGICAL, INTENT(IN) :: VALIDPT(:,:)
+        REAL, INTENT(INOUT) :: U(:,:),V(:,:)
+        REAL, INTENT(INOUT) :: DIV(:,:)
+        REAL, INTENT(IN) :: DXM,DYM
+        INTEGER, INTENT(IN) :: NX,NY
+        REAL dxi,dyi
+        END SUBROUTINE divcel
+      END INTERFACE
+   END SUBROUTINE divmin
+
+ END INTERFACE
     
    END SUBROUTINE ndfdgrid 
 
    SUBROUTINE GRIBLIMITED(SKY,IUNIT,GDIN,GFLD,IM,JM)
       use grddef
       use aset2d
+      use aset3d
       use asetdown
       USE GRIB_MOD
        INTEGER ID(25)
@@ -278,6 +326,7 @@
       else
         HAVESREF=1
       endif
+      fhrhrly=12
       print*,'CYC, HAVESREF=',cyc, havesref
       if (CORE.eq.'nmmb'.or. CORE.eq.'arw') GDIN%LHIRESW=.true.
       LHIRESW=GDIN%LHIRESW
@@ -353,7 +402,7 @@
    ALLOCATE (P6CP01(IM,JM),P6CP10(IM,JM),P6CP50(IM,JM),STAT=kret)
    ALLOCATE (P12CP01(IM,JM),P12CP10(IM,JM),P12CP50(IM,JM),STAT=kret)
    ALLOCATE (HAINES(IM,JM),HLVL(IM,JM),STAT=kret)
-   ALLOCATE (CEIL(IM,JM),SLP(IM,JM),SST(IM,JM),STAT=kret)
+   ALLOCATE (CEIL(IM,JM),SLP(IM,JM),SST(IM,JM),SFCR(IM,JM),STAT=kret)
 !  for nests
    ALLOCATE (VALIDPT(IM,JM),STAT=kret)
    VALIDPT=.TRUE.
@@ -385,7 +434,9 @@
 !   Initialize varbs to spval (for nests)
     where (.not. validpt)
       PSFC=SPVAL;REFC=SPVAL;WETFRZ=SPVAL;VIS=SPVAL;CEIL=SPVAL;SLP=SPVAL;SST=SPVAL
-      P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL
+      P03M=SPVAL;P06M=SPVAL;P12M=SPVAL;CWR=SPVAL;SFCR=SPVAL
+      PMID(:,:,1)=SPVAL;HGHT(:,:,1)=SPVAL;T(:,:,1)=SPVAL;Q(:,:,1)=SPVAL;UWND(:,:,1)=SPVAL;VWND(:,:,1)=SPVAL
+      PMID(:,:,2)=SPVAL;T(:,:,2)=SPVAL;Q(:,:,2)=SPVAL
     endwhere
 
 
@@ -587,7 +638,9 @@
 
 ! ----------------------------------------
 
-       DEC=3.0
+! Increase precision for wind gust
+!      DEC=3.0
+       DEC=-4.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,WGUST)
 
@@ -605,8 +658,8 @@
 ! ----------------------------------------
 
 ! DEC is 3.0 in original code - should I change?
-       DEC=3.0
-!      DEC=6.0
+!      DEC=3.0
+       DEC=6.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNP)
 
@@ -1139,7 +1192,8 @@
 ! VISIBILITY
       print *, 'Output Visibility',FHR
 
-      DEC=2.7
+!     DEC=2.7
+      DEC=3.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,VIS)
 
@@ -1178,7 +1232,8 @@
 ! SLP
       print*, 'Output SLP', FHR
 ! MSLET (Mesinger/Membrane)
-      DEC=-0.1
+!     DEC=-0.1
+      DEC=6.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,SLP)
 
@@ -1194,6 +1249,204 @@
         write(0,*) 'IRET for SLP: ', IRET
         write(0,*) 'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+
+! Write fields needed for radiance data assimilation in RTMA [4 Jan 2018]
+! pressure, temperature, mixing ratio, u, v, height at model level 1
+! pressure, temperature, and mixing ration at model level 2
+! and roughness length for Alaska nest only
+
+      if (TRIM(REGION).EQ.'AK3' .and. fhr .le. fhrhrly)then
+
+! Pressure at model level 1
+!     DEC=-0.1
+      DEC=6.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,PMID(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=3
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Pres at model level 1
+      write(0,*) 'IRET for PRES at model level 1: ', IRET
+      write(0,*) 'maxval(PMID),minval(PMID) at level 1: ', maxval(PMID(:,:,1)),minval(PMID(:,:,1))
+      print*,'maxval(PMID),minval(PMID): at level 1', maxval(PMID(:,:,1)),minval(PMID(:,:,1))
+
+! Pressure at model level 2
+!     DEC=-0.1
+      DEC=6.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,PMID(:,:,2))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=3
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=2
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Pres at model level 2
+      write(0,*) 'IRET for PRES at model level 2: ', IRET
+      write(0,*) 'maxval(PMID),minval(PMID) at level 2: ', maxval(PMID(:,:,2)),minval(PMID(:,:,2))
+      print*,'maxval(PMID),minval(PMID): at level 2', maxval(PMID(:,:,2)),minval(PMID(:,:,2))
+
+! Temperature at model level 1
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,T(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=000
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Temp at model level 1
+      write(0,*) 'IRET for T at model level 1: ', IRET
+      write(0,*) 'maxval(T),minval(T) at level 1: ', maxval(T(:,:,1)),minval(T(:,:,1))
+      print*,'maxval(T),minval(T): at level 1', maxval(T(:,:,1)),minval(T(:,:,1))
+
+! Temperature at model level 2
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,T(:,:,2))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=000
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=2
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Temp at model level 2
+      write(0,*) 'IRET for T at model level 2: ', IRET
+      write(0,*) 'maxval(T),minval(T) at level 2: ', maxval(T(:,:,2)),minval(T(:,:,2))
+      print*,'maxval(T),minval(T): at level 2', maxval(T(:,:,2)),minval(T(:,:,2))
+
+! Specific humidity at model level 1
+!     DEC=6.0
+      DEC=7.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,Q(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=001
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Q at model level 1
+      write(0,*) 'IRET for Q at model level 1: ', IRET
+      write(0,*) 'maxval(Q),minval(Q) at level 1: ', maxval(Q(:,:,1)),minval(Q(:,:,1))
+      print*,'maxval(Q),minval(Q): at level 1', maxval(Q(:,:,1)),minval(Q(:,:,1))
+
+! Specific humidity at model level 2
+!     DEC=6.0
+      DEC=7.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,Q(:,:,2))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=001
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=2
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Q at model level 2
+      write(0,*) 'IRET for Q at model level 2: ', IRET
+      write(0,*) 'maxval(Q),minval(Q) at level 2: ', maxval(Q(:,:,2)),minval(Q(:,:,2))
+      print*,'maxval(Q),minval(Q): at level 2', maxval(Q(:,:,2)),minval(Q(:,:,2))
+
+! U at model level 1
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,UWND(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=002
+      GFLD%ipdtmpl(2)=002
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! U at model level 1
+      write(0,*) 'IRET for U at model level 1: ', IRET
+      write(0,*) 'maxval(U),minval(U) at level 1: ', maxval(UWND(:,:,1)),minval(UWND(:,:,1))
+      print*,'maxval(U),minval(U): at level 1', maxval(UWND(:,:,1)),minval(UWND(:,:,1))
+
+! V at model level 1
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,VWND(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=002
+      GFLD%ipdtmpl(2)=003
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! V at model level 1
+      write(0,*) 'IRET for V at model level 1: ', IRET
+      write(0,*) 'maxval(V),minval(V) at level 1: ', maxval(VWND(:,:,1)),minval(VWND(:,:,1))
+      print*,'maxval(V),minval(V): at level 1', maxval(VWND(:,:,1)),minval(VWND(:,:,1))
+
+! HGHT at model level 1
+      DEC=-2.0
+!     DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,HGHT(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=003
+      GFLD%ipdtmpl(2)=005
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! HGHT at model level 1
+      write(0,*) 'IRET for HGHT at model level 1: ', IRET
+      write(0,*) 'maxval(HGHT),minval(HGHT) at level 1: ', maxval(HGHT(:,:,1)),minval(HGHT(:,:,1))
+      print*,'maxval(HGHT),minval(HGHT): at level 1', maxval(HGHT(:,:,1)),minval(HGHT(:,:,1))
+
+! SFC Roughness
+      DEC=2.7
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,SFCR)
+
+      GFLD%discipline=2
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=000
+      GFLD%ipdtmpl(2)=001
+      GFLD%ipdtmpl(10)=001
+      GFLD%ipdtmpl(12)=0
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! SFCR
+      write(0,*) 'IRET for SFCR at model level 1: ', IRET
+      write(0,*) 'maxval(SFCR),minval(SFCR) at level 1: ', maxval(SFCR),minval(SFCR)
+      print*,'maxval(SFCR),minval(SFCR): at level 1', maxval(SFCR),minval(SFCR)
+
+      endif
 
 ! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
 ! since Skin T/SST is already being used (per Geoff DiMego).
@@ -2320,6 +2573,7 @@
       SUBROUTINE GRIBLIMITED(SKY,IUNIT,GDIN,GFLD,IM,JM)
       use grddef
       use aset2d
+      use aset3d
       use asetdown
       USE GRIB_MOD
 !---------------------------------------------------------
@@ -2419,9 +2673,10 @@
        CALL set_scale(gfld, DEC)
        CALL PUTGB2(70,GFLD,IRET) ! DOWNV
 
-       DEC=3.0
+!      DEC=3.0
+       DEC=6.0
 
-       CALL FILL_FLD(GFLD,NUMV,IM,JM,PSFC)
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,DOWNP)
 
        GFLD%ipdtmpl(1)=3
        GFLD%ipdtmpl(2)=0
@@ -2429,7 +2684,7 @@
        GFLD%ipdtmpl(12)=0
 
        CALL set_scale(gfld, DEC)
-       CALL PUTGB2(70,GFLD,IRET) ! PSFC
+       CALL PUTGB2(70,GFLD,IRET) ! DOWNP
 
          DEC=-2.0
 
@@ -2466,7 +2721,9 @@
 ! 11-07-15 : Add SLP and SST to limited files for RTMA
       IF (trim(GDIN%CORE) .NE. 'GFS') THEN
 
-       DEC=3.0
+! Increase precision for wind gust
+!      DEC=3.0
+       DEC=-4.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,WGUST)
 
@@ -2482,7 +2739,8 @@
 
 ! VISIBILITY
 
-      DEC=2.7
+!     DEC=2.7
+      DEC=3.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,VIS)
 
@@ -2537,7 +2795,8 @@
 ! SLP
       print*, 'Output SLP', GDIN%FHR
 ! MSLET (Mesinger/Membrane)
-      DEC=-0.1
+!     DEC=-0.1
+      DEC=6.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,SLP)
 
@@ -2552,6 +2811,211 @@
        CALL PUTGB2(70,GFLD,IRET)  ! SLP
 
       print*,'maxval(SLP),minval(SLP): ', maxval(SLP),minval(SLP)
+
+! Write fields needed for radiance data assimilation in RTMA [4 Jan 2018]
+! pressure, temperature, mixing ratio, u, v, height at model level 1
+! pressure, temperature, and mixing ration at model level 2
+! and roughness length for Alaska nest only
+
+      if (gdin%region .EQ. 'AK3')then
+
+! Pressure at model level 1
+!     DEC=-0.1
+      DEC=6.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,PMID(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=3
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Pres at model level 1
+      write(0,*) 'IRET for PRES at model level 1: ', IRET
+      write(0,*) 'maxval(PMID),minval(PMID) at level 1: ', maxval(PMID(:,:,1)),minval(PMID(:,:,1))
+      print*,'maxval(PMID),minval(PMID): at level 1', maxval(PMID(:,:,1)),minval(PMID(:,:,1))
+
+! Pressure at model level 2
+!     DEC=-0.1
+      DEC=6.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,PMID(:,:,2))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=3
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=2
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Pres at model level 2
+      write(0,*) 'IRET for PRES at model level 2: ', IRET
+      write(0,*) 'maxval(PMID),minval(PMID) at level 2: ', maxval(PMID(:,:,2)),minval(PMID(:,:,2))
+      print*,'maxval(PMID),minval(PMID): at level 2', maxval(PMID(:,:,2)),minval(PMID(:,:,2))
+
+! Temperature at model level 1
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,T(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=000
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Temp at model level 1
+      write(0,*) 'IRET for T at model level 1: ', IRET
+      write(0,*) 'maxval(T),minval(T) at level 1: ', maxval(T(:,:,1)),minval(T(:,:,1))
+      print*,'maxval(T),minval(T): at level 1', maxval(T(:,:,1)),minval(T(:,:,1))
+
+! Temperature at model level 2
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,T(:,:,2))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=000
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=2
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Temp at model level 2
+      write(0,*) 'IRET for T at model level 2: ', IRET
+      write(0,*) 'maxval(T),minval(T) at level 2: ', maxval(T(:,:,2)),minval(T(:,:,2))
+      print*,'maxval(T),minval(T): at level 2', maxval(T(:,:,2)),minval(T(:,:,2))
+
+! Specific humidity at model level 1
+!     DEC=6.0
+      DEC=7.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,Q(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=001
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Q at model level 1
+      write(0,*) 'IRET for Q at model level 1: ', IRET
+      write(0,*) 'maxval(Q),minval(Q) at level 1: ', maxval(Q(:,:,1)),minval(Q(:,:,1))
+      print*,'maxval(Q),minval(Q): at level 1', maxval(Q(:,:,1)),minval(Q(:,:,1))
+
+! Specific humidity at model level 2
+!     DEC=6.0
+      DEC=7.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,Q(:,:,2))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=001
+      GFLD%ipdtmpl(2)=000
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=2
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! Q at model level 2
+      write(0,*) 'IRET for Q at model level 2: ', IRET
+      write(0,*) 'maxval(Q),minval(Q) at level 2: ', maxval(Q(:,:,2)),minval(Q(:,:,2))
+      print*,'maxval(Q),minval(Q): at level 2', maxval(Q(:,:,2)),minval(Q(:,:,2))
+
+! U at model level 1
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,UWND(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=002
+      GFLD%ipdtmpl(2)=002
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! U at model level 1
+      write(0,*) 'IRET for U at model level 1: ', IRET
+      write(0,*) 'maxval(U),minval(U) at level 1: ', maxval(UWND(:,:,1)),minval(UWND(:,:,1))
+      print*,'maxval(U),minval(U): at level 1', maxval(UWND(:,:,1)),minval(UWND(:,:,1))
+
+! V at model level 1
+!     DEC=-2.0
+      DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,VWND(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=002
+      GFLD%ipdtmpl(2)=003
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! V at model level 1
+      write(0,*) 'IRET for V at model level 1: ', IRET
+      write(0,*) 'maxval(V),minval(V) at level 1: ', maxval(VWND(:,:,1)),minval(VWND(:,:,1))
+      print*,'maxval(V),minval(V): at level 1', maxval(VWND(:,:,1)),minval(VWND(:,:,1))
+
+! HGHT at model level 1
+      DEC=-2.0
+!     DEC=4.0
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,HGHT(:,:,1))
+
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=003
+      GFLD%ipdtmpl(2)=005
+      GFLD%ipdtmpl(10)=105
+      GFLD%ipdtmpl(12)=1
+
+      CALL set_scale(gfld, DEC)
+! Do not need - HGHT is not identical between DNG and NDFD output if used
+!     gfld%idrtmpl(2)=0
+!     gfld%idrtmpl(3)=0
+!     gfld%idrtmpl(4)=13
+      CALL PUTGB2(70,GFLD,IRET)  ! HGHT at model level 1
+      write(0,*) 'IRET for HGHT at model level 1: ', IRET
+      write(0,*) 'maxval(HGHT),minval(HGHT) at level 1: ', maxval(HGHT(:,:,1)),minval(HGHT(:,:,1))
+      print*,'maxval(HGHT),minval(HGHT): at level 1', maxval(HGHT(:,:,1)),minval(HGHT(:,:,1))
+
+! SFC Roughness
+      DEC=2.7
+
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,SFCR)
+
+      GFLD%discipline=2
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=000
+      GFLD%ipdtmpl(2)=001
+      GFLD%ipdtmpl(10)=001
+      GFLD%ipdtmpl(12)=0
+
+      CALL set_scale(gfld, DEC)
+!     gfld%idrtmpl(2)=0
+!     gfld%idrtmpl(3)=2
+!     gfld%idrtmpl(4)=9
+      CALL PUTGB2(70,GFLD,IRET)  ! SFCR
+      write(0,*) 'IRET for SFCR at model level 1: ', IRET
+      write(0,*) 'maxval(SFCR),minval(SFCR) at level 1: ', maxval(SFCR),minval(SFCR)
+      print*,'maxval(SFCR),minval(SFCR): at level 1', maxval(SFCR),minval(SFCR)
+
+      endif
 
 ! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
 ! since Skin T/SST is already being used (per Geoff DiMego).

@@ -2,7 +2,7 @@ SHELL=/bin/sh
 #
 
 OBJS1= aset3d.o aset2d.o grddef.o constants.o asetdown.o rdgrib.o 
-OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VADJUST.o 
+OBJS2= GETGRIB.o MAIN.o BOUND.o GRIBIT.o GET_BITS.o MAKESTRING.o NDFDgrid.o  VADJUST.o WNDADJ.o DIVMIN.o 
 OBJS3= w3fi71.o w3fi63.o
 
 FC =   ifort -convert big_endian -g -traceback 

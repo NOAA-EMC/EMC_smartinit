@@ -1157,3 +1157,96 @@ June 2017
 	scripts/exnawips_nam_smartinit.sh.ecf 
 	jobs/JNAM_SMINIT
 
+******************************************************************
+DELIVERED to NCO - 14 July 2017
+SHOULD HAVE BEEN IMPLEMENTED - 13 Dec 2017
+IMPLEMENTED -  07 Feb 2017
+******************************************************************
+
+Smartinit VERS 4.1.1 - Annette Gibbs
+******************************************************************
+
+September 2017
+
+* Updated GRIB2 Terrain and Land/Sea Mask files for Alaska.
+
+	fix/topo/nam_smarttopoak3.grb2
+	fix/mask/nam_smartmaskak3.grb2
+
+* Surface pressure bugfix - at off hours (1,2,4,5, etc...) surface pressure from the NAM nest was written out
+  rather than the downscaled surface pressure. Need to write out the downscaled surface pressure every hour.
+
+	sorc/smartinit_g2.fd/MAIN.f90
+
+******************************************************************
+DELIVERED to NCO - 05 Feb 2018
+IMPLEMENTED - 11 July 2018
+******************************************************************
+
+******************************************************************
+Smartinit VERS 4.2.0 - Annette Gibbs
+******************************************************************
+
+September 2017
+
+* NAM nest will be used at 00 H instead of NAM parent for Puerto Rico and Hawaii.
+
+	scripts/exnam_smartinit.sh.ecf
+	kick-scripts/DRIVcs2p	<- changed pr and hi to priconest and hawaiinest for domains (which is set to RUNTYP)
+	kick-scripts/RUN-ALL	<- changed runreg to pr and hi from priconest and hawaiinest
+
+  Note: NCO must do something similar in their job submittal scripts, so it calls exnam_smartinit.sh.ecf with 
+	RUNTYPE = priconest and hawaiinest, not pr and hi.  In their prod${cyc}.def.yyyymmdd file, NCO should 
+	set RUNTYP to 'hawaiinest' and 'priconest' under family hi and family pr. (email from Wojciech Cencek - 24 Aug 2017)
+
+* Total cloud cover bugfix - at 00 H, the total cloud cover field is written out for CONUS and Alaska.  Previously,
+  0.0's were written for total cloud cover.
+
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/GETGRIB.f90
+
+* Added 4 different wind downscaling routines for testing
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/makefile
+	sorc/smartinit_g2.fd/DIVMIN.f90
+	sorc/smartinit_g2.fd/WNDADJ.f90
+	jobs/JNAM_SMINIT
+
+* Added option to change hbar from height at model level 1 to 4500.
+
+	sorc/smartinit_g2.fd/VADJUST.f90
+
+March 2018
+
+* Added fields needed for VIIRS land surface temperature data assimilation in RTMA/URMA for Alaska only.
+        -pressure, temperature, mixing ratio, u, v, height at model level 1
+        -pressure, temperature, and mixing ratio at model level 2
+        -surface roughness
+
+	sorc/smartinit_g2.fd/GETGRIB.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/aset2d.f90
+
+April 2018
+
+* Changed the decimal precision of downscaled specific humidity to 6.0
+* Changed the decimal precision of downscaled surface pressure to 6.0
+* Changed the decimal precision of wind gust to -4.0
+* Changed the decimal precision of visibility to 3.0
+
+	sorc/smartinit_g2.fd/MAIN.f90
+
+July 2018
+
+* replaced build_smartinit.scr with 3 new build scripts
+
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
+******************************************************************
+DELIVERED to NCO - 10 July 2018
+IMPLEMENTED -
+******************************************************************

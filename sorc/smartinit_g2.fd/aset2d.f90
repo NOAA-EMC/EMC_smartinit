@@ -8,7 +8,7 @@
    REAL,    ALLOCATABLE :: T2(:,:),Q2(:,:),BLI(:,:),REFC(:,:),GUST(:,:)
    REAL,    ALLOCATABLE :: T1(:,:),D2(:,:),WX(:,:),VIS(:,:)
    REAL,    ALLOCATABLE :: LCLD(:,:),MCLD(:,:),HCLD(:,:),TCLD(:,:)
-   REAL,    ALLOCATABLE :: CEIL(:,:),SLP(:,:),SST(:,:)
+   REAL,    ALLOCATABLE :: CEIL(:,:),SLP(:,:),SST(:,:),SFCR(:,:)
 
   END MODULE aset2d
 

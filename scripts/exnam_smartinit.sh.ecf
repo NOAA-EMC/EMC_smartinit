@@ -54,18 +54,18 @@ cd $DATA
 #   Downscale from MDL NAM parent for forecast hrs=0 and > ENDHR (54/60)
  
   case $RUNTYP in gm|guam) export RUNTYP=guamnest;; esac
-  if [ $ffhr -gt $fhrstr -a $ffhr -le $ENDHR ];then
+
+# Need to use the NAM parent because NAM nest does not go out to 84 hours
+
+  if [ $ffhr -gt $ENDHR ];then
     case $RUNTYP in
-      conus) export RUNTYP=${RUNTYP}nest;;
-         hi) export RUNTYP=hawaiinest;;
-         pr) export RUNTYP=priconest;;
-         ak) export RUNTYP=alaskanest;;
+         hawaiinest) export RUNTYP=hi;;
+         priconest) export RUNTYP=pr;;
       esac
   fi
+
   echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
-#${SMINIT_SSH:-$USHdng/smartinit.sh}
 ${SMINIT_SSH:-$USHdng/smartinit_g2.sh}
-#${SMINIT_SSH:-$USHdng/smartinit_g2_ro.sh}
 
 #####################################################################
 

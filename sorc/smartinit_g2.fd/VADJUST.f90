@@ -67,6 +67,7 @@
       do i=2,nx-1
        if(validpt(i,j)) then
          HBAR=HGHT(I,J,1)
+!        HBAR=4500.
          if (HBAR .LT. 1)HBAR=1.0
          FX=DXI/HBAR
          FY=DYI/HBAR
@@ -209,11 +210,11 @@
 
 !        Do not change winds over water  02/15
          if (VEG_NDFD(I,J) .LE. 0. .or. VEG_NDFD(I,J) .EQ. 16)  DSCALE=0.0
-!            if (i.eq.300) then
-!              if (j.ge.300.and.j.le.400) then
-!                print *, DSCALE, H1, hght(i,j,1), htopo(i,j)
-!              endif
-!            endif
+             if (j.eq.360) then
+               if (i.ge.390.and.i.le.410) then
+                 print *, DSCALE, VEG_NDFD(i,j), zsfc(i,j), hght(i,j,1), htopo(i,j)
+               endif
+             endif
 !12-14          endif
           DSCALE=AMIN1(DSCALE,1.0)
           DSCALE=AMAX1(DSCALE,0.0)
@@ -226,11 +227,14 @@
             if(diffi.lt.-10) diffi=-10
             U(I,J)=UOLD+diffi
             print *, i,j,'DIFFU', diffi,diffj,'U ',UOLD, U(I,J),'PHI:',PHIIP1,PHIIM1,'SCAL:',DSCALE
+                 print *, DSCALE, VEG_NDFD(i,j), zsfc(i,j), hght(i,j,1), htopo(i,j)
           endif
           if (abs(diffj).gt.10.)  then
             if(diffj.gt.10) diffj=10
             if(diffj.lt.-10) diffj=-10
             V(I,J)=VOLD+diffj
+            print *, i,j,'DIFFV', diffi,diffj,'V ',VOLD, V(I,J),'PHI:',PHIjP1,PHIjM1,'SCAL:',DSCALE
+                 print *, DSCALE, VEG_NDFD(i,j), zsfc(i,j), hght(i,j,1), htopo(i,j)
           endif
         endif
       enddo

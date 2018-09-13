@@ -1,0 +1,99 @@
+smartinit.v4.2.0
+
+June 2018 NAM smartinit changes to coincide with RTMA/URMA v2.7 upgrade (see docs/README for more details on changes)
+
+* NAM nest will be used at 00 H instead of NAM parent for Puerto Rico and Hawaii.
+
+* Total cloud cover bugfix - at 00 H, the total cloud cover field is written out for CONUS and Alaska.  Previously,
+  0.0's were written for total cloud cover.
+
+* Added fields needed for VIIRS land surface temperature data assimilation in RTMA/URMA for Alaska only.
+        -pressure, temperature, mixing ratio, u, v, height at model level 1
+        -pressure, temperature, and mixing ratio at model level 2
+        -surface roughness
+
+* Changed the decimal precision of downscaled specific humidity to 6.0
+* Changed the decimal precision of downscaled surface pressure to 6.0
+* Changed the decimal precision of wind gust to -4.0
+* Changed the decimal precision of visibility to 3.0
+
+* replaced build_smartinit.scr with 3 new build scripts
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
+#===============================================================================
+ IMPLEMENTATION INSTRUCTIONS 
+#===============================================================================
+
+1.  git clone -b RB-v4.2.0 ssh://${USER}@vlab.ncep.noaa.gov:29418/EMC_smartinit smartinit.v4.2.0
+
+    to set up and run on WCOSS phase 2.
+
+2.  Copy fixed files to the fix directory
+
+    cp -r /meso2/noscrub/Annette.Gibbs/emc-binaries/smartinit/fix smartinit.v4.2.0
+
+2.  Build sorc codes smartinit_g2.fd, smartprecip_g2.fd
+       
+	The modulefile used for the build is in modulefiles/SMARTINIT/v4.2.0.  Copy it to a location from which it can
+	be loaded (/nwprod2/modulefiles/SMARTINIT or something similar). 
+
+	In the smartinit sorc directory "smartinit.v4.2.0/sorc" type
+		./build_smartinit_all.sh
+	to compile the codes sequentially.  All executables will be copied over to the smartinit "exec" directory.
+
+4.  Use ...docs/smartinit.ver file if desired to set
+      model_ver=v4.2.0  parameter
+
+5.  I recommend you remove the following directories, as they are no longer needed or used:
+
+	ecf/sminit_ak
+	ecf/sminit_conus
+	ecf/sminit_dgex-ak
+	ecf/sminit_dgex-cs 
+
+    The CONUS (5km), Alaska (6km) and ak_rtmages (6 km) and DGEX smartinits are no longer needed or used.
+
+6.  Job Dependencies: 
+     Upstream: NAM/NAM Nest, SREF; 
+     Upstream links:
+
+     NAM/NAM Nest 
+     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.bgrd3d${hh}.tm00
+     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.priconest.bsmart${hh}.tm00
+     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.hawaiinest.bsmart${hh}.tm00
+     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.conusnest.bsmart${hh}.tm00
+     /com2/nam/prod/nam.$PDY/nam.t${cyc}z.alaskanest.bsmart${hh}.tm00
+
+     SREF
+     /com2/sref/prod/sref.$PDY/${hh}/ensprod/sref.t${hh}z.pgrb212.prob_3hrly
+     /com2/sref/prod/sref.$PDY/${hh}/ensprod/sref.t${hh}z.pgrb243.prob_3hrly
+     /com2/sref/prod/sref.$PDY/${hh}/ensprod/sref.t${hh}z.pgrb216.prob_3hrly
+
+     Downstream: RTMA, URMA
+     Downstream links(J-Jobs that use NAM smartinit files): 
+
+     /nwprod2/rtma.v2.7.0/jobs/JRTMA_GETGUESS
+     /nwprod2/urma.v2.7.0/jobs/JURMA_GETGUESS
+
+7.  Test plan: 
+
+	Test J-Jobs jobs/JNAM_SMINIT for a full 24-hour period.
+
+8.  Technical Details:
+	Runtime: ~3 hours, 30 minutes wallclock
+	Nodes: 12
+	Tasks per node: 12
+	Consumable memory: 4916 mb
+	Serial vs parallel: Parallel (wgrib2 only)
+	Disk Storage: Has increased by 1.4 GB total
+
+7.  New output files: None
+
+8.  Flow Diagram:
+
+    https://drive.google.com/file/d/1ACk-M4VxM6cp2Z1ku9baAlo0JRmmRv_b/view?usp=sharing
+
+NOTE: Details on all changes to nam smartinit are found at docs/README - Search for 4.2.0 for changes related to this implemenation.
+
