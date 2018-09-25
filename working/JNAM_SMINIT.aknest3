@@ -1,12 +1,17 @@
-#BSUB -J DNG06.aknest3-60
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.aknest3-60
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.aknest3-60
-#BSUB -n 1
+#BSUB -J DNG00.aknest3-03
+#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v5.0.0/20180920/00/list/oDNG00.aknest3-03
+#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v5.0.0/20180920/00/list/oDNG00.aknest3-03
+#BSUB -n 12
 #BSUB -W 1:00
 #BSUB -P RTMA-T2O
-#BSUB -q dev2_shared
-#BSUB -R affinity[core]
-#BSUB -R rusage[mem=10000]
+#BSUB -q dev2
+#BSUB -R span[ptile=12]
+#BSUB -R affinity[core(1)]
+#BSUB -x
+#BSUB -a poe
+. /usrx/local/Modules/default/init/ksh
+module load prod_util
+module load grib_util/v1.0.3
 #!/bin/ksh
 set -xa   #NCO preferred setting
 
@@ -40,7 +45,11 @@ set -xa   #NCO preferred setting
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
 # TEMPORARY SWITCH for VADJUST wind terrain adjustment
+# TEMPORARY SWITCH for DIVMIN nondivergent wind adjustment (IDMADJ - Calmet Method)
+# TEMPORARY SWITCH for WNDADJ nondivergent wind adjustment (IWOXADJ - WOX Method)
 export IVADJ=${IVADJ:-T}
+export IDMADJ=${IDMADJ:-F}
+export IWOXADJ=${IWOXADJ:-F}
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
@@ -120,10 +129,10 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
-if [ "$envir" != 'prod' ] ; then
-  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
-fi
+#export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
+#if [ "$envir" != 'prod' ] ; then
+#  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
+#fi
 
 ####################################
 # SENDECF  - Flag Events on ECF
@@ -138,13 +147,15 @@ export SENDDBN=${SENDDBN:-YES}
 # dng = downscaled gridding
 ####################################
 export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
-export HOMEnam=${HOMEnam:-$NWROOTp1/nam.${nam_ver}}
+export HOMEnam=${HOMEnam:-$NWROOT/nam.${nam_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen
 export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
+
+export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
 ###################################
 # Set up the UTILITIES
@@ -153,16 +164,15 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 #export utilexec=${utilexec:-/nwprod/util/exec}
 #export utilparm=${utilparm:-/nwprod/util/parm}
 #export gespath=${gespath:-/nwges/${envir}}
-export GESIN=${GESIN:-$GESROOTp1/${envir}}
+export GESIN=${GESIN:-$GESROOT/${envir}}
 
-. /usrx/local/Modules/default/init/ksh
-module load /nwpara2/modulefiles/util_shared/v1.0.3
-module load grib_util
+#. /usrx/local/Modules/default/init/ksh
+#module load prod_util
+#module load grib_util
 
 # use local versions of cnvgrib and wgrib2
-#export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export WGRIB2=${EXECdng}/smartinit_wgrib2
-export CNVGRIB=${EXECdng}/smartinit_cnvgrib
+#export WGRIB2=${EXECdng}/wgrib2
+#export CNVGRIB=${EXECdng}/smartinit_cnvgrib
 
 ###########################################
 # Run setpdy and initialize PDY variables
@@ -174,6 +184,7 @@ setpdy.sh
 #   For testing cold start export GUESS=GDAS   #TEST
 if [ -s $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
 .  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+export GUESS=$GUESStm00
 else
    echo  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
    export GUESS=NDAS
@@ -188,8 +199,8 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
-export COM_IN=${COM_IN:-$COMROOTp1/${NET}/${envir}}
-export COM_OUT=${COM_OUT:-$COMROOTp1/${NET}/${envir}}
+export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
+export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
@@ -229,8 +240,10 @@ export COM_SREF=${COM_SREF:-/com2/sref/prod}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
-export PCOM=${PCOM:-$PCOMROOT/${NET}}
-mkdir -p $PCOM
+#export PCOM=${PCOM:-$PCOMROOT/${NET}}
+#mkdir -p $PCOM
+export pcom=${pcom:-$PCOMROOT/${NET}}
+mkdir -p $pcom
 
 ####NCO-SET env  
 

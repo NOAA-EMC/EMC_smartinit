@@ -21,8 +21,8 @@ module load ruby emc-utils
 
 # set job directory needed if running from cron
 #export model_ver=v3.5.1
-export nam_smartinit_ver=v4.2.0
-export code_ver=v4.2.0
+export nam_smartinit_ver=v5.0.0
+export code_ver=v5.0.0
 export which_nam=prod
 export modeld=smartinit
 export rootd=/meso/save/${USER}/${modeld}.${nam_smartinit_ver}
@@ -48,7 +48,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#export cyc=12  #TEST
+export cyc=00  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -63,7 +63,8 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 
 #====================================================================
 #domains="pr aknest3 ak_rtmages conusnest2p5 hi"
-domains="priconest aknest3 conusnest2p5 hawaiinest"
+#domains="priconest aknest3 conusnest2p5 hawaiinest"
+domains="priconest"
 #domains="conusnest2p5 aknest3"
 #domains="aknest3"
 #domains="conusnest2p5"
@@ -85,13 +86,13 @@ domains="priconest aknest3 conusnest2p5 hawaiinest"
 #====================================================================
 
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=84
+  export ENDHRS=03
  export mdl=nam
 #  export mdl=namrr
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                          ak_rtmages) ENDHRS=12;;
-                            aknest3) export ENDHRS=60;; 
-                       conusnest2p5) export ENDHRS=60;; 
+                            aknest3) export ENDHRS=03;; 
+                       conusnest2p5) export ENDHRS=03;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
 

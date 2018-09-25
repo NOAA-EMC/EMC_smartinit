@@ -1250,3 +1250,16 @@ July 2018
 DELIVERED to NCO - 10 July 2018
 IMPLEMENTED -
 ******************************************************************
+
+******************************************************************
+Smartinit VERS 5.0.0 - Annette Gibbs
+******************************************************************
+
+September 2018
+
+* Update Puerto Rico grid from 2.5 km to 1.25 km for consistency with NDFD
+
+        sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	ush/smartinit_g2.sh
+

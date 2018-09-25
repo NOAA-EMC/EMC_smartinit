@@ -148,8 +148,12 @@ case $RUNTYP in
    hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
 #  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
 #  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
-   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
-   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+## priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+#  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20.000000 291.804687:353:1250.000000:296.027600 16.828685:257:1250.000000:19.747399";;
+   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
+## pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+#  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20.000000 291.804687:353:1250.000000:296.027600 16.828685:257:1250.000000:19.747399";;
+   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
    aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976.563 40.530101:1105:2976.563";;
    ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
    alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
