@@ -1248,5 +1248,86 @@ July 2018
 
 ******************************************************************
 DELIVERED to NCO - 10 July 2018
-IMPLEMENTED -
+IMPLEMENTED - 03 December 2018
 ******************************************************************
+
+******************************************************************
+Smartinit VERS 4.2.1 - Annette Gibbs
+******************************************************************
+
+March 2019
+
+NAM Smartinit changes associated with Dell Transition
+
+* replaced "/com2/sref/prod" with "compath.py /sref/prod" for definition of COM_SREF
+* replaced "-$COMROOT/${NET}/${envir}" with "compath.py ${NET}/${envir}" for definition for COM_IN
+
+	jobs/JNAM_SMINIT
+
+* created new modulefile for use on the Dell
+
+	modulefiles/SMARTINIT/v4.2.1
+
+* updated the build scripts for use on the Dell
+
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
+* changed "typeset -Z2" (pads a 0 in front of a single digit number) because it does not work on the Dell 
+* changed mpirun command to reflect the Dell mpirun command
+* removed hard-wired link to the /com/date/t${cyc}z file
+
+	ush/smartinit_g2.sh
+
+* fixed bug in subroutine rdgrib; was sending in J (which was undefined) into subroutine GETGB2S instead of JR.
+
+	sorc/smartinit_g2.fd/rdgrib.f90
+
+* SMARTPRECIP needed many changes to run on the Dell.  GRIB2 Grid Definition Template and Data Representation Template arrays 
+  needed to be redefined before writing the total accumulated precipitation and snow depths to the GRIB2 file.  
+  In addition, binary scaling needed to be forced to adequate precision (-4) and Subroutine Getbit needed to be called 
+  to calculate nbits (number of bits needed for packing).
+
+	sorc/smartprecip_g2.fd/SMARTPRECIP.f90
+
+* added new release notes and updated README file, changed smartinit.ver to reflect version 4.2.1
+
+	docs/README
+	docs/release-notes.v4.2.1
+	docs/smartinit.ver
+
+-----Local Drive script changes only - will not affect NCO
+
+* added changes to determine which development machine I am on, so it will locate the correct input files.
+* access $NDATE instead of /nwprod/util/exec/ndate
+* redefined output directories to reflect the Dell directories
+* removed code that deletes output data that is older than 5 days, because the Dell output directories only keep data for 5 days.
+* load modules needed for the Dell
+* changed job cards for running on the Dell
+
+	kick-scripts/DRIVcs2p
+	kick-scripts/cr8bjob
+	
+* load modules needed for the Dell
+* added code that if it can't find a Smartinit output file after 60 minutes, it will stop running Smartinit
+* removed typeset -Z2 cyc
+* changed WALLCLK time from 1 & 2 hours to 45 minutes
+* redefined output directories to reflect the Dell directories
+
+	kick-scripts/RUN_ALL
+
+* redefined directories for the Dell
+* loaded modules needed for the Dell 
+
+	parm/smart_para_config
+
+* removed the following directories, as they are no longer needed or used (NCO already did this for version v4.2.0)
+
+        ecf/sminit_ak
+        ecf/sminit_conus
+        ecf/sminit_dgex-ak
+        ecf/sminit_dgex-cs
+
+The CONUS (5km), Alaska (6km) and ak_rtmages (6 km) and DGEX smartinits are no longer needed or used.
+

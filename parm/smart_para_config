@@ -2,14 +2,17 @@
 # nam_smartinit configuration
 # Jeff McQueen 01/2013 
 
-. /usrx/local/Modules/default/init/ksh
-module load prod_util
+#. /usrx/local/Modules/default/init/ksh
+. /usrx/local/prod/lmod/lmod/init/profile
+#module load prod_util
+module purge
+module load EnvVars/1.0.2
 
 # OUTPUT REGION TO DOWNSCALE TO
 # valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
 #TEST typeset -Z2 ffhr
 export RUN_ENVIR=dev
-export envir=dev
+export envir=prod
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -32,7 +35,7 @@ export KEEPDATA=${KEEPDATA:-%KEEPDATA:YES%}
 export nam_ver=v3.1.6
 export dgex_ver=v3.1.1
 
-export HOMEdng=/meso/save/$USER/smartinit.${nam_smartinit_ver}             # dng software root dir
+export HOMEdng=/gpfs/dell2/emc/modeling/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
 echo HOMEdng $HOMEdng
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
@@ -42,20 +45,32 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 #TEST WITH Dana's GFS changes
 #export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
 
-export COMROOTp1=${COMROOTp1:-/com}
-export GESROOTp1=${GESROOTp1:-/nwges}
-export NWROOTp1=/nwprod
-export NWROOT=/nw${envir}2
-export PCOMROOT=${PCOMROOT:-/pcom2/${envir}}
+#export COMROOTp1=${COMROOTp1:-/gpfs/${wd}p1/nco/ops/com}
+#export GESROOTp1=${GESROOTp1:-/gpfs/${wd}p1/nco/ops/nwges}
+export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
+#export NWROOTp1=/gpfs/${wd}p1/nco/ops/nwprod
+#export NWROOT=/gpfs/${wd}p2/nco/ops/nw${envir}
+#export NWROOT=/gpfs/tp2/nco/ops/nw${envir}
+#export NWROOT=/gpfs/gp2/nco/ops/nw${envir}
+#export PCOMROOT=${PCOMROOT:-/gpfs/${wd}p1/nco/ops/pcom/${envir}}
+#export PCOMROOT=${PCOMROOT:-/gpfs/gp1/nco/ops/pcom/${envir}}
 
-export COMROOT=/com2
-export gespath=/nwges2/prod          
+# COMROOT is not defined properly on Venus to phase 2, so redefine it to phase 1 until I get it sorted out
+#xport COMROOT=/gpfs/${wd}p2/nco/ops/com
+#export COMROOT=/gpfs/${wd}p1/nco/ops/com
+#export COMROOT=/gpfs/tp2/nco/ops/com
+#export COMROOT=/gpfs/gp2/nco/ops/com
+#export gespath=/gpfs/${wd}p2/nco/ops/nwges/prod          
+#export gespath=/gpfs/tp2/nco/ops/nwges/prod          
+#export gespath=/gpfs/gp2/nco/ops/nwges/prod          
 ## Test with Eric's NAMRR PARA
-export GESIN=/nwges2/prod          
+#export GESIN=/gpfs/${wd}p2/nco/ops/nwges/prod
+#export GESIN=/gpfs/tp2/nco/ops/nwges/prod
+#export GESIN=/gpfs/gp2/nco/ops/nwges/prod
 #export GESIN=/ptmpd3/Eric.Rogers/nwges/para
 #export GESIN=/com2/nam/para
 #export GESIN=/meso2/noscrub/Eric.Rogers/nwges/para
-export COM_IN=${COMROOT}/${mdl}/prod 
+#export COM_IN=${COMROOT}/${mdl}/prod 
 
 #TEST WITH Eric's NAM PARA     
 #TEST export COMROOT="/meso/noscrub/Eric.Rogers/com"
@@ -64,30 +79,34 @@ export COM_IN=${COMROOT}/${mdl}/prod
 
 ## Test with Eric's NAM PARA
 #export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
-export COM_IN=/com2/${mdl}/prod 
+#export COM_IN=/gpfs/${wd}p2/nco/ops/com/${mdl}/prod
+#export COM_IN=/gpfs/tp2/nco/ops/com/${mdl}/prod
+#export COM_IN=/gpfs/gp2/nco/ops/com/${mdl}/prod
 ##export COM_IN=/meso2/noscrub/Annette.Gibbs/com2/${mdl}/prod
 #export COM_IN=/ptmpd3/Eric.Rogers/com/${mdl}/para 
 #export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/para
 #export COM_IN=/meso2/noscrub/Jacob.Carley/com/${mdl}/rt
 #export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/rt
-if [ $mdl = dgex ]; then
-export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para
+#if [ $mdl = dgex ]; then
+#export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para
 #export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/para
-fi
+#fi
 ## End Test
 
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
 #export COM_SREF=${COMROOT}/sref/prod   
 # new location of SREF
-export COM_SREF=/com2/sref/prod
+#export COM_SREF=/gpfs/${wd}p2/nco/ops/com/sref/prod
+#export COM_SREF=/gpfs/tp2/nco/ops/com/sref/prod
+#export COM_SREF=/gpfs/gp2/nco/ops/com/sref/prod
 ##export COM_SREF=/meso2/noscrub/Annette.Gibbs/com2/sref/prod
 
 
-export DATA_IN=/ptmpp2/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
-export DATAROOT=/ptmpp2/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
+export DATA_IN=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
+export DATAROOT=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 
-export COM_OUT=/meso2/noscrub/$USER/${nam_smartinit_ver}
+export COM_OUT=/gpfs/dell2/ptmp/$USER/${nam_smartinit_ver}
 #TEST export COM_OUT=/ptmpp2/$USER
-export pcom=${pcom:-${COM_OUT}/pcom/nam}
-export PCOM=${PCOM:-${COM_OUT}/pcom/nam}
+#export pcom=${pcom:-${COM_OUT}/pcom/nam}
+#export PCOM=${PCOM:-${COM_OUT}/pcom/nam}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
