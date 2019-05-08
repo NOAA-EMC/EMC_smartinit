@@ -1274,7 +1274,7 @@ NAM Smartinit changes associated with Dell Transition
 	sorc/build_smartinit_g2.sh
 	sorc/build_smartprecip_g2.sh
 
-* changed "typeset -Z2" (pads a 0 in front of a single digit number) because it does not work on the Dell 
+* changed "typeset -Z2" (pads a 0 in front of a single digit number) to conditional check
 * changed mpirun command to reflect the Dell mpirun command
 * removed hard-wired link to the /com/date/t${cyc}z file
 

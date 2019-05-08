@@ -2,12 +2,18 @@ smartinit.v4.2.1
 
 NAM Smartinit changes associated with Dell Transition (see docs/README for more details on changes)
 
-* SMARTPRECIP changes to run on the Dell:  GRIB2 Grid Definition Template and Data Representation Template arrays
+* used compath.py for definitions of COM_SREF and COM_IN
+
+* created new modulefile, changed mpirun command, and updated the build scripts for use on the Dell
+
+* removed hard-wired link to /com/date/t${cyc}z file
+
+* fixed bug in subroutine rdgrib
+
+* SMARTPRECIP needed many changes to run on the Dell:  GRIB2 Grid Definition Template and Data Representation Template arrays
   needed to be redefined before writing the total accumulated precipitation and snow depths to the GRIB2 file.
   In addition, binary scaling needed to be forced to adequate precision (-4) and Subroutine Getbit needed to be called
   to calculate nbits (number of bits needed for packing).
-
-        sorc/smartprecip_g2.fd/SMARTPRECIP.f90
 
 #===============================================================================
  IMPLEMENTATION INSTRUCTIONS 
