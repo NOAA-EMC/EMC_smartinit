@@ -943,18 +943,18 @@ chmod 775 j.poe
 chmod 775 k.poe
 chmod 775 l.poe
 
-echo "a.poe" > wgrib2.poe
-echo "b.poe" >> wgrib2.poe
-echo "c.poe" >> wgrib2.poe
-echo "d.poe" >> wgrib2.poe
-echo "e.poe" >> wgrib2.poe
-echo "f.poe" >> wgrib2.poe
-echo "g.poe" >> wgrib2.poe
-echo "h.poe" >> wgrib2.poe
-echo "i.poe" >> wgrib2.poe
-echo "j.poe" >> wgrib2.poe
-echo "k.poe" >> wgrib2.poe
-echo "l.poe" >> wgrib2.poe
+echo "-n 1 a.poe" > wgrib2.poe
+echo "-n 1 b.poe" >> wgrib2.poe
+echo "-n 1 c.poe" >> wgrib2.poe
+echo "-n 1 d.poe" >> wgrib2.poe
+echo "-n 1 e.poe" >> wgrib2.poe
+echo "-n 1 f.poe" >> wgrib2.poe
+echo "-n 1 g.poe" >> wgrib2.poe
+echo "-n 1 h.poe" >> wgrib2.poe
+echo "-n 1 i.poe" >> wgrib2.poe
+echo "-n 1 j.poe" >> wgrib2.poe
+echo "-n 1 k.poe" >> wgrib2.poe
+echo "-n 1 l.poe" >> wgrib2.poe
 
 chmod 775 wgrib2.poe
 #export MP_PGMMODEL=mpmd
