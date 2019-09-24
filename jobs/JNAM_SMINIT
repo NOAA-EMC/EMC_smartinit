@@ -193,8 +193,9 @@ export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
+export COMOUTwmo=$COMOUT/wmo
 
-mkdir -p $COMOUT
+mkdir -p $COMOUT $COMOUTwmo
 cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
@@ -231,8 +232,9 @@ export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
 #export PCOM=${PCOM:-$PCOMROOT/${NET}}
 #mkdir -p $PCOM
-export pcom=${pcom:-$PCOMROOT/${NET}}
-mkdir -p $pcom
+#export pcom=${pcom:-$PCOMROOT/${NET}}
+#mkdir -p $pcom
+export pcom=$COMOUTwmo
 
 ####NCO-SET env  
 

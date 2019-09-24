@@ -47,7 +47,7 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 
 #export COMROOTp1=${COMROOTp1:-/gpfs/${wd}p1/nco/ops/com}
 #export GESROOTp1=${GESROOTp1:-/gpfs/${wd}p1/nco/ops/nwges}
-export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
+#export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
 #export NWROOTp1=/gpfs/${wd}p1/nco/ops/nwprod
 #export NWROOT=/gpfs/${wd}p2/nco/ops/nw${envir}
 #export NWROOT=/gpfs/tp2/nco/ops/nw${envir}
@@ -101,6 +101,11 @@ export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
 #export COM_SREF=/gpfs/gp2/nco/ops/com/sref/prod
 ##export COM_SREF=/meso2/noscrub/Annette.Gibbs/com2/sref/prod
 
+# Using parallel data from NCO
+#export COM_SREF=/gpfs/dell1/nco/ops/com/sref/para
+
+#export COM_IN=/gpfs/dell1/nco/ops/com/nam/para
+#export COM_SREF=/gpfs/dell2/nco/ops/com/sref/para
 
 export DATA_IN=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 export DATAROOT=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc

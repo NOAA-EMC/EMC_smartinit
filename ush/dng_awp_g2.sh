@@ -143,21 +143,21 @@ if [ $ihindex -eq 1 ];then
  mv hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/hindex.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi
 
-# Move grib2 awips file to pcom
+# Move grib2 awips file to $COMOUTwmo
 if [ $RGIN != AKRT ];then
 if [ $awpchk -eq 0 ];then
 if [ $outreg = ak3 ];then
-  mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
+  mv grib2.t${cyc}z.smart${outreg}f${fhr} ${COMOUTwmo}/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
 else
-  mv grib2.t${cyc}z.smart${outreg}f${fhr} $pcom/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
+  mv grib2.t${cyc}z.smart${outreg}f${fhr} ${COMOUTwmo}/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
 fi
 
 if [ -s "$awpparm" ];then
   if [ $SENDDBN = YES ];then #bsm 25 feb 2008 - added code for awips alerts
     if [ $outreg = ak3 ];then
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job $pcom/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
+      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
     else
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job $pcom/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
+      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
     fi
   fi
 fi
