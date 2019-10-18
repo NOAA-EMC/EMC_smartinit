@@ -159,6 +159,8 @@ export GESIN=${GESIN:-$GESROOT/${envir}}
 # use local versions of cnvgrib and wgrib2
 #export WGRIB2=${EXECdng}/wgrib2
 #export CNVGRIB=${EXECdng}/smartinit_cnvgrib
+#export WGRIB2=/gpfs/tp2/nco/ops/nwprod/grib_util.v1.0.5/exec/wgrib2
+#export GRB2INDEX=/gpfs/tp2/nco/ops/nwprod/grib_util.v1.0.5/exec/grb2index
 
 ###########################################
 # Run setpdy and initialize PDY variables
@@ -185,13 +187,15 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
-export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
+#export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
+export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
 export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 export COMIN=$COM_IN/${RUN}.${PDY}
 export COMOUT=$COM_OUT/${RUN}.${PDY}
+export COMOUTwmo=$COMOUT/wmo
 
-mkdir -p $COMOUT
+mkdir -p $COMOUT $COMOUTwmo
 cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
@@ -222,14 +226,15 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com2/sref/prod}
+export COM_SREF=${COM_SREF:-$(compath.py /sref/prod)}
 export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
 export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
 #export PCOM=${PCOM:-$PCOMROOT/${NET}}
 #mkdir -p $PCOM
-export pcom=${pcom:-$PCOMROOT/${NET}}
-mkdir -p $pcom
+#export pcom=${pcom:-$PCOMROOT/${NET}}
+#mkdir -p $pcom
+export pcom=$COMOUTwmo
 
 ####NCO-SET env  
 

@@ -1,9 +1,14 @@
 BASE=`pwd`
 export BASE
 
-. /usrx/local/Modules/default/init/ksh
+ . $MODULESHOME/init/bash
+
+ . /usrx/local/prod/lmod/lmod/init/profile
 module purge
-module load $BASE/../modulefiles/SMARTINIT/v4.2.0
+module load EnvVars/1.0.2
+moduledir=`dirname $(readlink -f ../modulefiles/SMARTINIT)`
+module use ${moduledir}
+module load SMARTINIT/v4.2.1
 module list
 
 sleep 1

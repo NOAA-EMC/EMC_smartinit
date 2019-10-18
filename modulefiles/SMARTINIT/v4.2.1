@@ -1,0 +1,58 @@
+#%Module######################################################################
+##                                                       Annette.Gibbs@noaa.gov
+##                                                           NOAA/NWS/NCEP/EMC
+## SMARTINIT v4.2.1
+##_____________________________________________________
+proc ModulesHelp { } {
+puts stderr "Set environment veriables for SMARTINIT"
+puts stderr "This module initializes the enviro nment "
+puts stderr "for the Intel Compiler Suite $version\n"
+}
+module-whatis " SMARTINIT whatis description"
+
+set ver v4.2.1
+
+#set sys [uname sysname]
+#set SMARTINIT /nwprod2/modulefiles/SMARTINIT
+#set SMARTINIT /nwpara2/modulefiles/NAM_SMARTINIT
+#set SMARTINIT /u/Annette.Gibbs/modulefiles/SMARTINIT
+#set SMARTINIT /nwprod2/modulefiles/NAM_SMARTINIT
+#set lname SMARTINIT
+
+# Known conflicts ???
+#conflict bacio/v2.0.0
+#conflict w3nco/v2.0.5
+#conflict ics/14.1
+#conflict ics/15.0.1
+
+# Loading Intel Compiler Suite
+#module load ics/12.1
+
+module load ips/18.0.1.163
+
+### is ibmpe needed?  Seems needed for ARW, but kills NMMB build 
+module load impi/18.0.1
+
+# Loading nceplibs modules
+module load ip/3.0.1
+module load bacio/2.0.2
+module load w3nco/2.0.6
+module load w3emc/2.3.0
+
+module load g2/3.1.0
+module load g2tmpl/1.5.0
+module load jasper/1.900.29
+module load libpng/1.2.59
+module load zlib/1.2.11
+
+module load bufr/11.2.0
+module load sp/2.0.2
+#odule load transutil/v1.0.0
+
+setenv COMP ifort
+setenv COMP_MP mpfort
+setenv COMP_MPI mpiifort
+
+setenv C_COMP icc
+setenv C_COMP_MP mpcc
+

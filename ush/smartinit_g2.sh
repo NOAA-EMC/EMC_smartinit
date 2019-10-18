@@ -158,7 +158,10 @@ esac
 
 # End wgrib2
  
-typeset -Z2 srefcyc gefscyc pcphrl
+#typeset -Z2 srefcyc gefscyc pcphrl
+if [ $srefcyc -lt 10 ];then srefcyc="0"${srefcyc};fi
+if [ $gefscyc -lt 10 ];then gefscyc="0"${gefscyc};fi
+typeset -Z2 pcphrl
 text=".tm00"
 
 # For expanded conus nest 2.5 km
@@ -940,23 +943,24 @@ chmod 775 j.poe
 chmod 775 k.poe
 chmod 775 l.poe
 
-echo "a.poe" > wgrib2.poe
-echo "b.poe" >> wgrib2.poe
-echo "c.poe" >> wgrib2.poe
-echo "d.poe" >> wgrib2.poe
-echo "e.poe" >> wgrib2.poe
-echo "f.poe" >> wgrib2.poe
-echo "g.poe" >> wgrib2.poe
-echo "h.poe" >> wgrib2.poe
-echo "i.poe" >> wgrib2.poe
-echo "j.poe" >> wgrib2.poe
-echo "k.poe" >> wgrib2.poe
-echo "l.poe" >> wgrib2.poe
+echo "-n 1 a.poe" > wgrib2.poe
+echo "-n 1 b.poe" >> wgrib2.poe
+echo "-n 1 c.poe" >> wgrib2.poe
+echo "-n 1 d.poe" >> wgrib2.poe
+echo "-n 1 e.poe" >> wgrib2.poe
+echo "-n 1 f.poe" >> wgrib2.poe
+echo "-n 1 g.poe" >> wgrib2.poe
+echo "-n 1 h.poe" >> wgrib2.poe
+echo "-n 1 i.poe" >> wgrib2.poe
+echo "-n 1 j.poe" >> wgrib2.poe
+echo "-n 1 k.poe" >> wgrib2.poe
+echo "-n 1 l.poe" >> wgrib2.poe
 
 chmod 775 wgrib2.poe
-export MP_PGMMODEL=mpmd
+#export MP_PGMMODEL=mpmd
 export MP_CMDFILE=wgrib2.poe
-time mpirun.lsf
+#time mpirun -app $MP_CMDFILE
+time mpirun -configfile $MP_CMDFILE
 export err=$?;  err_chk
 
 #cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_6 \
@@ -977,6 +981,7 @@ fi # grib = 1
 
   if [ $PDY = $today ];then
     cp ${COMROOT}/date/t${cyc}z DATE
+#   cp /gpfs/gp1/nco/ops/com/date/t${cyc}z DATE
   else
     echo "DATE  "${PDY}${cyc}"00WASHINGTON" >DATE
   fi

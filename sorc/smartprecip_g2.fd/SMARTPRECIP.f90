@@ -44,10 +44,18 @@
 
 !C grib2
       INTEGER :: LUGB,LUGI,J,JDISC,JPDTN,JGDTN
-      INTEGER,DIMENSION(:) :: JIDS(200),JPDT(200),JGDT(200)
-      INTEGER,DIMENSION(:) :: PDS_SNOW_HOLD(200),PDS_RAIN_HOLD(200)
-      INTEGER,DIMENSION(:) :: PDS_SNOW_HOLD_EARLY(200), &
-                              PDS_RAIN_HOLD_EARLY(200)
+      integer,dimension(200) :: jids,jpdt,jgdt
+!     INTEGER,DIMENSION(:) :: JIDS(200),JPDT(200),JGDT(200)
+!     INTEGER,DIMENSION(:) :: PDS_SNOW_HOLD(200),PDS_RAIN_HOLD(200)
+!     INTEGER,DIMENSION(:) :: PDS_SNOW_HOLD_EARLY(200), &
+!                             PDS_RAIN_HOLD_EARLY(200)
+      integer, allocatable :: pds_rain_hold_early(:), pds_rain_hold(:)
+      integer, allocatable :: drt_rain_hold_early(:), drt_rain_hold(:)
+      integer, allocatable :: gds_rain_hold_early(:), gds_rain_hold(:)
+      integer, allocatable :: pds_snow_hold_early(:), pds_snow_hold(:)
+      integer, allocatable :: drt_snow_hold_early(:), drt_snow_hold(:)
+      integer, allocatable :: gds_snow_hold_early(:), gds_snow_hold(:)
+
       LOGICAL :: UNPACK
       INTEGER :: K,IRET
       TYPE(GRIBFIELD) :: GFLD
@@ -59,6 +67,12 @@
       REAL,     ALLOCATABLE :: SNOW1(:),SNOW2(:),SNOW3(:),SNOW4(:)
       REAL,     ALLOCATABLE :: APCPOUT(:),CAPCPOUT(:),SNOWOUT(:)
       LOGICAL,  ALLOCATABLE :: MASK(:)
+
+! Added for getbit
+      real,     allocatable :: grnd(:)
+      real :: gmin, gmax
+! Needed for the Dell
+!     integer,dimension(:) :: gds_hold(21)
 !--------------------------------------------------------------------------
 
       FNAME='fort.  '
@@ -156,11 +170,19 @@
 
 
 !        allocate(gfld%fld(1200*1200))
-        allocate(gfld%idsect(200))
-        allocate(gfld%igdtmpl(200))
-        allocate(gfld%ipdtmpl(200))
-        allocate(gfld%idrtmpl(200))
+!       allocate(gfld%idsect(200))
+!       allocate(gfld%igdtmpl(200))
+!       allocate(gfld%ipdtmpl(200))
+!       allocate(gfld%idrtmpl(200))
 !        allocate(gfld%bmap(1200*1200))
+      allocate(gfld%ipdtmpl(29))
+      allocate(gfld%igdtmpl(21))
+      allocate (pds_rain_hold(29),pds_rain_hold_early(29))
+      allocate (drt_rain_hold(5),drt_rain_hold_early(5))
+      allocate (gds_rain_hold(21),gds_rain_hold_early(21))
+      allocate (pds_snow_hold(29),pds_snow_hold_early(29))
+      allocate (drt_snow_hold(5),drt_snow_hold_early(5))
+      allocate (gds_snow_hold(21),gds_snow_hold_early(21))
 
         JIDS=-9999
         JPDTN=-1
@@ -236,10 +258,23 @@
         print*,'apcp1=',maxval(apcp1),minval(apcp1)
 
 
-        do K=1,29
+!       do K=1,29
 !       do K=1,200
+!       PDS_RAIN_HOLD_EARLY(K)=gfld%ipdtmpl(K)
+!       enddo
+
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
+      do K=1,29
         PDS_RAIN_HOLD_EARLY(K)=gfld%ipdtmpl(K)
-        enddo
+      enddo
+      do k=1,5
+        drt_rain_hold_early(k)=gfld%idrtmpl(k)
+      enddo
+      do k=1,21
+        gds_rain_hold_early(k)=gfld%igdtmpl(k)
+      enddo
 
         endif
 
@@ -291,9 +326,23 @@
         print*,'snow1=',maxval(snow1),minval(snow1)
 
 !       do K=1,200
-        do K=1,29
+!       do K=1,29
+!       PDS_SNOW_HOLD_EARLY(K)=gfld%ipdtmpl(K)
+!       enddo
+
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
+
+      do K=1,29
         PDS_SNOW_HOLD_EARLY(K)=gfld%ipdtmpl(K)
-        enddo
+      enddo
+      do k=1,5
+        drt_snow_hold_early(k)=gfld%idrtmpl(k)
+      enddo
+      do k=1,21
+        gds_snow_hold_early(k)=gfld%igdtmpl(k)
+      enddo
 
         endif
 
@@ -329,6 +378,10 @@
         do K=1,29
         PDS_RAIN_HOLD(K)=gfld%ipdtmpl(K)
         enddo
+
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
 
 ! SKIP ACCUMULATED CONVECTIVE PRECIP
 
@@ -367,6 +420,10 @@
         do K=1,29
         PDS_SNOW_HOLD(K)=gfld%ipdtmpl(K)
         enddo
+
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
 
 !     IF (FHR4.GT.0 ) THEN
       IF (LRD3) THEN
@@ -407,6 +464,10 @@
         PDS_RAIN_HOLD(K)=gfld%ipdtmpl(K)
         enddo
 
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
+
 ! SKIP ACCUMULATED CONVECTIVE PRECIP
 
 !     ACCUMULATED CONVECTIVE PRECIP
@@ -442,6 +503,10 @@
         do K=1,29
         PDS_SNOW_HOLD(K)=gfld%ipdtmpl(K)
         enddo
+
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
 
         ENDIF
 !=======================================================
@@ -482,6 +547,10 @@
         PDS_RAIN_HOLD(K)=gfld%ipdtmpl(K)
         enddo
 
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
+
 ! SKIP ACCUMULATED CONVECTIVE PRECIP
 !     ACCUMULATED CONVECTIVE PRECIP
 !     J = 0;JPDS = -1;JPDS(3) = IGDNUM
@@ -517,12 +586,17 @@
         do K=1,29
         PDS_SNOW_HOLD(K)=gfld%ipdtmpl(K)
         enddo
+!       do k=1,21
+!         gds_hold(k)=gfld%igdtmpl(k)
+!       enddo
+
       ENDIF 
 
 !=======================================================
 !     OUTPUT 3, 6 or 12 hr PRECIP BUCKETS
 !=======================================================
       ALLOCATE (APCPOUT(NUMVAL),CAPCPOUT(NUMVAL),SNOWOUT(NUMVAL),STAT=kret)
+      allocate (grnd(numval))
       IF(kret.ne.0)THEN
        WRITE(*,*)'ERROR allocation source location: ',numval
        STOP
@@ -584,6 +658,12 @@
         else
           gfld%ipdtmpl=PDS_RAIN_HOLD_EARLY
         endif
+
+! need to initialize grid specs
+!       gfld%igdtmpl=gds_hold
+      gfld%idrtmpl=drt_rain_hold_early
+      gfld%igdtmpl=gds_rain_hold_early
+
 
 !       gfld%ipdtmpl(9)=ihrs1
         gfld%ipdtmpl(9)=0
@@ -658,6 +738,18 @@
 
 !     ENDIF
 
+!  compute nbits
+
+! force binary scaling of adequate precision
+        gfld%idrtmpl(2)=-4
+
+        call getbit(0,abs(gfld%idrtmpl(2)), &
+          gfld%idrtmpl(3),numval,0,apcpout, &
+          grnd,gmin,gmax,nbit)
+
+      gfld%idrtmpl(4)=nbit
+
+! end nbits mod
 
       KPDS(5)=61
       print *, 'writing precip', KPDS(5),KPDS(14),KPDS(15),LUGB5,MINVAL(APCPOUT),MAXVAL(APCPOUT)
@@ -683,6 +775,18 @@
 !     CALL PUTGB(LUGB6,NUMVAL,KPDS,KGDS,MASK,CAPCPOUT,IRET)
 !     CALL BACLOSE(LUGB6,IRET)
 
+!  compute nbits
+
+! force binary scaling of adequate precision
+        gfld%idrtmpl(2)=-4
+
+        call getbit(0,abs(gfld%idrtmpl(2)), &
+          gfld%idrtmpl(3),numval,0,snowout, &
+          grnd,gmin,gmax,nbit)
+
+      gfld%idrtmpl(4)=nbit
+
+! end nbits mod
       KPDS(5)=65
       print *, 'writing SNOW', KPDS(5),KPDS(14),KPDS(15),LUGB7,MINVAL(SNOWOUT),MAXVAL(SNOWOUT)
       WRITE(FNAME(6:7),FMT='(I2)')LUGB7

@@ -8,9 +8,12 @@ cd $BASE
 mkdir $BASE/logs
 export logs_dir=$BASE/logs
 
-. /usrx/local/Modules/default/init/ksh
+#. /usrx/local/Modules/default/init/ksh
+ . /usrx/local/prod/lmod/lmod/init/profile
 module purge
-module load $BASE/../modulefiles/SMARTINIT/v4.2.0
+moduledir=`dirname $(readlink -f ../modulefiles/SMARTINIT)`
+module use ${moduledir}
+module load SMARTINIT/v4.2.1
 module list
 
 sleep 1

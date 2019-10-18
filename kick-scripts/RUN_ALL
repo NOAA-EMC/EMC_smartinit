@@ -1,12 +1,19 @@
 #!/bin/ksh
 set -xa
 export PATH=${PATH}:.
-export stutil=/hwrf/noscrub/soft/modulefiles
-. /usrx/local/Modules/default/init/ksh
-module load ibmpe lsf ics
-module use $stutil
-module load ruby emc-utils
-module load GrADS/2.0.2
+#export stutil=/hwrf/noscrub/soft/modulefiles
+#. /usrx/local/Modules/default/init/ksh
+ . /usrx/local/prod/lmod/lmod/init/profile
+module load ips/18.0.1.163
+module load impi/18.0.1
+module load prod_util/1.1.0
+module load emc-utils/1.0.0
+module load lsf/10.1
+echo $cyc
+#module load ibmpe lsf ics
+#module use $stutil
+#module load ruby emc-utils
+#module load GrADS/2.0.2
 #module load prod_util
 #module load /nwpara2/modulefiles/util_shared/v1.0.3 
 
@@ -24,16 +31,17 @@ module load GrADS/2.0.2
 # 7 Jul 2015 Annette Gibbs - Changed smartinit output from /stmpp2/$USER to /ptmpp2/$USER and added $PDY to dir
 # 7 Jul 2015 Annette Gibbs - $PDY is now determined in DRIVcs2p and DRIV-dgex
 #=======================================================
-typeset -Z2 cyc #ffhr fhrnxt ffhrsv HHold strhr
+#typeset -Z2 cyc #ffhr fhrnxt ffhrsv HHold strhr
+echo $cyc
 
 #====================User Sets=======================================
 # Location of smart config file to set up directories
 cfgdir=${rootd}/parm
 export wkdir=${rootd}/working
 mkdir -p $wkdir
-gemdir=/meso/save/$USER/gempak/sfcplot/smart
-plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_para
-export utilscript=${utilscript:-/nwprod/util/ush}
+#gemdir=/meso/save/$USER/gempak/sfcplot/smart
+#plotdir=/meso/save/Annette.Gibbs/plot_smartgrids_para
+##export utilscript=${utilscript:-/nwprod/util/ush}
 
 export jobd=${jobd:-`pwd`}
 
@@ -44,8 +52,8 @@ export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
 export NET=$mdl 
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
-export WALLCLK="1:00"  #TEST
-if [ $RUNTYP = conusnest2p5 ];then export WALLCLK="2:00";fi  #TEST
+export WALLCLK="0:45"  #TEST
+if [ $RUNTYP = conusnest2p5 ];then export WALLCLK="0:45";fi  #TEST
 
 runreg=$RUNTYP
 case $RUNTYP in 
@@ -61,7 +69,7 @@ esac
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/ptmpp2/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
+export DATA_IN=/gpfs/dell2/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 
@@ -110,8 +118,9 @@ while [ $ffhr -le $ENDHRS ];do
         sleep 10
 
         echo `date +%T` $MDL SUBMIT SMINIT JOB :  $RUNTYP CYCLE $cyc FHRNXT $fhrnxt
-       ${kickd}/cr8bjob_poe $job $fhrnxt
-#      ${kickd}/cr8bjob $job $fhrnxt
+#      ${kickd}/cr8bjob_poe $job $fhrnxt
+       ${kickd}/cr8bjob $job $fhrnxt
+module load lsf/10.1
         bsub < J${MDL}_SMINIT.${RUNTYP}
       fi
       ((fhrnxt=fhrnxt+INCR))
@@ -147,13 +156,19 @@ while [ $ffhr -le $ENDHRS ];do
         . ${wkdir}/dng_para_config${RUNTYP} >dngcfg.out
         echo  $wait `date +%T` SUBMIT $MDL SMINIT JOB :  $RUNTYP CYCLE $cyc FFHR $ffhr
         sleep 10     
-        ${kickd}/cr8bjob_poe $job $ffhr
-#       ${kickd}/cr8bjob $job $ffhr
+#       ${kickd}/cr8bjob_poe $job $ffhr
+        ${kickd}/cr8bjob $job $ffhr
+module load lsf/10.1
         bsub -K < J${MDL}_SMINIT.${RUNTYP}
         break
       fi
     fi
   done
+
+  if [ $wait -gt 3600 ];then
+    echo "files have not been found, discontinue search"
+    exit
+  fi
 
   ((ffhr=ffhr+INCR))
 done
