@@ -33,7 +33,8 @@
       integer i,j, ierr,k,ib,jb, ivar,ix,iy
       integer ibuf, ia,ja,iw,jw,id,n_rough_yes,n_rough_no
       integer m_rough_yes,m_rough_no
-      real zs,qv,qq,e,enl,dwpt,z6,t6,gam,tsfc,td
+!     real zs,qv,qq,e,enl,dwpt,z6,t6,gam,tsfc,td
+      real zs,qv,qq,e,enl,dwpt,z6,t6,tsfc,td
       real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
       real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
       real tmean,dz,theta1,theta6,dx,dy
@@ -219,11 +220,10 @@
 
         DX=2500.;DY=2500. ! hardwired for conus nests
 !
-! Temporarily comment out  - using PR 2.5 km grid for this upgrade - 04 Sept 2015[AMG]
-!       if(region.eq.'PR') then ! PR is now 1.25 km
-!         DX=1250.
-!         DY=1250.
-!       endif
+        if(region.eq.'PR') then ! PR is now 1.25 km
+          DX=1250.
+          DY=1250.
+        endif
 
         if(region.eq.'AK3') then 
           DX=3000.
@@ -313,7 +313,7 @@
       where (zsfc .lt. 0.) zsfc=0.0
       tnew=spval;qnew=spval
       dewnew=spval;unew=spval;vnew=spval
-      pnew=spval  
+      pnew=spval;gam=spval  
 
       do 120 j=1,jm
       do 120 i=1,im
@@ -352,7 +352,7 @@
         V1=V10(i,j)
 !       U1=UWND(I,J,1)
 !       V1=VWND(I,J,1)
-        GAM = (TP1-T6)/(Z6-Z1)
+        GAM(I,J) = (TP1-T6)/(Z6-Z1)
 ! Shear
 !       dudz(i,j) = (U3-U1)/(Z3-Z1)
 !       dvdz(i,j) = (V3-V1)/(Z3-Z1)
@@ -366,12 +366,12 @@
 !============================================
         if (topo_ndfd(i,j).le.zs ) then
 !============================================
-          GAM = MIN(GAMD,MAX(GAM,GAMi))
+          GAM(I,J) = MIN(GAMD,MAX(GAM(I,J),GAMi))
 
 ! --- temperature at NDFD topo
 ! -- again, use 2m T at NAM regular terrain from similarity
 !      theory for derivation of 2m T at topomini elevation
-          tsfc = t2(i,j) + (zs-topo_ndfd(i,j))*gam
+          tsfc = t2(i,j) + (zs-topo_ndfd(i,j))*gam(i,j)
 
 !  Don't let reduced valley temps be
 !     any lower than NAM 2m temp minus 10K.
@@ -408,7 +408,12 @@
 !        Here, when topo-NDFD > topo-MDL, we allow a small
 !        subisothermal lapse rate with slight warming with height.
 
-          GAM = MIN(GAMD,MAX(GAM,GAMsubj))
+          if(region .eq. 'HI' .or. region .eq. 'PR')then
+! Constrain local lapse rate to be between dry adiabatic and isothermal
+            GAM(I,J) = MIN(GAMD,MAX(GAM(I,J),GAMi))
+          else
+            GAM(I,J) = MIN(GAMD,MAX(GAM(I,J),GAMsubj))
+          endif
 
           DO K=1,LM
            if (hght(i,j,k) .gt. topo_ndfd(i,j)) goto 781
@@ -454,7 +459,7 @@
 !     This will avoid the problem with NDFD temp values
 !     being set to be much warmer than NAM 2m temp.
 
-          tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam
+          tsfc=t2(i,j) + (zs-topo_ndfd(i,j))*gam(i,j)
 
           if (tnew(i,j) .gt. t2(i,j))  tnew(i,j) = min(tnew(i,j),tsfc)
           if (i.eq.iprt.and. j.eq.jprt) then 
@@ -462,6 +467,14 @@
            print *,' pnew ',pnew(i,j),' thetavc ',thetavc
           endif
 
+! lapse rate suggestion from Guoqing - use for Hawaii and Puerto Rico only
+
+          if(region .eq. 'HI' .or. region .eq. 'PR')then
+            tnew(i,j)=tsfc
+            if (tnew(i,j) .gt. t2(i,j)) then
+             tnew(i,j) = t2(i,j)
+            endif
+          endif
 
 ! --- Just use q at NAM 1st level in this case.
 !     should use q2, but the values dont look good
@@ -479,7 +492,12 @@
           DWPT = (243.5*ENL-440.8)/(19.48-ENL)
           td = dwpt + 273.15
 ! --- dewpoint temperature
+! --- used in NAM Smartinit for all grids and RAP Smartinit for PR and HI
           dewnew(i,j) = min(td,tnew(i,j))
+! --- used in HRRR Smartinit and RAP Smartinit for CONUS and AK
+! --- lapserateTD plots
+!         dewnew(i,j) = tnew(i,j) - tddep
+
           if (k .eq. 1) then
             uc = u10(i,j)+frac * (uwnd(i,j,k)-u10(i,j))
             vc = v10(i,j)+frac * (vwnd(i,j,k)-v10(i,j))

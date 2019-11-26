@@ -13,7 +13,7 @@ export logs_dir=$BASE/logs
 module purge
 moduledir=`dirname $(readlink -f ../modulefiles/SMARTINIT)`
 module use ${moduledir}
-module load SMARTINIT/v4.2.1
+module load SMARTINIT/v4.3.0
 module list
 
 sleep 1

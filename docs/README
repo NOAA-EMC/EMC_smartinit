@@ -1297,6 +1297,11 @@ NAM Smartinit changes associated with Dell Transition
 	docs/release-notes.v4.2.1
 	docs/smartinit.ver
 
+* Add new wmo directory to replace the pcom directory  (delivered in v4.2.1)
+
+	jobs/JNAM_SMINIT
+	ush/dng_awp_g2.sh
+
 -----Local Drive script changes only - will not affect NCO
 
 * added changes to determine which development machine I am on, so it will locate the correct input files.
@@ -1330,4 +1335,53 @@ NAM Smartinit changes associated with Dell Transition
         ecf/sminit_dgex-cs
 
 The CONUS (5km), Alaska (6km) and ak_rtmages (6 km) and DGEX smartinits are no longer needed or used.
+
+******************************************************************
+DELIVERED to NCO - 25 Jun 2019 (verified) (initial delivery was 13 May 2019)
+IMPLEMENTED - 21 Aug 2019
+******************************************************************
+
+******************************************************************
+Smartinit VERS 4.3.0 - Annette Gibbs
+******************************************************************
+
+September 2018
+
+* Update Puerto Rico grid from 2.5 km to 1.25 km for consistency with NDFD
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	ush/smartinit_g2.sh
+	util/parm
+	fix/mask/nam_smartmaskpr.grb2
+	fix/topo/nam_smarttopopr.grb2
+
+IMPORTANT!!!  Note: Copy new 1.25 km PR mask and topo files to emc-binaries
+
+* Apply new HRRR T downscaling for Puerto Rico and Hawaii grids only
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+
+April 2019
+
+* Add additional fields needed for use in stability calculation for 10-m wind obsdrvations in
+  RTMA/URMA for all grids: skin temperature and model surface pressure. Also add the following
+  for CONUS, Puerto Rico, and Hawaii (already written out for Alaska): surface roughness; 
+  pressure, temperature, mixing ratio, u, v, height at model level 1; and pressure, temperature, 
+  and mixing ratio at model level 2.
+
+	sorc/smartinit_g2.fd/MAIN.f90
+
+June 2019
+
+* Added lapse-rate to the output files for lapse-rate adjustment for 2-m temperature in RTMA.
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/aset2d.f90
+
+******************************************************************
+DELIVERED to NCO - 
+IMPLEMENTED - 
+******************************************************************
 
