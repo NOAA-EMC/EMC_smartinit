@@ -135,7 +135,7 @@ module load lsf/10.1
   while [ $wait -le 3600 -a $ffhr -ge $((fhrstr+06)) ];do
     ((HHold=ffhr-6))
     if [ $HHold -lt 10 ];then HHold="0"${HHold};fi
-    smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00.grib2
+    smflold=${COMOUT}/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00.grib2
 
     if [ ! -s $smflold ];then
       echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr
@@ -144,7 +144,7 @@ module load lsf/10.1
     else
       ((HHold=ffhr-3))
       if [ $HHold -lt 10 ];then HHold="0"${HHold};fi
-      smflold=${COM_OUT}/$mdl.$PDY/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00.grib2
+      smflold=${COMOUT}/$mdl.t${cyc}z.smart${runreg}${HHold}.tm00.grib2
       if [ ! -s $smflold ];then
         echo  $wait `date +%T` Waiting for $smflold   FFHR=$ffhr
         sleep 60

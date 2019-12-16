@@ -17,7 +17,7 @@ NCEP_LIB_DIR =
 FFLAGS = -O2   ## -debug all  ## -fp-model strict -list
 LDFLAGS =-FR -assume byterecl # -check bounds -g # -check all -debug all -warn nounused  
 
-CMD =	../../exec/smartinit_g2_rw
+CMD =	smartinit_g2
 
 PROFLIB =	-lprof
 

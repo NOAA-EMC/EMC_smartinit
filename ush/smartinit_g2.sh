@@ -286,11 +286,11 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
 # Get the sref precip fields that we need
   if [ $rg = gm -o $rg = dgx ]; then
-#   cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
-    cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
+#   cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+    cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
   else
-#   cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
-    cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
+#   cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+    cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
   fi
 # $GRBINDEX SREFPROB SREFPROBI
   $GRB2INDEX SREFPROB SREFPROBI
@@ -1168,8 +1168,8 @@ fi # grib = 1
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 
-  export pgm=smartinit_g2_rw; . prep_step
-  ${EXECdng}/smartinit_g2_rw $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
+  export pgm=smartinit_g2; . prep_step
+  ${EXECdng}/smartinit_g2 $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
   export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
