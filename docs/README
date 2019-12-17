@@ -1352,9 +1352,11 @@ September 2018
 	sorc/smartinit_g2.fd/NDFDgrid.f90
 	sorc/smartinit_g2.fd/MAIN.f90
 	ush/smartinit_g2.sh
-	util/parm
 	fix/mask/nam_smartmaskpr.grb2
 	fix/topo/nam_smarttopopr.grb2
+	parm/wmo
+	ush/dng_awp_g2.sh
+	parm/wmo/grib2_awpnamdngpr*.1p25
 
 IMPORTANT!!!  Note: Copy new 1.25 km PR mask and topo files to emc-binaries
 
@@ -1371,6 +1373,7 @@ April 2019
   and mixing ratio at model level 2.
 
 	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/NDFDgrid.f90
 
 June 2019
 
@@ -1380,8 +1383,37 @@ June 2019
 	sorc/smartinit_g2.fd/MAIN.f90
 	sorc/smartinit_g2.fd/aset2d.f90
 
+Dec 2019
+
+* Added EE2 recommendations
+
+	- Changed the name of the smartinit executable from smartinit_g2_rw to smartinit_g2 
+          and changed the makefiles to create the executables in the source directory rather than the exec/ directory.
+
+        sorc/smartinit_g2.fd/makefile
+	sorc/smartprecip_g2.fd/makefile
+	ush/smartinit_g2.sh
+
+	- Created an install.sh script that will copy the executables from the source directory to the exec directory.
+
+	sorc/install.sh
+
+	- Cleaned up jobs/JNAM_SMINIT; removed all pcom/PCOM lines and legacy commented out lines; 
+          combined COM_IN/COM_OUT and COMIN/COMOUT into COMIN/COMOUT lines; 
+          renamed COMIN_SREF and COMIN_GEFS to COMINsref and COMINgefs.
+
+	jobs/JNAM_SMINIT
+	parm/smart_para_config
+	ush/smartinit_g2.sh
+
+	- Moved awips header files in util/parm to parm/wmo.  Deleted util/parm directory.
+
+	ush/dng_awp_g2.sh
+
+	- Removed scripts/exnawips_nam_smartinit.sh.ecf as it is not needed.
+
 ******************************************************************
-DELIVERED to NCO - 
+DELIVERED to NCO -  17 Dec 2019
 IMPLEMENTED - 
 ******************************************************************
 
