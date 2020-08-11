@@ -259,7 +259,7 @@ echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT MDL DIR : $COM_IN
+echo INPUT MDL DIR : $COMIN
 echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
@@ -391,7 +391,7 @@ for fhr in $hours; do
 # Backup 6 hours
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
-          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+          mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           echo MDLIN $mdlin
           if [ -s ${mdlin}${pcfhr}.tm00 ];then
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
@@ -402,7 +402,7 @@ for fhr in $hours; do
             export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
             cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
           fi
@@ -466,7 +466,7 @@ fi;;
 # Backup 6 hours
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
 
             if [ -s ${mdlin}${pcfhr}.tm00 ];then
@@ -478,7 +478,7 @@ fi;;
               export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
               echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
               echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-              mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+              mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
               echo MDLIN $mdlin
               cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
             fi
@@ -500,7 +500,7 @@ EOF
           else
 # Begin wgrib2
 #            if [ $grib = 2 ];then
-#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COM_IN/${mdl}.$PDY
+#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMIN/${mdl}.$PDY
 #            fi
 # End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
