@@ -98,6 +98,11 @@ fi
 rm *grb2*
 # End Correct for grib2 precision (AMG)
 
+# Mercator PR 1.25 grid
+if [ $outreg = pr ];then
+  ogrd=1p25
+fi
+
 if [ $RGIN != AKRT ];then
 
 if [ $awpchk -eq 0 ];then
@@ -113,13 +118,13 @@ export FORT51=grib2.t${cyc}z.smart${outreg}f${fhr}
 
 # Define grib2 awips parm file 
 if [ $outreg = conus2p5 ];then
-  awpparm=$utilparm/grib2_awp${mdl}dngconus${cyctp}f${fhr}.${ogrd}
+  awpparm=$PARMdng/wmo/grib2_awp${mdl}dngconus${cyctp}f${fhr}.${ogrd}
 elif [ $outreg = ak3 ];then
-  awpparm=$utilparm/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
+  awpparm=$PARMdng/wmo/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
 elif [ $outreg = guam ];then
   awpparm=$UTILdng/parm/grib2_${mdl}_smart${outreg}${cyctp}f${fhr}.${ogrd}
 else
-  awpparm=$utilparm/grib2_awp${mdl}dng${outreg}${cyctp}f${fhr}.${ogrd}
+  awpparm=$PARMdng/wmo/grib2_awp${mdl}dng${outreg}${cyctp}f${fhr}.${ogrd}
 fi
 
 if [ -s "$awpparm" ];then
@@ -148,6 +153,8 @@ if [ $RGIN != AKRT ];then
 if [ $awpchk -eq 0 ];then
 if [ $outreg = ak3 ];then
   mv grib2.t${cyc}z.smart${outreg}f${fhr} ${COMOUTwmo}/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
+elif [ $outreg = pr ];then
+  mv grib2.t${cyc}z.smart${outreg}f${fhr} ${COMOUTwmo}/grib2.awp${mdl}smart1p25.${outreg}${fhr}_awips_f${fhr}_${cyc}
 else
   mv grib2.t${cyc}z.smart${outreg}f${fhr} ${COMOUTwmo}/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
 fi
@@ -156,6 +163,8 @@ if [ -s "$awpparm" ];then
   if [ $SENDDBN = YES ];then #bsm 25 feb 2008 - added code for awips alerts
     if [ $outreg = ak3 ];then
       $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
+    elif [ $outreg = pr ];then
+      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart1p25.${outreg}${fhr}_awips_f${fhr}_${cyc}
     else
       $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
     fi

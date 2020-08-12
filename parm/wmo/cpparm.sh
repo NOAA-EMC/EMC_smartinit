@@ -4,10 +4,12 @@ typeset -Z2 fhr
 mdl=nam
 endhrs=84
 
-for rgn in pr conus;do
+#for rgn in pr conus;do
+for rgn in pr;do
   case $rgn in 
-     pr)grd=254; ogrd=195;;
-     conus)grd=188; ogrd=184;;
+      pr)grd=1p25; ogrd=195;;
+#     pr)grd=254; ogrd=195;;
+#     conus)grd=188; ogrd=184;;
   esac
   for cctp in on off;do
     fhr=00

@@ -47,7 +47,7 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 
 #export COMROOTp1=${COMROOTp1:-/gpfs/${wd}p1/nco/ops/com}
 #export GESROOTp1=${GESROOTp1:-/gpfs/${wd}p1/nco/ops/nwges}
-#export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
+export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
 #export NWROOTp1=/gpfs/${wd}p1/nco/ops/nwprod
 #export NWROOT=/gpfs/${wd}p2/nco/ops/nw${envir}
 #export NWROOT=/gpfs/tp2/nco/ops/nw${envir}
@@ -101,16 +101,20 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 #export COM_SREF=/gpfs/gp2/nco/ops/com/sref/prod
 ##export COM_SREF=/meso2/noscrub/Annette.Gibbs/com2/sref/prod
 
-# Using parallel data from NCO
-#export COM_SREF=/gpfs/dell1/nco/ops/com/sref/para
-
 #export COM_IN=/gpfs/dell1/nco/ops/com/nam/para
-#export COM_SREF=/gpfs/dell2/nco/ops/com/sref/para
+# Define COMIN if not using production input files
+#export COMIN=/gpfs/dell1/nco/ops/com/nam/prod
+#export COMSREF=/gpfs/dell2/nco/ops/com/sref/prod
 
 export DATA_IN=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 export DATAROOT=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 
-export COM_OUT=/gpfs/dell2/ptmp/$USER/${nam_smartinit_ver}
+# Define COM_SREF if not using production files
+#export COM_SREF=/gpfs/dell2/nco/ops/com/sref/para
+# Define COMIN if not using production input files
+#export COMIN=/gpfs/dell1/nco/ops/com/nam/para
+# Define COMOUT
+export COMOUT=/gpfs/dell2/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
 #TEST export COM_OUT=/ptmpp2/$USER
 #export pcom=${pcom:-${COM_OUT}/pcom/nam}
 #export PCOM=${PCOM:-${COM_OUT}/pcom/nam}

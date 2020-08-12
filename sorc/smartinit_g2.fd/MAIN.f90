@@ -178,7 +178,8 @@
       integer i,j, ierr,k,ib,jb, ivar,ix,iy
       integer ibuf, ia,ja,iw,jw,id,n_rough_yes,n_rough_no
       integer m_rough_yes,m_rough_no
-      real zs,qv,qq,e,enl,dwpt,z6,t6,gam,tsfc,td
+!     real zs,qv,qq,e,enl,dwpt,z6,t6,gam,tsfc,td
+      real zs,qv,qq,e,enl,dwpt,z6,t6,tsfc,td
       real tddep,td_orig,zdif_max,tup, qvdif2m5m,qv2m
       real qc,qvc,thetavc,uc,vc,ratio,speed,speedc,frac
       real tmean,dz,theta1,theta6,dx,dy
@@ -403,6 +404,7 @@
    ALLOCATE (P12CP01(IM,JM),P12CP10(IM,JM),P12CP50(IM,JM),STAT=kret)
    ALLOCATE (HAINES(IM,JM),HLVL(IM,JM),STAT=kret)
    ALLOCATE (CEIL(IM,JM),SLP(IM,JM),SST(IM,JM),SFCR(IM,JM),STAT=kret)
+   ALLOCATE (GAM(IM,JM),STAT=kret)
 !  for nests
    ALLOCATE (VALIDPT(IM,JM),STAT=kret)
    VALIDPT=.TRUE.
@@ -1255,7 +1257,8 @@
 ! pressure, temperature, and mixing ration at model level 2
 ! and roughness length for Alaska nest only
 
-      if (TRIM(REGION).EQ.'AK3' .and. fhr .le. fhrhrly)then
+!     if (TRIM(REGION).EQ.'AK3' .and. fhr .le. fhrhrly)then
+      if (fhr .le. fhrhrly)then
 
 ! Pressure at model level 1
 !     DEC=-0.1
@@ -1451,23 +1454,60 @@
 ! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
 ! since Skin T/SST is already being used (per Geoff DiMego).
 ! Disable for this implementation - revisit for next implementation
-!     print*, 'Output SST', FHR
+      print*, 'Output SST', FHR
 !     DEC=-2.0
+      DEC=4.0
 
-!      CALL FILL_FLD(GFLD,NUMV,IM,JM,SST)
+      CALL FILL_FLD(GFLD,NUMV,IM,JM,SST)
 
-!      GFLD%discipline=0
-!      GFLD%ipdtnum=0
-!      GFLD%ipdtmpl(1)=0
-!      GFLD%ipdtmpl(2)=0
-!      GFLD%ipdtmpl(10)=103
-!      GFLD%ipdtmpl(12)=2
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+      GFLD%ipdtmpl(1)=0
+      GFLD%ipdtmpl(2)=0
+      GFLD%ipdtmpl(10)=103
+      GFLD%ipdtmpl(12)=0
 
-!      CALL set_scale(gfld, DEC)
-!      CALL PUTGB2(70,GFLD,IRET)  ! SST
+      CALL set_scale(gfld, DEC)
+      CALL PUTGB2(70,GFLD,IRET)  ! SST
         write(0,*) 'IRET for SST: ', IRET
         write(0,*) 'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
       print*,'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+
+! Local lapse-rate
+       DEC=4.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,GAM)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=8
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+!      GFLD%idrtmpl(2)=DEC
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(70,GFLD,IRET)  ! GAM
+       write(0,*) 'IRET for GAM: ', IRET
+       write(0,*) 'maxval(GAM),minval(GAM): ', maxval(GAM),minval(GAM)
+       print*,'maxval(GAM),minval(GAM): ', maxval(GAM),minval(GAM)
+
+! Write model surface pressure to grib2
+       DEC=6.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,PSFC)
+
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(70,GFLD,IRET) ! PSFC
+
+         print *,'Output Downscaled Pressure',FHR
+        write(0,*) 'IRET for PSFC PUTGB2: ', IRET
+         print *, 'PSFC',minval(psfc),maxval(psfc)
 
 !     ID(1:25) = 0
 !     ID(8)=11;ID(9)=105
@@ -2817,7 +2857,7 @@
 ! pressure, temperature, and mixing ration at model level 2
 ! and roughness length for Alaska nest only
 
-      if (gdin%region .EQ. 'AK3')then
+!     if (gdin%region .EQ. 'AK3')then
 
 ! Pressure at model level 1
 !     DEC=-0.1
@@ -3015,13 +3055,14 @@
       write(0,*) 'maxval(SFCR),minval(SFCR) at level 1: ', maxval(SFCR),minval(SFCR)
       print*,'maxval(SFCR),minval(SFCR): at level 1', maxval(SFCR),minval(SFCR)
 
-      endif
+!     endif
 
 ! SST - this is really Skin T/SST, but we are writing it out as 2-m Temperature,
 ! since Skin T/SST is already being used (per Geoff DiMego).
 ! Disable for this implementation - revisit for next implementation
       print*, 'Output SST', GDIN%FHR
-      DEC=-2.0
+!     DEC=-2.0
+      DEC=4.0
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,SST)
 
@@ -3030,12 +3071,44 @@
        GFLD%ipdtmpl(1)=0
        GFLD%ipdtmpl(2)=0
        GFLD%ipdtmpl(10)=103
-       GFLD%ipdtmpl(12)=2
+       GFLD%ipdtmpl(12)=0
 
        CALL set_scale(gfld, DEC)
-!      CALL PUTGB2(70,GFLD,IRET)  ! SST
+       CALL PUTGB2(70,GFLD,IRET)  ! SST
         write(0,*) 'IRET for SST: ', IRET
         write(0,*) 'maxval(SST),minval(SST): ', maxval(SST),minval(SST)
+
+! Local lapse-rate
+       DEC=4.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,GAM)
+
+       GFLD%discipline=0
+       GFLD%ipdtnum=0
+       GFLD%ipdtmpl(1)=0
+       GFLD%ipdtmpl(2)=8
+       GFLD%ipdtmpl(10)=1
+       GFLD%ipdtmpl(12)=0
+!      GFLD%idrtmpl(2)=DEC
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(70,GFLD,IRET)  ! GAM
+       write(0,*) 'IRET for GAM: ', IRET
+       write(0,*) 'maxval(GAM),minval(GAM): ', maxval(GAM),minval(GAM)
+       print*,'maxval(GAM),minval(GAM): ', maxval(GAM),minval(GAM)
+
+! Write model surface pressure to grib2
+       DEC=6.0
+
+       CALL FILL_FLD(GFLD,NUMV,IM,JM,PSFC)
+
+       GFLD%ipdtmpl(1)=3
+       GFLD%ipdtmpl(2)=0
+       GFLD%ipdtmpl(10)=103
+       GFLD%ipdtmpl(12)=0
+
+       CALL set_scale(gfld, DEC)
+       CALL PUTGB2(70,GFLD,IRET) ! PSFC
 
       endif ! dgx
       ENDIF

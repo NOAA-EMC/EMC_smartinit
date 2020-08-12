@@ -1297,6 +1297,11 @@ NAM Smartinit changes associated with Dell Transition
 	docs/release-notes.v4.2.1
 	docs/smartinit.ver
 
+* Add new wmo directory to replace the pcom directory  (delivered in v4.2.1)
+
+	jobs/JNAM_SMINIT
+	ush/dng_awp_g2.sh
+
 -----Local Drive script changes only - will not affect NCO
 
 * added changes to determine which development machine I am on, so it will locate the correct input files.
@@ -1331,9 +1336,90 @@ NAM Smartinit changes associated with Dell Transition
 
 The CONUS (5km), Alaska (6km) and ak_rtmages (6 km) and DGEX smartinits are no longer needed or used.
 
+******************************************************************
+DELIVERED to NCO - 25 Jun 2019 (verified) (initial delivery was 13 May 2019)
+IMPLEMENTED - 21 Aug 2019
+******************************************************************
 
 ******************************************************************
-DELIVERED to NCO - 9 May 2019
-IMPLEMENTED - 21 Aug 2019
+Smartinit VERS 4.3.0 - Annette Gibbs
+******************************************************************
+
+September 2018
+
+* Update Puerto Rico grid from 2.5 km to 1.25 km for consistency with NDFD
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	ush/smartinit_g2.sh
+	fix/mask/nam_smartmaskpr.grb2
+	fix/topo/nam_smarttopopr.grb2
+	parm/wmo
+	ush/dng_awp_g2.sh
+	parm/wmo/grib2_awpnamdngpr*.1p25
+
+IMPORTANT!!!  Note: Copy new 1.25 km PR mask and topo files to emc-binaries
+
+* Apply new HRRR T downscaling for Puerto Rico and Hawaii grids only
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+
+April 2019
+
+* Add additional fields needed for use in stability calculation for 10-m wind obsdrvations in
+  RTMA/URMA for all grids: skin temperature and model surface pressure. Also add the following
+  for CONUS, Puerto Rico, and Hawaii (already written out for Alaska): surface roughness; 
+  pressure, temperature, mixing ratio, u, v, height at model level 1; and pressure, temperature, 
+  and mixing ratio at model level 2.
+
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+
+June 2019
+
+* Added lapse-rate to the output files for lapse-rate adjustment for 2-m temperature in RTMA.
+
+	sorc/smartinit_g2.fd/NDFDgrid.f90
+	sorc/smartinit_g2.fd/MAIN.f90
+	sorc/smartinit_g2.fd/aset2d.f90
+
+Dec 2019
+
+* Added EE2 recommendations
+
+	- Changed the name of the smartinit executable from smartinit_g2_rw to smartinit_g2 
+          and changed the makefiles to create the executables in the source directory rather than the exec/ directory.
+
+        sorc/smartinit_g2.fd/makefile
+	sorc/smartprecip_g2.fd/makefile
+	ush/smartinit_g2.sh
+
+	- Created an install.sh script that will copy the executables from the source directory to the exec directory.
+
+	sorc/install.sh
+
+	- Cleaned up jobs/JNAM_SMINIT; removed all pcom/PCOM lines and legacy commented out lines; 
+          combined COM_IN/COM_OUT and COMIN/COMOUT into COMIN/COMOUT lines; 
+          renamed COMIN_SREF and COMIN_GEFS to COMINsref and COMINgefs.
+
+	jobs/JNAM_SMINIT
+	parm/smart_para_config
+	ush/smartinit_g2.sh
+
+	- Moved awips header files in util/parm to parm/wmo.  Deleted util/parm directory.
+
+	ush/dng_awp_g2.sh
+
+	- Removed scripts/exnawips_nam_smartinit.sh.ecf as it is not needed.
+
+March 2020
+
+	- Changed all instances of COM_IN to COMIN in the ush/smartinit_g2.sh script
+
+	ush/smartinit_g2.sh
+
+******************************************************************
+DELIVERED to NCO - 17 Dec 2019
+IMPLEMENTED -  28 July 2020
 ******************************************************************
 

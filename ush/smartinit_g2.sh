@@ -148,8 +148,10 @@ case $RUNTYP in
    hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
 #  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
 #  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
-   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
-   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+#  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
+#  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
+   pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
    aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976.563 40.530101:1105:2976.563";;
    ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
    alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
@@ -257,7 +259,7 @@ echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT MDL DIR : $COM_IN
+echo INPUT MDL DIR : $COMIN
 echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
@@ -284,11 +286,11 @@ if [ $ffhr -gt ${fhrstr} ]; then
 
 # Get the sref precip fields that we need
   if [ $rg = gm -o $rg = dgx ]; then
-#   cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
-    cp $COMIN_GEFS/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
+#   cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+    cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
   else
-#   cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
-    cp $COMIN_SREF/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
+#   cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
+    cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
   fi
 # $GRBINDEX SREFPROB SREFPROBI
   $GRB2INDEX SREFPROB SREFPROBI
@@ -389,7 +391,7 @@ for fhr in $hours; do
 # Backup 6 hours
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
-          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+          mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           echo MDLIN $mdlin
           if [ -s ${mdlin}${pcfhr}.tm00 ];then
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
@@ -400,7 +402,7 @@ for fhr in $hours; do
             export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
             cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
           fi
@@ -464,7 +466,7 @@ fi;;
 # Backup 6 hours
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
 
             if [ -s ${mdlin}${pcfhr}.tm00 ];then
@@ -476,7 +478,7 @@ fi;;
               export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
               echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
               echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-              mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+              mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
               echo MDLIN $mdlin
               cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
             fi
@@ -498,7 +500,7 @@ EOF
           else
 # Begin wgrib2
 #            if [ $grib = 2 ];then
-#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COM_IN/${mdl}.$PDY
+#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMIN/${mdl}.$PDY
 #            fi
 # End wgrib2
             mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
@@ -1166,8 +1168,8 @@ fi # grib = 1
                  *) RGIN=`echo $rg |tr '[a-z]'  '[A-Z]' `;;
    esac
 
-  export pgm=smartinit_g2_rw; . prep_step
-  ${EXECdng}/smartinit_g2_rw $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
+  export pgm=smartinit_g2; . prep_step
+  ${EXECdng}/smartinit_g2 $cyc $fhr $ogrd $RGIN $inest $inhrfrq $fhrstr $core >smartinit.out${fhr}
   export err=$?; err_chk
 
 # Save hourly ak,hi,pr,conus2p5 nests and ak_rtmages(from nam parent) for RTMA 1st guess fields
