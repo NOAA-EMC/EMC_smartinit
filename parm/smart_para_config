@@ -3,10 +3,11 @@
 # Jeff McQueen 01/2013 
 
 #. /usrx/local/Modules/default/init/ksh
-. /usrx/local/prod/lmod/lmod/init/profile
+#. /usrx/local/prod/lmod/lmod/init/profile
+#source /apps/prod/lmodules/startLmod
 #module load prod_util
-module purge
-module load EnvVars/1.0.2
+#module purge
+#module load envvar/1.0
 
 # OUTPUT REGION TO DOWNSCALE TO
 # valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
@@ -35,7 +36,7 @@ export KEEPDATA=${KEEPDATA:-%KEEPDATA:YES%}
 export nam_ver=v3.1.6
 export dgex_ver=v3.1.1
 
-export HOMEdng=/gpfs/dell2/emc/modeling/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
+export HOMEdng=/lfs/h1/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
 echo HOMEdng $HOMEdng
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
@@ -47,7 +48,8 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 
 #export COMROOTp1=${COMROOTp1:-/gpfs/${wd}p1/nco/ops/com}
 #export GESROOTp1=${GESROOTp1:-/gpfs/${wd}p1/nco/ops/nwges}
-export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
+#export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
+export GESROOT=${GESROOT:-/lfs/h1/emc/da/noscrub/Annette.Gibbs/com/nwges}
 #export NWROOTp1=/gpfs/${wd}p1/nco/ops/nwprod
 #export NWROOT=/gpfs/${wd}p2/nco/ops/nw${envir}
 #export NWROOT=/gpfs/tp2/nco/ops/nw${envir}
@@ -93,6 +95,7 @@ export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
 #fi
 ## End Test
 
+
 # for dgex downscling thru 192 forecast hours, can use locally created gefs files
 #export COM_SREF=${COMROOT}/sref/prod   
 # new location of SREF
@@ -106,15 +109,19 @@ export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
 #export COMIN=/gpfs/dell1/nco/ops/com/nam/prod
 #export COMSREF=/gpfs/dell2/nco/ops/com/sref/prod
 
-export DATA_IN=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
-export DATAROOT=/gpfs/dell2/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
+# Acorn
+export COMIN=/lfs/h1/emc/da/noscrub/$USER/com/${NET}/${envir}/${RUN}.${PDY}
+export COM_SREF=/lfs/h1/emc/da/noscrub/Annette.Gibbs/com/sref/prod
+
+export DATA_IN=/lfs/h1/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
+export DATAROOT=/lfs/h1/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 
 # Define COM_SREF if not using production files
 #export COM_SREF=/gpfs/dell2/nco/ops/com/sref/para
 # Define COMIN if not using production input files
 #export COMIN=/gpfs/dell1/nco/ops/com/nam/para
 # Define COMOUT
-export COMOUT=/gpfs/dell2/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
+export COMOUT=/lfs/h1/emc/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
 #TEST export COM_OUT=/ptmpp2/$USER
 #export pcom=${pcom:-${COM_OUT}/pcom/nam}
 #export PCOM=${PCOM:-${COM_OUT}/pcom/nam}

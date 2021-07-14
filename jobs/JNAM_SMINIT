@@ -88,6 +88,7 @@ export KEEPDATA=${KEEPDATA:-NO}
 
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" != nco ];then
+ pwd
  dng_para_config${RUNTYP}   #EMC User set
 fi
 
@@ -148,8 +149,11 @@ export GESIN=${GESIN:-$GESROOT/${envir}}
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-setpdy.sh
-. PDY  # set local dir for crontab
+#setpdy.sh is called setpdy on Acorn
+#setpdy.sh
+setpdy
+# setpdy does not write PDY to a file named PDY on Acorn
+#. PDY  # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST

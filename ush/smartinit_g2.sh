@@ -47,6 +47,12 @@
 
 set -xa
 
+# Set WGRIB2 temporarily to use the wgrib2 from Luna until WGRIB2 is working (Acorn)
+#export WGRIB2=/u/Annette.Gibbs/bin/wgrib2
+#xport WGRIB2=/lfs/h1/emc/nceplibs/noscrub/hpc-stack/src/v1.1.0/install2/intel/19.1.3.304/cray-mpich/8.1.4/wgrib2/2.0.8ip/bin/wgrib2
+# Set WGRIB2 to wgrib2 as WGRIB2 is not defined in the wgrib2/2.0.8ip module yet (module show wgrib2/2.0.8ip)
+export WGRIB2=wgrib2
+
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
 
 #export grib=1
@@ -962,7 +968,7 @@ chmod 775 wgrib2.poe
 #export MP_PGMMODEL=mpmd
 export MP_CMDFILE=wgrib2.poe
 #time mpirun -app $MP_CMDFILE
-time mpirun -configfile $MP_CMDFILE
+time mpiexec -configfile $MP_CMDFILE
 export err=$?;  err_chk
 
 #cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_6 \

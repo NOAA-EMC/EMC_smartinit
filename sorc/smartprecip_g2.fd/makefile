@@ -2,7 +2,7 @@ SHELL=/bin/sh
 #
 OBJS=SMARTPRECIP.o
 
-FC =   ifort -convert big_endian -g -traceback 
+FC =   ftn -convert big_endian -g -traceback 
 
 LIBS = ${G2TMPL_LIB} ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB} \
        ${IP_LIB4} ${W3NCO_LIB4} ${W3EMC_LIB4} ${BACIO_LIB4}
