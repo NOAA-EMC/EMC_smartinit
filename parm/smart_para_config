@@ -47,7 +47,7 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 
 #export COMROOTp1=${COMROOTp1:-/gpfs/${wd}p1/nco/ops/com}
 #export GESROOTp1=${GESROOTp1:-/gpfs/${wd}p1/nco/ops/nwges}
-export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
+#export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
 #export NWROOTp1=/gpfs/${wd}p1/nco/ops/nwprod
 #export NWROOT=/gpfs/${wd}p2/nco/ops/nw${envir}
 #export NWROOT=/gpfs/tp2/nco/ops/nw${envir}
