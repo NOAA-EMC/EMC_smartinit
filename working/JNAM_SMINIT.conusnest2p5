@@ -1,12 +1,25 @@
-#BSUB -J DNG06.conusnest2p5-60
-#BSUB -oo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.conusnest2p5-60
-#BSUB -eo /ptmpp2/Annette.Gibbs/smartinit.v3.5.1/20160316/06/list/oDNG06.conusnest2p5-60
-#BSUB -n 1
-#BSUB -W 2:00
-#BSUB -P RTMA-T2O
-#BSUB -q dev2_shared
-#BSUB -R affinity[core]
-#BSUB -R rusage[mem=10000]
+#PBS -N DNG18.conusnest2p5-60
+#PBS -o /lfs/h2/emc/ptmp/Annette.Gibbs/smartinit.v4.4.0/20210824/18/list/oDNG18.conusnest2p5-60
+#PBS -e /lfs/h2/emc/ptmp/Annette.Gibbs/smartinit.v4.4.0/20210824/18/list/oDNG18.conusnest2p5-60
+#PBS -l place=shared,select=1:ncpus=12:mpiprocs=12:mem=32GB
+#PBS -l walltime=000:45:00
+#PBS -A RTMA-DEV
+#PBS -q dev
+#PBS -l debug=true
+#PBS -V
+module purge
+module load envvar/1.0
+module load PrgEnv-intel/8.1.0
+module load craype/2.7.8
+module load intel/19.1.3.304
+module load cray-mpich/8.1.7
+module load cray-pals/1.0.12
+module load prod_util/2.0.9
+module load prod_envir/2.0.4
+module load libjpeg/9c
+module load grib_util/1.2.2
+module load wgrib2/2.0.8
+export  OMP_NUM_THREADS=1
 #!/bin/ksh
 set -xa   #NCO preferred setting
 
@@ -40,7 +53,11 @@ set -xa   #NCO preferred setting
 #   export RUNTYP = conus,conunest2p5, ak,aknest3, hi, pr
 
 # TEMPORARY SWITCH for VADJUST wind terrain adjustment
+# TEMPORARY SWITCH for DIVMIN nondivergent wind adjustment (IDMADJ - Calmet Method)
+# TEMPORARY SWITCH for WNDADJ nondivergent wind adjustment (IWOXADJ - WOX Method)
 export IVADJ=${IVADJ:-T}
+export IDMADJ=${IDMADJ:-F}
+export IWOXADJ=${IWOXADJ:-F}
 
 #Changed to modeld to smartinit to accomodate other models COM)IN dir by using NET
 export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other models with NET
@@ -93,6 +110,7 @@ export KEEPDATA=${KEEPDATA:-NO}
 
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" != nco ];then
+ pwd
  dng_para_config${RUNTYP}   #EMC User set
 fi
 
@@ -120,10 +138,10 @@ export pgmout="OUTPUT.${pid}"
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
-if [ "$envir" != 'prod' ] ; then
-  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
-fi
+#export jlogfile=${jlogfile:-$COMROOTp1/logs/jlogfiles/jlogfile.${job}.$$}
+#if [ "$envir" != 'prod' ] ; then
+#  export jlogfile=${jlogfile:-$COMROOTp1/logs/${envir}/jlogfile}
+#fi
 
 ####################################
 # SENDECF  - Flag Events on ECF
@@ -138,7 +156,7 @@ export SENDDBN=${SENDDBN:-YES}
 # dng = downscaled gridding
 ####################################
 export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
-export HOMEnam=${HOMEnam:-$NWROOTp1/nam.${nam_ver}}
+export HOMEnam=${HOMEnam:-$NWROOT/nam.${nam_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen
@@ -146,34 +164,22 @@ export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
 
-###################################
-# Set up the UTILITIES
-###################################
-#export utilscript=${utilscript:-/nwprod/util/ush}
-#export utilexec=${utilexec:-/nwprod/util/exec}
-#export utilparm=${utilparm:-/nwprod/util/parm}
-#export gespath=${gespath:-/nwges/${envir}}
-export GESIN=${GESIN:-$GESROOTp1/${envir}}
+export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
-. /usrx/local/Modules/default/init/ksh
-module load /nwpara2/modulefiles/util_shared/v1.0.3
-module load grib_util
-
-# use local versions of cnvgrib and wgrib2
-#export WGRIB2=/meso/save/Eric.Rogers/utils/wgrib2_wesley_fornam/wgrib2new
-export WGRIB2=${EXECdng}/smartinit_wgrib2
-export CNVGRIB=${EXECdng}/smartinit_cnvgrib
+export GESIN=${GESIN:-$GESROOT/${envir}}
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
 setpdy.sh
-. PDY  # set local dir for crontab
+# setpdy does not write PDY to a file named PDY on Acorn
+#. PDY  # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST
 if [ -s $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
 .  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+export GUESS=$GUESStm00
 else
    echo  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
    export GUESS=NDAS
@@ -188,13 +194,23 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
-export COM_IN=${COM_IN:-$COMROOTp1/${NET}/${envir}}
-export COM_OUT=${COM_OUT:-$COMROOTp1/${NET}/${envir}}
+#export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
+##export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
+##export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
-export COMIN=$COM_IN/${RUN}.${PDY}
-export COMOUT=$COM_OUT/${RUN}.${PDY}
+#export COMIN=$COM_IN/${RUN}.${PDY}
+#export COMOUT=$COM_OUT/${RUN}.${PDY}
 
-mkdir -p $COMOUT
+#export COMIN=${COMIN:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
+#export COMOUT=${COMOUT:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
+
+export COMIN=${COMIN:-$(compath.py $envir/$NET/${nam_ver})/${RUN}.${PDY}}
+export COMOUT=${COMOUT:-$(compath.py $envir/${NET}/${nam_ver})/${RUN}.${PDY}}
+
+#export COMOUTwmo=$COMOUT/wmo
+export COMOUTwmo=${COMOUTwmo:-${COMOUT}/wmo}
+
+mkdir -p $COMOUT $COMOUTwmo
 cp ${PARMdng}/SMINIT.CTL $DATA
 
 let srefcyc=$cyc-3
@@ -225,17 +241,18 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-/com2/sref/prod}
-export COMIN_SREF=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
-export COMIN_GEFS=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
-
-export PCOM=${PCOM:-$PCOMROOT/${NET}}
-mkdir -p $PCOM
+#export COM_SREF=${COM_SREF:-$(compath.py /sref/prod)}
+export COM_SREF=${COM_SREF:-$(compath.py $envir/sref/${sref_ver})}
+#export COMINsref=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
+export COMINsref=${COMINsref:-${COM_SREF}/sref.${SREF_PDY}/${srefcyc2}/ensprod}
+# I don't think this is used
+export COMINgefs=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
 ####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
-postmsg "$jlogfile" "$msg"
+#postmsg "$jlogfile" "$msg"
+postmsg "$msg"
 
 ########################################################
 # Execute the script.
@@ -244,7 +261,7 @@ ${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
 cat $pgmout
 
 msg="ENDED NORMALLY."
-postmsg "$jlogfile" "$msg"
+postmsg "$msg"
 
 ##############################
 # Remove the Temporary working directory

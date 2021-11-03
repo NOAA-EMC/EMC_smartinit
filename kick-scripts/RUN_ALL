@@ -74,7 +74,7 @@ esac
 #================END User Sets=======================================
 
 export ffhr=$fhrstr
-export DATA_IN=/lfs/h1/emc/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
+export DATA_IN=/lfs/h2/emc/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
 mkdir -p $DATA_IN
 mkdir -p $DATA_IN/list
 

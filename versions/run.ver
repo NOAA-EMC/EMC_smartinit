@@ -1,0 +1,9 @@
+#! /bin/bash
+
+export nam_smartinit_ver=v4.4.0
+export nam_ver=v4.2
+export sref_ver=v7.1
+
+export libjpeg_ver=9c
+export wgrib2_ver=2.0.8
+export grib_util_ver=1.2.2

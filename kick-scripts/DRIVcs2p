@@ -39,14 +39,14 @@ fi
 
 # set job directory needed if running from cron
 #export model_ver=v3.5.1
-export nam_smartinit_ver=v4.3.2
-export code_ver=v4.3.2
+export nam_smartinit_ver=v4.4.0
+export code_ver=v4.4.0
 export which_nam=prod
 export modeld=smartinit
 #export rootd=`cd -`
 #export rootd=`cd .. ; pwd`
 #export rootd=/gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/nwprod/${USER}/${modeld}.${nam_smartinit_ver}
-export rootd=/lfs/h1/emc/da/noscrub/${USER}/nwprod/${modeld}.${nam_smartinit_ver}
+export rootd=/lfs/h2/emc/da/noscrub/${USER}/nwprod/${modeld}.${nam_smartinit_ver}
 echo $rootd
 export RUN_ENVIR=emc
 export envir=emc
@@ -59,12 +59,8 @@ cd $kickd
 # Determine date
 # export PDY=`/nwprod/util/exec/ndate |cut -c 1-8`
   export PDY=`$NDATE |cut -c 1-8`
-#export PDY=20170817 ###TEST
-#export PDY=20170907 ###TEST
-#export PDY=20181129 ###TEST
-#export PDY=20181204 ###TEST
-#export PDY=20190315 ###TEST
 export PDY=20210602 ###TEST
+export PDY=20210825 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -74,7 +70,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=18  #TEST
+export cyc=00  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -92,18 +88,18 @@ echo DRIVER $modeld run CYC $cyc fhr $fhrstr
 domains="priconest aknest3 conusnest2p5 hawaiinest"
 #domains="priconest aknest3 conusnest2p5"
 #domains="hawaiinest"
-#domains="priconest"
+domains="priconest"
 #domains="conusnest2p5"
 #domains="aknest3"
 #====================================================================
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=84
+  export ENDHRS=03
  export mdl=nam
 #  export mdl=namrr
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                          ak_rtmages) ENDHRS=12;;
-                            aknest3) export ENDHRS=60;; 
-                       conusnest2p5) export ENDHRS=60;; 
+                            aknest3) export ENDHRS=03;; 
+                       conusnest2p5) export ENDHRS=03;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
 
@@ -129,8 +125,8 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
 # Create and submit JNAM_SMINIT job
 
   echo `date +%T` SUBMIT RUN_ALL $RUNTYP  CYC $cyc from $fhrstr to $ENDHRS
-  mkdir -p /lfs/h1/emc/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
-  mkdir -p /lfs/h1/emc/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list
-  ${kickd}/RUN_ALL >/lfs/h1/emc/ptmp/$USER/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
+  mkdir -p /lfs/h2/emc/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}
+  mkdir -p /lfs/h2/emc/ptmp/${USER}/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list
+  ${kickd}/RUN_ALL >/lfs/h2/emc/ptmp/$USER/${modeld}.${nam_smartinit_ver}/${PDY}/${cyc}/list/RUNout${modeld}-${RUNTYP}${cyc} 2>&1 &
   sleep 10
 done

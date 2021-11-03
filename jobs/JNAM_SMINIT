@@ -144,14 +144,13 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 
 export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
-export GESIN=${GESIN:-$GESROOT/${envir}}
+#export GESIN=${GESIN:-$GESROOT/${envir}}
+export GESIN=${GESIN:-$(compath.py $envir/$NET/${nam_ver})/nwges}
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
-#setpdy.sh is called setpdy on Acorn
-#setpdy.sh
-setpdy
+setpdy.sh
 # setpdy does not write PDY to a file named PDY on Acorn
 #. PDY  # set local dir for crontab
 
@@ -181,10 +180,14 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 #export COMIN=$COM_IN/${RUN}.${PDY}
 #export COMOUT=$COM_OUT/${RUN}.${PDY}
 
-export COMIN=${COMIN:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
+#export COMIN=${COMIN:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
+#export COMOUT=${COMOUT:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
 
-export COMOUTwmo=$COMOUT/wmo
+export COMIN=${COMIN:-$(compath.py $envir/$NET/${nam_ver})/${RUN}.${PDY}}
+export COMOUT=${COMOUT:-$(compath.py $envir/${NET}/${nam_ver})/${RUN}.${PDY}}
+
+#export COMOUTwmo=$COMOUT/wmo
+export COMOUTwmo=${COMOUTwmo:-${COMOUT}/wmo}
 
 mkdir -p $COMOUT $COMOUTwmo
 cp ${PARMdng}/SMINIT.CTL $DATA
@@ -217,14 +220,18 @@ let gefscyc2=$gefscyc
 if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
 if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
 
-export COM_SREF=${COM_SREF:-$(compath.py /sref/prod)}
-export COMINsref=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
+#export COM_SREF=${COM_SREF:-$(compath.py /sref/prod)}
+export COM_SREF=${COM_SREF:-$(compath.py $envir/sref/${sref_ver})}
+#export COMINsref=$COM_SREF/sref.${SREF_PDY}/${srefcyc2}/ensprod
+export COMINsref=${COMINsref:-${COM_SREF}/sref.${SREF_PDY}/${srefcyc2}/ensprod}
+# I don't think this is used
 export COMINgefs=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
 ####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"
-postmsg "$jlogfile" "$msg"
+#postmsg "$jlogfile" "$msg"
+postmsg "$msg"
 
 ########################################################
 # Execute the script.
@@ -233,7 +240,7 @@ ${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
 cat $pgmout
 
 msg="ENDED NORMALLY."
-postmsg "$jlogfile" "$msg"
+postmsg "$msg"
 
 ##############################
 # Remove the Temporary working directory

@@ -1,0 +1,42 @@
+#%Module######################################################################
+##                                                       Annette.Gibbs@noaa.gov
+##                                                           NOAA/NWS/NCEP/EMC
+## SMARTINIT v4.4.0
+##_____________________________________________________
+proc ModulesHelp { } {
+puts stderr "Set environment veriables for SMARTINIT"
+puts stderr "This module initializes the environment"
+puts stderr "for the Intel Compiler Suite $version\n"
+}
+module-whatis " SMARTINIT whatis description"
+
+set ver v4.4.0
+
+# Loading Intel Compiler Suite
+module load envvar/$::env(envvar_ver)
+module load PrgEnv-intel/$::env(PrgEnv_intel_ver)
+module load intel/$::env(intel_ver)
+module load craype/$::env(craype_ver)
+module load cray-mpich/$::env(cray_mpich_ver)
+
+# Loading nceplibs modules
+module load ip/$::env(ip_ver)
+module load bacio/$::env(bacio_ver)
+module load w3nco/$::env(w3nco_ver)
+
+module load g2/$::env(g2_ver)
+module load g2tmpl/$::env(g2tmpl_ver)
+module load jasper/$::env(jasper_ver)
+module load libpng/$::env(libpng_ver)
+module load zlib/$::env(zlib_ver)
+
+module load bufr/$::env(bufr_ver)
+module load sp/$::env(sp_ver)
+
+setenv COMP ftn 
+setenv COMP_MP ftn
+setenv COMP_MPI ftn
+
+setenv C_COMP cc
+setenv C_COMP_MP cc
+
