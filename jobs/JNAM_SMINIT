@@ -174,7 +174,7 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # USER DEFINES in parm/dng_para_config
 ##############################################
 #export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
-##export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
+export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
 ##export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 #export COMIN=$COM_IN/${RUN}.${PDY}

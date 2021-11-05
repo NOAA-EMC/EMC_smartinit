@@ -1423,3 +1423,40 @@ DELIVERED to NCO - 17 Dec 2019
 IMPLEMENTED -  28 July 2020
 ******************************************************************
 
+******************************************************************
+Smartinit VERS 4.3.1 - Annette Gibbs
+******************************************************************
+
+May 2021
+
+NAM Smartinit changes associated with the RTMA/URMA v2.8.7 upgrade.  The RTMA CONUS land/sea mask and terrain around the Great Salt Lake 
+are updated to better match the lake's current shape.
+
+* Update the CONUS land/sea mask and consensus terrain files and remove unused fixed files from the fix/mask and fix/topo subdirectories.
+
+	-Update the following files:
+
+	fix/mask/nam_smartmaskconus2p5.grb2
+	fix/topo/nam_smarttopoconus2p5.grb2
+
+	-Removed the following unused files:
+
+	fix/mask/nam_smartmaskak.grb2
+	fix/mask/nam_smartmaskconus2p5_EXP.grb2
+	fix/mask/nam_smartmaskconus2p5_EXP_new.grb2
+	fix/mask/nam_smartmaskpr1p25.grb2
+	fix/mask/nam_smartmaskpr1p25.grb2_339x225
+	fix/mask/nam_smartmaskpr2p5.grb2
+	fix/topo/nam_smarttopoak.grb2
+	fix/topo/nam_smarttopoconus2p5_EXP.grb2
+	fix/topo/nam_smarttopoconus2p5_EXP_new.grb2
+	fix/nam/topo/nam_smarttopopr1p25.grb2
+	fix/nam/topo/nam_smarttopopr1p25.grb2_339x225
+	fix/nam/topo/nam_smarttopopr2p5.grb2
+
+******************************************************************
+DELIVERED to NCO -  14 May 2021
+IMPLEMENTED - 23 Jun 2021, 12Z 
+******************************************************************
+
+

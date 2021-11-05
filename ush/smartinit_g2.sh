@@ -397,7 +397,7 @@ for fhr in $hours; do
 # Backup 6 hours
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
-          mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           echo MDLIN $mdlin
           if [ -s ${mdlin}${pcfhr}.tm00 ];then
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
@@ -408,24 +408,14 @@ for fhr in $hours; do
             export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
             cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
           fi
-          cat > itag <<EOF
-${PDY}${cyc}
-EOF
 
-          export pgm=overdateg2
-          . prep_step
-
-          export FORT11=WRFPRS${pcfhr}.tm00
-          export FORT51=WRFPRS${fhr}.tm00
-#         /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
-          $OVERDATEG2 < itag >> $pgmout 2> errfile
+          $WGRIB2 WRFPRS${pcfhr}.tm00 -set_date ${PDY}${cyc} -grib WRFPRS${fhr}.tm00
           export err=$?;err_chk
           rm WRFPRS${pcfhr}.tm00
-          unset pgm
         else
           echo;echo $mdl GUESS= $GUESS
           mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
@@ -472,7 +462,7 @@ fi;;
 # Backup 6 hours
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
 
             if [ -s ${mdlin}${pcfhr}.tm00 ];then
@@ -484,24 +474,14 @@ fi;;
               export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
               echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
               echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-              mdlin=${COMIN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+              mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
               echo MDLIN $mdlin
               cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
             fi
-          cat > itag <<EOF
-${PDY}${cyc}
-EOF
 
-          export pgm=overdateg2
-          . prep_step
-
-          export FORT11=WRFPRS${pcfhr}.tm00
-          export FORT51=WRFPRS${fhr}.tm00
-#         /nwprod/util/exec/overdateg2 < itag >> $pgmout 2> errfile
-          $OVERDATEG2 < itag >> $pgmout 2> errfile
+          $WGRIB2 WRFPRS${pcfhr}.tm00 -set_date ${PDY}${cyc} -grib WRFPRS${fhr}.tm00
           export err=$?;err_chk
           rm WRFPRS${pcfhr}.tm00
-          unset pgm
 
           else
 # Begin wgrib2
@@ -1001,7 +981,8 @@ fi # grib = 1
     mv ${prdgfl}${fhr} meso${rg}.NDFDf${fhr}  
   else
     echo $prdgfl NOT FOUND FOR FORECAST HOUR ${fhr}
-    exit
+    export err=2
+    err_chk
   fi
 # $GRBINDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
   $GRB2INDEX meso${rg}.NDFDf${fhr} meso${rg}.NDFDif${fhr}
