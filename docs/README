@@ -1460,3 +1460,43 @@ IMPLEMENTED - 23 Jun 2021, 12Z
 ******************************************************************
 
 
+******************************************************************
+Smartinit VERS 4.4.0 - Annette Gibbs
+******************************************************************
+
+November 2021
+
+NAM Smartinit changes associated with the WCOSS2 transition
+
+* Added new “versions” sub-directory with two new files “build.ver” and “run.ver”.
+
+	versions/build.ver
+	versions/run.ver
+
+* Adapted COMIN, COM_IN, COMOUT, GESIN, COMINsref to the new filesystem and the use of compath.py.  Removed $jlogfile and replaced $NWROOT with $PACKAGEROOT.
+
+	smartinit.v4.4.0/jobs/JNAM_SMINIT
+
+* Converted modulefile from TCL to LUA format.
+
+	modulefiles/SMARTINIT/4.4.0.lua
+
+* Converted the build scripts to build on WCOSS2 (sourced ../versions/build.ver and loaded LUA modulefile)
+
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
+* Replaced ifort with ftn in the makefiles
+
+	sorc/smartinit_g2.fd/makefile
+	sorc/smartprecip_g2.fd/makefile 
+
+* Replace “mpirun” command with “mpiexec”
+
+	ush/smartinit_g2.sh
+
+******************************************************************
+DELIVERED to NCO -  16 Nov 2021
+IMPLEMENTED - 
+******************************************************************

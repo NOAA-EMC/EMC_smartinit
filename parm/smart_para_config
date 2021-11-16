@@ -126,8 +126,9 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 # Cactus canned data
 ##export COMIN=/lfs/h1/ops/${prodenvir}/com/nam/${nam_ver}/${RUN}.${PDY}
 # Test with Eric's data
-export GESIN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}/nwges
-export COMIN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}/${RUN}.${PDY}
+#export GESIN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}/nwges
+#export COMIN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}/${RUN}.${PDY}
+#export COM_IN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}
 ##export COM_SREF=/lfs/h1/ops/${prodenvir}/com/sref/${sref_ver}
 
 export DATA_IN=/lfs/h2/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc

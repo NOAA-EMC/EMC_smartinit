@@ -110,7 +110,6 @@ export KEEPDATA=${KEEPDATA:-NO}
 
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" != nco ];then
- pwd
  dng_para_config${RUNTYP}   #EMC User set
 fi
 
@@ -155,8 +154,8 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export HOMEdng=${HOMEdng:-$NWROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
-export HOMEnam=${HOMEnam:-$NWROOT/nam.${nam_ver}}
+export HOMEdng=${HOMEdng:-$PACKAGEROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
+export HOMEnam=${HOMEnam:-$PACKAGEROOT/nam.${nam_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
 export EXECnam=${EXECnam:-${HOMEnam}/exec}   #Point to nam_prdgen
@@ -166,14 +165,14 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 
 export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
-export GESIN=${GESIN:-$GESROOT/${envir}}
+#export GESIN=${GESIN:-$GESROOT/${envir}}
+export GESIN=${GESIN:-$(compath.py $envir/$NET/${nam_ver})/nwges}
 
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
 setpdy.sh
-# setpdy does not write PDY to a file named PDY on Acorn
-#. PDY  # set local dir for crontab
+. PDY  # set local dir for crontab
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST
@@ -195,7 +194,8 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # USER DEFINES in parm/dng_para_config
 ##############################################
 #export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
-##export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
+#export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
+export COM_IN=${COM_IN:-$(compath.py $envir/$NET/${nam_ver})}
 ##export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 #export COMIN=$COM_IN/${RUN}.${PDY}
