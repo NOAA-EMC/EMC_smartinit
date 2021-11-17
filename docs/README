@@ -1473,7 +1473,7 @@ NAM Smartinit changes associated with the WCOSS2 transition
 	versions/build.ver
 	versions/run.ver
 
-* Adapted COMIN, COM_IN, COMOUT, GESIN, COMINsref to the new filesystem and the use of compath.py.  Removed $jlogfile and replaced $NWROOT with $PACKAGEROOT.
+* Adapted COMIN, COM_IN, COMOUT, GESIN, COMINsref to the new filesystem and the use of compath.py.  Removed $jlogfile and replaced $NWROOT with $PACKAGEROOT. Replaced “exnam_smartinit.sh.ecf” with “exnam_smartinit.sh”.
 
 	smartinit.v4.4.0/jobs/JNAM_SMINIT
 
@@ -1495,6 +1495,10 @@ NAM Smartinit changes associated with the WCOSS2 transition
 * Replace “mpirun” command with “mpiexec”
 
 	ush/smartinit_g2.sh
+
+* Renamed “exnam_smartinit.sh.ecf” to “exnam_smartinit.sh”.
+
+	scripts/exnam_smartinit.sh
 
 ******************************************************************
 DELIVERED to NCO -  17 Nov 2021

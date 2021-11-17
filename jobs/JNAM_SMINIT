@@ -234,7 +234,7 @@ postmsg "$msg"
 
 ########################################################
 # Execute the script.
-${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh.ecf}
+${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh}
 ########################################################
 cat $pgmout
 
