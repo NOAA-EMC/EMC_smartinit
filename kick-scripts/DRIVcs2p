@@ -40,6 +40,7 @@ fi
 # set job directory needed if running from cron
 #export model_ver=v3.5.1
 export nam_smartinit_ver=v4.4.0
+export smartinit_ver=v4.4
 export code_ver=v4.4.0
 export which_nam=prod
 export modeld=smartinit
@@ -70,7 +71,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-export cyc=18  #TEST
+export cyc=00  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -106,8 +107,8 @@ for RUNTYP in $domains  $domhrw $domdgx ;do
 # Hourly forecasts to 18-h for the parent 12 km, 3 km DONUS nest and 3km Alaska
    if [ $cyc -ne 00 -a $cyc -ne 06 -a $cyc -ne 12 -a $cyc -ne 18 ];then export ENDHRS=18;fi 
 
-  export NET=$mdl
-  export RUN=$NET
+  export NET=smartinit
+  export RUN=$mdl
   export RUNTYP=$RUNTYP
 
 # Remove older directories

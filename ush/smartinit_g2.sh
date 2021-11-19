@@ -259,7 +259,7 @@ echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT MDL DIR : $COMIN
+echo INPUT MDL DIR : $COMINnam
 echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
@@ -391,7 +391,7 @@ for fhr in $hours; do
 # Backup 6 hours
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
-          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+          mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           echo MDLIN $mdlin
           if [ -s ${mdlin}${pcfhr}.tm00 ];then
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
@@ -402,7 +402,7 @@ for fhr in $hours; do
             export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
             cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
           fi
@@ -412,9 +412,9 @@ for fhr in $hours; do
           rm WRFPRS${pcfhr}.tm00
         else
           echo;echo $mdl GUESS= $GUESS
-          mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-#         ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
-#         slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
+          mdlin=$COMINnam/${mdl}.t${cyc}z.${natgrd}
+#         ceil_file=$COMINnam/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
+#         slp_file=$COMINnam/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
 #         if [ -e $ceil_file -a $grib = 1 ];then
 #            wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
@@ -442,12 +442,12 @@ fi;;
 # End wgrib2
 
       wrfprs)  
-        mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
+        mdlin=$COMINnam/${mdlgrd}.t${cyc}z.${natgrd}
         cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00;;
 
            *) 
         if [ $rg = dgx ];then 
-          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z.${natgrd}
+          mdlin=$COMINnam/${mdl}_${mdlgrd}.t${cyc}z.${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
 #         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
@@ -456,7 +456,7 @@ fi;;
 # Backup 6 hours
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
 
             if [ -s ${mdlin}${pcfhr}.tm00 ];then
@@ -468,7 +468,7 @@ fi;;
               export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
               echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
               echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-              mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+              mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
               echo MDLIN $mdlin
               cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
             fi
@@ -480,12 +480,12 @@ fi;;
           else
 # Begin wgrib2
 #            if [ $grib = 2 ];then
-#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMIN/${mdl}.$PDY
+#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMINnam/${mdl}.$PDY
 #            fi
 # End wgrib2
-            mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
-#           ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
-#           slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
+            mdlin=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
+#           ceil_file=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
+#           slp_file=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
 #           if [ -e $ceil_file -a $grib = 1 ];then
 #              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb

@@ -50,5 +50,5 @@ jfhr=$2
 # echo "module load grib_util/1.2.2"               >>bjobcards-dev${RUNTYP}-$jfhr
 
 #cat bjobcards-dev${RUNTYP}-$jfhr  ${jobd}/J${MDL}_SMINIT.test  > J${MDL}_SMINIT.${RUNTYP}
-cat bjobcards-dev${RUNTYP}-$jfhr  ${jobd}/J${MDL}_SMINIT  > J${MDL}_SMINIT.${RUNTYP}
+cat bjobcards-dev${RUNTYP}-$jfhr  ${jobd}/J${MDL}  > J${MDL}.${RUNTYP}
 rm -f bjobcards-dev${RUNTYP}-$jfhr

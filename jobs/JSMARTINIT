@@ -43,7 +43,7 @@ export modeld=${modeld:-smartinit}  #Changed to smartinit to accomodate other mo
 echo cyc is ${cyc:?}
 echo envir is ${envir:?}
 echo modeld is ${modeld:?}
-echo model_ver is ${nam_smartinit_ver:?}
+echo model_ver is ${smartinit_ver:?}
 
 ######################################################
 # The following two variable could be defined in the
@@ -59,7 +59,7 @@ export SENDECF=${SENDECF:-YES}
 # Specify NET and RUN Name and model
 ####################################
 #NCO set NET = nam, dgex or hiresw for GUAM run
-export NET=${NET:-nam}
+export NET=${NET:-smartinit}
 export RUN=${RUN:-nam}
 export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
 export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
@@ -132,7 +132,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 # dng = downscaled gridding
 ####################################
-export HOMEdng=${HOMEdng:-$PACKAGEROOT/${modeld}.${nam_smartinit_ver}}  # NCO preferred
+export HOMEdng=${HOMEsmartinit:-$PACKAGEROOT/${NET}.${smartinit_ver}}  # NCO preferred
 export HOMEnam=${HOMEnam:-$PACKAGEROOT/nam.${nam_ver}}
 
 export EXECdng=${EXECdng:-${HOMEdng}/exec}
@@ -144,7 +144,7 @@ export USHdng=${USHdng:-${HOMEdng}/ush}
 export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
 #export GESIN=${GESIN:-$GESROOT/${envir}}
-export GESIN=${GESIN:-$(compath.py $envir/$NET/${nam_ver})/nwges}
+export GESINnam=${GESINnam:-$(compath.py $envir/nam/${nam_ver})/nwges}
 
 ###########################################
 # Run setpdy and initialize PDY variables
@@ -154,11 +154,11 @@ setpdy.sh
 
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST
-if [ -s $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
-.  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+if [ -s $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
+.  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
 export GUESS=$GUESStm00
 else
-   echo  $GESIN/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
+   echo  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
    export GUESS=NDAS
 fi
 echo GUESS=$GUESS
@@ -173,7 +173,7 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 ##############################################
 #export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 #export COM_IN=${COM_IN:-$(compath.py ${NET}/${envir})}
-export COM_IN=${COM_IN:-$(compath.py $envir/$NET/${nam_ver})}
+export COM_INnam=${COM_INnam:-$(compath.py $envir/nam/${nam_ver})}
 ##export COM_OUT=${COM_OUT:-$COMROOT/${NET}/${envir}}
 
 #export COMIN=$COM_IN/${RUN}.${PDY}
@@ -182,8 +182,8 @@ export COM_IN=${COM_IN:-$(compath.py $envir/$NET/${nam_ver})}
 #export COMIN=${COMIN:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
 #export COMOUT=${COMOUT:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}}
 
-export COMIN=${COMIN:-$(compath.py $envir/$NET/${nam_ver})/${RUN}.${PDY}}
-export COMOUT=${COMOUT:-$(compath.py $envir/${NET}/${nam_ver})/${RUN}.${PDY}}
+export COMINnam=${COMINnam:-$(compath.py $envir/nam/${nam_ver})/${RUN}.${PDY}}
+export COMOUT=${COMOUT:-$(compath.py $envir/${NET}/${smartinit_ver})/${RUN}.${PDY}}
 
 #export COMOUTwmo=$COMOUT/wmo
 export COMOUTwmo=${COMOUTwmo:-${COMOUT}/wmo}
@@ -234,7 +234,7 @@ postmsg "$msg"
 
 ########################################################
 # Execute the script.
-${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}_${modeld}.sh}
+${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}.sh}
 ########################################################
 cat $pgmout
 

@@ -53,8 +53,8 @@ export jobd=${jobd:-`pwd`}
 subint=0                  # flag to submit intermediate hour forecasts (see below)
 
 export INCR=${INCR:-03}
-export MDL=`echo $mdl |tr '[a-z]'  '[A-Z]' `
-export NET=$mdl 
+export MDL=`echo $NET |tr '[a-z]'  '[A-Z]' `
+export NET=smartinit
 if [ $RUNTYP = guam ];then export NET=hiresw;fi
 
 export WALLCLK="000:45:00"  #TEST
@@ -88,7 +88,7 @@ while [ $ffhr -le $ENDHRS ];do
   echo "export cyc=$cyc"        >>$wkdir/dng_para_config${RUNTYP}
   echo "export RM_TMPDIR=NO"    >>$wkdir/dng_para_config${RUNTYP}
   echo "export mdl=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
-  echo "export NET=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
+  echo "export NET=smartinit"   >>$wkdir/dng_para_config${RUNTYP}
   echo "export RUN=$mdl"        >>$wkdir/dng_para_config${RUNTYP}
 
 #TEST ****   cat $cfgdir/smart_para_test  >>$wkdir/dng_para_config${RUNTYP}
@@ -127,7 +127,7 @@ while [ $ffhr -le $ENDHRS ];do
        ${kickd}/cr8bjob $job $fhrnxt
        export cyc
 #module load lsf/10.1
-        qsub J${MDL}_SMINIT.${RUNTYP}
+        qsub J${MDL}.${RUNTYP}
       fi
       ((fhrnxt=fhrnxt+INCR))
       if [ $fhrnxt -lt 10 ];then fhrnxt="0"${fhrnxt};fi
@@ -165,7 +165,7 @@ while [ $ffhr -le $ENDHRS ];do
 #       ${kickd}/cr8bjob_poe $job $ffhr
         ${kickd}/cr8bjob $job $ffhr
 #module load lsf/10.1
-        qsub J${MDL}_SMINIT.${RUNTYP}
+        qsub J${MDL}.${RUNTYP}
         break
       fi
     fi

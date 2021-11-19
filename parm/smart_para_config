@@ -39,8 +39,10 @@ export nam_ver=v4.2
 export sref_ver=v7.1
 export dgex_ver=v3.1.1
 
-export HOMEdng=/lfs/h2/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
-echo HOMEdng $HOMEdng
+#export HOMEdng=/lfs/h2/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
+#echo HOMEdng $HOMEdng
+export HOMEsmartinit=/lfs/h2/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
+echo HOMEsmartinit $HOMEsmartinit
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
 export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
@@ -142,7 +144,8 @@ export DATAROOT=/lfs/h2/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 # Acorn
 #export COMOUT=/lfs/h1/emc/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
 # Cactus
-export COMOUT=/lfs/h2/emc/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
+#export COMOUT=/lfs/h2/emc/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
+export COMOUT=/lfs/h2/emc/ptmp/$USER/${envir}/${NET}/${smartinit_ver}/${RUN}.${PDY}
 #TEST export COM_OUT=/ptmpp2/$USER
 #export pcom=${pcom:-${COM_OUT}/pcom/nam}
 #export PCOM=${PCOM:-${COM_OUT}/pcom/nam}

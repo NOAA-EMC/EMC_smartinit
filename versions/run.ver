@@ -1,6 +1,5 @@
 #! /bin/bash
 
-export nam_smartinit_ver=v4.4.0
 export nam_ver=v4.2
 export sref_ver=v7.1
 
