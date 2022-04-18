@@ -226,6 +226,9 @@ export COMINsref=${COMINsref:-${COM_SREF}/sref.${SREF_PDY}/${srefcyc2}/ensprod}
 # I don't think this is used
 export COMINgefs=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
 
+# email smartinit developer is SREF is delayed and smartinit proceeds without SREF
+export email_SREF="annette.gibbs@noaa.gov"
+
 ####NCO-SET env  
 
 msg="JOB $job HAS BEGUN"

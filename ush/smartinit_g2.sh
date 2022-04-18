@@ -288,9 +288,13 @@ if [ $ffhr -gt ${fhrstr} ]; then
   if [ $rg = gm -o $rg = dgx ]; then
 #   cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
     cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
-  else
+  elif [ -s $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 ];then
 #   cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
     cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
+  else
+    msg="SREF data is late or missing and NAM Smartinit will be run without the SREF file: \
+$COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 "
+    echo "$msg" | mail.py -c ${email_SREF}
   fi
 # $GRBINDEX SREFPROB SREFPROBI
   $GRB2INDEX SREFPROB SREFPROBI
