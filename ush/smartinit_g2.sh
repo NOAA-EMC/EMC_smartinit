@@ -259,7 +259,7 @@ echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT MDL DIR : $COMIN
+echo INPUT MDL DIR : $COMINnam
 echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
@@ -288,9 +288,16 @@ if [ $ffhr -gt ${fhrstr} ]; then
   if [ $rg = gm -o $rg = dgx ]; then
 #   cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
     cp $COMINgefs/${gefscyc}/sref.t${gefscyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
-  else
+  elif [ -s $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 ];then
 #   cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly SREFPROB
     cp $COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 SREFPROB
+  else
+    msg="SREF data is late or missing and NAM Smartinit will be run without the SREF file: \
+$COMINsref/sref.t${srefcyc}z.pgrb${sgrb}.prob_3hrly.grib2 "
+    postmsg "WARNING:  $msg"    
+#   if [ $ffhr -eq 03 ]; then   # f03 only to limit number of emails sent
+#      echo "$msg" | mail.py ${MAILCC:+"-c $MAILCC"}
+#   fi
   fi
 # $GRBINDEX SREFPROB SREFPROBI
   $GRB2INDEX SREFPROB SREFPROBI
@@ -391,7 +398,7 @@ for fhr in $hours; do
 # Backup 6 hours
           echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
           echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr FORECAST;echo
-          mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
+          mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${natgrd}
           echo MDLIN $mdlin
           if [ -s ${mdlin}${pcfhr}.tm00 ];then
             cp ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
@@ -402,7 +409,7 @@ for fhr in $hours; do
             export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
             cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
           fi
@@ -412,9 +419,9 @@ for fhr in $hours; do
           rm WRFPRS${pcfhr}.tm00
         else
           echo;echo $mdl GUESS= $GUESS
-          mdlin=$COMIN/${mdl}.t${cyc}z.${natgrd}
-#         ceil_file=$COMIN/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
-#         slp_file=$COMIN/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
+          mdlin=$COMINnam/${mdl}.t${cyc}z.${natgrd}
+#         ceil_file=$COMINnam/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
+#         slp_file=$COMINnam/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
 #         if [ -e $ceil_file -a $grib = 1 ];then
 #            wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
@@ -442,12 +449,12 @@ fi;;
 # End wgrib2
 
       wrfprs)  
-        mdlin=$COMIN/${mdlgrd}.t${cyc}z.${natgrd}
+        mdlin=$COMINnam/${mdlgrd}.t${cyc}z.${natgrd}
         cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00;;
 
            *) 
         if [ $rg = dgx ];then 
-          mdlin=$COMIN/${mdl}_${mdlgrd}.t${cyc}z.${natgrd}
+          mdlin=$COMINnam/${mdl}_${mdlgrd}.t${cyc}z.${natgrd}
           cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
         else
 #         Check that 00 hr analysis is from NDAS or GDAS (08/2013)
@@ -456,7 +463,7 @@ fi;;
 # Backup 6 hours
             echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
             echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-            mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+            mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
             echo MDLIN $mdlin
 
             if [ -s ${mdlin}${pcfhr}.tm00 ];then
@@ -468,7 +475,7 @@ fi;;
               export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
               echo;echo "WARNING  GUESS = " $GUESS INDICATES $mdl COLD START
               echo USING PREVIOUS $pcdate ${pcyc}Z CYCLE $mdl $pcfhr HR FORECAST
-              mdlin=${COM_IN}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
+              mdlin=${COM_INnam}/${mdl}.${pcdate}/${mdl}.t${pcyc}z.${mdlgrd}${natgrd}
               echo MDLIN $mdlin
               cpreq ${mdlin}${pcfhr}.tm00 WRFPRS${pcfhr}.tm00
             fi
@@ -480,12 +487,12 @@ fi;;
           else
 # Begin wgrib2
 #            if [ $grib = 2 ];then
-#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMIN/${mdl}.$PDY
+#            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMINnam/${mdl}.$PDY
 #            fi
 # End wgrib2
-            mdlin=$COMIN/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
-#           ceil_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
-#           slp_file=$COMIN/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
+            mdlin=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
+#           ceil_file=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
+#           slp_file=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
             cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
 #           if [ -e $ceil_file -a $grib = 1 ];then
 #              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
@@ -860,7 +867,7 @@ $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputs
 $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${fhr}.tm00
 $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
 
-rm wgrib2.poe
+#rm wgrib2.poe
 
 if [ -e model.ndfd_1 ]
 then
@@ -925,24 +932,46 @@ chmod 775 j.poe
 chmod 775 k.poe
 chmod 775 l.poe
 
-echo "-n 1 a.poe" > wgrib2.poe
-echo "-n 1 b.poe" >> wgrib2.poe
-echo "-n 1 c.poe" >> wgrib2.poe
-echo "-n 1 d.poe" >> wgrib2.poe
-echo "-n 1 e.poe" >> wgrib2.poe
-echo "-n 1 f.poe" >> wgrib2.poe
-echo "-n 1 g.poe" >> wgrib2.poe
-echo "-n 1 h.poe" >> wgrib2.poe
-echo "-n 1 i.poe" >> wgrib2.poe
-echo "-n 1 j.poe" >> wgrib2.poe
-echo "-n 1 k.poe" >> wgrib2.poe
-echo "-n 1 l.poe" >> wgrib2.poe
+# mpmd syntax
+#echo "-n 1 ./a.poe" > wgrib2.poe
+#echo "-n 1 ./b.poe" >> wgrib2.poe
+#echo "-n 1 ./c.poe" >> wgrib2.poe
+#echo "-n 1 ./d.poe" >> wgrib2.poe
+#echo "-n 1 ./e.poe" >> wgrib2.poe
+#echo "-n 1 ./f.poe" >> wgrib2.poe
+#echo "-n 1 ./g.poe" >> wgrib2.poe
+#echo "-n 1 ./h.poe" >> wgrib2.poe
+#echo "-n 1 ./i.poe" >> wgrib2.poe
+#echo "-n 1 ./j.poe" >> wgrib2.poe
+#echo "-n 1 ./k.poe" >> wgrib2.poe
+#echo "-n 1 ./l.poe" >> wgrib2.poe
+
+# cfp/serial syntax
+echo "./a.poe" > wgrib2.poe
+echo "./b.poe" >> wgrib2.poe
+echo "./c.poe" >> wgrib2.poe
+echo "./d.poe" >> wgrib2.poe
+echo "./e.poe" >> wgrib2.poe
+echo "./f.poe" >> wgrib2.poe
+echo "./g.poe" >> wgrib2.poe
+echo "./h.poe" >> wgrib2.poe
+echo "./i.poe" >> wgrib2.poe
+echo "./j.poe" >> wgrib2.poe
+echo "./k.poe" >> wgrib2.poe
+echo "./l.poe" >> wgrib2.poe
 
 chmod 775 wgrib2.poe
 #export MP_PGMMODEL=mpmd
 export MP_CMDFILE=wgrib2.poe
-#time mpirun -app $MP_CMDFILE
-time mpirun -configfile $MP_CMDFILE
+
+if [ $CFP = 'YES' ]; then
+  #time mpirun -app $MP_CMDFILE
+  #time mpiexec --cpu-bind core --configfile $MP_CMDFILE
+  time mpiexec -np $NTASKS --cpu-bind core cfp $MP_CMDFILE
+else
+  # serial execution
+  time ./$MP_CMDFILE
+fi
 export err=$?;  err_chk
 
 #cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_6 \

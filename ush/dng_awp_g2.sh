@@ -160,13 +160,13 @@ else
 fi
 
 if [ -s "$awpparm" ];then
-  if [ $SENDDBN = YES ];then #bsm 25 feb 2008 - added code for awips alerts
+  if [ "$SENDDBN" = YES ];then #bsm 25 feb 2008 - added code for awips alerts
     if [ $outreg = ak3 ];then
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
+      $SIPHONROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart3.ak${fhr}_awips_f${fhr}_${cyc}
     elif [ $outreg = pr ];then
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart1p25.${outreg}${fhr}_awips_f${fhr}_${cyc}
+      $SIPHONROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart1p25.${outreg}${fhr}_awips_f${fhr}_${cyc}
     else
-      $DBNROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
+      $SIPHONROOT/bin/dbn_alert NTC_LOW SMART${REGCP} $job ${COMOUTwmo}/grib2.awp${mdl}smart.${outreg}${fhr}_awips_f${fhr}_${cyc}
     fi
   fi
 fi
@@ -174,6 +174,6 @@ fi
 fi # awpchk -eq 0
 fi # RGIN != AKRT
 
-if [ $SENDDBN = YES ];then
-  $DBNROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2 $job $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+if [ "$SENDDBN" = YES ];then
+  $SIPHONROOT/bin/dbn_alert MODEL NAM_SMART${REGCP}_GB2 $job $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi

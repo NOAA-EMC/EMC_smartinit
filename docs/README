@@ -1460,3 +1460,71 @@ IMPLEMENTED - 23 Jun 2021, 12Z
 ******************************************************************
 
 
+******************************************************************
+Smartinit VERS 4.4.0 - Annette Gibbs
+******************************************************************
+
+November 2021
+
+NAM Smartinit changes associated with the WCOSS2 transition
+
+* Additional changes associated with moving Smartinit output data to its own Smartinit output directory (com/smartinit/v4.4).
+
+	-Renamed exnam_smartinit.sh to exsmartinit.sh
+
+		scripts/exsmartinit.sh
+
+	-Renamed JNAM_SMINIT JSMARTINIT
+	-Set NET=smartinit instead of nam
+	-Replaced nam_smartinit_ver with smartinit_ver
+	-Changed GESIN, COM_IN, COMIN to GESINnam, COM_INnam, COMINnam and replaced $NET with nam in its definitions.
+	-Replaced ${nam_ver} with ${smartinit_ver} in the definition of COMOUT.
+	-Changed the name of the ex-script.
+	-Added HOMEsmartinit to the HOMEdng definition.
+
+		jobs/JSMARTINIT
+
+	-Replace all COM_IN and COMIN with COM_INnam and COMINnam in smartinit_g2.sh
+
+		ush/smartinit_g2.sh
+
+	-Removed nam_smartinit_ver=v4.4.0 from versions/run.ver.
+
+		versions/run.ver
+
+* Added new versions sub-directory with two new files build.ver and run.ver.
+
+	versions/build.ver
+	versions/run.ver
+
+* Adapted COMINnam, COM_INnam, COMOUT, GESINnam, COMINsref to the new filesystem and the use of compath.py.  Removed $jlogfile and replaced $NWROOT with $PACKAGEROOT. Replaced exnam_smartinit.sh.ecf with exsmartinit.sh.
+
+	smartinit.v4.4.0/jobs/JNAM_SMINIT
+
+* Converted modulefile from TCL to LUA format.
+
+	modulefiles/SMARTINIT/4.4.0.lua
+
+* Converted the build scripts to build on WCOSS2 (sourced ../versions/build.ver and loaded LUA modulefile)
+
+	sorc/build_smartinit_all.sh
+	sorc/build_smartinit_g2.sh
+	sorc/build_smartprecip_g2.sh
+
+* Replaced ifort with ftn in the makefiles
+
+	sorc/smartinit_g2.fd/makefile
+	sorc/smartprecip_g2.fd/makefile 
+
+* Replaced mpirun command with mpiexec
+
+	ush/smartinit_g2.sh
+
+* Renamed exnam_smartinit.sh.ecf to exsmartinit.sh.
+
+	scripts/exnam_smartinit.sh
+
+******************************************************************
+DELIVERED to NCO -  19 Nov 2021
+IMPLEMENTED - 28 Jun 2022 
+******************************************************************

@@ -5,15 +5,15 @@ export BASE
 
 cd $BASE
 
-mkdir $BASE/logs
+mkdir -p $BASE/logs
 export logs_dir=$BASE/logs
 
-#. /usrx/local/Modules/default/init/ksh
- . /usrx/local/prod/lmod/lmod/init/profile
-module purge
+module reset
 moduledir=`dirname $(readlink -f ../modulefiles/SMARTINIT)`
 module use ${moduledir}
-module load SMARTINIT/v4.3.1
+source ../versions/build.ver
+#module load SMARTINIT/4.4.0.lua
+module load SMARTINIT/$smartinit_ver.lua
 module list
 
 sleep 1

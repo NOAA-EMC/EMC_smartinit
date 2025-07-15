@@ -1,14 +1,12 @@
+set -x
 BASE=`pwd`
 export BASE
 
- . $MODULESHOME/init/bash
-
- . /usrx/local/prod/lmod/lmod/init/profile
-module purge
-module load EnvVars/1.0.2
+module reset
 moduledir=`dirname $(readlink -f ../modulefiles/SMARTINIT)`
 module use ${moduledir}
-module load SMARTINIT/v4.3.1
+source ../versions/build.ver
+module load SMARTINIT/4.4.0.lua
 module list
 
 sleep 1
