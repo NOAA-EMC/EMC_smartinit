@@ -35,13 +35,14 @@ export SENDDBN=NO
 export SENDDBN_GB2=NO
 export DBNROOT=/nwprod/spa_util/para_dbn
 export KEEPDATA=${KEEPDATA:-%KEEPDATA:YES%}
+export rrfs_ver=v1.0
 export nam_ver=v4.2
 export sref_ver=v7.1
 export dgex_ver=v3.1.1
 
 #export HOMEdng=/lfs/h2/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
 #echo HOMEdng $HOMEdng
-export HOMEsmartinit=/lfs/h2/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
+export HOMEsmartinit=/lfs/h2/emc/da/save/$USER/packages/smartinit.${nam_smartinit_ver}             # dng software root dir
 echo HOMEsmartinit $HOMEsmartinit
 export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
 export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
@@ -133,6 +134,8 @@ export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
 #export COM_IN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}
 ##export COM_SREF=/lfs/h1/ops/${prodenvir}/com/sref/${sref_ver}
 
+export COM_INrrfs=/lfs/h2/emc/ptmp/emc.lam/com/rrfs/${rrfs_ver}
+export COMINrrfs=/lfs/h2/emc/ptmp/emc.lam/com/rrfs/${rrfs_ver}/${RUN}.${PDY}
 export DATA_IN=/lfs/h2/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 export DATAROOT=/lfs/h2/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
 

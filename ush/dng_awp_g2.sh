@@ -118,13 +118,16 @@ export FORT51=grib2.t${cyc}z.smart${outreg}f${fhr}
 
 # Define grib2 awips parm file 
 if [ $outreg = conus2p5 ];then
-  awpparm=$PARMdng/wmo/grib2_awp${mdl}dngconus${cyctp}f${fhr}.${ogrd}
+# awpparm=$PARMdng/wmo/grib2_awp${mdl}dngconus${cyctp}f${fhr}.${ogrd}
+  awpparm=$PARMdng/wmo/grib2_awips_${mdl}_smartconus_${cyctp}_f0${fhr}
 elif [ $outreg = ak3 ];then
-  awpparm=$PARMdng/wmo/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
+# awpparm=$PARMdng/wmo/grib2_awp${mdl}dngak${cyctp}f${fhr}.${ogrd}
+  awpparm=$PARMdng/wmo/grib2_awips_${mdl}_smartak_${cyctp}_f0${fhr}
 elif [ $outreg = guam ];then
   awpparm=$UTILdng/parm/grib2_${mdl}_smart${outreg}${cyctp}f${fhr}.${ogrd}
 else
-  awpparm=$PARMdng/wmo/grib2_awp${mdl}dng${outreg}${cyctp}f${fhr}.${ogrd}
+# awpparm=$PARMdng/wmo/grib2_awp${mdl}dng${outreg}${cyctp}f${fhr}.${ogrd}
+  awpparm=$PARMdng/wmo/grib2_awips_${mdl}_smart${outreg}_${cyctp}_f0${fhr}
 fi
 
 if [ -s "$awpparm" ];then

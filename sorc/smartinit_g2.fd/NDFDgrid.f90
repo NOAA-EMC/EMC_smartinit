@@ -335,13 +335,14 @@
 ! --- Base Td on 2m q
         qv = qq/(1.-qq)
 
-! ---   get values at level 6 for lapse rate calculations
-        QQ = Q(I,J,6)/(1.+Q(i,j,6))
+! ---   get values at level 6 for lapse rate calculations - NAM
+! ---   get values at level 8 for lapse rate calculations - RRFS
+        QQ = Q(I,J,8)/(1.+Q(i,j,8))
 
-        exn(i,j) = cpd_p*(pmid(i,j,6)/P1000)**rovcp_p
-        T6=T(I,J,6)
+        exn(i,j) = cpd_p*(pmid(i,j,8)/P1000)**rovcp_p
+        T6=T(I,J,8)
         Z1=HGHT(I,J,1)
-        Z6=HGHT(I,J,6)
+        Z6=HGHT(I,J,8)
 !       Z3=HGHT(I,J,2)
         Z3=HGHT(I,J,1)
         U3=UWND(I,J,1)

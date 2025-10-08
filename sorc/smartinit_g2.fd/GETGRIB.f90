@@ -74,6 +74,8 @@
    INTEGER, INTENT(INOUT) :: ISNOW(:,:),IZR(:,:),IIP(:,:),IRAIN(:,:)
    REAL, allocatable,dimension(:,:) :: RTYPE
 
+   REAL, allocatable,dimension(:,:) :: htagl,mdlsfc
+
 !  TYPE PCPSET, INTENT(INOUT) :: prcp
    REAL,    INTENT(INOUT) :: P03M(:,:),P06M(:,:),P12M(:,:),SN03(:,:),SN06(:,:)
    REAL,    INTENT(INOUT) :: WETFRZ(:,:)
@@ -185,10 +187,36 @@
          else
            LUGP6=15;LUGP6i=16
            LUGS6=17;LUGS6i=18
+           if(ifhr .eq. 6)then
+             LUGP6=11;LUGP6i=12
+             LUGS6=11;LUGS6i=12
+             LUGP3=15;LUGP3i=16
+             LUGS3=17;LUGS3i=18
+           endif
+           if(ifhr .gt. 6)then
+             LUGP6=19;LUGP6i=20
+             LUGS6=21;LUGS6i=22
+             LUGP3=15;LUGP3i=16
+             LUGS3=17;LUGS3i=18
+           endif
+           if(ifhr .eq. 12)then
+             LUGP12=11;LUGP12i=12
+             LUGP6=19;LUGP6i=20
+             LUGS6=21;LUGS6i=22
+             LUGP3=15;LUGP3i=16
+             LUGS3=17;LUGS3i=18
+           endif
+           if(ifhr .gt. 12)then
+             LUGP12=23;LUGP12i=24
+             LUGP6=19;LUGP6i=20
+             LUGS6=21;LUGS6i=22
+             LUGP3=15;LUGP3i=16
+             LUGS3=17;LUGS3i=18
+           endif
          endif
-         IF (trim(CORE).NE.'GFS') THEN
-           LUGP12=19;LUGP12i=20
-         ENDIF
+!        IF (trim(CORE).NE.'GFS') THEN
+!          LUGP12=23;LUGP12i=24
+!        ENDIF
          LHR9=.FALSE.   ! nests have 3 hour precip in std parent grid (01-28-13, JTM)
        else
          IF(LCYCON) THEN 
@@ -219,8 +247,12 @@
 !     FOR 12-hr on-cycle TIMES, WE NEED 3 AND 6-HR BUCKETS AND MAX/MIN TEMP
 !     DATA FOR THE PREVIOUS 11 HOURS
       IF(LHR12) THEN
-       LUGT1=23
-       IF (.not.LCYCON .or. lnest) LUGT1=21
+       if (ifhr .eq. 12) then
+         LUGT1=23
+       else
+         LUGT1=25
+       endif
+!      IF (.not.LCYCON .or. lnest) LUGT1=25
        IF (trim(CORE) .EQ. 'GFS') LUGT1=25
        LUGT2=LUGT1+1
        LUGT3=LUGT1+2
@@ -240,7 +272,11 @@
 
       ELSE IF(LHR6.OR.LHR9) THEN
 !      However Off-Hour cycle runs do not have 6 hour buckets
+        if(ifhr.eq.6)then 
          LUGT1=19; LUGT2=20; LUGT1I=21; LUGT2I=22
+        else
+         LUGT1=23; LUGT2=24; LUGT1I=25; LUGT2I=26
+        endif
          IF(trim(CORE) .EQ. 'GFS') THEN
            LUGT1=23;LUGT2=24; LUGT1I=25; LUGT2I=26
          ENDIF
@@ -251,7 +287,19 @@
        print *,'======================================================='
 
       ELSE IF(LHR3) THEN
-        LUGT1=15;LUGT2=16; LUGT1I=17; LUGT2I=18
+        print*,'in LHR3 loop, LHR3, LHR6, ifhr=',LHR3, LHR6, ifhr
+        if (.not.LHR6.and.ifhr .gt. 3) then
+          LUGT1=19;LUGT2=20; LUGT1I=21; LUGT2I=22
+          print*,'1 LHR3,LHR6,ifhr=',LHR3,LHR6,ifhr
+        elseif(ifhr .gt. 3)then
+          print*,'2 LHR3,LHR6,ifhr=',LHR3,LHR6,ifhr
+          LUGT1=17;LUGT2=18; LUGT1I=19; LUGT2I=20
+!       else if (.not.LHR6) then
+!         LUGT1=19;LUGT2=20; LUGT1I=21; LUGT2I=22
+        else
+          print*,'3 LHR3,LHR6,ifhr=',LHR3,LHR6,ifhr
+          LUGT1=15;LUGT2=16; LUGT1I=17; LUGT2I=18
+        endif
        print *,'================================================================='
        print *, 'Read previous 2 hours of MAX,MIN TEMP ', IFHR,lugt1,lugt2
        print *, 'Read 3 hr prcp from std grid ',lugp3,lugs3
@@ -403,6 +451,8 @@
 
         write(0,*) 'GFLD_S%ibmap: ', GFLD_S%ibmap
 
+      allocate (mdlsfc(imax,jmax))
+      mdlsfc=zsfc
       WHERE (ZSFC < 0.0) ZSFC=0.0
 
         write(0,*) 'minval(zsfc),maxval(zsfc): ', minval(zsfc),maxval(zsfc)
@@ -442,7 +492,8 @@
 
         JPDTN=0
        JPDT(1) = 001
-       JPDT(2) = 195 ! 036
+!      JPDT(2) = 195 ! NAM 
+       JPDT(2) = 036 ! RRFS
        JPDT(10) = 1
         UNPACK=.true.
         J=0
@@ -485,7 +536,8 @@
 
 ! ice pellets
        JPDT(1) = 001
-       JPDT(2) = 194 ! 035
+!      JPDT(2) = 194 ! NAM
+       JPDT(2) = 035 ! RRFS
        JPDT(10) = 1
 
         write(0,*) 'to ice pellets'
@@ -527,7 +579,8 @@
 
 ! frz rain
        JPDT(1) = 001
-       JPDT(2) = 193 ! 034
+!      JPDT(2) = 193 ! NAM
+       JPDT(2) = 034 ! RRFS
        JPDT(10) = 1
 
 !      CALL GETGB2(LUGB,LUGI,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDTN,JGDT, &
@@ -567,7 +620,8 @@
 
 ! rain
        JPDT(1) = 001
-       JPDT(2) = 192 ! 034
+!      JPDT(2) = 192 ! NAM
+       JPDT(2) = 033 ! RRFS
        JPDT(10) = 1
 
 !      CALL GETGB2(LUGB,LUGI,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDTN,JGDT, &
@@ -933,7 +987,8 @@
        JDISC=0
         JPDT=-9999
        JPDT(1) = 7
-       JPDT(2) = 193
+!      JPDT(2) = 193 !NAM bsmart
+       JPDT(2) = 11  !RRFS
        JPDT(10) = -9999
         J=0
       CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
@@ -974,7 +1029,8 @@
        JDISC=0
        JPDTN=8
        JPDT(1) = 1
-       JPDT(2) = 13
+!      JPDT(2) = 13  ! NAM nest WEASD
+       JPDT(2) = 50  ! RRFS TSNOWP
        JPDT(10) = -9999
         J=0
       CALL SETVAR_g2(LUGS3,LUGS3I,NUMVS,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
@@ -1018,7 +1074,8 @@
        JDISC=0
        JPDTN=8
        JPDT(1) = 1
-       JPDT(2) = 13
+!      JPDT(2) = 13 ! NAM WEASD
+       JPDT(2) = 50 ! RRFS TSNOWP
        JPDT(10) = -9999
         J=0
       CALL SETVAR_g2(LUGS3,LUGS3I,NUMVS,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
@@ -1056,7 +1113,8 @@
 
        JPDTN=8
        JPDT(1) = 1
-       JPDT(2) = 13
+!      JPDT(2) = 13 !NAM nest WEASD
+       JPDT(2) = 50 !RRFS TSNOWP
        JPDT(10) = -9999
         J=0
       CALL SETVAR_g2(LUGS6,LUGS6I,NUMVS,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
@@ -1104,6 +1162,8 @@
       CALL SETVAR_g2(LUGT1,LUGT1I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
                      KPDS,KGDS,MASK,GRID,THOLD(:,:,2),GFLD,ISSREF,IRET,ISTAT)
 
+      print*,'inhrfrq,min/max THOLD(:,:,2) ', inhrfrq,minval(THOLD(:,:,2)),MAXVAL(THOLD(:,:,2))
+
 !        print*, 'THOLD(251,100,2): ', THOLD(251,100,2)
 !        print*, 'THOLD(253,131,2): ', THOLD(253,131,2)
 
@@ -1126,6 +1186,7 @@
         J=0
       CALL SETVAR_g2(LUGT1,LUGT1I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
                      KPDS,KGDS,MASK,GRID,DHOLD(:,:,2),GFLD,ISSREF,IRET,ISTAT)
+      print*,'min/max DHOLD(:,:,2) ', minval(DHOLD(:,:,2)),MAXVAL(DHOLD(:,:,2))
 
 !     JPDS=-1;J=0;JPDS(3) = IGDNUMT
 !     JPDS(5) = 11
@@ -1144,6 +1205,8 @@
         J=0
       CALL SETVAR_g2(LUGT2,LUGT2I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
                      KPDS,KGDS,MASK,GRID,THOLD(:,:,3),GFLD,ISSREF,IRET,ISTAT)
+      print*,'min/max THOLD(:,:,3) ', minval(THOLD(:,:,3)),MAXVAL(THOLD(:,:,3))
+
 
 !     JPDS=-1;J=0;JPDS(3) = IGDNUMT
 !     JPDS(5) = 17
@@ -1163,6 +1226,8 @@
         J=0
       CALL SETVAR_g2(LUGT2,LUGT2I,NUMVALT,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,KF,K,&
                      KPDS,KGDS,MASK,GRID,DHOLD(:,:,3),GFLD,ISSREF,IRET,ISTAT)
+      print*,'min/max DHOLD(:,:,3) ', minval(DHOLD(:,:,3)),MAXVAL(DHOLD(:,:,3))
+
 
 ! Get min/max temperature values for full 12-hr period for F12,24...
       IF (LHR12) THEN
@@ -1280,6 +1345,30 @@
         endif
 
       ENDDO
+
+! Calculate height above ground
+
+      allocate (htagl(imax,jmax))
+      do ll=1,kmax
+        rmin=+huge(rmin)
+        rmax=-huge(rmax)
+        sumh=0.0
+        num=0
+        where (.not. validpt) htagl=1.e19
+        where (validpt) htagl=hght(:,:,ll)-mdlsfc
+        do i=1,imax
+        do j=1,jmax
+          if(htagl(i,j) < 1.e19)then
+            if(htagl(i,j) < rmin) rmin=htagl(i,j)
+            if(htagl(i,j) > rmax) rmax=htagl(i,j)
+            num=num+1
+            sumh=sumh+htagl(i,j)
+          endif
+        enddo
+        enddo
+        print*,'LL,sumh,num,imax,jmax,imax*jmax=',LL,sumh,num,imax,jmax,imax*jmax
+        write(6,*) 'min/max/ave of HTAGL: ',LL, rmin, rmax, sumh/real(num)
+      enddo
 
 !   get the vertical profile of temperature
       J=0
@@ -1528,7 +1617,8 @@
 !       JPDS(6) = 200
 !       CALL SETVAR(LUGB,LUGI,NUMVAL,J,JPDS,JGDS,KF, K,KPDS,KGDS,MASK,GRID,REFC,IRET,ISTAT)
        JPDT(1) = 16
-       JPDT(2) = 196
+!      JPDT(2) = 196     ! NAM bsmart
+       JPDT(2) = 5       ! RRFS
        JPDT(10) = -9999
        JPDT(12) = -9999
 
@@ -1751,6 +1841,8 @@
       else
       write(6,*) 'SKIPPED SREF READS'
       endif
+
+      deallocate (mdlsfc,htagl,rtype)
 
       RETURN 
       END SUBROUTINE getgrib

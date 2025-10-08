@@ -24,6 +24,7 @@ set -xa   #NCO preferred setting
 # 2012-12-03  Jeff McQueen  - Adapted for unified smartinit
 # 2013-08-27  Jeff McQueen  - Put in vertical structure     
 # 2016-02-12  Annette Gibbs - Added NCO phase 2 standards
+# 2025-07-18  Annette Gibbs - Replaced NAM/NAM nest with RRFSv1
 
 #  NOTE: cyc, ffhr, RUNTYP must be set from controlling ECFlow script
 #   export cyc = 00,06,12,18
@@ -60,9 +61,9 @@ export SENDECF=${SENDECF:-YES}
 ####################################
 #NCO set NET = nam, dgex or hiresw for GUAM run
 export NET=${NET:-smartinit}
-export RUN=${RUN:-nam}
-export GUESS=${GUESS:-NAM} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
-export mdl=${mdl:-nam}   # Delineates parent model (nam, hiresw,rap,gfs..>)
+export RUN=${RUN:-rrfs}
+export GUESS=${GUESS:-RRFS} # Indicates whether a NAM NDAS or NAM coldstart (GDAS) initial condition (08/2013)
+export mdl=${mdl:-rrfs}   # Delineates parent model (nam, hiresw,rap,gfs..>)
 export KEEPDATA=${KEEPDATA:-NO}
 
 #####################################################################################
@@ -88,7 +89,7 @@ export KEEPDATA=${KEEPDATA:-NO}
 
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
 if [ "$RUN_ENVIR" != nco ];then
- dng_para_config${RUNTYP}   #EMC User set
+ ./dng_para_config${RUNTYP}   #EMC User set
 fi
 
 export PS4='+ $SECONDS + '
@@ -97,7 +98,10 @@ date
 ####################################
 # make temp directory
 ####################################
+echo $DATA 
+echo $DATAROOT
 export DATA=${DATA:-${DATAROOT:?}/${jobid:?}}
+echo $DATA 
 mkdir -p $DATA
 cd $DATA
 
@@ -119,9 +123,9 @@ export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
 
-export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
+#export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
 
-export GESINnam=${GESINnam:-$(compath.py $envir/nam/${nam_ver})/nwges}
+#export GESINnam=${GESINrrfs:-$(compath.py $envir/rrfs/${rrfs_ver})/nwges}
 
 ###########################################
 # Run setpdy and initialize PDY variables
@@ -129,19 +133,20 @@ export GESINnam=${GESINnam:-$(compath.py $envir/nam/${nam_ver})/nwges}
 setpdy.sh
 . ./PDY  # set local dir for crontab
 
+# Do I still need this with RRFS - AMG
 # Set GUESS, CYCLE parameters from NAM run 
 #   For testing cold start export GUESS=GDAS   #TEST
-if [ -s $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
-.  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
-export GUESS=$GUESStm00
-else
-   echo  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
-   export GUESS=NDAS
-fi
+#if [ -s $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
+#.  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
+#export GUESS=$GUESStm00
+#else
+#   echo  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
+#   export GUESS=NDAS
+#fi
 echo GUESS=$GUESS
-export pcfhr=06
-export pcdate=`$NDATE -${pcfhr} $PDY$cyc |cut -c 1-8`
-export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
+#export pcfhr=06
+#export pcdate=`$NDATE -${pcfhr} $PDY$cyc |cut -c 1-8`
+#export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 
 
 ##############################################
@@ -149,8 +154,10 @@ export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
 # USER DEFINES in parm/dng_para_config
 ##############################################
 
-export COM_INnam=${COM_INnam:-$(compath.py $envir/nam/${nam_ver})}
-export COMINnam=${COMINnam:-$(compath.py $envir/nam/${nam_ver})/${RUN}.${PDY}}
+#export COM_INnam=${COM_INnam:-$(compath.py $envir/nam/${nam_ver})}
+export COM_INrrfs=${COM_INrrfs:-$(compath.py $envir/${RUN}/${rrfs_ver})}
+#export COMINnam=${COMINnam:-$(compath.py $envir/nam/${nam_ver})/${RUN}.${PDY}}
+export COMINrrfs=${COMINrrfs:-$(compath.py $envir/${RUN}/${rrfs_ver})/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${smartinit_ver})/${RUN}.${PDY}}
 
 export COMOUTwmo=${COMOUTwmo:-${COMOUT}/wmo}

@@ -13,7 +13,7 @@ jfhr=$2
   echo "#PBS -l walltime=${WALLCLK}"       >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#PBS -A RTMA-DEV"             >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#PBS -q dev"              >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "#PBS -l debug=true"              >>bjobcards-dev${RUNTYP}-$jfhr
+# echo "#PBS -l debug=true"              >>bjobcards-dev${RUNTYP}-$jfhr
   echo "#PBS -V"              >>bjobcards-dev${RUNTYP}-$jfhr
 
 # echo "source /apps/prod/lmodules/startLmod"     >>bjobcards-dev${RUNTYP}-$jfhr
@@ -32,7 +32,7 @@ jfhr=$2
 # echo "module load hpc" >>bjobcards-dev${RUNTYP}-$jfhr
 # echo "module load hpc-intel" >>bjobcards-dev${RUNTYP}-$jfhr
 # echo "module load hpc-cray-mpich" >>bjobcards-dev${RUNTYP}-$jfhr
-  echo "module load wgrib2/2.0.8" >>bjobcards-dev${RUNTYP}-$jfhr
+  echo "module load wgrib2/2.0.8_wmo" >>bjobcards-dev${RUNTYP}-$jfhr
   echo "export  OMP_NUM_THREADS=1" >>bjobcards-dev${RUNTYP}-$jfhr
 # echo "module load cce/11.0.2" >>bjobcards-dev${RUNTYP}-$jfhr
 # echo "module load git/2.29.0" >>bjobcards-dev${RUNTYP}-$jfhr

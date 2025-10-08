@@ -19,6 +19,7 @@
 # 2013-11-20  JTM : Added option to downscale DGEX 3 hrly files beyond 84 hrs w/ 6 hr precip
 # 2014-01-20  JTM : completed option to downscale hiresw guamnmmb, guamarw to 48 hours 
 # 2016-08-24  Annette Gibbs : converted smartinit from GRIB1 to GRIB2; coincide with NAM upgrade
+# 2025-07-18  Annette Gibbs : converted smartinit from NAM/NAMnest; coincide with RRFS implementation
 #======================================================================
 #  Set Defaults fcst hours,cycle,model,region in smart_config_para called in parent job
 
@@ -48,6 +49,8 @@
 set -xa
 
 inest=`echo $RUNTYP|awk '{ print( index($0,"nest") )}' `
+# added inest=1, since all of RRFS smartinit is a nest
+export inest=1
 
 #export grib=1
 export grib=2
@@ -141,18 +144,18 @@ esac
 
 
 case $RUNTYP in
-   conusnest2p5) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723448:2345:2539.703 19.228976:1597:2539.703";;
+   conusnest2p5) natgrd=natlev; mdlgrd=conusnest; rg=con; outreg=conus2p5; wgrib2def="lambert:265:25:25 233.723448:2345:2539.703 19.228976:1597:2539.703";;
    conus) natgrd=bgrd3d; mdlgrd=""; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
    conusnest) natgrd=.bsmart; mdlgrd=conusnest; rg=con; outreg=conus; wgrib2def="lambert:265:25:25 238.450:1073:5079 20.192:689:5079";;
-   hawaiinest) inest=1; rg=hi; natgrd=.bsmart; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
+   hawaiinest) inest=1; rg=hi; natgrd=natlev; mdlgrd=hawaiinest; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
    hi) rg=hi; natgrd=bgrd3d; mdlgrd=""; outreg=hi; wgrib2def="mercator:20 198.474999:321:2500:206.130999 18.072699:225:2500:23.087799";;
 #  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
 #  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.0155 16.828685:129:2500:19.7362";;
 #  priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
-   priconest) inest=1; natgrd=.bsmart; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
+   priconest) inest=1; natgrd=natlev; rg=pr; mdlgrd=priconest; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
 #  pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20 291.804687:177:2500:296.027600 16.828685:129:2500:19.747399";;
    pr) natgrd=bgrd3d; mdlgrd=""; rg=pr; outreg=pr; wgrib2def="mercator:20.000000 291.804700:353:1250.000000:296.015500 16.828700:257:1250.000000:19.736200";;
-   aknest3) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976.563 40.530101:1105:2976.563";;
+   aknest3) natgrd=natlev; mdlgrd=alaskanest; rg=ak3; outreg=ak3; wgrib2def="nps:210:60 181.429:1649:2976.563 40.530101:1105:2976.563";;
    ak) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
    alaskanest) natgrd=.bsmart; mdlgrd=alaskanest; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
    ak_rtmages) natgrd=bgrd3d; mdlgrd=""; rg=ak; outreg=ak; wgrib2def="nps:210:60 181.429:825:5953 40.53:553:5953";;
@@ -246,8 +249,10 @@ if [ $gtyp -ne $ogrd ];then
 fi
 
 # Set NDFD output grid topo and land mask filenames
-maskpre=${mdl}_smartmask${outreg}
-topopre=${mdl}_smarttopo${outreg}
+#maskpre=${mdl}_smartmask${outreg}
+#topopre=${mdl}_smarttopo${outreg}
+maskpre=nam_smartmask${outreg}
+topopre=nam_smarttopo${outreg}
 ext=grb2
 case $RUNTYP in conus|conusnest) ext=dat;; esac
 maskfl=${maskpre}.${ext}
@@ -259,7 +264,7 @@ echo
 echo "============================================================================"
 echo BEGIN SMARTINIT PROCESSING FOR FFHR $ffhr  CYCLE $cyc
 echo RUNTYP:  $RUNTYP mdlgrd: $mdlgrd  rg: $rg
-echo INPUT MDL DIR : $COMINnam
+echo INPUT MDL DIR : $COMINrrfs
 echo INPUT MDL GUESS : $GUESS   NATIVE GRID: $natgrd
 echo INTERP GRID for copygb : $grid
 echo OUTPUT GRID: $ogrd $outreg
@@ -282,7 +287,8 @@ let pcphr3=pcphr-3
 #======================================================================
 
 # fhr should be gt 0 since precip is not available at initial time
-if [ $ffhr -gt ${fhrstr} ]; then
+export havesref=0
+if [ $ffhr -gt ${fhrstr} -a $havesref -eq 1 ]; then
 
 # Get the sref precip fields that we need
   if [ $rg = gm -o $rg = dgx ]; then
@@ -374,11 +380,18 @@ for fhr in $hours; do
   mk3p=0;mk6p=0;mk12p=0
   let check=fhr%3
   let check6=fhr%6
+  if [ $cycon -eq 1 ];then
+    let check12=fhr%12
+  else
+    let check12=$((fhr-18))%12
+  fi
+  echo check check6 check12 $check $check6 $check12
   let fhr1=fhr-1
   let fhr2=fhr-2
   let fhr3=fhr-3
   let fhr6=fhr-6
   let fhr9=fhr-9
+  let fhr12=fhr-12
   if [ $fhr -gt 00 ];then 
    if [ $fhr -lt 10 -a $check -ne 0 ];then fhr="0"${fhr};fi
    if [ $fhr1 -lt 10 ];then fhr1="0"${fhr1};fi
@@ -386,6 +399,7 @@ for fhr in $hours; do
    if [ $fhr3 -lt 10 ];then fhr3="0"${fhr3};fi
    if [ $fhr6 -lt 10 ];then fhr6="0"${fhr6};fi
    if [ $fhr9 -lt 10 ];then fhr9="0"${fhr9};fi
+   if [ $fhr12 -lt 10 ];then fhr12="0"${fhr12};fi
   fi
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9
 
@@ -419,7 +433,7 @@ for fhr in $hours; do
           rm WRFPRS${pcfhr}.tm00
         else
           echo;echo $mdl GUESS= $GUESS
-          mdlin=$COMINnam/${mdl}.t${cyc}z.${natgrd}
+          mdlin=$COMINrrfs/${mdl}.t${cyc}z.${natgrd}.3km.
 #         ceil_file=$COMINnam/${mdl}.t${cyc}z.${ceilmdl}${fhr}${text}
 #         slp_file=$COMINnam/${mdl}.t${cyc}z.${slpmdl}${fhr}${text}
           cp ${mdlin}${fhr}${text} WRFPRS${fhr}.tm00
@@ -490,10 +504,12 @@ fi;;
 #            cp $ERIC_NAM/${mdl}.$PDY/${mdl}.t${cyc}z.${mdlgrd}${natgrd}${fhr}.tm00 $COMINnam/${mdl}.$PDY
 #            fi
 # End wgrib2
-            mdlin=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}${natgrd}
+            mdlin=$COMINrrfs/${cyc}/${mdl}.t${cyc}z.${natgrd}
 #           ceil_file=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}.${ceilmdl}${fhr}${text}
 #           slp_file=$COMINnam/${mdl}.t${cyc}z.${mdlgrd}.${slpmdl}${fhr}${text}
-            cp ${mdlin}${fhr}.tm00 WRFPRS${fhr}.tm00
+            wgrib2 -V $COMINrrfs/${cyc}/${mdl}.t${cyc}z.prslev.3km.f0${fhr}.na.grib2 -match "HGT:cloud ceiling|TCDC:entire|MSLET" -grib prslev_fields${fhr}.grib2
+            cp ${mdlin}.3km.f0${fhr}.na.grib2 WRFPRS${fhr}.tm00
+            cat prslev_fields${fhr}.grib2 >> WRFPRS${fhr}.tm00
 #           if [ -e $ceil_file -a $grib = 1 ];then
 #              wgrib -s $ceil_file | grep "HGT:cloud ceiling" | wgrib -i -grib $ceil_file -o ceiling.grb
 #              cat WRFPRS${fhr}.tm00 ceiling.grb > WRFPRS${fhr}.tm00_withceiling
@@ -526,18 +542,21 @@ fi;;
 
 # sminit_mkprcp.sh ######################################
 #-------------------------------------------------------------
-#   OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
+#   NAM - OFF-CYC & Nests: Create 6/12 hour buckets, 3 hr buckets available
+#   RRFS - OFF-CYC : Create all buckets, only model forecast totals available
 #   ON-CYC :
-#     3hr precip available at only 3,15, 27,39... forcast fhours
+#     NAM 3hr precip available at only 3,15, 27,39... forcast fhours
 #     other hours, create 3 hr precip
 #     6hr precip: Create only at 00/12 UTC valid times 
 #           eg: fhr=12,24,36
 #     Create 12 hour precip at 00/12 UTC valid times
 #-------------------------------------------------------------
     mk3p=0
-    if [ $check6 -eq 0 -a $rg != dgx ];then 
+    if [ $check6 -eq 0 -a $fhr -gt 6 ];then 
+#   if [ $check6 -eq 0 -a $rg != dgx ];then 
       mk6p=6
-      ppgm=add
+#     ppgm=add  #NAM
+      ppgm=make #RRFS
     fi
 #   hr3bkt flag determines when to run smartprecip to create 3 hr buckets
     let hr3bkt=$((fhr-3))%12
@@ -548,14 +567,21 @@ fi;;
 #   since we only gather max/min data at those hours to compute 12 hr max/mins
 #   DGEX has 6 hr precip at 6hr times and 3 hr precip at other times
 #-------------------------------------------------------------
-    if [ $cycon -eq 1 -a $inest -eq 0 ];then
-      if [ $hr3bkt -ne 0 -a $check -eq 0 ];then
+#   if [ $cycon -eq 1 -a $inest -eq 0 ];then
+#   if [ $cycon -eq 1 -a $inest -eq 1 ];then
+    if [ $inest -eq 1 ];then
+#     if [ $hr3bkt -ne 0 -a $check -eq 0 ];then
+      if [ $check -eq 0 -a $fhr -gt 3 ];then
         mk3p=3
         ppgm=make
       fi
-    else
-      hr3bkt=0
-      if [ $rg = dgx -a $check6 -eq 0 ];then mk3p=3;ppgm=make;fi
+      if [ $check12 -eq 0 -a $fhr -gt 12 ];then
+        mk12p=12
+        ppgm=make
+      fi
+#   else
+#     hr3bkt=0
+#     if [ $rg = dgx -a $check6 -eq 0 ];then mk3p=3;ppgm=make;fi
     fi #cycon check
   fi  #fhr -ne 0
 
@@ -573,8 +599,11 @@ fi;;
     else
 #     off-cycles and  Nests have 3 hr buckets but need 6,12 hour precip
       mk6p=6
-      mk12p=12
-      ppgm=add
+      if [ $fhr -gt 12 ];then
+        mk12p=12
+      fi
+#     ppgm=add
+      ppgm=make
       if [ $rg = dgx ];then mk6p=0;fi
     fi;;
   esac 
@@ -602,14 +631,18 @@ fi;;
         $mk6p )
           FHRFRQ=$fhr6;freq=6
           pfhr1=$fhr;pfhr2=$fhr6
-          if [ $ppgm = add ];then 
-            FHRFRQ=$fhr3
-            pfhr1=$fhr3;pfhr2=$fhr
+#         if [ $ppgm = add ];then  # NAM
+          if [ $ppgm = make ];then # RRFS
+            FHRFRQ=$fhr6
+#           pfhr1=$fhr3;pfhr2=$fhr
+            pfhr1=$fhr;pfhr2=$fhr6
           fi;;
 
         $mk12p )
-          FHRFRQ=$fhr9;freq=12
-          pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
+#         FHRFRQ=$fhr9;freq=12
+          FHRFRQ=$fhr12;freq=12
+#         pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
+          pfhr1=$fhr;pfhr2=$fhr12;;
       esac
 # Begin wgrib2
 #     if [ $grib = 2 ];then
@@ -619,7 +652,7 @@ fi;;
 #       cp WRFPRS${fhr}.tm00 WRFPRS${fhr}.tm00.grb2
 #       $CNVGRIB -g21 WRFPRS${fhr}.tm00.grb2 WRFPRS${fhr}.tm00.grb
 #     else
-        cp ${mdlin}${FHRFRQ}${text} WRFPRS${FHRFRQ}.tm00
+        cp ${mdlin}.3km.f0${FHRFRQ}.na.grib2 WRFPRS${FHRFRQ}.tm00
 #     fi
 # End wgrib2
       case $natgrd in bgrd3d) 
@@ -638,40 +671,57 @@ fi;;
       if [ $grib = 2 ];then
 #       $GRBINDEX WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
 # Simple packing for smartprecip
-        $WGRIB2 WRFPRS${fhr}.tm00 -set_grib_type s -grib_out WRFPRS${fhr}.tm00.simple
-        mv WRFPRS${fhr}.tm00.simple WRFPRS${fhr}.tm00
-        $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+#       $WGRIB2 WRFPRS${fhr}.tm00 -set_grib_type s -grib_out WRFPRS${fhr}.tm00.simple
+#       mv WRFPRS${fhr}.tm00.simple WRFPRS${fhr}.tm00
+#       $GRB2INDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
+        if [ $fhr -eq 24 -o $fhr -eq 48 -o $fhr -eq 72 ]; then
+          fday=$((fhr / 24))
+          $WGRIB2 WRFPRS${fhr}.tm00 -match "(APCP|TSNOWP):surface:0-${fday} day acc fcst:" -grib WRFPRS${fhr}.tm00.precip_only
+        else
+          $WGRIB2 WRFPRS${fhr}.tm00 -match "(APCP|TSNOWP):surface:0-${fhr#0} hour acc fcst:" -grib WRFPRS${fhr}.tm00.precip_only
+        fi
+#       mv WRFPRS${fhr}.tm00.precip_only WRFPRS${fhr}.tm00
+        $GRB2INDEX WRFPRS${fhr}.tm00.precip_only WRFPRS${fhr}i.tm00.precip_only
       else
         $GRBINDEX WRFPRS${fhr}.tm00.grb WRFPRS${fhr}i.tm00.grb
 #       $GRBINDEX WRFPRS${fhr}.tm00 WRFPRS${fhr}i.tm00
       fi
 #     $GRBINDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
 # Simple packing for smartprecip
-      $WGRIB2 WRFPRS${FHRFRQ}.tm00 -set_grib_type s -grib_out WRFPRS${FHRFRQ}.tm00.simple
-      mv WRFPRS${FHRFRQ}.tm00.simple WRFPRS${FHRFRQ}.tm00
-      $GRB2INDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+#     $WGRIB2 WRFPRS${FHRFRQ}.tm00 -set_grib_type s -grib_out WRFPRS${FHRFRQ}.tm00.simple
+#     mv WRFPRS${FHRFRQ}.tm00.simple WRFPRS${FHRFRQ}.tm00
+#     $GRB2INDEX WRFPRS${FHRFRQ}.tm00 WRFPRS${FHRFRQ}i.tm00
+        if [ $FHRFRQ -eq 24 -o $FHRFRQ -eq 48 -o $FHRFRQ -eq 72 ]; then
+          fday=$((FHRFRQ / 24))
+          $WGRIB2 WRFPRS${FHRFRQ}.tm00 -match "(APCP|TSNOWP):surface:0-${fday} day acc fcst:" -grib WRFPRS${FHRFRQ}.tm00.precip_only
+        else
+          $WGRIB2 WRFPRS${FHRFRQ}.tm00 -match "(APCP|TSNOWP):surface:0-${FHRFRQ#0} hour acc fcst:" -grib WRFPRS${FHRFRQ}.tm00.precip_only
+        fi
+#     mv WRFPRS${FHRFRQ}.tm00.precip_only WRFPRS${FHRFRQ}.tm00
+      $GRB2INDEX WRFPRS${FHRFRQ}.tm00.precip_only WRFPRS${FHRFRQ}i.tm00.precip_only
 
       export pgm=smartprecip_g2; . prep_step
-      ln -sf "WRFPRS${FHRFRQ}.tm00"  fort.13  
-      ln -sf "WRFPRS${FHRFRQ}i.tm00" fort.14
+      ln -sf "WRFPRS${FHRFRQ}.tm00.precip_only"  fort.13  
+      ln -sf "WRFPRS${FHRFRQ}i.tm00.precip_only" fort.14
 #     if [ $grib = 2 ];then
 #     ln -sf "WRFPRS${fhr}.tm00.grb"     fort.15
 #     ln -sf "WRFPRS${fhr}i.tm00.grb"    fort.16
 #     else
-      ln -sf "WRFPRS${fhr}.tm00"     fort.15
-      ln -sf "WRFPRS${fhr}i.tm00"    fort.16
+      ln -sf "WRFPRS${fhr}.tm00.precip_only"     fort.15
+      ln -sf "WRFPRS${fhr}i.tm00.precip_only"    fort.16
 #     fi
       ln -sf "${freq}precip.${fhr}"  fort.50
       ln -sf "${freq}cprecip.${fhr}" fort.51
       ln -sf "${freq}snow.${fhr}"    fort.52
 
-      if [ $MKPCP -eq $mk12p ];then
+      donotdo=1
+      if [ $MKPCP -eq $mk12p -a $donotdo -eq 0 ];then
 # Begin wgrib2
 #       if [ $grib = 2 ];then
 #         cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00.grb2
 #         $CNVGRIB -g21 WRFPRS${fhr3}.tm00.grb2 WRFPRS${fhr3}.tm00
 #       else
-          cp ${mdlin}${fhr3}${text} WRFPRS${fhr3}.tm00
+          cp ${mdlin}.3km.f0${fhr3}.na.grib2 WRFPRS${fhr3}.tm00
 #       fi
 # End wgrib2
         case $natgrd in bgrd3d) 
@@ -689,16 +739,17 @@ fi;;
         esac
 #       $GRBINDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
 # Simple packing for smartprecip
-        $WGRIB2 WRFPRS${fhr3}.tm00 -set_grib_type s -grib_out WRFPRS${fhr3}.tm00.simple
-        mv WRFPRS${fhr3}.tm00.simple WRFPRS${fhr3}.tm00
-        $GRB2INDEX WRFPRS${fhr3}.tm00 WRFPRS${fhr3}i.tm00
+#       $WGRIB2 WRFPRS${fhr3}.tm00 -set_grib_type s -grib_out WRFPRS${fhr3}.tm00.simple
+        $WGRIB2 WRFPRS${fhr3}.tm00 -match "(APCP|TSNOWP):surface:0-${fhr3#0} hour acc fcst:" -grib WRFPRS${fhr3}.tm00.precip_only
+#       mv WRFPRS${fhr3}.tm00.simple WRFPRS${fhr3}.tm00
+        $GRB2INDEX WRFPRS${fhr3}.tm00.precip_only WRFPRS${fhr3}i.tm00.precip_only
 
 # Begin wgrib2
 #       if [ $grib = 2 ];then
 #         cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00.grb2
 #         $CNVGRIB -g21 WRFPRS${fhr6}.tm00.grb2 WRFPRS${fhr6}.tm00
 #       else
-          cp ${mdlin}${fhr6}${text} WRFPRS${fhr6}.tm00
+          cp ${mdlin}.3km.f0${fhr6}.na.grib2 WRFPRS${fhr6}.tm00
 #       fi
 # End wgrib2
         case $natgrd in bgrd3d) 
@@ -717,20 +768,21 @@ fi;;
         esac
 #       $GRBINDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
 # Simple packing for smartprecip
-          $WGRIB2 WRFPRS${fhr6}.tm00 -set_grib_type s -grib_out WRFPRS${fhr6}.tm00.simple
-          mv WRFPRS${fhr6}.tm00.simple WRFPRS${fhr6}.tm00
-          $GRB2INDEX WRFPRS${fhr6}.tm00 WRFPRS${fhr6}i.tm00
+#         $WGRIB2 WRFPRS${fhr6}.tm00 -set_grib_type s -grib_out WRFPRS${fhr6}.tm00.simple
+          $WGRIB2 WRFPRS${fhr6}.tm00 -match "(APCP|TSNOWP):surface:0-${fhr6#0} hour acc fcst:" -grib WRFPRS${fhr6}.tm00.precip_only
+#         mv WRFPRS${fhr6}.tm00.simple WRFPRS${fhr6}.tm00
+          $GRB2INDEX WRFPRS${fhr6}.tm00.precip_only WRFPRS${fhr6}i.tm00.precip_only
 
-        ln -sf "WRFPRS${fhr6}.tm00"      fort.15    
-        ln -sf "WRFPRS${fhr6}i.tm00"     fort.16
-        ln -sf "WRFPRS${fhr3}.tm00"      fort.17
-        ln -sf "WRFPRS${fhr3}i.tm00"     fort.18
+        ln -sf "WRFPRS${fhr6}.tm00.precip_only"      fort.15    
+        ln -sf "WRFPRS${fhr6}i.tm00.precip_only"     fort.16
+        ln -sf "WRFPRS${fhr3}.tm00.precip_only"      fort.17
+        ln -sf "WRFPRS${fhr3}i.tm00.precip_only"     fort.18
 #     if [ $grib = 2 ];then
 #       ln -sf "WRFPRS${fhr}.tm00.grb"       fort.19
 #       ln -sf "WRFPRS${fhr}i.tm00.grb"      fort.20
 #     else
-        ln -sf "WRFPRS${fhr}.tm00"       fort.19
-        ln -sf "WRFPRS${fhr}i.tm00"      fort.20
+        ln -sf "WRFPRS${fhr}.tm00.precip_only"       fort.19
+        ln -sf "WRFPRS${fhr}i.tm00.precip_only"      fort.20
 #     fi
       fi  # mk12p
 
@@ -835,7 +887,7 @@ rm inputs.grb2_1 inputs.grb2_2 inputs.grb2_3 inputs.grb2_4 inputs.grb2_5 inputs.
 fi
 
 ngrd=$natgrd
-if [ $natgrd = ".bsmart" ];then
+if [ $natgrd = "natlev" ];then
   ngrd=bsmart
 fi
 
@@ -998,7 +1050,8 @@ fi # grib = 1
   fi
   if [ -s $prdgfl ];then  
     echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
-    mv ${prdgfl} meso${rg}.NDFDf${fhr}  
+#   mv ${prdgfl} meso${rg}.NDFDf${fhr}  
+    $WGRIB2 ${prdgfl} -not_if "(APCP|TSNOWP):surface:${fhr1#0}-${fhr#0} hour acc fcst:" -grib meso${rg}.NDFDf${fhr}
   elif [ -s ${prdgfl}${fhr} ];then    # check for hawaii ???
     echo $prdgfl${fhr} FOUND FOR FORECAST HOUR ${fhr}
     mv ${prdgfl}${fhr} meso${rg}.NDFDf${fhr}  
@@ -1032,8 +1085,10 @@ fi # grib = 1
 
   mksmart=1
   if [ $check -eq 0 -a $fhr -ne $fhrstr ];then 
+    if [ $havesref -eq 1 ]; then
     cp srefpcp${rg}_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCP
     cp srefpcp${rg}i_${SREF_PDY}${srefcyc}f0${pcphrl} SREFPCPi
+    fi
     if [ -s MAXMIN${fhr1}.tm00 ];then
       echo MAXMIN${fhr1}.tm00 FOUND
       cp MAXMIN${fhr2}.tm00 MAXMIN2
@@ -1049,7 +1104,11 @@ fi # grib = 1
     $GRB2INDEX MAXMIN1 MAXMIN1i
     $GRB2INDEX MAXMIN2 MAXMIN2i
   fi
-  freq=6;fmx=21   #fmx =  maxmin unit number for 1st maxmin file
+# freq=6;fmx=21   #fmx =  maxmin unit number for 1st maxmin file
+# fmx=21   #fmx =  maxmin unit number for 1st maxmin file
+  if [ $fhr -eq 3 ]; then
+    fmx=15   #fmx =  maxmin unit number for 1st maxmin file
+  fi
   if [ $cycon -eq 1 ];then 
     if [ $inest -eq 0 ];then 
       freq=3;fmx=23
@@ -1060,10 +1119,22 @@ fi # grib = 1
 
   ln -sf "meso${rg}.NDFDf${fhr}"    fort.11
   ln -sf "meso${rg}.NDFDif${fhr}"   fort.12
+  if [ $havesref -eq 1 ]; then
   ln -sf "SREFPCP"                  fort.13
   ln -sf "SREFPCPi"                 fort.14
-  ln -sf "${freq}precip"            fort.15
-  ln -sf "${freq}precipi"           fort.16
+  fi
+  if [ mk3p -ne 0 ]; then
+    ln -sf "3precip"            fort.15
+    ln -sf "3precipi"           fort.16
+    ln -sf "3snow"      fort.17
+    ln -sf "3snowi"     fort.18
+  fi
+  if [ mk6p -ne 0 ]; then
+    ln -sf "6precip"            fort.19
+    ln -sf "6precipi"           fort.20
+    ln -sf "6snow"      fort.21
+    ln -sf "6snowi"     fort.22
+  fi
 
 # At 12-hr times, input 12-hr max/min temps and 3 and 6-hr buckets
   case $fhr in 
@@ -1073,6 +1144,7 @@ fi # grib = 1
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
     if [ $cycon -eq 0 ];then fmx=21;fi
+    if [ $cycon -eq 1 ];then fmx=23;fi
 # Fix bug - ak_rtmages was using files from the ak grid, which is initialized with bsmart and has a bitmap.
 # A. Gibbs 3-15-16
     if [ $RUNTYP = ak_rtmages ];then
@@ -1101,10 +1173,13 @@ fi # grib = 1
       ln -sf "6snowi"    fort.22
     else     
 #     READ 6/12 hr precip from special files created by makeprecip
-      ln -sf "6snow"      fort.17
-      ln -sf "6snowi"     fort.18
-      ln -sf "12precip"   fort.19
-      ln -sf "12precipi"  fort.20
+#     ln -sf "6snow"      fort.17
+#     ln -sf "6snowi"     fort.18
+      if [ $mk3p -ne 0 -a $mk6p -ne 0 -a $mk12p -ne 0 ]; then
+        ln -sf "12precip"   fort.23
+        ln -sf "12precipi"  fort.24
+        fmx=25
+      fi
     fi   
     ln -sf "MAXMIN1"   fort.$fmx
     ln -sf "MAXMIN2"   fort.$((fmx+1))
@@ -1123,18 +1198,19 @@ fi # grib = 1
 #      ON-CYC: All forecast hours divisible by 3 except for (3,15,27....), 
 #      read  3-hr buckets max/min temp data for the previous 2 hours
 #      OFF-CYC: Set input files to read 6 hr prcp from makeprecip files
-       if [ $hr3bkt -ne 0 -o $mk6p -ne 0 ];then
+#      if [ $hr3bkt -ne 0 -o $mk6p -ne 0 ];then
+       if [ $mk3p -ne 0 -a $fhr -ne $fhrstr -a $mk6p -ne 0 ];then
          echo "****************************************************************"
          case $cycon in
           1) echo RUN SMARTINIT for ON-CYC  hrs without 3 hr buckets : $fhr;;
           *) echo RUN SMARTINIT for OFF-CYC hrs without 6 hr buckets : $fhr;;
          esac
-         ln -fs "${freq}snow"  fort.17
-         ln -sf "${freq}snowi" fort.18
-         ln -sf "MAXMIN2"   fort.19
-         ln -sf "MAXMIN1"   fort.20
-         ln -sf "MAXMIN2i"  fort.21
-         ln -sf "MAXMIN1i"  fort.22
+#        ln -fs "${freq}snow"  fort.17
+#        ln -sf "${freq}snowi" fort.18
+         ln -sf "MAXMIN2"   fort.23
+         ln -sf "MAXMIN1"   fort.24
+         ln -sf "MAXMIN2i"  fort.25
+         ln -sf "MAXMIN1i"  fort.26
 
        else           
 #        READ PRECIP FROM INPUT MDL GRIB FILE 
@@ -1144,10 +1220,17 @@ fi # grib = 1
 
          echo "****************************************************"
          echo RUN SMARTINIT for hours with 3 hr buckets: $fhr
-         ln -sf "MAXMIN2"   fort.15
-         ln -sf "MAXMIN1"   fort.16
-         ln -sf "MAXMIN2i"  fort.17
-         ln -sf "MAXMIN1i"  fort.18
+         if [ $fhr -eq 3 ]; then
+           ln -sf "MAXMIN2"   fort.15
+           ln -sf "MAXMIN1"   fort.16
+           ln -sf "MAXMIN2i"  fort.17
+           ln -sf "MAXMIN1i"  fort.18
+         else
+           ln -sf "MAXMIN2"   fort.19
+           ln -sf "MAXMIN1"   fort.20
+           ln -sf "MAXMIN2i"  fort.21
+           ln -sf "MAXMIN1i"  fort.22
+         fi
        fi  
 
      else   # fhr%3 -ne 0

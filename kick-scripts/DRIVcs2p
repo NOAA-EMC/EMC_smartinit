@@ -39,16 +39,16 @@ fi
 
 # set job directory needed if running from cron
 #export model_ver=v3.5.1
-export nam_smartinit_ver=v4.4.0
-export smartinit_ver=v4.4
-export code_ver=v4.4.0
+export nam_smartinit_ver=v5.0.0
+export smartinit_ver=v5.0
+export code_ver=v5.0.0
 export which_nam=prod
 export modeld=smartinit
 #export rootd=`cd -`
 #export rootd=`cd .. ; pwd`
 #export rootd=/gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/nwprod/${USER}/${modeld}.${nam_smartinit_ver}
 #export rootd=/lfs/h2/emc/da/noscrub/${USER}/nwprod/${modeld}.${nam_smartinit_ver}
-export rootd=/lfs/h2/emc/da/save/${USER}/packages/${modeld}.${nam_smartinit_ver}_ops
+export rootd=/lfs/h2/emc/da/save/${USER}/packages/${modeld}.${nam_smartinit_ver}
 echo $rootd
 export RUN_ENVIR=emc
 export envir=emc
@@ -63,6 +63,7 @@ cd $kickd
   export PDY=`$NDATE |cut -c 1-8`
 #xport PDY=20220412 ###TEST
 #export PDY=20210824 ###TEST
+export PDY=20251003 ###TEST
 
 # Determine cycle
 let HH=`date +%H`
@@ -72,7 +73,7 @@ elif [ $HH -le 19 ];then export cyc=12;
 else 
   export cyc=18
 fi 
-#export cyc=18  #TEST
+export cyc=00  #TEST
 domhrw=;
 #TEST case $cyc in 00|12) domhrw="guamnmmb guamarw";;esac
 
@@ -91,23 +92,24 @@ domains="priconest aknest3 conusnest2p5 hawaiinest"
 #domains="priconest aknest3 conusnest2p5"
 #domains="hawaiinest"
 #domains="priconest hawaiinest"
-#domains="priconest"
+#domains="conusnest2p5 aknest3"
 #domains="conusnest2p5"
+#domains="conusnest2p5 hawaiinest"
 #domains="aknest3"
 #====================================================================
 for RUNTYP in $domains  $domhrw $domdgx ;do
-  export ENDHRS=84
- export mdl=nam
+  export ENDHRS=00
+ export mdl=rrfs
 #  export mdl=namrr
   case  $RUNTYP in guamarw|guamnmmb) export ENDHRS=12;export mdl=hiresw;; 
                          ak_rtmages) ENDHRS=12;;
-                            aknest3) export ENDHRS=60;; 
-                       conusnest2p5) export ENDHRS=60;; 
+                            aknest3) export ENDHRS=00;; 
+                       conusnest2p5) export ENDHRS=00;; 
                        dgex) export fhrstr=87; export ENDHRS=192;; 
   esac
 
 # Hourly forecasts to 18-h for the parent 12 km, 3 km DONUS nest and 3km Alaska
-   if [ $cyc -ne 00 -a $cyc -ne 06 -a $cyc -ne 12 -a $cyc -ne 18 ];then export ENDHRS=18;fi 
+   if [ $cyc -ne 00 -a $cyc -ne 06 -a $cyc -ne 12 -a $cyc -ne 18 ];then export ENDHRS=01;fi 
 
   export NET=smartinit
   export RUN=$mdl

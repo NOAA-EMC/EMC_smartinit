@@ -308,7 +308,7 @@
         JPDTN=1
         JPDTN=8
         JPDT=-9999
-        JPDT(2)=13
+        JPDT(2)=50
         JGDTN=-1
         JGDT=-9999
 
@@ -406,7 +406,7 @@
         JIDS=-9999
         JPDTN=8
         JPDT=-9999
-        JPDT(2)=13
+        JPDT(2)=50
         JGDTN=-1
         JGDT=-9999
 
@@ -489,7 +489,7 @@
         JIDS=-9999
         JPDTN=8
         JPDT=-9999
-        JPDT(2)=13
+        JPDT(2)=50
         JGDTN=-1
         JGDT=-9999
 
@@ -571,7 +571,7 @@
         JIDS=-9999
         JPDTN=8
         JPDT=-9999
-        JPDT(2)=13
+        JPDT(2)=50
         JGDTN=-1
         JGDT=-9999
 
@@ -614,6 +614,11 @@
        KPDS(14)=FHR1
        KPDS(15)=FHR2
        print *, 'OUTPUT 3 HR PRECIP: SUB ', FHR1,FHR2, maxval(apcpout)
+       do n=1,numval
+         if(snowout(n) .lt. 0.)then
+           print*,'n, snowout, snow2, snow1,=',n,snowout(n),snow2(n),snow1(n)
+         endif
+       enddo
 
       ELSE
         APCPOUT=APCP2+APCP1
@@ -792,7 +797,7 @@
       WRITE(FNAME(6:7),FMT='(I2)')LUGB7
       CALL BAOPEN(LUGB7,FNAME,IRET)
 !     CALL PUTGB(LUGB7,NUMVAL,KPDS,KGDS,MASK,SNOWOUT,IRET)
-      gfld%ipdtmpl(2)=13
+      gfld%ipdtmpl(2)=50
       gfld%fld=SNOWOUT
       call putgb2(LUGB7,GFLD,IRET)
       CALL BACLOSE(LUGB7,IRET)

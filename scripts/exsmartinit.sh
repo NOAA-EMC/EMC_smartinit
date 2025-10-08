@@ -57,12 +57,12 @@ cd $DATA
 
 # Need to use the NAM parent because NAM nest does not go out to 84 hours
 
-  if [ $ffhr -gt $ENDHR ];then
-    case $RUNTYP in
-         hawaiinest) export RUNTYP=hi;;
-         priconest) export RUNTYP=pr;;
-      esac
-  fi
+# if [ $ffhr -gt $ENDHR ];then
+#   case $RUNTYP in
+#        hawaiinest) export RUNTYP=hi;;
+#        priconest) export RUNTYP=pr;;
+#     esac
+# fi
 
   echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
 ${SMINIT_SSH:-$USHdng/smartinit_g2.sh}

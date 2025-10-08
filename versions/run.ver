@@ -1,6 +1,7 @@
 #! /bin/bash
 
 # Upstream dependencies
+export rrfs_ver=v1.0
 export nam_ver=v4.2
 export sref_ver=v7.1
 
@@ -11,7 +12,7 @@ export craype_ver=2.7.10
 export cray_mpich_ver=8.1.7
 export cray_pals_ver=1.0.12
 export libjpeg_ver=9c
-export wgrib2_ver=2.0.8
+export wgrib2_ver=2.0.8_wmo
 export grib_util_ver=1.2.2
 export cfp_ver=2.0.4
 

@@ -327,6 +327,8 @@
       else
         HAVESREF=1
       endif
+! Set HAVESREF=0; Run w/o SREF
+      HAVESREF=0
       fhrhrly=12
       print*,'CYC, HAVESREF=',cyc, havesref
       if (CORE.eq.'nmmb'.or. CORE.eq.'arw') GDIN%LHIRESW=.true.
@@ -762,7 +764,8 @@
         IF (FHR .EQ. 0) GOTO 444
 ! Skip POP fields for off-cycles of NAMRR
 !       if (cyc .ne. 00 .and. cyc .ne. 06 .and. cyc .ne. 12 .and. cyc .ne.18)goto 444 
-        if (HAVESREF .eq. 0)goto 444
+!       if (HAVESREF .eq. 0)goto 444
+        if (HAVESREF .eq. 1)then
 !         CALL OUTPRCP
 !--------------------------------------------------------------------------
 ! QPF - simply take model QPF and change units to inches
@@ -820,8 +823,10 @@
        CALL set_scale(gfld8, DEC)
        CALL PUTGB2(70,GFLD8,IRET) ! POP3
          ENDIF
-
+       endif ! havesref .eq. 1
 ! ----------------------------------------
+       print *, 'Output 03 hr precip',FHR
+       DEC=3.0
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,P03M)
 
         write(0,*) 'maxval(P03M) at write: ', maxval(P03m)
@@ -849,6 +854,7 @@
 
 ! 6-hr POP
         IF(MOD(FHR,6).EQ.0) THEN
+        if (havesref .eq. 1)then
           CALL MKPOP(PBLMARK,RH,BLI,P6CP01,P6CP10,P12CP01,P12CP10,QPF6,POP6,GDIN,6,VALIDPT)
           WHERE(POP6.LT.POP3) POP6=POP3
           CALL BOUND(POP6,0.,100.)
@@ -881,6 +887,7 @@
        CALL PUTGB2(70,GFLD8,IRET) ! POP6
 
           ENDIF
+       endif ! if havesref .eq. 1
 
 ! Test output SREF PoP > .01"
 !          ID(8)=194;ID(9)=1
@@ -888,6 +895,8 @@
 
 ! ----------------------------------------------------
 
+       print *, 'Output 06 hr precip',FHR
+       DEC=3.0
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,P06M)
 
        GFLD8%discipline=0
@@ -910,6 +919,7 @@
 ! 12-hr POP
        IF (LHR12) THEN
          IF(LCYCON .OR. .NOT.LCYCON.AND.FHR.NE.6) THEN
+         if(havesref .eq. 1) then
            CALL MKPOP(PBLMARK,RH,BLI,P12CP01,P12CP10,P12CP01,P12CP10,QPF12,POP12,GDIN,12,VALIDPT)
            WHERE (POP12.LT.POP6) POP12=POP6
            CALL BOUND(POP12,0.,100.)
@@ -937,7 +947,10 @@
        CALL PUTGB2(70,GFLD8,IRET) ! POP12
 
            ENDIF
+       endif ! if havesref .eq. 1
 
+       print *, 'Output 12 hr precip',FHR
+       DEC=3.0
        CALL FILL_FLD(GFLD8,NUMV,IM,JM,P12M)
 
        GFLD8%discipline=0
@@ -958,6 +971,7 @@
          ENDIF
       ENDIF
 
+      if (havesref .eq. 1) then
       print *, 'Compute GRIDWX',FHR
       ALLOCATE (WXSTRING(IM,JM),GRIDWX(IM,JM),STAT=kret)
       CALL MAKESTRING(IRAIN,ISNOW,IZR,IIP,BLI,POP3,GDIN,WXSTRING,GRIDWX,VALIDPT)
@@ -1024,6 +1038,7 @@
        CALL PUTGB2(70,GFLD8,IRET) ! CWR
 
        ENDIF !if core not equal gfs
+       endif ! if havesref .eq. 1
 !======================================================================
 !--->   COMPUTE SNOWFALL  FOR 3 and 6 HR PERIODS
 !======================================================================
@@ -1215,6 +1230,15 @@
       IF (trim(CORE) .NE. 'dgx' ) THEN
       print*, 'Output Cloud Ceiling Height', FHR
       DEC=-5.0
+! Since RRFS has bitmap for max ceiling height (NAMnest does not), need to set max ceiling height to 20000.01.
+! RRFS bitmap read in as zeroes.
+      DO J=1,JM
+       DO I=1,IM
+         if (ceil(i,j) .eq. 0.) then
+           ceil(i,j) = 20000.01
+         endif
+       enddo
+      enddo
 
        CALL FILL_FLD(GFLD,NUMV,IM,JM,CEIL)
 
@@ -1636,13 +1660,22 @@
        if(validpt(i,j))then
        firetheta=((P1000/PSFC(I,J))**CAPA)*(T2(I,J)+2.0)
        DO L=2,ktop
+!        if(i.eq.244.and.j.eq.46)print*,'l,firetheta,theta,pmid,t,hght=',l,firetheta,theta,pmid(i,k,l),t(i,j,l),hght(i,j,l)
          theta=((P1000/PMID(I,J,L))**CAPA)*(T(I,J,L))
          IF (theta.gt.firetheta) THEN
            MIXHGT(I,J)=HGHT(I,J,L)-ZSFC(I,J)
+!          if(mixhgt(i,j).le.50.0)then
+!            print*,'1 i,j,l,mixhgt,hght,zsfc=',i,j,l,mixhgt(i,j),hght(i,j,l),zsfc(i,j)
+!            print*,'1 firetheta,theta,psfc,pmid,t2,t=',firetheta,theta,psfc(i,j),pmid(i,j,l),t2(i,j),t(i,j,l)
+!            if(t2(i,j).le.t(i,j,1))print*,'inversion - t2(i,j),t(i,j,1),pmid(i,j,1),hght(i,j,1)=',t2(i,j),t(i,j,1),pmid(i,j,1),HGHT(i,j,1)
+!          endif
            GOTO 321
          ENDIF
        ENDDO
        MIXHGT(I,J)=HGHT(I,J,ktop)+300.   ! 07/13: Fix to ensure mixhgt definition
+!          if(mixhgt(i,j).lt.50.0.or.i.eq.244)then
+!            print*,'2 i,j,l,mixhgt,hght,zsfc=',i,j,l,mixhgt(i,j),hght(i,j,ktop),zsfc(i,j)
+!          endif
        endif
  321  continue
       ENDDO
@@ -2816,6 +2849,17 @@
 ! CLOUD CEILING HEIGHT
       IF (trim(GDIN%CORE) .NE. 'dgx') THEN
       print*, 'Output Cloud Ceiling Height', GDIN%FHR
+
+! Since RRFS has bitmap for max ceiling height (NAMnest does not), need to set max ceiling height to 20000.01.
+! RRFS bitmap read in as zeroes.
+      DO J=1,JM
+       DO I=1,IM
+         if (ceil(i,j) .eq. 0.) then
+           ceil(i,j) = 20000.01
+         endif
+       enddo
+      enddo
+      print*,'maxval(CEIL),minval(CEIL): ', maxval(CEIL),minval(CEIL)
 
       DEC=-5.0
        CALL FILL_FLD(GFLD,NUMV,IM,JM,CEIL)
