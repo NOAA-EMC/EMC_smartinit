@@ -2,8 +2,6 @@
 
 # Upstream dependencies
 export rrfs_ver=v1.0
-export nam_ver=v4.2
-export sref_ver=v7.1
 
 # Software
 export PrgEnv_intel_ver=8.1.0
