@@ -30,45 +30,17 @@
 # NOTE: NCO should not run jobs for RUNTYP=ak from 12 - 54/60 hours
 #
 
-#NCO set -xa
-msg="JOB $job HAS BEGUN"
+set -x
+#msg="JOB $job HAS BEGUN"
 #NCO postmsg "$jlogfile" "$msg"
 
 cd $DATA
+cp ${PARMdng}/SMINIT.CTL .
 
-# 00/12 UTC CYCLE smartinit CONFIGURE
-  export ENDHR=60
-  export fhrstr=00
+export fhrstr=00
 
-# For Off-Cycles must stop nest at 54 hours, so that 12-hr totals at
-# f66 aren't split between nest and parent
-  if [ cyc -eq 06 -o cyc -eq 18 ]; then export ENDHR=54;fi
-  case $RUNTYP in
-              ak_rtmages) export ENDHR=12;;
-                 gm|guam) export ENDHR=48;;       
-    conusnest2p5|aknest3) export ENDHR=60;;
-  esac
-
-# For 5 km NAM downscaled NDFD output grids:
-#   Downscale from NAM nest for forecast hrs 03-->54/60
-#   Downscale from MDL NAM parent for forecast hrs=0 and > ENDHR (54/60)
- 
-  case $RUNTYP in gm|guam) export RUNTYP=guamnest;; esac
-
-# Need to use the NAM parent because NAM nest does not go out to 84 hours
-
-# if [ $ffhr -gt $ENDHR ];then
-#   case $RUNTYP in
-#        hawaiinest) export RUNTYP=hi;;
-#        priconest) export RUNTYP=pr;;
-#     esac
-# fi
-
-  echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
-${SMINIT_SSH:-$USHdng/smartinit_g2.sh}
+echo `date +%T` "Submit smartinit" $RUNTYP  CYC=$cyc  FHR=$ffhr 
+$USHdng/smartinit_g2.sh
 
 #####################################################################
 
-echo EXITING $0
-exit
-#

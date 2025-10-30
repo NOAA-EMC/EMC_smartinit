@@ -88,9 +88,6 @@ export KEEPDATA=${KEEPDATA:-NO}
 ###############################################################
 
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi  #Comment out FOR NCO
-if [ "$RUN_ENVIR" != nco ];then
- ./dng_para_config${RUNTYP}   #EMC User set
-fi
 
 export PS4='+ $SECONDS + '
 date
@@ -98,10 +95,7 @@ date
 ####################################
 # make temp directory
 ####################################
-echo $DATA 
-echo $DATAROOT
 export DATA=${DATA:-${DATAROOT:?}/${jobid:?}}
-echo $DATA 
 mkdir -p $DATA
 cd $DATA
 
@@ -123,91 +117,40 @@ export FIXdng=${FIXdng:-${HOMEdng}/fix}
 export PARMdng=${PARMdng:-${HOMEdng}/parm}
 export USHdng=${USHdng:-${HOMEdng}/ush}
 
-#export utilparm=${utilparm:-${HOMEdng}/util/parm}  # grib2 parm files dir
-
-#export GESINnam=${GESINrrfs:-$(compath.py $envir/rrfs/${rrfs_ver})/nwges}
-
 ###########################################
 # Run setpdy and initialize PDY variables
 ###########################################
 setpdy.sh
 . ./PDY  # set local dir for crontab
 
-# Do I still need this with RRFS - AMG
-# Set GUESS, CYCLE parameters from NAM run 
-#   For testing cold start export GUESS=GDAS   #TEST
-#if [ -s $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh ];then
-#.  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh
-#export GUESS=$GUESStm00
-#else
-#   echo  $GESINnam/${RUN}.${PDY}/${RUN}.t${cyc}z.envir.sh NOT FOUND
-#   export GUESS=NDAS
-#fi
-echo GUESS=$GUESS
-#export pcfhr=06
-#export pcdate=`$NDATE -${pcfhr} $PDY$cyc |cut -c 1-8`
-#export pcyc=`$NDATE -${pcfhr} $PDY$cyc |cut -c 9-10`
-
-
 ##############################################
 # Define COM directories
 # USER DEFINES in parm/dng_para_config
 ##############################################
 
-#export COM_INnam=${COM_INnam:-$(compath.py $envir/nam/${nam_ver})}
-export COM_INrrfs=${COM_INrrfs:-$(compath.py $envir/${RUN}/${rrfs_ver})}
-#export COMINnam=${COMINnam:-$(compath.py $envir/nam/${nam_ver})/${RUN}.${PDY}}
+#export COM_INrrfs=${COM_INrrfs:-$(compath.py $envir/${RUN}/${rrfs_ver})}
 export COMINrrfs=${COMINrrfs:-$(compath.py $envir/${RUN}/${rrfs_ver})/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${smartinit_ver})/${RUN}.${PDY}}
 
 export COMOUTwmo=${COMOUTwmo:-${COMOUT}/wmo}
 
 mkdir -p $COMOUT $COMOUTwmo
-cp ${PARMdng}/SMINIT.CTL $DATA
-
-let srefcyc=$cyc-3
-if [ $srefcyc -lt 0 ] ; then
-  let srefcyc=$srefcyc+24
-  export SREF_PDY=$PDYm1
-else
-  export SREF_PDY=$PDY
-fi
-
-let gefscyc=$cyc-6
-if [ $gefscyc -lt 0 ] ; then
-  let gefscyc=$gefscyc+24
-  export GEFS_PDY=$PDYm1
-else
-  export GEFS_PDY=$PDY
-fi
-
-export srefcyc
-let srefcyc2=$srefcyc
-###typeset -Z2 srefcyc2
-
-export gefscyc
-let gefscyc2=$gefscyc
-###typeset -Z2 gefscyc2
-
-#DEV TEST typeset problem
-if [ $srefcyc2 -lt 10 ];then srefcyc2="0"${srefcyc2};fi
-if [ $gefscyc2 -lt 10 ];then gefscyc2="0"${gefscyc2};fi
-
-export COM_SREF=${COM_SREF:-$(compath.py $envir/sref/${sref_ver})}
-export COMINsref=${COMINsref:-${COM_SREF}/sref.${SREF_PDY}/${srefcyc2}/ensprod}
-# I don't think this is used
-export COMINgefs=$COM_SREF/sref.${GEFS_PDY}/ensprod_gefs
-
-####NCO-SET env  
+#cp ${PARMdng}/SMINIT.CTL $DATA
 
 msg="JOB $job HAS BEGUN"
 postmsg "$msg"
 
+env
+
 ########################################################
 # Execute the script.
-${NAM_SMINIT_CONUSSH:-$HOMEdng/scripts/ex${NET}.sh}
+$HOMEdng/scripts/ex${NET}.sh
+export err=$?; err_chk
 ########################################################
-cat $pgmout
+
+if [ -e "$pgmout" ]; then
+  cat $pgmout
+fi
 
 msg="ENDED NORMALLY."
 postmsg "$msg"
@@ -215,8 +158,10 @@ postmsg "$msg"
 ##############################
 # Remove the Temporary working directory
 ##############################
-cd $DATAROOT
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi
+#if [ "${KEEPDATA^^}" != YES ]; then
+#   rm -rf $DATA
+#fi
 
 date
 

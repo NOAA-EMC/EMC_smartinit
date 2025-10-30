@@ -477,7 +477,7 @@
         endif
 
 ! get 4 INTEGER precip types 
-      if (lfull) then
+      if (lfull.and.havesref.eq.1) then
 !     J=0;JPDS=-1;JPDS(3)=IGDNUM 
 !     JPDS(5) = 143 
 !     JPDS(6) = 001
@@ -660,7 +660,9 @@
         enddo
         enddo
 
-      endif !lfull
+        deallocate (rtype)
+
+      endif !lfull and havesref .eq. 1
     
 ! visibility 
 ! Moved to hourly reads for hourly writes for RTMA (03-19-2013) from 00-12 hours
@@ -1842,7 +1844,7 @@
       write(6,*) 'SKIPPED SREF READS'
       endif
 
-      deallocate (mdlsfc,htagl,rtype)
+      deallocate (mdlsfc,htagl)
 
       RETURN 
       END SUBROUTINE getgrib

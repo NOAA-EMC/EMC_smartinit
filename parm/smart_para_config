@@ -1,21 +1,10 @@
 #!/bin/ksh
-# nam_smartinit configuration
-# Jeff McQueen 01/2013 
+# rrfs_smartinit configuration
+# Annette Gibbs
 
-#. /usrx/local/Modules/default/init/ksh
-#. /usrx/local/prod/lmod/lmod/init/profile
-#source /apps/prod/lmodules/startLmod
-#module load prod_util
-#module purge
-#module load envvar/1.0
-
-# OUTPUT REGION TO DOWNSCALE TO
-# valid RUNTYP=conus,ak,hi,pr,conusnest2p5,aknest3,dgex_ak,dgex_cs,guamnmmb,guamarw
-#TEST typeset -Z2 ffhr
 export RUN_ENVIR=dev
 export envir=prod
-#export envir=canned
-export prodenvir=canned # location of nam/sref data: prod, para, test, or canned
+#export prodenvir=canned # location of nam/sref data: prod, para, test, or canned
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -36,120 +25,14 @@ export SENDDBN_GB2=NO
 export DBNROOT=/nwprod/spa_util/para_dbn
 export KEEPDATA=${KEEPDATA:-%KEEPDATA:YES%}
 export rrfs_ver=v1.0
-export nam_ver=v4.2
-export sref_ver=v7.1
-export dgex_ver=v3.1.1
 
-#export HOMEdng=/lfs/h2/emc/da/noscrub/$USER/nwprod/smartinit.${nam_smartinit_ver}             # dng software root dir
-#echo HOMEdng $HOMEdng
-export HOMEsmartinit=/lfs/h2/emc/da/save/$USER/packages/smartinit.${nam_smartinit_ver}             # dng software root dir
+export HOMEsmartinit=/lfs/h2/emc/da/save/$USER/packages/smartinit.${rrfs_smartinit_ver}_test # dng software root dir
 echo HOMEsmartinit $HOMEsmartinit
-export utilparm=$HOMEdng/util/parm  # grib2 parm files dir
-export EXECnam=/nwprod/nam.$nam_ver/exec    # Location of nam_prdgen
-export EXECdgex=/nwprod/dgex.$dgex_ver/exec   # Location of dgex_prdgen
-#export EXEChiresw=/meso/save/Matthew.Pyle/hiresw_vert/exec
-
-#TEST WITH Dana's GFS changes
-#export EXECdng=/global/save/$USER/svn/smartinit/trunk/exec
-
-#export COMROOTp1=${COMROOTp1:-/gpfs/${wd}p1/nco/ops/com}
-#export GESROOTp1=${GESROOTp1:-/gpfs/${wd}p1/nco/ops/nwges}
-#export GESROOT=${GESROOT:-/gpfs/${wd}p2/nco/ops/nwges}
-# Acorn
-#export GESROOT=${GESROOT:-/lfs/h2/emc/da/noscrub/Annette.Gibbs/com/nwges}
-# Cactus
-##export GESROOT=${GESROOT:-/lfs/h1/ops/${prodenvir}/com/nam/${nam_ver}/nwges}
-##export GESIN=$GESROOT
-#export NWROOTp1=/gpfs/${wd}p1/nco/ops/nwprod
-#export NWROOT=/gpfs/${wd}p2/nco/ops/nw${envir}
-#export NWROOT=/gpfs/tp2/nco/ops/nw${envir}
-#export NWROOT=/gpfs/gp2/nco/ops/nw${envir}
-#export PCOMROOT=${PCOMROOT:-/gpfs/${wd}p1/nco/ops/pcom/${envir}}
-#export PCOMROOT=${PCOMROOT:-/gpfs/gp1/nco/ops/pcom/${envir}}
-
-# COMROOT is not defined properly on Venus to phase 2, so redefine it to phase 1 until I get it sorted out
-#xport COMROOT=/gpfs/${wd}p2/nco/ops/com
-#export COMROOT=/gpfs/${wd}p1/nco/ops/com
-#export COMROOT=/gpfs/tp2/nco/ops/com
-#export COMROOT=/gpfs/gp2/nco/ops/com
-#export gespath=/gpfs/${wd}p2/nco/ops/nwges/prod          
-#export gespath=/gpfs/tp2/nco/ops/nwges/prod          
-#export gespath=/gpfs/gp2/nco/ops/nwges/prod          
-## Test with Eric's NAMRR PARA
-#export GESIN=/gpfs/${wd}p2/nco/ops/nwges/prod
-#export GESIN=/gpfs/tp2/nco/ops/nwges/prod
-#export GESIN=/gpfs/gp2/nco/ops/nwges/prod
-#export GESIN=/ptmpd3/Eric.Rogers/nwges/para
-#export GESIN=/com2/nam/para
-#export GESIN=/meso2/noscrub/Eric.Rogers/nwges/para
-#export COM_IN=${COMROOT}/${mdl}/prod 
-
-#TEST WITH Eric's NAM PARA     
-#TEST export COMROOT="/meso/noscrub/Eric.Rogers/com"
-#TEST export gespath=/meso/noscrub/Eric.Rogers/nwges/para
-#TEST export COM_IN=${COMROOT}/${mdl}/paranco    #TEST**********************
-
-## Test with Eric's NAM PARA
-#export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para 
-#export COM_IN=/gpfs/${wd}p2/nco/ops/com/${mdl}/prod
-#export COM_IN=/gpfs/tp2/nco/ops/com/${mdl}/prod
-#export COM_IN=/gpfs/gp2/nco/ops/com/${mdl}/prod
-##export COM_IN=/meso2/noscrub/Annette.Gibbs/com2/${mdl}/prod
-#export COM_IN=/ptmpd3/Eric.Rogers/com/${mdl}/para 
-#export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/para
-#export COM_IN=/meso2/noscrub/Jacob.Carley/com/${mdl}/rt
-#export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/rt
-#if [ $mdl = dgex ]; then
-#export COM_IN=/meso2/noscrub/Eric.Rogers/com/${mdl}/para
-#export COM_IN=/meso2/noscrub/Annette.Gibbs/com/${mdl}/para
-#fi
-## End Test
-
-
-# for dgex downscling thru 192 forecast hours, can use locally created gefs files
-#export COM_SREF=${COMROOT}/sref/prod   
-# new location of SREF
-#export COM_SREF=/gpfs/${wd}p2/nco/ops/com/sref/prod
-#export COM_SREF=/gpfs/tp2/nco/ops/com/sref/prod
-#export COM_SREF=/gpfs/gp2/nco/ops/com/sref/prod
-##export COM_SREF=/meso2/noscrub/Annette.Gibbs/com2/sref/prod
-
-#export COM_IN=/gpfs/dell1/nco/ops/com/nam/para
-# Define COMIN if not using production input files
-#export COMIN=/gpfs/dell1/nco/ops/com/nam/prod
-#export COMSREF=/gpfs/dell2/nco/ops/com/sref/prod
-
-# Acorn
-#export COMIN=/lfs/h1/emc/da/noscrub/$USER/com/${NET}/${envir}/${RUN}.${PDY}
-#export COM_SREF=/lfs/h1/emc/da/noscrub/Annette.Gibbs/com/sref/prod
-
-#export DATA_IN=/lfs/h1/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
-#export DATAROOT=/lfs/h1/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
-
-# Cactus canned data
-##export COMIN=/lfs/h1/ops/${prodenvir}/com/nam/${nam_ver}/${RUN}.${PDY}
-# Test with Eric's data
-#export GESIN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}/nwges
-#export COMIN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}/${RUN}.${PDY}
-#export COM_IN=/lfs/h2/emc/ptmp/Eric.Rogers/canned/com/nam/${nam_ver}
-##export COM_SREF=/lfs/h1/ops/${prodenvir}/com/sref/${sref_ver}
 
 export COM_INrrfs=/lfs/h2/emc/ptmp/emc.lam/com/rrfs/${rrfs_ver}
 export COMINrrfs=/lfs/h2/emc/ptmp/emc.lam/com/rrfs/${rrfs_ver}/${RUN}.${PDY}
-export DATA_IN=/lfs/h2/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
-export DATAROOT=/lfs/h2/emc/ptmp/$USER/smartinit.${nam_smartinit_ver}/$PDY/$cyc
+export DATA_IN=/lfs/h2/emc/ptmp/$USER/smartinit.${rrfs_smartinit_ver}_test/$PDY/$cyc
+export DATAROOT=/lfs/h2/emc/ptmp/$USER/smartinit.${rrfs_smartinit_ver}_test/$PDY/$cyc
 
-# Define COM_SREF if not using production files
-#export COM_SREF=/gpfs/dell2/nco/ops/com/sref/para
-# Define COMIN if not using production input files
-#export COMIN=/gpfs/dell1/nco/ops/com/nam/para
-# Define COMOUT
-# Acorn
-#export COMOUT=/lfs/h1/emc/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
-# Cactus
-#export COMOUT=/lfs/h2/emc/ptmp/$USER/${nam_smartinit_ver}/${RUN}.${PDY}
-export COMOUT=/lfs/h2/emc/ptmp/$USER/${envir}/${NET}/${smartinit_ver}/${RUN}.${PDY}
-#TEST export COM_OUT=/ptmpp2/$USER
-#export pcom=${pcom:-${COM_OUT}/pcom/nam}
-#export PCOM=${PCOM:-${COM_OUT}/pcom/nam}
+export COMOUT=/lfs/h2/emc/ptmp/$USER/${envir}/${NET}/${smartinit_ver}_test/${RUN}.${PDY}
 export jlogfile=${COM_OUT}/jlogfile.`date +%Y%m%d`
