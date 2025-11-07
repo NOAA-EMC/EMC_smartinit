@@ -2,7 +2,7 @@
 
 set -x
 
-export exp="_test"
+export exp="_cfp"
 
 module purge
 module load envvar/1.0
@@ -16,6 +16,7 @@ module load prod_envir/2.0.4
 module load libjpeg/9c
 module load grib_util/1.2.2
 module load wgrib2/2.0.8_wmo
+module load cfp/2.0.4
 
 module use /apps/ops/test/nco/modulefiles
 module load core/rocoto/1.3.5

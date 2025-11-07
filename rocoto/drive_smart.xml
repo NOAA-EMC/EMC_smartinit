@@ -7,13 +7,15 @@
  <!ENTITY rrfs_ver "v1.0">
  <!ENTITY smartinit_ver "v5.0.0">
  <!ENTITY rrfs_smartinit_ver "v5.0">
- <!ENTITY exp "_test">
+ <!ENTITY exp "_cfp">
 
  <!ENTITY HOMEsmartinit "/lfs/h2/emc/da/save/&USER;/packages/smartinit.&smartinit_ver;&exp;">
  <!ENTITY ROCOTO_DIR "&HOMEsmartinit;/rocoto">
  <!ENTITY PTMP_DIR "/lfs/h2/emc/ptmp/&USER;">
  <!ENTITY JOBSdir "&HOMEsmartinit;/jobs">
 
+ <!ENTITY CFP "YES">
+ <!ENTITY NTASKS "12">
  <!ENTITY IVADJ "T">
  <!ENTITY envir "prod">
  <!ENTITY modeld "smartinit">
@@ -31,7 +33,7 @@
  <!ENTITY LOG_DIR "&DATA;/logs">
 
 <!-- ppn=1 for serial and 12 for parallel (cfp) -->
- <!ENTITY RESERVATION '<nodes>1:ppn=1:mem=32GB</nodes><queue>dev</queue><account>&ACCOUNT;</account>'>
+ <!ENTITY RESERVATION '<nodes>1:ppn=&NTASKS;:mem=32GB</nodes><queue>dev</queue><account>&ACCOUNT;</account>'>
  <!ENTITY RESERVATION_TRANSFER '<queue>dev_transfer</queue><account>&ACCOUNT;</account>'>
 
  <!ENTITY SMART_RESOURCES '<walltime>00:30:00</walltime>'>
@@ -81,6 +83,8 @@
         <envar><name>RUN</name><value>&RUN;</value></envar>
         <envar><name>smartinit_ver</name><value>&smartinit_ver;</value></envar>
         <envar><name>KEEPDATA</name><value>&KEEPDATA;</value></envar>
+        <envar><name>CFP</name><value>&CFP;</value></envar>
+        <envar><name>NTASKS</name><value>&NTASKS;</value></envar>
         <envar><name>RUNTYP</name><value>#domain#</value></envar>
         <envar><name>DATA</name><value><cyclestr>&DATA;/data/@Y@m@d/@H/smartinit_#domain#_f#fhr#</cyclestr></value></envar>
         <envar><name>COMOUT</name><value><cyclestr>&COM_OUT;/&RUN;.@Y@m@d</cyclestr></value></envar>
@@ -123,6 +127,8 @@
         <envar><name>RUN</name><value>&RUN;</value></envar>
         <envar><name>smartinit_ver</name><value>&smartinit_ver;</value></envar>
         <envar><name>KEEPDATA</name><value>&KEEPDATA;</value></envar>
+        <envar><name>CFP</name><value>&CFP;</value></envar>
+        <envar><name>NTASKS</name><value>&NTASKS;</value></envar>
         <envar><name>RUNTYP</name><value>#domain#</value></envar>
         <envar><name>DATA</name><value><cyclestr>&DATA;/data/@Y@m@d/@H/smartinit_#domain#_f#fhr#</cyclestr></value></envar>
         <envar><name>COMOUT</name><value><cyclestr>&COM_OUT;/&RUN;.@Y@m@d</cyclestr></value></envar>
@@ -168,6 +174,8 @@
         <envar><name>RUN</name><value>&RUN;</value></envar>
         <envar><name>smartinit_ver</name><value>&smartinit_ver;</value></envar>
         <envar><name>KEEPDATA</name><value>&KEEPDATA;</value></envar>
+        <envar><name>CFP</name><value>&CFP;</value></envar>
+        <envar><name>NTASKS</name><value>&NTASKS;</value></envar>
         <envar><name>RUNTYP</name><value>#domain#</value></envar>
         <envar><name>DATA</name><value><cyclestr>&DATA;/data/@Y@m@d/@H/smartinit_#domain#_f#fhr#</cyclestr></value></envar>
         <envar><name>COMOUT</name><value><cyclestr>&COM_OUT;/&RUN;.@Y@m@d</cyclestr></value></envar>
@@ -215,6 +223,8 @@
         <envar><name>RUN</name><value>&RUN;</value></envar>
         <envar><name>smartinit_ver</name><value>&smartinit_ver;</value></envar>
         <envar><name>KEEPDATA</name><value>&KEEPDATA;</value></envar>
+        <envar><name>CFP</name><value>&CFP;</value></envar>
+        <envar><name>NTASKS</name><value>&NTASKS;</value></envar>
         <envar><name>RUNTYP</name><value>#domain#</value></envar>
         <envar><name>DATA</name><value><cyclestr>&DATA;/data/@Y@m@d/@H/smartinit_#domain#_f#fhr#</cyclestr></value></envar>
         <envar><name>COMOUT</name><value><cyclestr>&COM_OUT;/&RUN;.@Y@m@d</cyclestr></value></envar>
