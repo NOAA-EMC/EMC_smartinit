@@ -7,7 +7,7 @@
  <!ENTITY rrfs_ver "v1.0">
  <!ENTITY smartinit_ver "v5.0.0">
  <!ENTITY rrfs_smartinit_ver "v5.0">
- <!ENTITY exp "_cfp">
+ <!ENTITY exp "">
 
  <!ENTITY HOMEsmartinit "/lfs/h2/emc/da/save/&USER;/packages/smartinit.&smartinit_ver;&exp;">
  <!ENTITY ROCOTO_DIR "&HOMEsmartinit;/rocoto">
@@ -15,7 +15,7 @@
  <!ENTITY JOBSdir "&HOMEsmartinit;/jobs">
 
  <!ENTITY CFP "YES">
- <!ENTITY NTASKS "12">
+ <!ENTITY NTASKS "24">
  <!ENTITY IVADJ "T">
  <!ENTITY envir "prod">
  <!ENTITY modeld "smartinit">
@@ -33,7 +33,7 @@
  <!ENTITY LOG_DIR "&DATA;/logs">
 
 <!-- ppn=1 for serial and 12 for parallel (cfp) -->
- <!ENTITY RESERVATION '<nodes>1:ppn=&NTASKS;:mem=32GB</nodes><queue>dev</queue><account>&ACCOUNT;</account>'>
+ <!ENTITY RESERVATION '<nodes>1:ppn=&NTASKS;:mem=500GB</nodes><queue>dev</queue><account>&ACCOUNT;</account>'>
  <!ENTITY RESERVATION_TRANSFER '<queue>dev_transfer</queue><account>&ACCOUNT;</account>'>
 
  <!ENTITY SMART_RESOURCES '<walltime>00:30:00</walltime>'>
@@ -69,7 +69,6 @@
         <jobname>smartinit_#domain#_f#fhr#</jobname>
 
         <envar><name>HOMEsmartinit</name><value>&HOMEsmartinit;</value></envar>
-<!--    <envar><name>COM_INrrfs</name><value>&COM_INrrfs;</value></envar> -->
         <envar><name>COMINrrfs</name><value><cyclestr>&COM_INrrfs;/&RUN;.@Y@m@d</cyclestr></value></envar>
         <envar><name>USER</name><value>&USER;</value></envar>
         <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
@@ -113,7 +112,6 @@
         <jobname>smartinit_#domain#_f#fhr#</jobname>
 
         <envar><name>HOMEsmartinit</name><value>&HOMEsmartinit;</value></envar>
-<!--    <envar><name>COM_INrrfs</name><value>&COM_INrrfs;</value></envar> -->
         <envar><name>COMINrrfs</name><value><cyclestr>&COM_INrrfs;/&RUN;.@Y@m@d</cyclestr></value></envar>
         <envar><name>USER</name><value>&USER;</value></envar>
         <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
@@ -160,7 +158,6 @@
         <jobname>smartinit_#domain#_f#fhr#</jobname>
 
         <envar><name>HOMEsmartinit</name><value>&HOMEsmartinit;</value></envar>
-<!--    <envar><name>COM_INrrfs</name><value>&COM_INrrfs;</value></envar> -->
         <envar><name>COMINrrfs</name><value><cyclestr>&COM_INrrfs;/&RUN;.@Y@m@d</cyclestr></value></envar>
         <envar><name>USER</name><value>&USER;</value></envar>
         <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
@@ -209,7 +206,6 @@
         <jobname>smartinit_#domain#_f#fhr#</jobname>
 
         <envar><name>HOMEsmartinit</name><value>&HOMEsmartinit;</value></envar>
-<!--    <envar><name>COM_INrrfs</name><value>&COM_INrrfs;</value></envar> -->
         <envar><name>COMINrrfs</name><value><cyclestr>&COM_INrrfs;/&RUN;.@Y@m@d</cyclestr></value></envar>
         <envar><name>USER</name><value>&USER;</value></envar>
         <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
