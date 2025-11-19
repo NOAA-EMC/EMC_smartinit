@@ -2,7 +2,7 @@
 
 set -x
 
-export exp="_cfp"
+export exp=""
 
 module purge
 module load envvar/1.0

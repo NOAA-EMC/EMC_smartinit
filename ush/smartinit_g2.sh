@@ -253,39 +253,16 @@ for fhr in $hours; do
 #   For in-between fhrs (22,23,25) --> Create 3-hr buckets
 #   since we only gather max/min data at those hours to compute 12 hr max/mins
 #-------------------------------------------------------------
-    if [ $inest -eq 1 ];then
-      if [ $check -eq 0 -a $fhr -gt 3 ];then
-        mk3p=3
-        ppgm=make
-      fi
-      if [ $check12 -eq 0 -a $fhr -gt 12 ];then
-        mk12p=12
-        ppgm=make
-      fi
-    fi #cycon check #RRFS inest check
+#-------------------------------------------------------------
+    if [ $check -eq 0 -a $fhr -gt 3 ];then
+      mk3p=3
+      ppgm=make
+    fi
+    if [ $check12 -eq 0 -a $fhr -gt 12 ];then
+      mk12p=12
+      ppgm=make
+    fi
   fi  #fhr -ne 0
-
-#-------------------------------------------------------------
-# ON-CYCLE:  At 12-hr times:  Need 6 hour buckets as well
-# Except for 6 hr times (18,30,42...) : Already have 6 hour buckets
-# In addition, For 00/12 UTC valid times: Need to make 12 hour accumulations
-#-------------------------------------------------------------
-  case $fhr in 
-    ${A6HR[0]}|${A6HR[1]}|${A6HR[2]}|${A6HR[3]}|${A6HR[4]}|${A6HR[5]}|${A6HR[6]}| \
-    ${A6HR[7]}|${A6HR[8]} )
-    if [ $cycon -eq 1 -a inest -eq 0 ];then
-      mk6p=6
-      ppgm=make
-    else
-#     off-cycles and  Nests have 3 hr buckets but need 6,12 hour precip
-      mk6p=6
-      if [ $fhr -gt 12 ];then
-        mk12p=12
-      fi
-#     ppgm=add
-      ppgm=make
-    fi;;
-  esac 
 
   echo MKPCP Flags: MK3P $mk3p   MK6P $mk6p   MK12P $mk12p
   for MKPCP in $mk3p $mk6p $mk12p;do
@@ -301,35 +278,27 @@ for fhr in $hours; do
 
         $mk6p )
           FHRFRQ=$fhr6;freq=6
-          pfhr1=$fhr;pfhr2=$fhr6
-#         if [ $ppgm = add ];then  # NAM
-          if [ $ppgm = make ];then # RRFS
-            FHRFRQ=$fhr6
-#           pfhr1=$fhr3;pfhr2=$fhr
-            pfhr1=$fhr;pfhr2=$fhr6
-          fi;;
+          pfhr1=$fhr;pfhr2=$fhr6;;
 
         $mk12p )
-#         FHRFRQ=$fhr9;freq=12
           FHRFRQ=$fhr12;freq=12
-#         pfhr1=$fhr9;pfhr2=$fhr6;pfhr3=$fhr3;pfhr4=$fhr;;
           pfhr1=$fhr;pfhr2=$fhr12;;
       esac
       cp ${mdlin}.3km.f0${FHRFRQ}.na.grib2 WRFPRS${FHRFRQ}.tm00
 
-        if [ $fhr -eq 24 -o $fhr -eq 48 -o $fhr -eq 72 ]; then
-          fday=$((fhr / 24))
-          $WGRIB2 WRFPRS${fhr}.tm00 -match "(APCP|TSNOWP):surface:0-${fday} day acc fcst:" -grib WRFPRS${fhr}.tm00.precip_only
-        else
-          $WGRIB2 WRFPRS${fhr}.tm00 -match "(APCP|TSNOWP):surface:0-${fhr#0} hour acc fcst:" -grib WRFPRS${fhr}.tm00.precip_only
-        fi
-        $GRB2INDEX WRFPRS${fhr}.tm00.precip_only WRFPRS${fhr}i.tm00.precip_only
-        if [ $FHRFRQ -eq 24 -o $FHRFRQ -eq 48 -o $FHRFRQ -eq 72 ]; then
-          fday=$((FHRFRQ / 24))
-          $WGRIB2 WRFPRS${FHRFRQ}.tm00 -match "(APCP|TSNOWP):surface:0-${fday} day acc fcst:" -grib WRFPRS${FHRFRQ}.tm00.precip_only
-        else
-          $WGRIB2 WRFPRS${FHRFRQ}.tm00 -match "(APCP|TSNOWP):surface:0-${FHRFRQ#0} hour acc fcst:" -grib WRFPRS${FHRFRQ}.tm00.precip_only
-        fi
+      if [ $fhr -eq 24 -o $fhr -eq 48 -o $fhr -eq 72 ]; then
+        fday=$((fhr / 24))
+        $WGRIB2 WRFPRS${fhr}.tm00 -match "(APCP|TSNOWP):surface:0-${fday} day acc fcst:" -grib WRFPRS${fhr}.tm00.precip_only
+      else
+        $WGRIB2 WRFPRS${fhr}.tm00 -match "(APCP|TSNOWP):surface:0-${fhr#0} hour acc fcst:" -grib WRFPRS${fhr}.tm00.precip_only
+      fi
+      $GRB2INDEX WRFPRS${fhr}.tm00.precip_only WRFPRS${fhr}i.tm00.precip_only
+      if [ $FHRFRQ -eq 24 -o $FHRFRQ -eq 48 -o $FHRFRQ -eq 72 ]; then
+        fday=$((FHRFRQ / 24))
+        $WGRIB2 WRFPRS${FHRFRQ}.tm00 -match "(APCP|TSNOWP):surface:0-${fday} day acc fcst:" -grib WRFPRS${FHRFRQ}.tm00.precip_only
+      else
+        $WGRIB2 WRFPRS${FHRFRQ}.tm00 -match "(APCP|TSNOWP):surface:0-${FHRFRQ#0} hour acc fcst:" -grib WRFPRS${FHRFRQ}.tm00.precip_only
+      fi
       $GRB2INDEX WRFPRS${FHRFRQ}.tm00.precip_only WRFPRS${FHRFRQ}i.tm00.precip_only
 
       export pgm=smartprecip_g2; . prep_step
@@ -338,7 +307,7 @@ for fhr in $hours; do
       ln -sf "WRFPRS${fhr}.tm00.precip_only"     fort.15
       ln -sf "WRFPRS${fhr}i.tm00.precip_only"    fort.16
       ln -sf "${freq}precip.${fhr}"  fort.50
-      ln -sf "${freq}cprecip.${fhr}" fort.51
+#     ln -sf "${freq}cprecip.${fhr}" fort.51
       ln -sf "${freq}snow.${fhr}"    fort.52
 
 #===============================================================
@@ -361,129 +330,171 @@ EOF
 
 # Begin bi-linear interpolation to NDFD grid
 
-interp="-new_grid_interpolation bilinear"
+ interp="-new_grid_interpolation bilinear"
 
 # Begin parallel wgrib2
 
-if [ -e inputs.grb2_1 ]
-then
-rm inputs.grb2_1 inputs.grb2_2 inputs.grb2_3 inputs.grb2_4 inputs.grb2_5 inputs.grb2_6 inputs.grb2_7 inputs.grb2_8 inputs.grb2_9 inputs.grb2_10 inputsb.grb2_1 inputsb.grb2_2 inputsn.grb2
-fi
+  if [ -e inputs.grb2_1 ]
+  then
+    rm inputs.grb2*
+  fi
 
-ngrd=$natgrd
+  if [ -e model.ndfd_1 ]
+  then
+    rm model.ndfd*
+  fi
 
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_1 inventory.txt1
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_2 inventory.txt2
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_3 inventory.txt3
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_4 inventory.txt4
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_5 inventory.txt5
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_6 inventory.txt6
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_7 inventory.txt7
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_8 inventory.txt8
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_9 inventory.txt9
-cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_10 inventory.txt10
-cp -p $PARMdng/smartinit_grb2_budget.parmlist_1 inventoryb.txt1
-cp -p $PARMdng/smartinit_grb2_budget.parmlist_2 inventoryb.txt2
-cp -p $PARMdng/smartinit_grb2_nn.parmlist inventoryn.txt
+  if [ -e wgrib2.poe ];
+  then
+    rm wgrib2.poe
+  fi
 
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt1 | $WGRIB2 -i -grib inputs.grb2_1 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt2 | $WGRIB2 -i -grib inputs.grb2_2 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt3 | $WGRIB2 -i -grib inputs.grb2_3 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt4 | $WGRIB2 -i -grib inputs.grb2_4 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt5 | $WGRIB2 -i -grib inputs.grb2_5 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt6 | $WGRIB2 -i -grib inputs.grb2_6 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt7 | $WGRIB2 -i -grib inputs.grb2_7 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt8 | $WGRIB2 -i -grib inputs.grb2_8 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt9 | $WGRIB2 -i -grib inputs.grb2_9 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt10 | $WGRIB2 -i -grib inputs.grb2_10 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputsb.grb2_1 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${fhr}.tm00
-$WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
+  ngrd=$natgrd
 
-if [ -e model.ndfd_1 ]
-then
-rm  model.ndfd_1  model.ndfd_2  model.ndfd_3  model.ndfd_4  model.ndfd_5 model.ndfd_6 
-rm  model.ndfd_7 model.ndfd_8 model.ndfd_9 model.ndfd_10 model.ndfd_b1 model.ndfd_b2 model.ndfd_n
-fi
+  if [ $CFP = 'YES' -a $NTASKS -eq 24 ]; then
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist natlev.txt
+    sed -n -e '1,12p' natlev.txt > inventory.txt1
+    sed -n -e '13,22p' natlev.txt > inventory.txt2
+    sed -n -e '23,33p' natlev.txt > inventory.txt3
+    sed -n -e '34,44p' natlev.txt > inventory.txt4
+    sed -n -e '45,55p' natlev.txt > inventory.txt5
+    sed -n -e '56,66p' natlev.txt > inventory.txt6
+    sed -n -e '67,78p' natlev.txt > inventory.txt7
+    sed -n -e '79,88p' natlev.txt > inventory.txt8
+    sed -n -e '89,99p' natlev.txt > inventory.txt9 
+    sed -n -e '100,110p' natlev.txt > inventory.txt10
+    sed -n -e '111,121p' natlev.txt > inventory.txt11
+    sed -n -e '122,132p' natlev.txt > inventory.txt12
+    sed -n -e '133,144p' natlev.txt > inventory.txt13
+    sed -n -e '145,154p' natlev.txt > inventory.txt14
+    sed -n -e '155,165p' natlev.txt > inventory.txt15
+    sed -n -e '166,176p' natlev.txt > inventory.txt16
+    sed -n -e '177,188p' natlev.txt > inventory.txt17
+    sed -n -e '189,200p' natlev.txt > inventory.txt18
+    sed -n -e '201,212p' natlev.txt > inventory.txt19
+    sed -n -e '213,224p' natlev.txt > inventory.txt20
+    sed -n -e '225,236p' natlev.txt > inventory.txt21
+    sed -n -e '237,248p' natlev.txt > inventory.txt22
+    sed -n -e '249,260p' natlev.txt > inventory.txt23
+    sed -n -e '261,$p' natlev.txt > inventory.txt24
 
-echo "#! /bin/ksh" > a.poe
-echo "$WGRIB2 inputs.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1" >> a.poe
-echo "#! /bin/ksh" > b.poe
-echo "$WGRIB2 inputs.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_2" >> b.poe
-echo "#! /bin/ksh" > c.poe
-echo "$WGRIB2 inputs.grb2_3 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_3" >> c.poe
-echo "#! /bin/ksh" > d.poe
-echo "$WGRIB2 inputs.grb2_4 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_4" >> d.poe
-echo "#! /bin/ksh" > e.poe
-echo "$WGRIB2 inputs.grb2_5 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_5" >> e.poe
-echo "#! /bin/ksh" > f.poe
-echo "$WGRIB2 inputs.grb2_6 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_6" >> f.poe
-echo "#! /bin/ksh" > g.poe
-echo "$WGRIB2 inputs.grb2_7 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_7" >> g.poe
-echo "#! /bin/ksh" > h.poe
-echo "$WGRIB2 inputs.grb2_8 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_8" >> h.poe
-echo "#! /bin/ksh" > i.poe
-echo "$WGRIB2 inputs.grb2_9 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_9" >> i.poe
-echo "#! /bin/ksh" > j.poe
-echo "$WGRIB2 inputs.grb2_10 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_10" >> j.poe
+    tasks=(24)
+    count=0
+    for task in $(seq ${tasks[count]})
+    do
+      echo "${USHdng}/smartinit_subpiece.sh ${task} ${DATA} WRFPRS${fhr}.tm00 \"${wgrib2def}\" \"${compress}\" \"${interp}\" " >> wgrib2.poe
+    done
+    count=$count+1
+
+    chmod 775 wgrib2.poe
+    export MP_CMDFILE=wgrib2.poe
+
+# parallel execution - only tested 24 tasks
+    time mpiexec -np $NTASKS --cpu-bind core cfp $MP_CMDFILE
+    export err=$?;  err_chk
+
+# reassemble the grid
+    tasks=(24)
+    count=0
+    for task in $(seq ${tasks[count]})
+    do
+      cat $DATA/model.ndfd_${task} >> ${prdgfl}
+    done
+    count=$count+1
+
+  else
+    # serial processing
+
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist natlev.txt
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_1 inventory.txt1
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_2 inventory.txt2
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_3 inventory.txt3
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_4 inventory.txt4
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_5 inventory.txt5
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_6 inventory.txt6
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_7 inventory.txt7
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_8 inventory.txt8
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_9 inventory.txt9
+    cp -p $PARMdng/smartinit_${ngrd}_grb2.parmlist_10 inventory.txt10
+    cp -p $PARMdng/smartinit_grb2_budget.parmlist_1 inventoryb.txt1
+    cp -p $PARMdng/smartinit_grb2_budget.parmlist_2 inventoryb.txt2
+    cp -p $PARMdng/smartinit_grb2_nn.parmlist inventoryn.txt
+
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt1 | $WGRIB2 -i -grib inputs.grb2_1 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt2 | $WGRIB2 -i -grib inputs.grb2_2 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt3 | $WGRIB2 -i -grib inputs.grb2_3 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt4 | $WGRIB2 -i -grib inputs.grb2_4 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt5 | $WGRIB2 -i -grib inputs.grb2_5 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt6 | $WGRIB2 -i -grib inputs.grb2_6 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt7 | $WGRIB2 -i -grib inputs.grb2_7 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt8 | $WGRIB2 -i -grib inputs.grb2_8 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt9 | $WGRIB2 -i -grib inputs.grb2_9 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventory.txt10 | $WGRIB2 -i -grib inputs.grb2_10 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt1 | $WGRIB2 -i -grib inputsb.grb2_1 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryb.txt2 | $WGRIB2 -i -grib inputsb.grb2_2 WRFPRS${fhr}.tm00
+    $WGRIB2 WRFPRS${fhr}.tm00 | grep -F -f inventoryn.txt | $WGRIB2 -i -grib inputsn.grb2 WRFPRS${fhr}.tm00
+
+    echo "#! /bin/ksh" > a.poe
+    echo "$WGRIB2 inputs.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_1" >> a.poe
+    echo "#! /bin/ksh" > b.poe
+    echo "$WGRIB2 inputs.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_2" >> b.poe
+    echo "#! /bin/ksh" > c.poe
+    echo "$WGRIB2 inputs.grb2_3 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_3" >> c.poe
+    echo "#! /bin/ksh" > d.poe
+    echo "$WGRIB2 inputs.grb2_4 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_4" >> d.poe
+    echo "#! /bin/ksh" > e.poe
+    echo "$WGRIB2 inputs.grb2_5 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_5" >> e.poe
+    echo "#! /bin/ksh" > f.poe
+    echo "$WGRIB2 inputs.grb2_6 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_6" >> f.poe
+    echo "#! /bin/ksh" > g.poe
+    echo "$WGRIB2 inputs.grb2_7 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_7" >> g.poe
+    echo "#! /bin/ksh" > h.poe
+    echo "$WGRIB2 inputs.grb2_8 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_8" >> h.poe
+    echo "#! /bin/ksh" > i.poe
+    echo "$WGRIB2 inputs.grb2_9 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_9" >> i.poe
+    echo "#! /bin/ksh" > j.poe
+    echo "$WGRIB2 inputs.grb2_10 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_10" >> j.poe
 
 # always use budget interpolation for precip and snow
 # but GRIB1 smartinit uses bilinear interpolation
 
-interp="-new_grid_interpolation bilinear"
-echo "#! /bin/ksh" > k.poe
-echo "$WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1" >> k.poe
-echo "#! /bin/ksh" > l.poe
-echo "$WGRIB2 inputsb.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b2" >> l.poe
+    interp="-new_grid_interpolation bilinear"
+    echo "#! /bin/ksh" > k.poe
+    echo "$WGRIB2 inputsb.grb2_1 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b1" >> k.poe
+    echo "#! /bin/ksh" > l.poe
+    echo "$WGRIB2 inputsb.grb2_2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_b2" >> l.poe
 
 # always use nearest neighbor interpolation for these fields
 
-interp="-new_grid_interpolation neighbor"
-$WGRIB2 inputsn.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_n
+    interp="-new_grid_interpolation neighbor"
+    $WGRIB2 inputsn.grb2 -set_grib_type ${compress} -new_grid_winds grid ${interp} -new_grid ${wgrib2def} model.ndfd_n
 
-chmod 775 a.poe
-chmod 775 b.poe
-chmod 775 c.poe
-chmod 775 d.poe
-chmod 775 e.poe
-chmod 775 f.poe
-chmod 775 g.poe
-chmod 775 h.poe
-chmod 775 i.poe
-chmod 775 j.poe
-chmod 775 k.poe
-chmod 775 l.poe
+    chmod 775 ?.poe
 
 # cfp/serial syntax
-echo "./a.poe" > wgrib2.poe
-echo "./b.poe" >> wgrib2.poe
-echo "./c.poe" >> wgrib2.poe
-echo "./d.poe" >> wgrib2.poe
-echo "./e.poe" >> wgrib2.poe
-echo "./f.poe" >> wgrib2.poe
-echo "./g.poe" >> wgrib2.poe
-echo "./h.poe" >> wgrib2.poe
-echo "./i.poe" >> wgrib2.poe
-echo "./j.poe" >> wgrib2.poe
-echo "./k.poe" >> wgrib2.poe
-echo "./l.poe" >> wgrib2.poe
+    echo "./a.poe" > wgrib2.poe
+    echo "./b.poe" >> wgrib2.poe
+    echo "./c.poe" >> wgrib2.poe
+    echo "./d.poe" >> wgrib2.poe
+    echo "./e.poe" >> wgrib2.poe
+    echo "./f.poe" >> wgrib2.poe
+    echo "./g.poe" >> wgrib2.poe
+    echo "./h.poe" >> wgrib2.poe
+    echo "./i.poe" >> wgrib2.poe
+    echo "./j.poe" >> wgrib2.poe
+    echo "./k.poe" >> wgrib2.poe
+    echo "./l.poe" >> wgrib2.poe
 
-chmod 775 wgrib2.poe
-export MP_CMDFILE=wgrib2.poe
+    chmod 775 wgrib2.poe
+    export MP_CMDFILE=wgrib2.poe
 
-if [ $CFP = 'YES' ]; then
-  #time mpirun -app $MP_CMDFILE
-  #time mpiexec --cpu-bind core --configfile $MP_CMDFILE
-  time mpiexec -np $NTASKS --cpu-bind core cfp $MP_CMDFILE
-else
   # serial execution
-  time ./$MP_CMDFILE
-fi
-export err=$?;  err_chk
+    time ./$MP_CMDFILE
+    export err=$?;  err_chk
 
-cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_6 \
-    model.ndfd_7 model.ndfd_8 model.ndfd_9 model.ndfd_10 model.ndfd_b1 model.ndfd_b2 model.ndfd_n > ${prdgfl}
-
+    cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_6 \
+      model.ndfd_7 model.ndfd_8 model.ndfd_9 model.ndfd_10 model.ndfd_b1 model.ndfd_b2 model.ndfd_n > ${prdgfl}
+  fi
 
   if [ $PDY = $today ];then
     cp ${COMROOT}/date/t${cyc}z DATE
@@ -492,7 +503,6 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
   fi
   if [ -s $prdgfl ];then  
     echo $prdgfl FOUND FOR FORECAST HOUR ${fhr}
-#   mv ${prdgfl} meso${rg}.NDFDf${fhr}  
     $WGRIB2 ${prdgfl} -not_if "(APCP|TSNOWP):surface:${fhr1#0}-${fhr#0} hour acc fcst:" -grib meso${rg}.NDFDf${fhr}
     rm ${prdgfl}
   elif [ -s ${prdgfl}${fhr} ];then    # check for hawaii ???
@@ -523,26 +533,9 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
       echo MAXMIN${fhr1}.tm00 FOUND
       cp MAXMIN${fhr2}.tm00 MAXMIN2
       cp MAXMIN${fhr1}.tm00 MAXMIN1
-    else
-#     For 3 hourly input files, hourly maxmins not created
-      echo MAXMIN$fhr1.tm00 NOT FOUND....3 hrly imputs assumed
-      ln -fs meso${rg}.NDFDf${fhr} MAXMIN2
-      ln -fs meso${rg}.NDFDf${fhr} MAXMIN1
     fi
     $GRB2INDEX MAXMIN1 MAXMIN1i
     $GRB2INDEX MAXMIN2 MAXMIN2i
-  fi
-# freq=6;fmx=21   #fmx =  maxmin unit number for 1st maxmin file
-# fmx=21   #fmx =  maxmin unit number for 1st maxmin file
-  if [ $fhr -eq 3 ]; then
-    fmx=15   #fmx =  maxmin unit number for 1st maxmin file
-  fi
-  if [ $cycon -eq 1 ];then 
-    if [ $inest -eq 0 ];then 
-      freq=3;fmx=23
-    fi
-  else
-    fmx=19   
   fi
 
   ln -sf "meso${rg}.NDFDf${fhr}"    fort.11
@@ -567,8 +560,6 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
     echo "********************************************************"
     echo RUN SMARTINIT for 12h valid 00 or 12Z fcst hours: $fhr
 
-    if [ $cycon -eq 0 ];then fmx=21;fi
-    if [ $cycon -eq 1 ];then fmx=23;fi
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr3}.tm00${exptext} MAXMIN3
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr6}.tm00${exptext} MAXMIN4
     cp $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr9}.tm00${exptext} MAXMIN5
@@ -576,22 +567,14 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
     $GRB2INDEX MAXMIN4 MAXMIN4i
     $GRB2INDEX MAXMIN5 MAXMIN5i
 
-    if [ $cycon -eq 1 -a inest -eq 0 ];then
-#     READ 3/6 hr precip from special files created by makeprecip
-      ln -sf "6precip"   fort.17
-      ln -sf "6precipi"  fort.18
-      ln -sf "3snow"     fort.19
-      ln -sf "3snowi"    fort.20
-      ln -sf "6snow"     fort.21
-      ln -sf "6snowi"    fort.22
-    else     
-#     READ 6/12 hr precip from special files created by makeprecip
-      if [ $mk3p -ne 0 -a $mk6p -ne 0 -a $mk12p -ne 0 ]; then
-        ln -sf "12precip"   fort.23
-        ln -sf "12precipi"  fort.24
-        fmx=25
-      fi
-    fi   
+    if [ $mk3p -ne 0 -a $mk6p -ne 0 -a $mk12p -ne 0 ]; then
+      ln -sf "12precip"   fort.23
+      ln -sf "12precipi"  fort.24
+      fmx=25
+    else
+      fmx=23
+    fi
+
     ln -sf "MAXMIN1"   fort.$fmx
     ln -sf "MAXMIN2"   fort.$((fmx+1))
     ln -sf "MAXMIN3"   fort.$((fmx+2))
@@ -605,19 +588,12 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
 
     *)   # Not 00/12 UTC valid times
      if [ $check -eq 0 -a $fhr -ne $fhrstr ];then
-#      READ PRECIP FROM SPECIAL FILES CREATED BY SMARTPRECIP
-#      ON-CYC: All forecast hours divisible by 3 except for (3,15,27....), 
-#      read  3-hr buckets max/min temp data for the previous 2 hours
-#      OFF-CYC: Set input files to read 6 hr prcp from makeprecip files
-#      if [ $hr3bkt -ne 0 -o $mk6p -ne 0 ];then
        if [ $mk3p -ne 0 -a $fhr -ne $fhrstr -a $mk6p -ne 0 ];then
          echo "****************************************************************"
          case $cycon in
           1) echo RUN SMARTINIT for ON-CYC  hrs without 3 hr buckets : $fhr;;
           *) echo RUN SMARTINIT for OFF-CYC hrs without 6 hr buckets : $fhr;;
          esac
-#        ln -fs "${freq}snow"  fort.17
-#        ln -sf "${freq}snowi" fort.18
          ln -sf "MAXMIN2"   fort.23
          ln -sf "MAXMIN1"   fort.24
          ln -sf "MAXMIN2i"  fort.25
@@ -654,8 +630,6 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
        ln -fs " " fort.15
        ln -fs " " fort.16
        mksmart=0
-#      Create downscaled 00 hour files 
-       if [ $fhr -eq $fhrstr ];then mksmart=1;fi
      fi;;
   esac
 
@@ -681,7 +655,6 @@ cat model.ndfd_1 model.ndfd_2 model.ndfd_3 model.ndfd_4 model.ndfd_5 model.ndfd_
     case $RUNTYP in
      hawaiinest|priconest|conusnest2p5|aknest3)
        mksmart=1
-       if [ $RUNTYP = conusnest2p5 ];then mksmart=1;fi;;  #make grib2 files for wave group
     esac
   fi
 
