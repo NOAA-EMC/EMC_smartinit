@@ -455,6 +455,8 @@
       mdlsfc=zsfc
       WHERE (ZSFC < 0.0) ZSFC=0.0
 
+      print*,'min/max mdlsfc=',minval(mdlsfc),maxval(mdlsfc)
+      print*,'min/max zsfc=',minval(zsfc),maxval(zsfc)
         write(0,*) 'minval(zsfc),maxval(zsfc): ', minval(zsfc),maxval(zsfc)
 
 ! get surface pressure
@@ -699,7 +701,16 @@
                      KPDS,KGDS,MASK,GRID,CEIL,GFLD,ISSREF,IRET,ISTAT)
         write(0,*) 'IRET  for CEIL: ', IRET, minval(CEIL),MAXVAL(CEIL)
 
-        print*,'min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
+        print*,'AGL min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
+        do i=1,imax
+        do j=1,jmax
+! Add terrain height to get ceiling in ASL
+          if(ceil(i,j) .ne. 0.0)then
+            ceil(i,j)=ceil(i,j)+mdlsfc(i,j)
+          endif
+        enddo
+        enddo
+        print*,'ASL min/max CEIL ', minval(CEIL),MAXVAL(CEIL)
 
 ! Membrane SLP MSLET
        print*, 'SLP', lnest, LHR3
