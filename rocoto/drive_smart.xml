@@ -1,7 +1,7 @@
 <?xml version="1.0"?> 
 <!DOCTYPE workflow
 [
- <!ENTITY USER "user.name">
+ <!ENTITY USER "annette.gibbs">
  <!ENTITY ACCOUNT "RTMA-DEV">
 
  <!ENTITY rrfs_ver "v1.0">
@@ -9,7 +9,7 @@
  <!ENTITY rrfs_smartinit_ver "v4.5">
  <!ENTITY exp "">
 
- <!ENTITY HOMEsmartinit "/lfs/h2/emc/da/save/&USER;/packages/smartinit.&smartinit_ver;&exp;">
+ <!ENTITY HOMEsmartinit "/lfs/h2/emc/da/save/&USER;/packages/RB-&smartinit_ver;&exp;">
  <!ENTITY ROCOTO_DIR "&HOMEsmartinit;/rocoto">
  <!ENTITY PTMP_DIR "/lfs/h2/emc/ptmp/&USER;">
  <!ENTITY JOBSdir "&HOMEsmartinit;/jobs">
@@ -90,8 +90,8 @@
 
         <dependency>
           <and>
-            <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
           </and>
         </dependency>
 
@@ -133,8 +133,8 @@
 
         <dependency>
           <and>
-            <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
           </and>
         </dependency>
 
@@ -179,8 +179,8 @@
 
         <dependency>
           <and>
-            <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00.grib2</cyclestr></datadep>
           </and>
@@ -227,8 +227,8 @@
 
         <dependency>
           <and>
-            <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="10:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00.grib2</cyclestr></datadep>
           </and>
