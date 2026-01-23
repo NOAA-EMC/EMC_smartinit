@@ -21,4 +21,4 @@ module load cfp/2.0.4
 module use /apps/ops/test/nco/modulefiles
 module load core/rocoto/1.3.5
 
-rocotorun -v 10 -w /lfs/h2/emc/da/save/annette.gibbs/packages/smartinit.v5.0.0${exp}/rocoto/drive_smart.xml -d /lfs/h2/emc/da/save/annette.gibbs/packages/smartinit.v5.0.0${exp}/rocoto/drive_smart.db
+rocotorun -v 10 -w /lfs/h2/emc/da/save/annette.gibbs/packages/smartinit.v4.5.0${exp}/rocoto/drive_smart.xml -d /lfs/h2/emc/da/save/annette.gibbs/packages/smartinit.v4.5.0${exp}/rocoto/drive_smart.db

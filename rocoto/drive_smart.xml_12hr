@@ -5,8 +5,8 @@
  <!ENTITY ACCOUNT "RTMA-DEV">
 
  <!ENTITY rrfs_ver "v1.0">
- <!ENTITY smartinit_ver "v5.0.0">
- <!ENTITY rrfs_smartinit_ver "v5.0">
+ <!ENTITY smartinit_ver "v4.5.0">
+ <!ENTITY rrfs_smartinit_ver "v4.5">
  <!ENTITY exp "_test">
 
  <!ENTITY HOMEsmartinit "/lfs/h2/emc/da/save/&USER;/packages/smartinit.&smartinit_ver;&exp;">

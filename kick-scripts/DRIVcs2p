@@ -15,9 +15,9 @@ set -x
 #==========================================
 
 # set job directory needed if running from cron
-export rrfs_smartinit_ver=v5.0.0
-export smartinit_ver=v5.0
-export code_ver=v5.0.0
+export rrfs_smartinit_ver=v4.5.0
+export smartinit_ver=v4.5
+export code_ver=v4.5.0
 export modeld=smartinit
 export rootd=/lfs/h2/emc/da/save/${USER}/packages/${modeld}.${rrfs_smartinit_ver}_test
 echo $rootd

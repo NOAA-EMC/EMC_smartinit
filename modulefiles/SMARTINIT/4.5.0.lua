@@ -1,4 +1,4 @@
-setenv("nam_smartinit_ver","v4.4.0")
+setenv("smartinit_ver","v4.5.0")
 
 local PrgEnv_intel_ver = os.getenv("PrgEnv_intel_ver")
 local intel_ver = os.getenv("intel_ver")

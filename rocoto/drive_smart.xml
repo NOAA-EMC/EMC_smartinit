@@ -5,8 +5,8 @@
  <!ENTITY ACCOUNT "RTMA-DEV">
 
  <!ENTITY rrfs_ver "v1.0">
- <!ENTITY smartinit_ver "v5.0.0">
- <!ENTITY rrfs_smartinit_ver "v5.0">
+ <!ENTITY smartinit_ver "v4.5.0">
+ <!ENTITY rrfs_smartinit_ver "v4.5">
  <!ENTITY exp "">
 
  <!ENTITY HOMEsmartinit "/lfs/h2/emc/da/save/&USER;/packages/smartinit.&smartinit_ver;&exp;">
@@ -27,7 +27,7 @@
  <!ENTITY mdl "rrfs">
  <!ENTITY NET "smartinit">
       
- <!ENTITY COM_INrrfs "/lfs/h2/emc/ptmp/emc.lam/com/rrfs/&rrfs_ver;">
+ <!ENTITY COM_INrrfs "/lfs/h1/ops/para/com/rrfs/&rrfs_ver;">
  <!ENTITY DATA "&PTMP_DIR;/&modeld;.&smartinit_ver;&exp;">
  <!ENTITY COM_OUT "&DATA;/com/&NET;/&rrfs_smartinit_ver;">
  <!ENTITY LOG_DIR "&DATA;/logs">
