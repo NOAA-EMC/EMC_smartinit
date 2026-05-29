@@ -221,11 +221,13 @@ for fhr in $hours; do
   echo FHR FHR1 FHR2 FHR3 FHR6 FHR9 FHR12  $fhr $fhr1 $fhr2 $fhr3 $fhr6 $fhr9 $fhr12
 
 
-# Get cloud ceiling height from prslev file; it is not in the natlev file
+# Get cloud ceiling height from 2dfld file; it is no longer in the prslev file
+# Get TMP at 950,850,700,500 mb and RH at 850,700 mb from prslev file; it is no longer in natlev file
   mdlin=$COMINrrfs/${cyc}/${mdl}.t${cyc}z.${natgrd}
-  wgrib2 -V $COMINrrfs/${cyc}/${mdl}.t${cyc}z.prslev.3km.f0${fhr}.na.grib2 -match "HGT:cloud ceiling" -grib prslev_fields${fhr}.grib2
+  wgrib2 $COMINrrfs/${cyc}/${mdl}.t${cyc}z.2dfld.3km.f0${fhr}.na.grib2 -match "HGT:cloud ceiling" -grib 2dfld_fields${fhr}.grib2
+  wgrib2 $COMINrrfs/${cyc}/${mdl}.t${cyc}z.prslev.3km.f0${fhr}.na.grib2 -match ":(TMP:(950|850|700|500) mb|RH:(850|700) mb):" -grib prslev_fields${fhr}.grib2
   cp ${mdlin}.3km.f0${fhr}.na.grib2 WRFPRS${fhr}.tm00
-  cat prslev_fields${fhr}.grib2 >> WRFPRS${fhr}.tm00
+  cat prslev_fields${fhr}.grib2 2dfld_fields${fhr}.grib2 >> WRFPRS${fhr}.tm00
 
   inhrfrq=1
 
