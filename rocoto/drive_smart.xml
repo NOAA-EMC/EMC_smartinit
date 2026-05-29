@@ -45,7 +45,7 @@
 
 <workflow realtime="T" scheduler="pbspro" cyclelifespan="00:18:00:00" cyclethrottle="4" taskthrottle="84">
 
-  <cycledef group="prod">202510270000 202601270000 06:00:00</cycledef>
+  <cycledef group="prod">202510270000 202612270000 06:00:00</cycledef>
   <cycledef group="daily">202504220100 202512310100 24:00:00</cycledef>
 
   <log verbosity="10"><cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr></log>
@@ -91,7 +91,8 @@
         <dependency>
           <and>
             <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="3G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="1G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.2dfld.3km.f0#fhr#.na.grib2</cyclestr></datadep>
           </and>
         </dependency>
 
@@ -134,7 +135,8 @@
         <dependency>
           <and>
             <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="3G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="1G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.2dfld.3km.f0#fhr#.na.grib2</cyclestr></datadep>
           </and>
         </dependency>
 
@@ -180,7 +182,8 @@
         <dependency>
           <and>
             <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="3G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="1G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.2dfld.3km.f0#fhr#.na.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00.grib2</cyclestr></datadep>
           </and>
@@ -228,7 +231,8 @@
         <dependency>
           <and>
             <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00" minsize="5G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="3G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
+            <datadep age="2:00" minsize="1G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.2dfld.3km.f0#fhr#.na.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00.grib2</cyclestr></datadep>
             <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00.grib2</cyclestr></datadep>
           </and>
