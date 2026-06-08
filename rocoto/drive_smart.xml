@@ -59,7 +59,8 @@
   <metatask>
     <var name="domain">conusnest2p5 aknest3</var>
     <metatask>
-      <var name="fhr">00 03 09 15 21 27 33 39 45 51 57</var>
+<!--  <var name="fhr">00 03 09 15 21 27 33 39 45 51 57</var> -->
+      <var name="fhr">00 03 09</var>
       <task name="smartinit_#domain#_f#fhr#" maxtries="2" cycledefs="prod">
         &RESERVATION;
         &SMART_RESOURCES;
@@ -103,7 +104,8 @@
   <metatask>
     <var name="domain">hawaiinest priconest</var>
     <metatask>
-      <var name="fhr">00 03 09 15 21 27 33 39 45 51 57 63 69 75 81</var>
+<!--  <var name="fhr">00 03 09 15 21 27 33 39 45 51 57 63 69 75 81</var> -->
+      <var name="fhr">00 03 09</var>
       <task name="smartinit_#domain#_f#fhr#" maxtries="2" cycledefs="prod">
         &RESERVATION;
         &SMART_RESOURCES;
@@ -148,9 +150,12 @@
     <var name="domain">hawaiinest priconest</var>
     <var name="dom">hi pr</var>
     <metatask>
-      <var name="fhr">06 12 18 24 30 36 42 48 54 60 66 72 78 84</var> 
+<!--  <var name="fhr">06 12 18 24 30 36 42 48 54 60 66 72 78 84</var> 
       <var name="fhrm6">00 06 12 18 24 30 36 42 48 54 60 66 72 78</var>
-      <var name="fhrm3">03 09 15 21 27 33 39 45 51 57 63 69 75 81</var>
+      <var name="fhrm3">03 09 15 21 27 33 39 45 51 57 63 69 75 81</var> -->
+      <var name="fhr">06 12</var>
+      <var name="fhrm6">00 06</var>
+      <var name="fhrm3">03 09</var>
       <task name="smartinit_#domain#_f#fhr#" maxtries="2" cycledefs="prod">
         &RESERVATION;
         &SMART_RESOURCES;
@@ -197,9 +202,12 @@
     <var name="domain">conusnest2p5 aknest3</var>
     <var name="dom">conus2p5 ak3</var>
     <metatask>
-      <var name="fhr">06 12 18 24 30 36 42 48 54 60</var>
+<!--  <var name="fhr">06 12 18 24 30 36 42 48 54 60</var>
       <var name="fhrm6">00 06 12 18 24 30 36 42 48 54</var>
-      <var name="fhrm3">03 09 15 21 27 33 39 45 51 57</var>
+      <var name="fhrm3">03 09 15 21 27 33 39 45 51 57</var> -->
+      <var name="fhr">06 12</var>
+      <var name="fhrm6">00 06</var>
+      <var name="fhrm3">03 09</var>
       <task name="smartinit_#domain#_f#fhr#" maxtries="2" cycledefs="prod">
         &RESERVATION;
         &SMART_RESOURCES;
@@ -233,8 +241,19 @@
             <datadep age="2:00" minsize="8G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.natlev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
             <datadep age="2:00" minsize="3G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.prslev.3km.f0#fhr#.na.grib2</cyclestr></datadep>
             <datadep age="2:00" minsize="1G"><cyclestr>&COM_INrrfs;/rrfs.@Y@m@d/@H/rrfs.t@Hz.2dfld.3km.f0#fhr#.na.grib2</cyclestr></datadep>
-            <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00.grib2</cyclestr></datadep>
-            <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00.grib2</cyclestr></datadep>
+
+            <or>
+              <and>
+                <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00.grib2</cyclestr></datadep>
+                <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00.grib2</cyclestr></datadep>
+              </and>
+
+              <and>
+                <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm6#.tm00_wexp.grib2</cyclestr></datadep>
+                <datadep age="2:00"><cyclestr>&COM_OUT;/&RUN;.@Y@m@d/rrfs.t@Hz.smart#dom##fhrm3#.tm00_wexp.grib2</cyclestr></datadep>
+              </and>
+            </or>
+
           </and>
         </dependency>
 

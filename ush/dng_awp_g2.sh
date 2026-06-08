@@ -24,16 +24,7 @@ echo BEGIN NCO sminit Post-Processing for REG $RGIN $outreg $ogrd CYC $cyc FHR $
 
 # Change grid id number from 188 to 255
 if [ $outreg = conus2p5 ];then
-  ogrd=184
-  mv MESO${RGIN}${fhr}.tm00 MESO${RGIN}${fhr}.tm00.grb188
-  if [ $fhr -le 12 ];then
-    cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp.grib2
-  fi
-  cp MESO${RGIN}${fhr}.tm00.grb188 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_grb188
-  w2def="lambert:265:25:25 238.446:2145:2540 20.192:1377:2540"
-  $WGRIB2 MESO${RGIN}${fhr}.tm00.grb188 -set_grib_type c3 -set_bitmap 1 -new_grid_winds grid -new_grid_interpolation bilinear -new_grid ${w2def} MESO${RGIN}${fhr}.tm00.uv
-  $WGRIB2 MESO${RGIN}${fhr}.tm00.uv -new_grid_vectors "UGRD:VGRD" -submsg_uv MESO${RGIN}${fhr}.tm00
-  cp MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 
+  cp MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00_wexp.grib2
 fi
 
 if [ $outreg != conus2p5 ];then
@@ -41,7 +32,7 @@ if [ $outreg != conus2p5 ];then
   cp MESO${RGIN}${fhr}.tm00 MESO${RGIN}${fhr}.tm00.uv
   $WGRIB2 MESO${RGIN}${fhr}.tm00.uv -new_grid_vectors "UGRD:VGRD" -submsg_uv MESO${RGIN}${fhr}.tm00
   # End make u/v part of one record
-  mv MESO${RGIN}${fhr}.tm00 ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
+  mv MESO${RGIN}${fhr}.tm00 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
 fi
 
 rm *grb2* MESO*
@@ -79,9 +70,6 @@ else
 fi
 
 fi # awpchk -eq 0
-
-mv ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2 $COMOUT/${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00.grib2
-#mv ${mdl}.t${cyc}z.smart${outreg}${fhr}.tm00 $COMOUT
 
 # Move grib2 awips file to $COMOUTwmo
 if [ $awpchk -eq 0 ];then

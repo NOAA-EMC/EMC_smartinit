@@ -122,7 +122,8 @@ text=".tm00"
 
 # For expanded conus nest 2.5 km
 exptext=".grib2"
-case $RUNTYP in conusnest2p5) exptext="_grb188";; esac
+#case $RUNTYP in conusnest2p5) exptext="_grb188";; esac
+case $RUNTYP in conusnest2p5) exptext="_wexp.grib2";; esac
 
 # Define core 
 core=$rg
@@ -668,6 +669,8 @@ EOF
     else
       let awpchk=1 # in-between hours
     fi
+#   Do not create any awips files since public dissemination will be removed
+    let awpchk=1
     echo $awpchk
 
 #   Run NCO processing to convert output to grib2 and awips
